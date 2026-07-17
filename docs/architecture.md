@@ -1,177 +1,382 @@
 # Архитектура AML Workshop Simulator
 
-## Назначение и границы
+## 1. Назначение и scope
 
-Система проводит интерактивный AML-мастер-класс: участник собирает финансовый
-сценарий, администратор запускает общий скоринг, после чего интерфейсы показывают
-результат и объяснимые факторы. Первая версия рассчитана на одно мероприятие, один
-активный раунд и до 500 зарегистрированных участников.
+Система поддерживает интерактивный мастер-класс: участник собирает цепочку
+финансовых действий, стараясь выполнить игровую цель с ограниченными ресурсами и не
+получить высокий риск; администратор управляет раундом, контролирует участников,
+запускает общий скоринг и проводит разбор результатов.
 
-В v1 не входят тяжелая ML-модель, очередь задач, Redis, Celery, Kubernetes,
-автоматический offline fallback и прямой доступ браузера к API.
+Целевая v1 рассчитана на:
 
-## Архитектурные цели
+- одно мероприятие и один раунд в `active` или `scoring` одновременно;
+- до 500 зарегистрированных участников;
+- сценарий до настраиваемого числа шагов, по умолчанию 8;
+- одну облачную VM и Docker Compose;
+- легкий детерминированный scoring ruleset без тяжелой ML-модели;
+- два независимых Streamlit-интерфейса, использующих общий FastAPI и PostgreSQL.
 
-- единая реализация игровых правил в FastAPI;
-- воспроизводимый скоринг по зафиксированной конфигурации раунда;
-- сохранность отправленных сценариев при перезапуске UI или API;
-- понятная эксплуатация на одной облачной VM;
-- контролируемая работа при одновременной отправке сценариев;
-- минимальная обработка персональных данных школьников;
-- объяснимость каждого результата для учебного разбора.
+В v1 не входят Redis, Celery, Kafka, Kubernetes, публичный API, мобильный клиент,
+мультитенантность, несколько одновременных мероприятий и offline fallback.
 
-## Нефункциональные требования
+## 2. Архитектурные цели
 
-| Характеристика | Требование v1 |
+| Цель | Архитектурное следствие |
 | --- | --- |
-| Нагрузка | До 500 пользователей и не более 8 действий в сценарии по умолчанию |
-| Доступность | Интерфейсы доступны на протяжении 45-минутного мероприятия |
-| Производительность | p95 обычного API-запроса до 500 мс; пакетный скоринг до 10 с |
-| Целостность | Не более одного сценария участника на раунд; один активный раунд |
-| Безопасность | HTTPS, bcrypt, JWT, RBAC, закрытые API и PostgreSQL |
-| Восстановление | RPO до 24 часов до события и ручной backup непосредственно перед событием; RTO до 30 минут |
-| Наблюдаемость | Структурные логи, request ID, readiness/liveness и метрики раунда |
+| Воспроизводимость | Раунд фиксирует версии карточек, правил, скоринга и лидерборда |
+| Целостность | FastAPI единолично валидирует команды; PostgreSQL обеспечивает constraints и транзакции |
+| Отзывчивый UX | Streamlit делает локальный preview, но синхронизирует структурные изменения с API |
+| Устойчивость к rerun | Запись не выполняется во время обычного рендера; команды имеют revision/idempotency guard |
+| Объяснимость | Каждый результат содержит факторы, ресурсный итог и версию ruleset |
+| Управляемость | Администратор видит профили, цепочки, блокировки, корректировки и audit trail |
+| Минимальная инфраструктура | Одна VM, внутренние Docker-сети, синхронный scoring |
+| Эволюция | Контракт Streamlit не зависит от размещения PostgreSQL или способа запуска scoring |
 
-Показатели являются приемочными целями. Фактическая емкость подтверждается нагрузочным
-тестом на конфигурации VM, выбранной для мероприятия.
+## 3. Нефункциональные требования
 
-## Контекст системы
+| Характеристика | Цель v1 | Как проверяется |
+| --- | --- | --- |
+| Нагрузка | 500 одновременных Streamlit-сессий | Load test через реальный WebSocket/UI профиль |
+| API latency | p95 GET/PUT/submit до 500 мс без учета сети пользователя | API metrics под целевой нагрузкой |
+| Скоринг | 500 сценариев до 10 с, hard timeout 30 с | Пакетный benchmark на release image |
+| Ошибки | Менее 1% 5xx во время сценария нагрузки | Метрики и отчет теста |
+| Целостность | Нет потерянных обновлений и частично опубликованной доски | Concurrency/integration tests с PostgreSQL |
+| Восстановление | RTO до 30 минут; backup до события | Restore drill |
+| Конфиденциальность | Нет email/JWT/сценариев в логах и leaderboard | Security tests и log scan |
+| Доступность | Все 45 минут мероприятия без планового deploy | Preflight и change freeze |
+| Доступность интерфейса | Desktop, планшет и мобильный экран; light/dark theme | Playwright visual matrix |
+
+Цели принимаются только на фактическом профиле VM и Wi-Fi площадки. Числа не являются
+гарантией без нагрузочного прогона.
+
+## 4. System context
 
 ```mermaid
 flowchart LR
-    participant["Участник"] -->|"HTTPS: играет и смотрит свой результат"| system["AML Workshop Simulator"]
-    admin["Администратор / спикер"] -->|"HTTPS: управляет раундом и доской"| system
-    system -->|"Сохраняет учетные записи, сценарии и результаты"| storage["Постоянное хранилище"]
+    player["Участник"] -->|"HTTPS: сценарий, результат, лидерборд"| system["AML Workshop Simulator"]
+    admin["Администратор"] -->|"HTTPS: раунд, игроки, скоринг, корректировки"| system
+    speaker["Спикер"] -->|"HTTPS: цепочки и объяснения"| system
+    operator["Оператор"] -->|"SSH, backup, monitoring"| system
+    system -->|"TLS и DNS"| provider["Облачная инфраструктура"]
 ```
 
-`Постоянное хранилище` является внутренней частью развертывания, а не внешней
-интеграцией. На контекстной схеме оно выделено только для демонстрации назначения
-данных.
+Администратор и спикер используют одну техническую роль `admin`, но разные use cases.
+Оператор VM не получает прикладную роль автоматически.
 
-## Контейнеры
+## 5. Архитектурный стиль
+
+Streamlit является **server-side UI**: браузер поддерживает Streamlit WebSocket, а
+Python-процесс Streamlit сам вызывает внутренний FastAPI. Это BFF-подобная граница,
+но Streamlit не владеет бизнес-правилами и не формирует отдельный доменный API.
 
 ```mermaid
 flowchart LR
-    browserP["Браузер участника"] -->|"HTTPS /play"| proxy["Reverse proxy"]
-    browserA["Браузер администратора"] -->|"HTTPS /admin"| proxy
+    browser["Browser"] -->|"HTTPS + WebSocket"| ui["Streamlit server-side UI"]
+    ui -->|"HTTP JSON + Bearer JWT"| api["FastAPI application service"]
+    api -->|"SQLAlchemy transaction"| db[("PostgreSQL")]
 
-    subgraph vm["Облачная VM"]
-        proxy --> participantUI["Streamlit participant"]
-        proxy --> adminUI["Streamlit admin"]
-        participantUI -->|"HTTP + JWT"| api["FastAPI /api/v1"]
-        adminUI -->|"HTTP + JWT"| api
-        api -->|"SQLAlchemy / psycopg"| db[("PostgreSQL")]
-    end
+    browser -.->|"не имеет маршрута"| api
+    ui -.->|"не подключается"| db
 ```
 
-Reverse proxy публикует только два Streamlit-интерфейса. API слушает внутренний
-Docker-интерфейс, PostgreSQL не публикует порт на внешнем интерфейсе VM.
+Следствия:
 
-## Компоненты FastAPI
+1. JWT хранится в памяти Streamlit-сессии на сервере, а не в browser storage.
+2. CORS для прикладного API не нужен, поскольку браузер к нему не обращается.
+3. Любая бизнес-проверка в Streamlit является только UX-preview.
+4. При нескольких репликах Streamlit потребуется sticky session или вынос UI-state.
+5. Потеря Streamlit-сессии не должна приводить к потере серверного черновика.
+
+## 6. Container diagram
 
 ```mermaid
 flowchart TB
-    routers["API routers /api/v1"] --> auth["Auth service"]
-    routers --> rounds["Round service"]
-    routers --> scenarios["Scenario service"]
-    routers --> board["Board queries"]
-    scenarios --> rules["Game rules and validation"]
-    rounds --> scoring["Scoring service"]
-    scoring --> rules
-    auth --> repositories["Repositories / SQLAlchemy"]
+    playerBrowser["Браузер участника"] -->|"HTTPS /play"| proxy["Reverse proxy"]
+    adminBrowser["Браузер администратора"] -->|"HTTPS /admin"| proxy
+
+    subgraph vm["Одна облачная VM"]
+        subgraph edgeNet["edge network"]
+            proxy --> playerUi["Participant Streamlit"]
+            proxy --> adminUi["Admin Streamlit"]
+        end
+
+        subgraph appNet["app network"]
+            playerUi -->|"HTTP /api/v1"| api["FastAPI"]
+            adminUi -->|"HTTP /api/v1/admin"| api
+        end
+
+        subgraph dataNet["data network"]
+            api -->|"SQLAlchemy + psycopg"| pg[("PostgreSQL")]
+            pg --> volume[("Persistent volume")]
+        end
+    end
+
+    operator["Оператор"] -->|"SSH по ключу"| vm
+    pg -.->|"Encrypted pg_dump"| backup["Backup storage"]
+```
+
+Публичны только reverse proxy и два UI-маршрута. FastAPI, OpenAPI и PostgreSQL не
+публикуют host ports.
+
+## 7. Компоненты Participant Streamlit
+
+```mermaid
+flowchart TB
+    pages["Pages and navigation"] --> controllers["Page controllers"]
+    widgets["Forms and widget callbacks"] --> controllers
+    controllers --> state["Session state adapter"]
+    controllers --> draft["Draft coordinator"]
+    controllers --> presenter["View models and formatters"]
+    draft --> preview["Local preview calculator"]
+    draft --> client["Typed API client"]
+    controllers --> client
+    client --> pool["Cached HTTP connection pool"]
+    client --> errors["Error mapper"]
+    pool --> api["FastAPI /api/v1"]
+```
+
+- **Pages** содержат вход, обзор раунда, конструктор, результат и leaderboard.
+- **Callbacks/forms** создают намерение пользователя; HTTP-запись не вызывается из
+  безусловного top-level render.
+- **Draft coordinator** хранит local copy, `server_revision`, dirty state и
+  `client_mutation_id`.
+- **Local preview** повторяет расчет для мгновенной обратной связи, но его результат
+  никогда не записывается как канонический.
+- **API client** добавляет timeout, JWT, request ID, retry policy и преобразует error
+  envelope в типизированную ошибку UI.
+- **View models** не меняют доменные значения, а только локализуют и форматируют их.
+
+## 8. Компоненты Admin Streamlit
+
+```mermaid
+flowchart TB
+    adminPages["Monitoring, players, leaderboard, settings"] --> adminControllers["Admin page controllers"]
+    adminControllers --> commandGuard["Confirmation and command guard"]
+    adminControllers --> adminState["Admin session state"]
+    adminControllers --> apiClient["Typed API client"]
+    commandGuard --> apiClient
+    apiClient --> api["FastAPI admin routers"]
+
+    api --> roundService["Round service"]
+    api --> playerService["Player administration service"]
+    api --> boardService["Leaderboard query service"]
+    api --> auditService["Audit service"]
+```
+
+Admin UI не изменяет локальные копии до подтвержденного ответа API. Для score,
+block/unblock и leaderboard adjustment используются подтверждение, reason и защита от
+повторной отправки команды после rerun.
+
+## 9. Компоненты FastAPI
+
+```mermaid
+flowchart TB
+    middleware["Request ID, limits, error middleware"] --> routers["Versioned routers /api/v1"]
+    routers --> auth["Auth and RBAC"]
+    routers --> rounds["Round application service"]
+    routers --> scenarios["Scenario application service"]
+    routers --> players["Player administration service"]
+    routers --> leaderboard["Leaderboard query service"]
+
+    scenarios --> rules["Game rules engine"]
+    scenarios --> cardRegistry["Action parameter registry"]
+    rounds --> scoring["Scoring orchestrator"]
+    scoring --> model["Risk scoring engine"]
+    scoring --> efficiency["Resource rating engine"]
+    leaderboard --> adjustments["Adjustment resolver"]
+
+    auth --> repositories["Repositories and unit of work"]
     rounds --> repositories
     scenarios --> repositories
-    board --> repositories
+    players --> repositories
+    leaderboard --> repositories
     scoring --> repositories
     repositories --> db[("PostgreSQL")]
 ```
 
-- **Routers** проверяют HTTP-контракт, авторизацию и преобразуют ошибки.
-- **Auth service** регистрирует пользователей, проверяет пароль и выпускает JWT.
-- **Round service** управляет конфигурацией и допустимыми переходами статусов.
-- **Scenario service** сохраняет черновик, повторно валидирует и отправляет сценарий.
-- **Game rules** рассчитывают деньги, энергию, комиссии, цель и нарушения.
-- **Scoring service** детерминированно вычисляет риск и объяснение.
-- **Repositories** инкапсулируют запросы, блокировки и транзакции PostgreSQL.
+### Слои
 
-## Ответственность и источники истины
+| Слой | Ответственность | Не делает |
+| --- | --- | --- |
+| Router | HTTP schema, dependency injection, status code, RBAC | Не содержит игровых формул |
+| Application service | Use case, транзакционная граница, state transition | Не форматирует Streamlit UI |
+| Domain rules | Детерминированные ресурсы, риск, ranking | Не выполняет SQL/HTTP |
+| Repository/unit of work | Query, lock, constraint mapping, commit/rollback | Не решает, разрешен ли use case |
+| Middleware | request ID, error envelope, безопасное логирование | Не скрывает доменные ошибки как 500 |
+
+## 10. Матрица ответственности
 
 | Область | Streamlit | FastAPI | PostgreSQL |
 | --- | --- | --- | --- |
-| JWT | Хранит в пользовательской `session_state` | Выпускает и проверяет | Хранит пользователя и роль |
-| Черновик | Держит UI-копию для быстрых rerun | Валидирует и сохраняет | Каноническая версия |
-| Карточки | Показывает и локально preview-ит | Отдает конфигурацию раунда | Канонический каталог и версии |
-| Деньги и энергия | Предварительный расчет для UX | Окончательный расчет | Сохраняет валидный сценарий и конфиг |
-| Статус раунда | Отображает | Разрешает переходы | Канонический статус |
-| Скоринг | Запускает или показывает | Выполняет | Сохраняет результат и объяснение |
-| Доска | Форматирует | Фильтрует и сортирует | Источник результатов |
+| Навигация и виджеты | Владелец | Нет | Нет |
+| JWT | Хранит в `session_state`, передает на каждый запрос | Выпускает, проверяет, сверяет пользователя | Хранит роль, блокировку, `token_version` |
+| Динамическая форма шага | Рендерит по card specification | Формирует спецификацию и строго валидирует | Хранит версию карточки и metadata |
+| Черновик | Локальная рабочая копия | Координирует GET/PUT/submit | Канонические steps и revision |
+| Ресурсный preview | Может считать приблизительно | Канонический расчет | Хранит принятый snapshot/result |
+| Статус раунда | Показывает | Разрешает переход | Канонический status |
+| Скоринг | Инициирует/показывает | Оркестрирует и рассчитывает | Атомарно публикует результаты |
+| Лидерборд | Отображает и фильтрует локально | Собирает effective projection | Base result, adjustment, audit |
+| Блокировка игрока | Запрашивает команду | Проверяет RBAC и применяет | Канонический access state |
+| Логи | UI event без PII | Request/domain event без PII | Не используется как application log |
 
-Любое расхождение между preview Streamlit и ответом API разрешается в пользу API.
-Streamlit показывает пользователю полученную серверную ошибку и обновляет черновик
-данными сервера.
+## 11. Источники истины и копии состояния
 
-## Основные потоки данных
+```mermaid
+flowchart LR
+    widgets["Widget values"] --> localDraft["Local draft copy"]
+    localDraft -->|"PUT with expected revision"| canonical["Canonical scenario in PostgreSQL"]
+    canonical -->|"Response replaces local copy"| localDraft
+    canonical --> scoring["Scoring result"]
+    scoring --> board["Leaderboard projection"]
+    adjustment["Admin adjustment"] --> board
 
-1. Браузер устанавливает WebSocket-сессию со Streamlit через reverse proxy.
-2. Streamlit передает учетные данные в FastAPI по внутренней сети и получает JWT.
-3. JWT хранится только в `st.session_state` конкретной пользовательской сессии.
-4. При структурном изменении цепочки Streamlit сохраняет черновик через идемпотентный
-   `PUT`.
-5. При отправке FastAPI заново загружает карточки и конфигурацию раунда, вычисляет
-   ресурсы и только после успешной проверки меняет статус сценария.
-6. При скоринге FastAPI блокирует строку раунда, рассчитывает все отправленные
-   сценарии в одной транзакции и публикует результаты после commit.
+    preview["Streamlit preview"] -. "informational" .-> localDraft
+    serverPreview["FastAPI resource snapshot"] --> canonical
+```
 
-## Конкурентный доступ
+При конфликте локальная копия не побеждает автоматически. UI получает `409`, загружает
+каноническую ревизию и предлагает пользователю повторить осознанное изменение.
 
-- Ограничение `UNIQUE(round_id, participant_id)` предотвращает дубли сценариев.
-- Сохранение черновика выполняется как upsert и не создает новую сущность при retry.
-- Активация раунда блокирует участвующие строки и завершает ранее активный раунд.
-- Скоринг использует `SELECT ... FOR UPDATE` для строки раунда. Повторный запрос к
-  `scoring` отклоняется конфликтом, запрос к `completed` возвращает существующий итог.
-- Результат сценария обновляется по уникальному `scenario_id`, поэтому повторный
-  безопасный пересчет не создает дубль.
+## 12. Основные потоки данных
 
-## Отказы и восстановление
+### Открытие страницы конструктора
 
-| Сбой | Поведение | Восстановление |
-| --- | --- | --- |
-| Streamlit перезапущен | UI-сессии и JWT потеряны, данные остаются в PG | Пользователь входит повторно и получает черновик |
-| FastAPI недоступен | UI показывает временную ошибку, отправка не считается успешной | Retry только для безопасных GET/PUT |
-| PostgreSQL недоступен | Readiness API становится failed, запись запрещена | Восстановить БД, проверить транзакции |
-| Скоринг завершился исключением | Транзакция откатывается, результаты не публикуются частично | Исправить причину и повторить запуск |
-| Reverse proxy недоступен | Внешние UI недоступны | Перезапустить proxy, проверить сертификат и DNS |
+1. Streamlit проверяет JWT в своей session state.
+2. Получает активный раунд с TTL не более 5 секунд.
+3. Получает карточки; неизменяемые карточки активированного раунда кэшируются по
+   `round_id + config_version` до 5 минут.
+4. Получает собственный сценарий без межпользовательского кэша.
+5. Серверный сценарий гидратирует local draft и его revision.
+6. Если active round отсутствует после reconnect, `GET /rounds/mine` находит собственный
+   completed round и result.
+7. Рендер выполняется без HTTP-команд записи.
 
-## Кэширование Streamlit
+### Изменение сценария
 
-`st.cache_resource` применяется только для общего HTTP-клиента с connection pooling.
-Кэшированный клиент не содержит JWT: токен передается аргументом каждого запроса.
+1. Callback/form изменяет local draft и отмечает его dirty.
+2. Streamlit считает быстрый preview.
+3. При структурном изменении Draft coordinator отправляет `PUT` с ожидаемой revision и
+   уникальным mutation ID.
+4. FastAPI блокирует строку сценария, проверяет revision, раунд, карточки и ресурсы.
+5. Ответ API полностью заменяет локальную копию и server preview.
 
-`st.cache_data` разрешен для:
+### Скоринг
 
-- карточек активированного раунда по ключу `round_id`, TTL 300 секунд;
-- активного раунда, TTL не более 5 секунд;
-- статических справочников интерфейса, не содержащих пользовательских данных.
+1. Admin UI подтверждает команду и передает idempotency key.
+2. FastAPI берет `FOR UPDATE NOWAIT` на строке раунда.
+3. В одной транзакции проверяет status, временно переводит его в `scoring`, загружает
+   submitted scenarios и фиксированный snapshot.
+4. Детерминированно рассчитывает результаты, bulk-upsert выполняется в той же
+   транзакции.
+5. Сценарии переходят в `scored`, раунд — в `completed`, затем commit публикует все
+   результаты одновременно.
+6. При исключении соединение откатывает всю транзакцию; round остается `active`.
 
-Не кэшируются сценарии, результаты, статистика администратора, доска и ответы с
-персональными данными. После создания, активации или скоринга раунда admin UI очищает
-соответствующий кэш и вызывает `st.rerun()`.
+Статус `scoring` в v1 является транзакционным: другие команды либо получают lock
+conflict, либо после commit видят `completed`. Admin UI показывает локальный pending
+state и после неопределенного timeout читает серверный статус, а не повторяет POST
+вслепую.
 
-Streamlit не создает SQLAlchemy-сессии, не подключается к PostgreSQL и не использует
-`st.cache_resource` как бизнес-хранилище.
+## 13. Конкурентный доступ
 
-## Масштабирование
+| Риск | Механизм |
+| --- | --- |
+| Два окна игрока перезаписывают шаги | `expected_revision`, row lock, `409 scenario_revision_conflict` |
+| Rerun повторяет тот же PUT | `client_mutation_id` и сравнение payload hash |
+| Два сценария игрока в раунде | `UNIQUE(round_id, participant_id)` |
+| Два активных раунда | Partial unique index и блокировка при activate |
+| Активация при существующем active | `409 active_round_exists`; скрытого завершения нет |
+| Submit одновременно со score | Обе команды блокируют round row; после начала score submit отклоняется |
+| Два запуска score | `FOR UPDATE NOWAIT`, idempotency key, результат completed возвращается повторно |
+| Две admin-корректировки | Optimistic revision adjustment и immutable audit event |
 
-Для v1 используются по одному процессу participant UI и admin UI и 2–4 Uvicorn
-worker на одной VM. PostgreSQL pool каждого worker ограничивается так, чтобы сумма
-подключений оставалась ниже `max_connections` с запасом для обслуживания.
+## 14. Транзакционные границы
 
-Вертикальное масштабирование VM является первым шагом. При дальнейшем росте:
+```mermaid
+flowchart LR
+    put["PUT draft"] --> tx1["TX: lock scenario, validate, update revision"]
+    submit["POST submit"] --> tx2["TX: lock round and scenario, revalidate, submitted"]
+    activate["POST activate"] --> tx3["TX: validate snapshot, lock active scope, active"]
+    score["POST score"] --> tx4["TX: lock round, calculate, bulk publish, completed"]
+    block["PUT player access"] --> tx5["TX: user state, token version, audit event"]
+    adjust["PUT leaderboard adjustment"] --> tx6["TX: adjustment revision, audit event"]
+```
 
-1. PostgreSQL выносится в managed service без изменения HTTP-контрактов.
-2. FastAPI масштабируется горизонтально, так как пользовательское состояние хранится
-   в PostgreSQL и JWT.
-3. Для нескольких Streamlit-реплик reverse proxy должен обеспечить sticky sessions,
-   поскольку Streamlit использует долгоживущие WebSocket-сессии.
-4. Тяжелый скоринг выносится в очередь только после превышения целевого времени 10 с.
+Транзакции коротких UI-команд не включают сетевые вызовы. Исключение — синхронный
+scoring v1, допустимый только пока benchmark подтверждает верхнюю границу 10 секунд.
 
+## 15. Отказоустойчивость
+
+| Сбой | Состояние данных | Поведение UI | Восстановление |
+| --- | --- | --- | --- |
+| Перезапуск Streamlit | PG не затронут | JWT/local draft потеряны | Повторный вход и GET сценария |
+| Timeout GET | Нет изменения | Inline retry/error | Автоматически до 2 retry |
+| Timeout PUT | Результат неизвестен | Повтор с тем же mutation ID | API возвращает уже примененную ревизию |
+| Timeout POST submit | Результат неизвестен | GET scenario, затем решение | Не повторять без проверки статуса |
+| Timeout POST score | Результат неизвестен | GET round/stats | Повтор только после подтвержденного `active` |
+| Crash API во время score | TX откатывается | Admin видит временную ошибку | API restart, status остается `active` |
+| Недоступна БД | Запись невозможна | Service unavailable без локального fallback | Restore DB/readiness |
+| Поврежден UI cache | Канонические данные не затронуты | Cache clear и rerun | Повторное чтение API |
+
+## 16. Кэширование
+
+Кэширование не меняет владение данными.
+
+| Данные | Механизм | TTL/ключ | Инвалидация |
+| --- | --- | --- | --- |
+| HTTP connection pool | `st.cache_resource` | На процесс UI | Перезапуск/явный clear |
+| Active round | `st.cache_data` | До 5 с; без JWT в ключе/значении | Admin-local clear; participant TTL |
+| Round cards | `st.cache_data` | `round_id`, `config_version`, до 300 с | Новый config key; admin-local clear |
+| UI static dictionaries | `st.cache_data` | Версия UI | Deploy |
+| Scenario/result/profile/stats/leaderboard | Не кэшировать между сессиями | Нет | Всегда API |
+
+JWT не встраивается в cached client. SQLAlchemy session и соединение PostgreSQL никогда
+не создаются в Streamlit. Полная политика описана в
+[Streamlit и FastAPI](streamlit-fastapi.md#11-кэширование-streamlit).
+
+Active-round/cards endpoints являются token-free только во внутренней app network и не
+содержат PII. Это осознанное исключение устраняет передачу JWT в process-wide cache;
+user-specific reads всегда авторизованы и не кэшируются глобально.
+
+Participant/admin Streamlit работают в разных процессах, поэтому `cache.clear()` в
+admin UI не очищает participant cache. Видимость admin-команд обеспечивают TTL active
+round до 5 секунд и новый `config_version` в card cache key. Event bus для invalidation
+в v1 не нужен.
+
+## 17. Масштабирование
+
+### V1
+
+- вертикальное масштабирование одной VM;
+- один participant Streamlit process, один admin Streamlit process;
+- 2–4 Uvicorn worker при рассчитанном общем DB pool;
+- PostgreSQL на той же VM с persistent volume;
+- один синхронный scoring request.
+
+### Путь развития
+
+```mermaid
+flowchart LR
+    v1["V1: одна VM"] --> dbOut["Вынести PostgreSQL"]
+    dbOut --> apiScale["Несколько stateless FastAPI replicas"]
+    apiScale --> uiScale["Несколько Streamlit replicas + sticky sessions"]
+    uiScale --> asyncScore["Очередь и scoring workers"]
+    asyncScore --> events["Несколько мероприятий и tenant scope"]
+```
+
+Переход к очереди нужен, если scoring стабильно превышает 10 секунд, использует
+тяжелую модель или требует progress. Публичные Streamlit-контракты при этом не меняются:
+синхронный ответ score заменяется ресурсом job и polling, а participant API остается
+прежним.
+
+## 18. Архитектурные запреты
+
+- Не импортировать repository/SQLAlchemy из Streamlit.
+- Не считать локальный preview подтвержденным сохранением.
+- Не выполнять POST/PUT без пользовательского события при каждом rerun.
+- Не помещать JWT, user object, scenario или result в `st.cache_data`.
+- Не редактировать исходный scoring result при ручной корректировке leaderboard.
+- Не завершать существующий active round неявно при активации нового.
+- Не включать LocalStore как production fallback.
+- Не публиковать FastAPI/Swagger/PostgreSQL наружу.
+- Не добавлять Redis/Celery до измеренной потребности.

@@ -1,140 +1,349 @@
 # Безопасность
 
-## Модель угроз и доверительные границы
+## 1. Контекст
 
-Система является учебной, но обрабатывает учетные данные и действия школьников.
-Основные риски: подбор паролей, кража JWT, доступ участника к admin API, утечка email,
-публикация PostgreSQL в интернет, подмена конфигурации активного раунда и отказ в
-обслуживании во время мероприятия.
+Система учебная, но обрабатывает учетные данные и поведение школьников. Упрощенный
+scoring не уменьшает требования к защите email, пароля, JWT, admin-команд и базы.
+
+Основные активы:
+
+- учетные записи и email;
+- participant JWT и admin JWT;
+- scenario chains и explanations;
+- immutable round/scoring configuration;
+- base results, leaderboard overlays и audit events;
+- PostgreSQL volume, backup и production secrets;
+- доступность интерфейса в течение 45 минут.
+
+## 2. Доверительные границы
 
 ```mermaid
 flowchart LR
-    internet["Недоверенная сеть / браузеры"] -->|"HTTPS"| proxy["Reverse proxy"]
-
-    subgraph publicBoundary["Публичная граница VM"]
-        proxy --> participant["Participant Streamlit"]
-        proxy --> admin["Admin Streamlit"]
+    subgraph untrusted["Недоверенная зона"]
+        player["Participant browser"]
+        adminBrowser["Admin browser"]
+        internet["Internet and venue Wi-Fi"]
     end
 
-    subgraph trustedBoundary["Внутренняя Docker-сеть"]
-        participant -->|"JWT"| api["FastAPI"]
-        admin -->|"JWT + admin role"| api
-        api --> db[("PostgreSQL")]
+    subgraph edge["Публичная граница VM"]
+        proxy["Reverse proxy and TLS"]
+        participantUi["Participant Streamlit"]
+        adminUi["Admin Streamlit"]
     end
 
-    operator["Оператор VM"] -->|"SSH / ограниченный доступ"| trustedBoundary
+    subgraph app["Внутренняя application network"]
+        api["FastAPI"]
+    end
+
+    subgraph data["Внутренняя data network"]
+        db[("PostgreSQL")]
+        volume[("Persistent volume")]
+    end
+
+    player --> internet -->|"HTTPS and WebSocket"| proxy
+    adminBrowser --> internet
+    proxy --> participantUi
+    proxy --> adminUi
+    participantUi -->|"Internal HTTP plus participant JWT"| api
+    adminUi -->|"Internal HTTP plus admin JWT"| api
+    api -->|"Least-privilege DB account"| db
+    db --> volume
+    operator["Authorized operator"] -->|"SSH key or VPN"| edge
+    operator --> app
+    operator --> data
 ```
 
-## Аутентификация
+### Ключевое следствие
 
-- Пароли длиной 10–128 символов хешируются bcrypt с актуальной стоимостью.
-- Пароль, его хеш и JWT никогда не пишутся в логи и не возвращаются после создания.
-- JWT подписывается отдельным случайным production secret, содержит `sub`, `role`,
-  `iat`, `exp` и `jti` и действует четыре часа по умолчанию.
-- JWT хранится в `st.session_state`; он не помещается в URL, query string, общий кэш
-  или кэшированный HTTP-клиент.
-- Refresh token отсутствует. Logout удаляет JWT из сессии Streamlit.
-- Учетная запись администратора создается отдельной bootstrap-командой, а не
-  публичным endpoint. Дефолтные `admin@example.com/admin123` запрещены вне разработки.
+JWT хранится в server-side `st.session_state`. Browser получает Streamlit session
+cookie/WebSocket, но не Bearer token и не имеет route к FastAPI. Это уменьшает риск
+утечки через localStorage, но не отменяет защиту Streamlit session, TLS и admin UI.
 
-После пяти неудачных входов существующая учетная запись блокируется на пять минут.
-Для этого `users` хранит `failed_login_count` и `locked_until`; успешный вход сбрасывает
-счетчик. Ответ не сообщает, существует ли введенный email.
+## 3. Threat matrix
 
-## Авторизация
+| Угроза | Актив | Мера v1 | Проверка |
+| --- | --- | --- | --- |
+| Подбор пароля | Accounts | Password policy, bcrypt, lockout, auth rate limit | Auth security tests |
+| Кража UI session | JWT/admin access | HTTPS, secure cookies, XSRF protection, short event lifetime | Browser/proxy tests |
+| Participant вызывает admin API | Results/config | JWT + DB role check on every request | RBAC matrix |
+| IDOR | чужой scenario/profile | Ownership derived from JWT; admin routes isolated | IDOR tests |
+| Подмена active config | Reproducibility | Immutable snapshot/hash and state transition lock | Integration tests |
+| Lost update | Scenario/admin overlay | Revisions, mutation IDs, row locks | Concurrency tests |
+| Повтор score | Round/result | Idempotency key, `FOR UPDATE NOWAIT`, completed summary | Concurrency tests |
+| Утечка через logs | Email/JWT/steps | Structured allowlist logging and redaction | Automated log scan |
+| Публикация DB/API | All data | No host ports, firewall, internal networks | External port scan |
+| XSS через display name/details | Admin/public UI | Output escaping, no unsafe HTML with user input | UI security tests |
+| SQL injection | DB | SQLAlchemy bound parameters, strict DTO | Fuzz/security tests |
+| DoS с общего NAT | Availability | Body/connection limits, NAT-aware burst, capacity test | Venue load test |
+| Компрометация dependency/image | Runtime | Pinned lock, image scan, minimal image, provenance | CI release gate |
+| Утечка backup | Historical PII | Encryption, restricted storage, retention/restore process | Backup audit |
 
-FastAPI проверяет JWT и загружает текущего пользователя для каждого защищенного
-запроса. Роль из БД имеет приоритет над устаревшим claim токена.
+## 4. Пароли и аутентификация
 
-- Participant routes никогда не принимают `participant_id` от клиента.
-- Доступ к сценарию определяется текущим `user.id` и `round_id`.
-- Все `/api/v1/admin/*` требуют роль `admin`.
-- Изменение конфигурации разрешено только для `draft`.
-- Результаты общего раунда доступны только admin UI; participant получает только свой.
+- Password: 10–128 символов; пробелы не обрезаются без явно описанного правила.
+- В v1 используется bcrypt с cost, измеренным на production VM: проверка должна быть
+  достаточно дорогой, но не создавать auth DoS для 500 участников.
+- Hash и salt управляются библиотекой; собственная криптография запрещена.
+- Пароль существует в Streamlit только во время form submit и не сохраняется в
+  `session_state`, cache, URL или log.
+- Login response для неизвестного email и неверного password одинаков.
+- После пяти неудачных попыток account временно блокируется на пять минут; значения
+  являются настраиваемой security policy.
+- Успешный login сбрасывает failed counter в транзакции.
+- Admin account создается bootstrap-командой; публичная регистрация всегда participant.
+- Default admin credentials запрещены вне локальной demo-среды.
 
-## Сетевая защита
+Argon2id может заменить bcrypt отдельным решением с постепенным rehash при login; формат
+`hashed_password` не должен связывать API contract с конкретным алгоритмом.
 
-- Reverse proxy завершает TLS 1.2+ и перенаправляет HTTP на HTTPS.
-- Публичны только `/play` и `/admin`; порт FastAPI и порт PostgreSQL не публикуются.
-- Docker-сеть приложений отделена от сети БД; к PostgreSQL подключается только API.
-- Swagger/OpenAPI не проксируются наружу.
-- SSH разрешен только операторским адресам или через VPN, вход по ключу.
-- Security headers включают HSTS после проверки домена, `X-Content-Type-Options`,
-  `Referrer-Policy` и подходящую Content Security Policy без нарушения Streamlit.
+## 5. JWT и жизненный цикл сессии
 
-## Rate limiting
+JWT v1:
 
-Защита не должна блокировать 500 участников за общим NAT площадки:
+- asymmetric signing предпочтителен при нескольких независимых verifiers, но для одной
+  VM допустим сильный HMAC secret;
+- claims: `sub`, `role`, `token_version`, `iat`, `exp`, `jti`;
+- lifetime покрывает мероприятие, default 4 часа;
+- refresh token отсутствует;
+- clock skew ограничен 30–60 секундами;
+- secret/key имеет `kid` при поддержке ротации.
 
-- reverse proxy ограничивает общее число новых соединений и запросов с большим burst,
-  настроенным по результатам нагрузочного теста;
-- FastAPI применяет account lockout для существующего email;
-- регистрация защищена уникальностью email, ограничением размера тела и общим лимитом
-  запросов на auth routes;
-- admin login имеет отдельный более строгий лимит и может быть дополнительно ограничен
-  операторской сетью;
-- значения лимитов проверяются с реального Wi-Fi площадки, а не выбираются вслепую.
+FastAPI не доверяет role/block только из token:
 
-Redis в v1 отсутствует, поэтому распределенный token bucket не проектируется. Если API
-будет разнесен по нескольким VM, rate limiter выносится во внешний общий сервис.
+```mermaid
+sequenceDiagram
+    participant S as Streamlit
+    participant A as FastAPI
+    participant D as PostgreSQL
 
-## Валидация и целостность
+    S->>A: Request with JWT
+    A->>A: Verify signature, exp, claims
+    A->>D: Load user role, block, token version
+    alt valid current session
+        A-->>S: Authorized response
+    else token version differs
+        A-->>S: 401 token_revoked
+    else user blocked
+        A-->>S: 403 account_blocked
+    end
+```
 
-- Pydantic ограничивает типы, длины, enum и размер сценария до бизнес-валидации.
-- FastAPI игнорирует клиентский расчет ресурсов и вычисляет его заново.
-- Карточка шага должна входить в snapshot раунда; code/version должны совпадать с ID.
-- Денежные расчеты используют `Decimal`, а не binary float.
-- Строка раунда блокируется при активации и скоринге.
-- SQL строится SQLAlchemy без конкатенации пользовательских строк.
-- Размер JSON request body ограничивается reverse proxy.
+Block/unblock/security reset увеличивает `token_version`; старый JWT становится
+недействительным на следующем request. Logout participant очищает JWT из Streamlit
+session. Глобальный revoke при logout не нужен, иначе одно окно завершит все сессии.
 
-## Секреты
+## 6. Streamlit session security
 
-Production secrets не находятся в Git, образах или примерах с рабочими значениями.
-Минимальный набор:
+- `server.enableXsrfProtection=true` в production.
+- Cookie settings соответствуют HTTPS; proxy не понижает scheme в forwarded headers.
+- `st.session_state` не используется как shared process storage.
+- JWT не помещается в `st.cache_data`, `st.cache_resource`, query params или widget key.
+- Cached HTTP transport не содержит mutable default Authorization header.
+- User-controlled text экранируется перед `unsafe_allow_html=True`; предпочтителен
+  native Streamlit rendering.
+- Admin destructive actions требуют explicit confirmation и reason.
+- После logout очищаются auth, local draft, selected participant и pending command.
+- WebSocket origin/CORS settings ограничены каноническим доменом.
 
-- `DATABASE_URL` с отдельным паролем пользователя приложения;
-- `SECRET_KEY` для JWT;
-- `POSTGRES_PASSWORD` для инициализации;
-- параметры домена и TLS;
-- учетные данные backup-хранилища, если оно используется.
+## 7. Авторизация
 
-Файл `.env` на VM имеет права только у сервисного пользователя. Ротация JWT secret
-завершает существующие сессии и проводится до или после мероприятия, но не во время
-активного раунда без необходимости.
+### Participant
 
-## Логи и персональные данные
+- Current participant определяется только `JWT.sub`.
+- Token-free active-round/cards reads разрешены только во внутренней app network,
+  содержат несекретный catalog snapshot и не проксируются browser.
+- Endpoint scenario/result не принимает participant ID.
+- Round ID проверяется на доступность и lifecycle.
+- Public leaderboard возвращает только pseudonym и безопасные метрики.
+- Blocked participant не может читать/изменять даже собственный scenario до unblock.
 
-Разрешены: `request_id`, route template, status code, latency, `round_id`, `scenario_id`,
-роль и внутренний `user_id`. Запрещены:
+### Admin
 
-- пароль, password hash и полный JWT;
-- email и display name в технических логах;
-- заголовок `Authorization`;
-- полное тело сценария и explanation;
-- строка подключения к PostgreSQL.
+- Все `/api/v1/admin/*` требуют current DB role `admin`.
+- Admin не может заблокировать самого себя через UI/API.
+- Block, adjustment, activate и score требуют reason/confirmation там, где определено.
+- Изменение создает audit event в той же транзакции.
+- Full email/chain читается только detail endpoint выбранного player.
+- Admin UI рекомендуется дополнительно ограничить VPN/IP allowlist, если площадка это
+  позволяет; URL secrecy не является защитой.
 
-При необходимости корреляции email логируется только стабильный HMAC, вычисленный
-отдельным observability secret.
+## 8. Сетевая защита
 
-## Данные школьников
+```mermaid
+flowchart TB
+    internet["Internet"] -->|"80 redirect and 443 HTTPS"| firewall["Cloud firewall"]
+    firewall --> proxy["Reverse proxy"]
+    proxy -->|"/play"| playerUi["Participant UI"]
+    proxy -->|"/admin"| adminUi["Admin UI"]
+    proxy -. "deny" .-> api["FastAPI 8000"]
+    proxy -. "deny" .-> db["PostgreSQL 5432"]
+    playerUi --> api
+    adminUi --> api
+    api --> db
+```
 
-- Собираются только email, отображаемое имя и игровой сценарий.
-- В интерфейсе должно быть краткое уведомление о цели и сроке хранения данных.
-- Доска использует только display name; участникам рекомендуется псевдоним.
-- Доступ к выгрузке имеют только назначенные операторы.
-- Рекомендуемый срок удаления — не более 30 дней после мероприятия, если организатор
-  письменно не установил иной срок.
-- Удаление включает основную БД и backup после истечения его установленного срока.
+- Публичны только 80/443; HTTP перенаправляется на HTTPS.
+- TLS 1.2+; слабые suites отключены.
+- HSTS включается после проверки домена и rollback plan.
+- API/DB не имеют host port mappings.
+- OpenAPI/Swagger не проксируются; внутри VM доступ ограничен оператором.
+- SSH по ключу, без password login, с allowlist/VPN при возможности.
+- DB user приложения не superuser и не владеет infrastructure DB.
+- Backup channel отделен от public route.
 
-## Проверки безопасности перед публикацией
+Security headers: `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`,
+`Referrer-Policy`, `Permissions-Policy` и CSP, протестированная с Streamlit WebSocket и
+static assets. `X-Frame-Options`/`frame-ancestors` запрещает embedding, если iframe не
+нужен платформе мероприятия.
 
-1. Заменены все development secrets и удален дефолтный пароль администратора.
-2. Снаружи недоступны порты 8000 и 5432, `/docs`, `/redoc`, `/openapi.json`.
-3. Participant JWT получает `403` на admin endpoint.
-4. Один участник не может прочитать сценарий другого.
-5. Истекший и измененный JWT дают `401`.
-6. Логи не содержат email, паролей, токенов и request body.
-7. Backup зашифрован и успешно восстановлен на тестовой среде.
-8. Rate limits проверены через сеть с общим NAT.
+## 9. Rate limiting и DoS
 
+500 участников могут находиться за одним NAT, поэтому жесткий per-IP limit опасен.
+
+| Уровень | Ограничение |
+| --- | --- |
+| Proxy | Max body, header size, connection timeout, WebSocket limits, broad IP burst |
+| Auth API | Account-based lockout, route-wide rate, separate strict admin policy |
+| Application | Max steps, string lengths, nested JSON depth, pagination limit |
+| Database | Pool bounds, statement timeout, lock timeout |
+| Scoring | Один batch, row lock NOWAIT, max scenarios/steps, 30 s request timeout |
+
+Точные значения выбираются после теста через Wi-Fi площадки. Redis-less limiter v1
+может быть process-local только как дополнительная защита; критическая защита основана
+на proxy limits и DB/account state. При нескольких API replicas нужен общий limiter.
+
+## 10. Валидация и целостность
+
+- Pydantic input models используют `extra="forbid"`.
+- Reverse proxy и API ограничивают body до размера, достаточного для max scenario.
+- Decimal используется для всех денежных/score расчетов.
+- Card ID/code/version сверяются с immutable round snapshot.
+- Action details валидируются server registry, а не доверяются UI metadata.
+- `step_id` UUID и array length проверяются.
+- Server игнорирует клиентский resource preview.
+- State transitions защищены row locks и DB constraints.
+- SQLAlchemy использует bound parameters.
+- URL IDs не считаются секретными; RBAC/ownership проверяется всегда.
+
+## 11. Защита admin-команд
+
+```mermaid
+flowchart LR
+    ui["Admin confirmation"] --> dto["Strict command DTO"]
+    dto --> rbac["Current DB role"]
+    rbac --> conflict["Expected revision or token version"]
+    conflict --> transaction["Mutation plus audit in one transaction"]
+    transaction --> response["Canonical response"]
+```
+
+- `Idempotency-Key` обязателен для activate/score; хранится только его hash.
+- Причина обязательна для block и leaderboard adjustment.
+- Base scoring result immutable.
+- UI показывает base/effective рядом, чтобы admin видел последствия.
+- Audit event содержит numeric before/after, но не полную chain/PII.
+- Опционально применяется dual control для финальных мероприятий; в v1 не требуется.
+
+## 12. Секреты
+
+Production secrets не входят в Git, Docker image, Markdown examples или application
+logs.
+
+| Secret | Потребитель | Ротация |
+| --- | --- | --- |
+| `DATABASE_URL`/password | FastAPI | До мероприятия или при инциденте |
+| JWT signing key | FastAPI | Между мероприятиями; emergency revoke sessions |
+| `POSTGRES_PASSWORD` | DB bootstrap/operator | По infrastructure policy |
+| TLS private key | Reverse proxy | ACME/организатор |
+| Backup credentials/key | Operator job | Отдельно от application secrets |
+| Observability HMAC key | Logging pipeline | При компрометации |
+
+`.env` на VM доступен только сервисному пользователю. Предпочтительны Docker secrets или
+cloud secret store, если они доступны без существенного усложнения v1. Ошибка config не
+должна печатать значение secret.
+
+## 13. Logging и observability privacy
+
+Логирование строится по allowlist.
+
+**Разрешено:** service, event, route template, method, status, latency, request ID,
+round ID, scenario ID, internal user ID, role, revisions, counts.
+
+**Запрещено:**
+
+- password/password hash;
+- JWT, cookie, Authorization header;
+- email и display name в техническом log;
+- request/response body auth/scenario;
+- full steps/action details/explanation;
+- DSN и secret values;
+- raw idempotency key.
+
+При необходимости поиска account используется HMAC(normalized email) с отдельным
+observability key. Raw email остается доступен только через admin detail/API по RBAC.
+
+## 14. Минимизация данных школьников
+
+1. Собирать только email, pseudonym/display name и игровое состояние.
+2. До регистрации показать цель, владельца, срок и способ удаления.
+3. Рекомендовать pseudonym, не ФИО, для public leaderboard.
+4. Не показывать email на проекторе/общей доске.
+5. Не экспортировать chains без явной необходимости.
+6. Установить retention до события; рекомендуемый максимум — 30 дней.
+7. Удалить primary DB и backups по расписанию.
+8. Хранить только действительно обезличенные агрегаты после проверки re-identification.
+
+## 15. Backup security
+
+- Dump шифруется до передачи во внешнее хранилище.
+- Encryption key не хранится рядом с dump.
+- Access ограничен назначенными операторами.
+- Restore выполняется в изолированной test DB.
+- Restore logs не содержат row data.
+- Retention backup не превышает retention исходной PII.
+- Удаление подтверждается inventory/checksum records.
+
+## 16. Supply chain и runtime
+
+- Python dependencies pin/lock с hashes, где возможно.
+- Base image фиксируется digest/tag release.
+- Image запускается непривилегированным user.
+- Read-only filesystem для stateless containers при совместимости Streamlit temp paths.
+- Linux capabilities минимизированы; Docker socket не монтируется в app containers.
+- Dependency/image scan выполняется до release freeze.
+- Critical vulnerability оценивается до мероприятия; исключение документируется.
+- Debug/reload отключены в production.
+
+## 17. Security checklist перед событием
+
+1. Production secrets отличаются от dev и не найдены secret scan.
+2. Default admin отсутствует; admin password проверен.
+3. Снаружи закрыты 8000/5432 и OpenAPI endpoints.
+4. TLS/WebSocket работают из внешней сети; certificate не истекает.
+5. Participant token получает `403` на все admin routes.
+6. Participant A не читает data B.
+7. Blocked user получает `403` со старым JWT.
+8. Stale revisions дают `409`, а не overwrite.
+9. Logs не содержат email/JWT/password/steps.
+10. Public leaderboard не содержит IDs, email или chain.
+11. Rate limits проверены через общий NAT площадки.
+12. Backup зашифрован и restore проверен.
+13. Data notice и retention owner утверждены.
+14. Admin block/adjustment/score создают audit events.
+15. Streamlit light/dark error states остаются читаемыми и не раскрывают tracebacks.
+
+## 18. Реакция на инцидент
+
+```mermaid
+flowchart TD
+    detect["Detect security event"] --> contain["Contain access or service"]
+    contain --> preserve["Preserve safe logs and request IDs"]
+    preserve --> assess["Assess affected accounts and data"]
+    assess --> rotate["Revoke tokens or rotate secrets"]
+    rotate --> recover["Restore verified service"]
+    recover --> notify["Follow organizer and legal notification process"]
+    notify --> delete["Apply retention and remediation"]
+```
+
+При компрометации admin session блокируются admin-команды, повышается token version,
+ротируется signing key при необходимости и проверяется audit trail. Продолжение
+мастер-класса не важнее защиты данных.

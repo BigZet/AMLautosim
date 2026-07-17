@@ -1,55 +1,114 @@
 # Эксплуатация и runbook
 
-## Ответственность
+## 1. Роли на мероприятии
 
-На мероприятии назначается один оператор, имеющий доступ к VM и логам, и один
-администратор приложения. Спикер не должен переключаться в терминал во время разбора.
-Контакты оператора, провайдера VM и организатора хранятся вне публичного репозитория.
-
-## Проверка за 24 часа
-
-- DNS и TLS корректны из внешней сети.
-- Снаружи доступны только 80/443; 8000 и 5432 закрыты.
-- VM имеет достаточный запас CPU, RAM и диска.
-- Все контейнеры healthy, `/health/ready` возвращает 200.
-- Применена ожидаемая версия Alembic.
-- Создан production admin, дефолтные credentials отсутствуют.
-- Пройден нагрузочный тест целевого профиля.
-- Backup создан, зашифрован и восстановлен в тестовую БД.
-- Проверен QR/короткий URL через Wi-Fi площадки.
-
-## Проверка за 30 минут
-
-1. Проверить системное время VM и свободное место.
-2. Проверить health всех контейнеров и срок TLS-сертификата.
-3. Войти в admin UI и создать тестовый `draft`.
-4. Зарегистрировать тестового участника, сохранить и отправить сценарий.
-5. Запустить скоринг, открыть participant result и admin board.
-6. Удалить тестовый раунд или создать чистый production-раунд.
-7. Сделать предсобытийный backup.
-8. Открыть dashboard логов/метрик и не закрывать операторскую сессию.
-
-## Наблюдаемость
-
-### Метрики
-
-| Метрика | Назначение | Сигнал внимания |
+| Роль | Ответственность | Не должна делать |
 | --- | --- | --- |
-| HTTP request rate/status | Общая активность и ошибки | 5xx > 1% за 2 минуты |
-| API latency p50/p95/p99 | Задержки интерфейса | p95 > 500 мс за 2 минуты |
-| DB pool used/waiting | Нехватка соединений | ожидание pool > 0 устойчиво |
-| PostgreSQL connections | Риск исчерпания | > 80% лимита |
-| CPU/RAM/disk | Емкость VM | CPU > 85%, RAM > 85%, disk > 80% |
-| Active Streamlit sessions | Реальная аудитория | Сравнивается с планом площадки |
-| Registered/draft/submitted/scored | Готовность раунда | Расхождение submitted/scored после завершения |
-| Scoring duration | Укладывается ли пакет | > 10 секунд |
+| Оператор | VM, proxy, containers, DB, logs, backup, incident response | Менять leaderboard без admin role/process |
+| Администратор | Round lifecycle, participants, score, adjustments | Работать напрямую с SQL |
+| Спикер | Сценарий мастер-класса и разбор | Диагностировать production terminal на проекторе |
+| Владелец данных | Retention/export/deletion decisions | Передавать PII без основания |
 
-Для v1 допустимы dashboard провайдера VM и структурные логи без отдельного тяжелого
-observability stack, если оператор видит перечисленные сигналы.
+Контакты, доступы и escalation chain хранятся вне публичного репозитория. Назначается
+заместитель оператора или явно принимается риск единственной точки поддержки.
 
-### Структурные логи
+## 2. Operational state model
 
-Пример безопасной записи:
+```mermaid
+stateDiagram-v2
+    [*] --> preparation
+    preparation --> ready: preflight accepted
+    ready --> live: registration opened
+    live --> incident: service degradation
+    incident --> live: recovered and smoke passed
+    live --> completed: workshop finished
+    completed --> retention: backup and reports
+    retention --> deleted: retention expired
+    deleted --> [*]
+```
+
+## 3. Проверка за 7 дней
+
+- Release candidate собран из immutable images.
+- Все readiness gates из `testing-strategy.md` пройдены.
+- Load test на 500 virtual participants выполнен на target-like VM.
+- DNS/TLS/short URL/QR проверены.
+- Wi-Fi площадки проверен на WebSocket и общий NAT.
+- Production admin создан, доступ протестирован и передан безопасно.
+- Ruleset/card snapshots проверены методистом.
+- Backup restore drill выполнен.
+- Retention owner/date утверждены.
+- Плановая разработка заморожена либо изменения требуют нового полного rehearsal.
+
+## 4. Проверка за 24 часа
+
+### Infrastructure
+
+- DNS и certificate корректны из внешней сети.
+- Публичны только 80/443; 8000/5432 и OpenAPI закрыты.
+- VM time sync, CPU/RAM/disk headroom достаточны.
+- Все containers имеют ожидаемые image digests.
+- DB volume подключен, PostgreSQL logs чисты от критичных ошибок.
+- Alembic head и API release совместимы.
+- Backup создан, encrypted, checksum записан.
+
+### Application
+
+- `/health/live` и `/health/ready` — 200.
+- Participant/admin Streamlit health — healthy.
+- Внешний login работает на обоих routes.
+- Тестовый round прошел create -> activate -> draft -> submit -> score -> result.
+- Admin видит participant chain, block/unblock и adjustment audit.
+- Public leaderboard не раскрывает PII.
+- Log scan не обнаруживает email/JWT/password/steps.
+
+## 5. Проверка за 30 минут
+
+1. Сверить системное время и свободный disk.
+2. Проверить `docker compose ps`, health и image tags.
+3. Проверить certificate expiry и WebSocket с устройства площадки.
+4. Войти в admin UI; открыть production draft/active round.
+5. Зарегистрировать одного test participant, сохранить и submit scenario.
+6. На отдельном test round или rehearsal environment проверить score/result/leaderboard.
+7. Удалить test data либо не смешивать его с production ranking.
+8. Сделать pre-event backup по policy.
+9. Открыть logs/metrics dashboard на операторском экране.
+10. Зафиксировать «change freeze» до завершения мастер-класса.
+
+## 6. Dashboard мероприятия
+
+```mermaid
+flowchart LR
+    proxy["Proxy metrics"] --> dashboard["Operator dashboard"]
+    ui["Streamlit logs and sessions"] --> dashboard
+    api["FastAPI metrics"] --> dashboard
+    db["PostgreSQL and host metrics"] --> dashboard
+    appStats["Round stats"] --> dashboard
+```
+
+Минимальный dashboard:
+
+| Сигнал | Разрез | Внимание | Критично |
+| --- | --- | ---: | ---: |
+| API 5xx rate | 2 min | > 1% | > 5% |
+| API p95 ordinary latency | 2 min | > 500 мс | > 2 с |
+| API 401/429 | auth routes | Резкий рост | Массовый login failure |
+| DB pool waiting | worker | > 0 устойчиво | Pool timeout |
+| DB connections | total | > 70% | > 85% |
+| CPU | VM, 5 min | > 80% | > 95% |
+| RAM | VM | > 80% | > 90%/swap pressure |
+| Disk | volume | > 75% | > 85% |
+| Active Streamlit sessions | participant/admin | Отклонение от аудитории | Резкий обвал |
+| Submitted count | round | Ниже ожидаемого к deadline | Не растет при активной аудитории |
+| Scoring duration | round | > 10 с | > 30 с/timeout |
+| Submitted vs scored | completed round | Любое различие | Любое различие |
+
+Thresholds калибруются rehearsal. Alert без оператора и инструкции не считается
+полезной наблюдаемостью.
+
+## 7. Structured logging
+
+### Обязательные поля
 
 ```json
 {
@@ -59,89 +118,249 @@ observability stack, если оператор видит перечисленн
   "event": "scenario_saved",
   "request_id": "01JAML7Q5SH2RZ8JYK6M4V3Q9T",
   "route": "/api/v1/rounds/{round_id}/scenario",
+  "method": "PUT",
   "status_code": 200,
   "latency_ms": 42,
   "user_id": 57,
   "round_id": 12,
-  "scenario_id": 91
+  "scenario_id": 91,
+  "revision": 5
 }
 ```
 
-Не логируются email, display name, пароль, JWT, Authorization header, request body,
-полный сценарий и строка подключения.
+Events:
 
-## Health
+- API request completed/failed;
+- auth success/failure without email;
+- scenario saved/submitted/conflict;
+- round created/updated/activated/scored;
+- participant blocked/unblocked;
+- leaderboard adjusted/cleared;
+- readiness transition;
+- backup/restore start/result in operator log.
+
+Не логируются email, display name, password/hash, JWT/cookie/Authorization, request body,
+full scenario, action details, explanation, DSN и raw idempotency key.
+
+## 8. Request correlation
+
+```mermaid
+sequenceDiagram
+    participant S as Streamlit
+    participant A as FastAPI
+    participant D as PostgreSQL
+
+    S->>A: Request with X-Request-ID=R
+    A->>A: Log request_started R
+    A->>D: SQL in context R
+    D-->>A: Result
+    A->>A: Log domain_event and request_completed R
+    A-->>S: Response X-Request-ID=R
+    S->>S: Log UI outcome R
+```
+
+Оператор ищет инцидент сначала по request ID, затем по round/scenario internal IDs. UI
+показывает request ID в технической детали ошибки.
+
+## 9. Health endpoints
 
 ```bash
 curl --fail http://api:8000/health/live
 curl --fail http://api:8000/health/ready
 ```
 
-`live` используется для определения зависшего процесса. `ready` проверяет PostgreSQL
-и миграции и определяет, можно ли направлять запросы. Автоматический restart по failed
-readiness не должен создавать бесконечный цикл при недоступной БД.
+### Live
 
-## Runbook: participant UI недоступен
+Проверяет только процесс. Failed live допускает restart container.
 
-1. Проверить внешний HTTPS и WebSocket в браузере.
-2. Проверить proxy logs и health `participant-ui`.
-3. Если контейнер остановлен, перезапустить только participant UI.
-4. Убедиться, что API ready; не переключать пользователей на LocalStore.
-5. После восстановления попросить пользователей войти повторно; черновики загружаются
-   из PostgreSQL.
+### Ready
 
-## Runbook: admin UI недоступен
+Проверяет DB, Alembic и ruleset availability. Failed ready означает «не направлять
+прикладные запросы», но автоматический restart не исправит недоступную DB и может
+усугубить ситуацию.
 
-1. Проверить, затронут ли participant UI.
-2. Перезапустить только `admin-ui`, сохраняя API и БД.
-3. Войти повторно и прочитать статус раунда из API.
-4. Не запускать scoring повторно, пока статус не подтвержден.
+### Synthetic UI check
 
-## Runbook: FastAPI недоступен
+Из внешней сети проверяются HTTPS status, Streamlit WebSocket/bootstrap и входная
+страница под правильным base path. Простой `200` proxy недостаточен.
 
-1. Проверить `/health/live`, затем логи API и последние deploy/migration события.
-2. Проверить доступность PostgreSQL и число соединений.
-3. При crash перезапустить API и проверить readiness.
-4. Если ошибка появилась после релиза, откатить image tag.
-5. Участникам сообщить не закрывать страницу; локальный UI-черновик может сохраниться в
-   текущей Streamlit-сессии, но подтвержденным считается только ответ API.
+## 10. Общий алгоритм инцидента
 
-## Runbook: PostgreSQL недоступен
+```mermaid
+flowchart TD
+    detect["Обнаружить симптом"] --> scope["Определить scope: player, admin, API, DB, network"]
+    scope --> protect["Остановить опасные admin-команды"]
+    protect --> correlate["Найти request ID, release and metrics"]
+    correlate --> recover["Минимальное обратимое восстановление"]
+    recover --> smoke["End-to-end smoke"]
+    smoke --> decision{"Сервис подтвержден?"}
+    decision -->|"да"| resume["Возобновить интерактив"]
+    decision -->|"нет"| fallback["Перейти к резервному сценарию занятия"]
+    resume --> record["Записать timeline and actions"]
+    fallback --> record
+```
 
-1. Остановить административные изменения и не запускать scoring.
-2. Проверить контейнер, volume, диск, memory pressure и `pg_isready`.
-3. Перезапустить PostgreSQL только после проверки диска и логов.
-4. После восстановления проверить `SELECT 1`, Alembic revision и `/health/ready`.
-5. При повреждении остановить запись и восстановить последний проверенный backup.
+Не выполнять несколько изменений одновременно без гипотезы: иначе невозможно понять,
+что восстановило систему.
 
-## Runbook: скоринг завис или завершился ошибкой
+## 11. Runbook: participant UI недоступен
 
-1. Найти scoring request по `request_id` и измерить фактическую длительность.
-2. Проверить статус раунда и открытую транзакцию в PostgreSQL.
-3. Не нажимать scoring многократно: параллельный запрос должен получить `409`.
-4. Если процесс завершился исключением, убедиться, что транзакция откатилась и раунд
-   вернулся в `active`.
-5. После устранения причины повторить один запуск и сравнить submitted/scored.
-6. Если транзакция действительно зависла, оператор завершает конкретную backend-сессию
-   PostgreSQL только после идентификации запроса, затем перезапускает API.
+1. Проверить `/play`, certificate и WebSocket из внешнего устройства.
+2. Сравнить доступность `/admin`: определить scope proxy или отдельного UI.
+3. Проверить proxy route/log и health `participant-ui`.
+4. Проверить CPU/RAM и active sessions.
+5. Если container unhealthy, перезапустить только participant UI.
+6. Проверить API ready до приглашения к повторному входу.
+7. Выполнить login -> GET scenario smoke.
+8. Сообщить участникам повторно войти; server draft восстанавливается из PG.
 
-## Резервный сценарий мероприятия
+Нельзя переключать participant на LocalStore.
 
-Автоматического LocalStore fallback нет: он создал бы две независимые версии данных.
-Если восстановление занимает более согласованного окна:
+## 12. Runbook: admin UI недоступен
 
-1. спикер продолжает теоретическую часть и разбор заранее подготовленных обезличенных
-   сценариев в презентации;
-2. оператор восстанавливает штатную связку API/PG;
-3. интерактив возобновляется только после end-to-end smoke test;
-4. если восстановление невозможно, мероприятие завершается демонстрационным разбором,
-   а результаты незавершенного раунда не объявляются сохраненными.
+1. Убедиться, продолжает ли работать participant UI.
+2. Проверить route `/admin`, WebSocket и admin container health.
+3. Перезапустить только `admin-ui`, не затрагивая API/DB.
+4. После входа сначала GET round/status/stats.
+5. Не повторять score до чтения canonical state.
+6. Проверить выбранный round/player после потери session state.
 
-## После мероприятия
+## 13. Runbook: reverse proxy/TLS
 
-- Зафиксировать число регистраций, отправок, результатов, p95 и scoring duration.
-- Сделать финальный backup, если он нужен по политике хранения.
-- Выгрузить только согласованные обезличенные агрегаты.
-- Записать инциденты, ручные действия и идеи улучшения.
-- Запланировать удаление пользовательских данных и backup по установленному сроку.
+1. Проверить cloud firewall, DNS resolution и certificate expiry.
+2. Проверить proxy process/config syntax/logs.
+3. Проверить внутренний health обоих Streamlit containers.
+4. При certificate issue использовать утвержденный renewal/rollback, не отключать HTTPS
+   для публичного мероприятия.
+5. После восстановления проверить WebSocket и оба base paths из внешней сети.
 
+## 14. Runbook: FastAPI недоступен
+
+1. Проверить `/health/live`, затем `/health/ready`.
+2. Найти crash/5xx по release version и request ID.
+3. Проверить DB health/pool/connections и последнюю migration.
+4. При process crash перезапустить API и дождаться ready.
+5. Если failure после release, вернуть предыдущий compatible image.
+6. Выполнить auth -> active round -> scenario GET/PUT smoke.
+7. UI local dirty copy не считается сохраненной до success response.
+
+## 15. Runbook: PostgreSQL недоступен
+
+1. Остановить score/activate/block/adjustment и не обещать сохранение participant PUT.
+2. Проверить container, `pg_isready`, disk, volume mount, memory pressure и logs.
+3. Проверить connection exhaustion/long queries отдельно от process outage.
+4. Не перезапускать DB вслепую при полном disk.
+5. После восстановления проверить `SELECT 1`, Alembic head и API ready.
+6. Проверить active round invariant и последние scenario revisions.
+7. При corruption остановить writes и восстановить verified backup.
+
+## 16. Runbook: DB pool исчерпан
+
+1. Проверить active/waiting pool metrics по API worker.
+2. Проверить PostgreSQL sessions и long-running transaction без вывода query body с PII.
+3. Найти request IDs/route templates, удерживающие connections.
+4. Не повышать `max_connections` без оценки RAM и pool multiplication.
+5. Завершить только точно идентифицированную зависшую backend session с approval
+   оператора.
+6. Устранить N+1/timeout/release issue; затем smoke и наблюдение.
+
+## 17. Runbook: scoring timeout или ошибка
+
+### UI timeout без подтвержденного ответа
+
+1. Не нажимать score повторно.
+2. GET round и stats.
+3. Если `completed`, сверить submitted/scored и открыть leaderboard.
+4. Если `active`, найти transaction/error по request ID; предыдущий run не commit.
+5. Если row lock занят, дождаться bounded timeout и проверить снова.
+6. Повторить команду только при подтвержденном active и устраненной причине.
+
+### Backend exception
+
+1. Проверить, что transaction rollback завершен.
+2. Round должен быть active, scenarios submitted, новые results отсутствуют.
+3. Найти failing scenario только по internal ID; не выводить chain в общий log.
+4. Устранить data/ruleset issue либо исключить release с rollback.
+5. Повторить один score и сверить counts/hashes.
+
+### Действительно зависшая transaction
+
+1. Идентифицировать PostgreSQL PID, user, transaction age и request ID.
+2. Убедиться, что это scoring, а не migration/backup.
+3. Завершить конкретную backend session.
+4. PostgreSQL rollback должен вернуть round active.
+5. Перезапустить API только если process не восстановился.
+
+## 18. Runbook: всплеск auth errors
+
+1. Сравнить 401, 429 и WebSocket reconnect rate.
+2. Проверить clock synchronization и JWT key/version.
+3. Проверить, не попала ли аудитория под слишком жесткий common-NAT limit.
+4. Не отключать password/security controls полностью.
+5. Изменять proxy burst только по утвержденному диапазону и записать время.
+6. Проверить generic error response и отсутствие email в logs.
+
+## 19. Runbook: неверная блокировка/корректировка
+
+### Block
+
+1. Открыть participant detail и audit event.
+2. Проверить actor/reason/request ID.
+3. Выполнить unblock через UI; прямой SQL запрещен.
+4. Participant входит повторно из-за token version change.
+
+### Leaderboard adjustment
+
+1. Сравнить base/effective и adjustment revision.
+2. Проверить reason/actor в audit.
+3. Clear overlay через endpoint; base result восстановится.
+4. Проверить пересчет public rank.
+5. Не изменять `scoring_results` SQL-командой.
+
+## 20. Резервный сценарий занятия
+
+Автоматического offline/LocalStore fallback нет. Если end-to-end recovery не
+укладывается в согласованное окно:
+
+1. спикер продолжает теоретическую часть;
+2. использует заранее подготовленные обезличенные screenshots/scenarios;
+3. объясняет scoring и ограничения модели на fixed examples;
+4. оператор восстанавливает штатную связку отдельно;
+5. интерактив возобновляется только после smoke test;
+6. несохраненные local drafts и незавершенный round не объявляются результатами.
+
+Резервные материалы не содержат production email или chains участников.
+
+## 21. После мероприятия
+
+### Технический отчет
+
+- release/image/config versions;
+- registrations, active/blocked, drafts/submitted/scored;
+- ordinary p50/p95/p99 и error rate;
+- scoring duration и counts;
+- peak CPU/RAM/disk/DB connections/sessions;
+- incidents, request IDs, manual actions и recovery time;
+- admin adjustments count без PII.
+
+### Данные
+
+1. Сделать final backup только если он нужен policy.
+2. Выгрузить только утвержденные обезличенные aggregates.
+3. Назначить deletion date и owner.
+4. Удалить participant data и backup по retention.
+5. Проверить отсутствие public access/active routes.
+6. Зафиксировать completion без хранения лишней PII.
+
+## 22. Короткая операторская карточка
+
+```text
+1. Protect data: stop admin mutations if state is unclear.
+2. Scope: proxy, one UI, API, DB, or venue network.
+3. Correlate: request_id, round_id, release, metrics.
+4. Recover minimally: restart only failed stateless service when justified.
+5. Never use LocalStore or direct SQL as fallback.
+6. Smoke: login -> round -> scenario -> expected read/write.
+7. Resume only after canonical state is confirmed.
+8. Record timeline and actions.
+```

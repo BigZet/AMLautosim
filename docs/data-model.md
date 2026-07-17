@@ -1,29 +1,52 @@
-# Целевая модель данных
+# Целевая модель данных PostgreSQL
 
-## Общие правила
+## 1. Принципы
 
-PostgreSQL хранит все постоянное состояние. Денежные значения хранятся как
-`NUMERIC`, время — как timezone-aware `TIMESTAMPTZ`, структурированные игровые данные
-— как JSONB со строгой проверкой Pydantic на входе и выходе API.
+PostgreSQL хранит все постоянное состояние. FastAPI является единственным компонентом,
+который читает и изменяет эти данные. Streamlit не знает схему БД и работает только с
+DTO `/api/v1`.
 
-В v1 используются пять основных таблиц. Карточка с опубликованной версией не
-редактируется: изменение правил создает новую версию. Активированный раунд содержит
-снимок идентификаторов карточек и игровой конфигурации.
+- Деньги: `NUMERIC(14,2)` в SQL и `Decimal` в Python.
+- Веса и коэффициенты: `NUMERIC`, без binary float в канонических расчетах.
+- Время: `TIMESTAMPTZ` в UTC.
+- Статусы и роли: PostgreSQL enum либо `VARCHAR + CHECK`, единообразно во всей схеме.
+- Сложные snapshots: JSONB, прошедший строгую Pydantic-валидацию.
+- Все ID, попадающие в URL, непрозрачны для клиента; v1 может использовать `BIGINT`.
+- Все mutable сущности имеют `created_at`/`updated_at`; admin history — append-only.
 
-## ER-диаграмма
+## 2. Группы сущностей
+
+| Группа | Таблицы | Назначение |
+| --- | --- | --- |
+| Identity | `users` | Учетная запись, роль, блокировка, token version |
+| Game configuration | `action_cards`, `rounds` | Версии карточек и snapshot правил раунда |
+| Gameplay | `scenarios`, `scoring_results` | Цепочка, ресурсы, модельный и игровой результат |
+| Administration | `leaderboard_adjustments`, `audit_events` | Неизменяемый base result, ручной overlay и аудит |
+
+## 3. ER-диаграмма
 
 ```mermaid
 erDiagram
-    USERS ||--o{ SCENARIOS : creates
-    ROUNDS ||--o{ SCENARIOS : contains
-    SCENARIOS ||--o| SCORING_RESULTS : receives
+    USERS ||--o{ SCENARIOS : "owns"
+    ROUNDS ||--o{ SCENARIOS : "contains"
+    SCENARIOS ||--o| SCORING_RESULTS : "receives"
+    SCENARIOS ||--o| LEADERBOARD_ADJUSTMENTS : "has active overlay"
+    USERS ||--o{ LEADERBOARD_ADJUSTMENTS : "creates"
+    USERS ||--o{ AUDIT_EVENTS : "acts"
+    ROUNDS ||--o{ AUDIT_EVENTS : "scopes"
+    SCENARIOS ||--o{ AUDIT_EVENTS : "references"
 
     USERS {
         bigint id PK
         varchar email UK
         varchar display_name
         varchar hashed_password
-        user_role role
+        varchar role
+        boolean is_blocked
+        varchar blocked_reason
+        timestamptz blocked_at
+        bigint blocked_by_user_id FK
+        integer token_version
         integer failed_login_count
         timestamptz locked_until
         timestamptz created_at
@@ -38,21 +61,27 @@ erDiagram
         varchar flow
         numeric risk_weight
         integer energy_cost
+        integer time_cost
+        integer trust_cost
         numeric fee_rate
         numeric min_amount
         numeric max_amount
         integer max_frequency
         varchar requires_card_code
+        jsonb parameter_schema
         boolean is_active
     }
 
     ROUNDS {
         bigint id PK
         varchar title
-        round_status status
+        varchar status
+        integer config_revision
         jsonb game_config
+        jsonb scoring_summary
+        bigint created_by_user_id FK
         timestamptz created_at
-        timestamptz started_at
+        timestamptz activated_at
         timestamptz completed_at
     }
 
@@ -60,10 +89,12 @@ erDiagram
         bigint id PK
         bigint round_id FK
         bigint participant_id FK
-        scenario_status status
+        varchar status
         jsonb steps
+        jsonb resource_snapshot
         integer revision
-        timestamptz created_at
+        uuid last_client_mutation_id
+        varchar payload_hash
         timestamptz updated_at
         timestamptz submitted_at
     }
@@ -72,184 +103,519 @@ erDiagram
         bigint id PK
         bigint scenario_id FK
         numeric risk_score
-        risk_label label
+        varchar risk_label
+        numeric stealth_score
+        numeric resource_score
+        numeric game_score
         jsonb explanation
         varchar scoring_version
+        varchar leaderboard_version
+        timestamptz created_at
+    }
+
+    LEADERBOARD_ADJUSTMENTS {
+        bigint id PK
+        bigint scenario_id FK
+        bigint admin_user_id FK
+        integer revision
+        numeric risk_score_override
+        numeric resource_score_override
+        numeric game_score_override
+        varchar reason
+        timestamptz updated_at
+    }
+
+    AUDIT_EVENTS {
+        bigint id PK
+        bigint actor_user_id FK
+        bigint round_id FK
+        bigint scenario_id FK
+        varchar event_type
+        varchar target_type
+        varchar target_id
+        varchar reason
+        varchar request_id
+        varchar idempotency_key_hash
+        jsonb metadata
         timestamptz created_at
     }
 ```
 
-`ROUNDS.game_config.card_ids` логически связывает раунд с версиями `ACTION_CARDS`.
-Отдельная mapping-таблица не нужна для v1, поскольку список мал, целиком читается при
-валидации и после активации неизменяем.
+`rounds.game_config.card_versions` логически связывает активированный раунд с
+конкретными immutable строками `action_cards`. В v1 набор мал и целиком загружается
+при валидации. Если карточки получат независимый workflow публикации или SQL-запросы по
+составу раунда, вводится `round_action_cards` без изменения API.
 
-## `users`
+## 4. `users`
 
 | Поле | Тип | Правило |
 | --- | --- | --- |
-| `id` | `BIGINT` | Первичный ключ |
-| `email` | `VARCHAR(320)` | Нормализованный lowercase, unique |
-| `display_name` | `VARCHAR(120)` | Имя на доске, 2–120 символов |
-| `hashed_password` | `VARCHAR(255)` | Только bcrypt-хеш |
-| `role` | enum | `participant` или `admin` |
-| `failed_login_count` | `INTEGER` | Счетчик неудачных входов, по умолчанию 0 |
-| `locked_until` | `TIMESTAMPTZ`, nullable | Окончание временной блокировки |
-| `created_at` | `TIMESTAMPTZ` | Время регистрации в UTC |
+| `id` | `BIGINT` | PK |
+| `email` | `VARCHAR(320)` | Lowercase/trim normalized, unique |
+| `display_name` | `VARCHAR(120)` | 2–120 символов; рекомендуется псевдоним |
+| `hashed_password` | `VARCHAR(255)` | Argon2id или bcrypt hash; не возвращается API |
+| `role` | enum | `participant`, `admin` |
+| `is_blocked` | `BOOLEAN` | Запрещает все participant actions |
+| `blocked_reason` | `VARCHAR(500)`, nullable | Обязателен при `is_blocked=true` |
+| `blocked_at` | `TIMESTAMPTZ`, nullable | Время admin-команды |
+| `blocked_by_user_id` | self FK, nullable | Только admin |
+| `token_version` | `INTEGER` | Входит в JWT; увеличивается при принудительном revoke |
+| `failed_login_count` | `INTEGER` | Неотрицательный, default 0 |
+| `locked_until` | `TIMESTAMPTZ`, nullable | Временная auth-блокировка |
+| `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC |
+| `last_login_at` | `TIMESTAMPTZ`, nullable | Не отображается leaderboard |
 
-Email никогда не возвращается в строках общей доски. Удаление пользователя должно
-каскадно или отдельной процедурой удалить его сценарии и результаты.
+`is_blocked` — административная блокировка, `locked_until` — автоматическая защита от
+подбора пароля. Они имеют разные error codes и audit semantics.
 
-## `action_cards`
+Удаление participant выполняется контролируемой процедурой. FK на admin actor по
+умолчанию `SET NULL`, чтобы аудит сохранял факт действия без удержания лишней PII.
+
+## 5. `action_cards`
+
+Каждая строка — неизменяемая опубликованная версия типа действия.
 
 | Поле | Тип | Назначение |
 | --- | --- | --- |
-| `code` | `VARCHAR(80)` | Стабильный машинный код операции |
-| `version` | `INTEGER` | Версия правил карточки, начиная с 1 |
-| `title`, `description`, `category` | text | Представление в UI |
-| `flow` | enum/text | `credit` или `debit` |
-| `risk_weight` | `NUMERIC(8,2)` | Базовый вклад в скоринг |
-| `energy_cost` | `INTEGER` | Энергия на один повтор |
-| `fee_rate` | `NUMERIC(8,6)` | Комиссия от 0 до 1 |
-| `min_amount`, `max_amount` | `NUMERIC(14,2)` | Допустимая сумма одного повтора |
-| `max_frequency` | `INTEGER` | Максимальное число повторов шага |
-| `requires_card_code` | nullable text | Код обязательной предшествующей операции |
-| `is_active` | `BOOLEAN` | Доступность для будущих раундов |
+| `id` | `BIGINT` | Уникальная версия карточки |
+| `code` | `VARCHAR(80)` | Стабильный code, например `cash_deposit` |
+| `version` | `INTEGER` | Версия начиная с 1 |
+| `title`, `description`, `category` | text | UI metadata |
+| `flow` | enum | `credit`, `debit`, `neutral` |
+| `risk_weight` | `NUMERIC(8,2)` | Базовый вклад ruleset |
+| `energy_cost`, `time_cost`, `trust_cost` | `INTEGER` | Базовая стоимость одного повтора |
+| `fee_rate` | `NUMERIC(8,6)` | Доля комиссии от 0 до 1 |
+| `min_amount`, `max_amount` | `NUMERIC(14,2)` | Сумма одного повтора |
+| `max_frequency` | `INTEGER` | Лимит повторов шага |
+| `requires_card_code` | nullable code | Предшествующее действие, например покупка для возврата |
+| `parameter_schema` | `JSONB` | Декларативные специфичные поля для UI и schema validation |
+| `is_active` | `BOOLEAN` | Можно ли выбирать версию для нового draft-round |
+| `created_at` | `TIMESTAMPTZ` | Audit timestamp |
 
-Ограничения: `UNIQUE(code, version)`, положительные лимиты, `min_amount <= max_amount`,
-`0 <= fee_rate <= 1`. Деактивация не влияет на уже активированный или завершенный
-раунд.
+Ограничения:
 
-## `rounds`
+- `UNIQUE(code, version)`;
+- `version > 0`, затраты неотрицательны;
+- `min_amount > 0`, `min_amount <= max_amount`;
+- `0 <= fee_rate <= 1`;
+- `max_frequency >= 1`;
+- `requires_card_code != code`;
+- published row не обновляется, кроме `is_active`; новая семантика создает новую version.
 
-Статусы: `draft`, `active`, `scoring`, `completed`. Допускается не более одного
-`active` или `scoring` раунда одновременно. Это обеспечивается partial unique index
-по константному выражению для соответствующих статусов и транзакционной активацией.
-
-Пример `game_config`:
+### `parameter_schema`
 
 ```json
 {
   "schema_version": 1,
-  "initial_balance": 250000,
-  "initial_energy": 14,
-  "max_actions": 8,
-  "target_outflow": 150000,
-  "card_ids": [11, 12, 13, 14, 15, 16, 17, 18],
+  "fields": [
+    {
+      "key": "funds_source",
+      "label": "Источник средств",
+      "kind": "select",
+      "required": true,
+      "options": [
+        {"value": "salary", "label": "Зарплата"},
+        {"value": "third_party", "label": "Третье лицо"}
+      ]
+    }
+  ]
+}
+```
+
+Разрешенные `kind` v1: `select`, `multiselect`, `boolean`, `integer`, `decimal`,
+`short_text`. Для каждого kind Pydantic проверяет допустимые keys, ranges и размер.
+`parameter_schema` не содержит исполняемого кода. Эффекты значений реализуются
+версионированным FastAPI ruleset, указанным в snapshot раунда.
+
+## 6. `rounds`
+
+Статусы: `draft`, `active`, `scoring`, `completed`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> active: validate and activate
+    active --> scoring: score command in transaction
+    scoring --> completed: publish and commit
+    scoring --> active: rollback
+    completed --> [*]
+```
+
+Не более одного раунда может находиться в `active` или `scoring`. Активация нового
+раунда при существующем активном возвращает `409 active_round_exists`; API никогда не
+завершает прежний раунд скрыто.
+
+### `game_config` snapshot
+
+```json
+{
+  "schema_version": 2,
+  "config_version": "round-config-v2:sha256:8f4c...",
+  "resources": {
+    "initial_balance": "250000.00",
+    "initial_energy": 14,
+    "initial_time": 18,
+    "initial_trust": 100
+  },
+  "objectives": {
+    "target_outflow": "150000.00",
+    "max_actions": 8
+  },
+  "constraints": {
+    "max_identical_steps": 2,
+    "max_night_operations": 2,
+    "max_anonymous_operations": 1,
+    "category_limits": {
+      "cash": "120000.00",
+      "crypto": "100000.00",
+      "high_risk_country": "75000.00"
+    }
+  },
+  "card_versions": [
+    {"id": 11, "code": "salary", "version": 1},
+    {"id": 18, "code": "crypto_exchange", "version": 2}
+  ],
+  "ruleset_version": "game-rules-v2",
   "scoring": {
-    "version": "rules-v1",
-    "review_threshold": 35,
-    "suspicious_threshold": 65
+    "version": "risk-rules-v2",
+    "review_threshold": "35.00",
+    "suspicious_threshold": "65.00"
+  },
+  "leaderboard": {
+    "version": "leaderboard-v1",
+    "weights": {"stealth": "0.60", "resources": "0.40"},
+    "resource_weights": {
+      "balance": "0.20",
+      "energy": "0.15",
+      "time": "0.15",
+      "trust": "0.25",
+      "fees": "0.15",
+      "slots": "0.10"
+    }
   }
 }
 ```
 
-До активации администратор может менять `game_config`. При переходе в `active` API:
+Значения выше — конфигурация референсного раунда. Admin может менять их в `draft` в
+валидных диапазонах. При активации FastAPI:
 
-1. проверяет схему, диапазоны и существование всех `card_ids`;
-2. проверяет, что версии карточек активны для новых раундов;
-3. сохраняет окончательный JSONB-снимок;
-4. запрещает дальнейшие изменения конфигурации.
+1. берет lock на scope активного раунда;
+2. убеждается, что другого `active/scoring` нет;
+3. валидирует JSON schema и сумму весов;
+4. разрешает card references в immutable versions;
+5. проверяет наличие реализаций `ruleset_version`, `scoring.version` и
+   `leaderboard.version` в release image;
+6. рассчитывает `config_version` как hash canonical JSON;
+7. переводит раунд в `active` и запрещает дальнейший update.
 
-## `scenarios`
+`config_revision` используется только при редактировании draft admin-формой. После
+активации он фиксируется.
 
-`UNIQUE(round_id, participant_id)` гарантирует один сценарий участника в раунде.
-Поле `revision` увеличивается при каждом материальном изменении и возвращается API для
-диагностики повторных запросов. Повтор идентичного `PUT` не меняет revision.
+`scoring_summary` остается `NULL` до completed и затем хранит counts, duration,
+scoring/leaderboard versions и completed timestamp. Благодаря этому повторный score
+completed round возвращает исходную summary без пересчета и без изменения результатов.
 
-Целевой Pydantic-контракт элемента `steps`:
+## 7. `scenarios`
+
+`UNIQUE(round_id, participant_id)` обеспечивает один сценарий на участника и раунд.
+
+### Строгая схема шага
 
 ```python
+class CardRef(BaseModel):
+    id: int
+    code: str
+    version: int = Field(ge=1)
+
+class OperationContext(BaseModel):
+    country_risk: Literal["low", "medium", "high"] = "low"
+    time_of_day: Literal["day", "evening", "night"] = "day"
+    velocity: Literal["spaced", "normal", "rapid"] = "normal"
+    channel: Literal["mobile", "web", "branch", "atm"]
+    has_documents: bool = False
+
 class ScenarioStep(BaseModel):
-    card_id: int
-    card_code: str
-    card_version: int = Field(ge=1)
+    model_config = ConfigDict(extra="forbid")
+    step_id: UUID
+    card: CardRef
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
     frequency: int = Field(ge=1, le=20)
-    recipient_type: Literal[
-        "known_counterparty", "new_counterparty", "anonymous_wallet"
-    ]
-    country_risk: Literal["low", "medium", "high"]
+    context: OperationContext
+    action_details: dict[str, StrictValue]
 ```
 
-В JSONB сохраняются `card_code` и `card_version` для прозрачного аудита, но API
-проверяет их соответствие `card_id` и конфигурации раунда. Длина массива — от 1 до
-`game_config.max_actions` при отправке; пустой черновик разрешен.
+`action_details` получает строгую модель из registry по `card.code + card.version`.
+Неизвестное поле запрещено. `step_id` уникален внутри сценария и сохраняется при reorder.
 
-Пример:
-
-```json
-[
-  {
-    "card_id": 13,
-    "card_code": "card_transfer",
-    "card_version": 1,
-    "amount": "50000.00",
-    "frequency": 3,
-    "recipient_type": "new_counterparty",
-    "country_risk": "medium"
-  }
-]
-```
-
-## `scoring_results`
-
-Результат однозначно связан со сценарием через `UNIQUE(scenario_id)`. `risk_score`
-лежит в диапазоне 0–100, `label` принимает `normal`, `review` или `suspicious`.
-
-Пример `explanation`:
+Пример шага:
 
 ```json
 {
-  "schema_version": 1,
-  "top_factors": [
-    {"step": 1, "name": "frequency", "points": 6.0},
-    {"step": 1, "name": "country_risk:medium", "points": 10.0}
-  ],
-  "all_factors": [],
-  "resource_summary": {
-    "balance": "99250.00",
-    "energy": 11,
-    "outflow": "150000.00",
-    "fees": "750.00"
+  "step_id": "4fe2d542-a810-4fd0-b63f-a43ad7ea7853",
+  "card": {"id": 18, "code": "crypto_exchange", "version": 2},
+  "amount": "50000.00",
+  "frequency": 2,
+  "context": {
+    "country_risk": "medium",
+    "time_of_day": "evening",
+    "velocity": "rapid",
+    "channel": "web",
+    "has_documents": true
   },
-  "note": "Учебная модель, не решение реальной AML-системы"
+  "action_details": {
+    "exchange_type": "regulated",
+    "wallet_owner": "self",
+    "asset_profile": "stablecoin"
+  }
 }
 ```
 
-`scoring_version` дублируется отдельным полем для фильтрации и одновременно входит
-в конфигурацию раунда для воспроизводимости.
+### Revision и идемпотентность
 
-## Индексы
+- `revision = 0` означает отсутствующий/пустой server draft в request contract.
+- Первый material PUT создает row с `revision = 1`.
+- Material PUT увеличивает revision на 1.
+- Повтор с тем же `client_mutation_id` и payload возвращает текущую revision.
+- Тот же mutation ID с другим payload возвращает `409 mutation_id_reused`.
+- Идентичный payload с новым mutation ID может вернуть текущую revision без update.
+- Submit меняет status, но не content revision.
 
-- `users(email)` — unique.
-- `action_cards(code, version)` — unique.
-- `rounds(status, created_at DESC)` — поиск активного и последних раундов.
-- partial unique index, запрещающий два раунда в `active`/`scoring`.
-- `scenarios(round_id, participant_id)` — unique.
-- `scenarios(round_id, status)` — статистика и пакетный скоринг.
-- `scenarios(participant_id, updated_at DESC)` — восстановление пользовательского состояния.
-- `scoring_results(scenario_id)` — unique.
-- `scoring_results(label, risk_score DESC)` — доска и агрегация.
+`payload_hash` вычисляется сервером от canonical JSON steps и не является security hash.
 
-GIN-индексы по JSONB в v1 не нужны: игровые правила читают сценарии пакетно по
-`round_id`, а не выполняют произвольный поиск по отдельным шагам.
+### `resource_snapshot`
 
-## Инварианты и транзакции
+```json
+{
+  "schema_version": 2,
+  "valid": true,
+  "resources_after": {
+    "balance": "99250.00",
+    "energy": 8,
+    "time": 10,
+    "trust": 74,
+    "slots": 5
+  },
+  "totals": {
+    "gross_inflow": "0.00",
+    "gross_outflow": "150000.00",
+    "fees": "750.00"
+  },
+  "objective": {
+    "target_outflow": "150000.00",
+    "reached": true
+  },
+  "limit_usage": {
+    "cash": "0.00",
+    "crypto": "100000.00",
+    "high_risk_country": "0.00",
+    "night_operations": 0
+  },
+  "violations": [],
+  "per_step": []
+}
+```
 
-- Только участник с ролью `participant` может владеть сценарием.
-- Черновик можно менять только пока раунд `active`.
-- Повторная отправка разрешена в `active` и заменяет предыдущую версию.
-- В `scoring` и `completed` сценарий неизменяем.
-- Результат создается только для `submitted`/`scored` сценария.
-- Публикация всех результатов и перевод раунда в `completed` происходят одной
-  транзакцией; частично готовая доска не видна.
-- Все серверные даты записываются в UTC.
+FastAPI вычисляет snapshot при каждом структурно валидном PUT и сохраняет его рядом со
+steps. Бизнес-невалидный draft (например, отрицательный остаток или превышенная квота)
+может быть сохранен с `valid=false` и violations, чтобы участник не потерял работу.
+Неизвестная карточка, неверный тип или лишнее поле остаются schema error и не сохраняются.
+При submit и score snapshot считается заново по fixed round config; сохраненная копия
+используется для восстановления UX и аудита, но не отменяет revalidation.
 
-## Хранение и удаление
+## 8. `scoring_results`
 
-- До мероприятия выполняется резервная копия конфигурации, карточек и тестового раунда.
-- После мероприятия данные хранятся только согласованный организацией срок; рекомендуемый
-  срок для учебного запуска — не более 30 дней.
-- При удалении персональных данных удаляются email, учетная запись, сценарии и результаты,
-  либо сценарии предварительно необратимо обезличиваются по утвержденной процедуре.
-- Backup с персональными данными имеет тот же срок хранения и доступ только у оператора.
+Один result на scenario: `UNIQUE(scenario_id)`. Все base values лежат в диапазоне
+`0..100`.
+
+| Поле | Смысл |
+| --- | --- |
+| `risk_score` | Риск модели; меньше лучше для игровой цели |
+| `risk_label` | `normal`, `review`, `suspicious` |
+| `stealth_score` | `100 - risk_score` по версии leaderboard |
+| `resource_score` | Эффективность использования ресурсов |
+| `game_score` | Настраиваемая композиция stealth/resource |
+| `explanation` | Факторы риска, защитные факторы, sequence patterns, resource summary |
+| `scoring_version` | Версия risk engine |
+| `leaderboard_version` | Версия формулы игрового балла |
+
+Base result после commit раунда неизменяем. Повторный scoring completed round возвращает
+существующую summary и не обновляет timestamp/result.
+
+Пример explanation:
+
+```json
+{
+  "schema_version": 2,
+  "top_risk_factors": [
+    {
+      "step_id": "4fe2d542-a810-4fd0-b63f-a43ad7ea7853",
+      "code": "velocity:rapid",
+      "points": "8.00",
+      "description": "Быстрая серия операций повышает риск"
+    }
+  ],
+  "protective_factors": [
+    {
+      "step_id": "4fe2d542-a810-4fd0-b63f-a43ad7ea7853",
+      "code": "documents:present",
+      "points": "-4.00",
+      "description": "Подтверждающие документы снижают риск"
+    }
+  ],
+  "sequence_factors": [],
+  "resource_summary": {},
+  "disclaimer": "Учебная модель; результат не является AML-решением"
+}
+```
+
+## 9. `leaderboard_adjustments`
+
+Таблица хранит только текущий overlay; история находится в `audit_events`.
+
+- `UNIQUE(scenario_id)`;
+- хотя бы одно override value не `NULL`;
+- каждое override в `0..100`;
+- `reason` обязателен, 10–500 символов;
+- `revision` начинается с 1 и защищает admin от lost update;
+- base fields `scoring_results` не обновляются.
+
+Effective projection:
+
+```text
+effective_risk_score     = COALESCE(risk_score_override, result.risk_score)
+effective_resource_score = COALESCE(resource_score_override, result.resource_score)
+effective_game_score     = COALESCE(game_score_override, result.game_score)
+```
+
+Если admin меняет только risk/resource, API не должен молча пересчитывать game override.
+UI явно предлагает либо оставить base game score, либо задать отдельный effective game
+score. Это предотвращает скрытую формулу после ручного решения.
+
+Удаление корректировки удаляет overlay в транзакции и создает audit event с прежними
+значениями; base result снова становится effective.
+
+## 10. `audit_events`
+
+Append-only журнал содержит административные и критичные state transitions:
+
+- `round_created`, `round_updated`, `round_activated`, `round_scored`;
+- `participant_blocked`, `participant_unblocked`;
+- `leaderboard_adjusted`, `leaderboard_adjustment_cleared`;
+- `admin_login_failed`, если политика допускает без PII;
+- `data_exported`, `participant_deleted`.
+
+`metadata` содержит только безопасный diff: IDs, revisions, numeric before/after и
+status. `idempotency_key_hash` хранит необратимый hash ключа только для команд, которым
+нужна строгая дедупликация; raw key запрещен. Email, JWT, password, full steps и full
+explanation не сохраняются.
+
+```json
+{
+  "event_type": "leaderboard_adjusted",
+  "actor_user_id": 3,
+  "round_id": 12,
+  "scenario_id": 91,
+  "reason": "Коррекция после технической ошибки демонстрации",
+  "request_id": "01JAML...",
+  "metadata": {
+    "revision_before": 1,
+    "revision_after": 2,
+    "game_score_before": "71.40",
+    "game_score_after": "74.00"
+  }
+}
+```
+
+## 11. Индексы
+
+```text
+users(email_normalized) UNIQUE
+users(is_blocked) WHERE is_blocked = true
+action_cards(code, version) UNIQUE
+rounds(status, created_at DESC)
+rounds((1)) UNIQUE WHERE status IN ('active', 'scoring')
+scenarios(round_id, participant_id) UNIQUE
+scenarios(round_id, status)
+scenarios(participant_id, updated_at DESC)
+scoring_results(scenario_id) UNIQUE
+scoring_results(game_score DESC, risk_score ASC)
+leaderboard_adjustments(scenario_id) UNIQUE
+audit_events(round_id, created_at DESC)
+audit_events(actor_user_id, created_at DESC)
+audit_events(scenario_id, created_at DESC)
+audit_events(actor_user_id, event_type, target_type, target_id, idempotency_key_hash) UNIQUE
+    WHERE idempotency_key_hash IS NOT NULL
+```
+
+GIN по `steps` и `explanation` в v1 не нужен: списки выбираются по round/scenario ID, а
+не произвольными JSON-path запросами. Добавление индекса требует подтвержденного query
+profile.
+
+## 12. Constraints и инварианты
+
+1. Только `participant` владеет scenario; DB FK не проверяет роль, это делает service.
+2. Scenario редактируется только в active round.
+3. Пустой и бизнес-невалидный draft разрешены; submit требует 1..`max_actions` шагов,
+   отсутствие violations и достигнутую цель.
+4. Все `step_id` в одном scenario уникальны.
+5. Card ref точно входит в `game_config.card_versions`.
+6. Action details соответствуют конкретным code/version.
+7. Submitted можно вернуть в draft новым PUT только пока round active.
+8. Scored scenario и completed round неизменяемы.
+9. Result создается только для submitted scenario внутри scoring transaction.
+10. Число results после completed равно числу сценариев, выбранных для scoring.
+11. Блокировка пользователя не удаляет scenario/result и не меняет leaderboard сама по
+    себе; политика отображения blocked player задается query service.
+12. Manual adjustment не меняет base result.
+13. Audit event записывается в той же транзакции, что block/adjustment/admin transition.
+14. Все timestamps генерирует сервер/БД, а не Streamlit.
+
+## 13. Неизменность конфигурации
+
+```mermaid
+flowchart LR
+    draft["Round draft"] -->|"PUT config_revision"| draft
+    draft -->|"Activate and hash snapshot"| active["Round active"]
+    active -->|"Config update"| reject["409 round_config_locked"]
+    active -->|"Catalog card changed"| unaffected["Snapshot unchanged"]
+    active -->|"Deploy without old ruleset"| notReady["API readiness failed"]
+```
+
+Release image обязан содержать implementations всех ruleset versions, используемых
+active или неистекшими completed rounds. Удаление старой версии кода допустимо только
+после окончания retention и проверки, что она больше не нужна для воспроизведения.
+
+## 14. SQLAlchemy mapping
+
+| Таблица | Target model | Repository |
+| --- | --- | --- |
+| `users` | `User` | `UserRepository` |
+| `action_cards` | `ActionCard` | `ActionCardRepository` |
+| `rounds` | `Round` | `RoundRepository` |
+| `scenarios` | `Scenario` | `ScenarioRepository` |
+| `scoring_results` | `ScoringResult` | `ScoringResultRepository` |
+| `leaderboard_adjustments` | `LeaderboardAdjustment` | `LeaderboardRepository` |
+| `audit_events` | `AuditEvent` | `AuditRepository` |
+
+Pydantic DTO не возвращает SQLAlchemy entity напрямую. Application service формирует
+response model после commit/refresh, чтобы UI не видел lazy-loading и внутренние поля.
+
+## 15. Хранение и удаление данных
+
+| Данные | Рекомендуемый срок | Удаление |
+| --- | --- | --- |
+| Email/account | До 30 дней после мероприятия, если нет иного основания | Hard delete или approved anonymization |
+| Scenario/result | Тот же срок, если связаны с participant | Cascade delete либо необратимое обезличивание |
+| Display name | Вместе с account | Удалить/заменить псевдонимом |
+| Audit events | По политике организатора | Удалить actor linkage/target PII, сохранить технический факт при необходимости |
+| Backup | Не дольше исходных данных | Expiry + подтвержденное удаление |
+| Обезличенные агрегаты | По отдельной политике | Только после проверки невозможности re-identification |
+
+Процедура удаления:
+
+1. закрыть доступ к мероприятию;
+2. сформировать список participant IDs без выгрузки email в логи;
+3. удалить/анонимизировать в одной контролируемой операции;
+4. проверить отсутствие строк и leaderboard projection;
+5. зафиксировать audit event без PII;
+6. дождаться удаления backup по retention schedule.

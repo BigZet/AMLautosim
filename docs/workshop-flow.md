@@ -1,178 +1,347 @@
 # Поток мастер-класса и use cases
 
-## Роли
+## 1. Роли
 
-- **Участник** регистрируется, собирает сценарий и видит только свой результат.
-- **Администратор** создает и активирует раунд, следит за готовностью и запускает скоринг.
-- **Спикер** использует admin board для общего разбора факторов. В v1 это та же роль
-  доступа `admin`, но отдельная организационная ответственность.
+| Роль | Цель | Технический доступ |
+| --- | --- | --- |
+| Участник | Собрать валидный сценарий, выполнить цель и получить высокий game score | `participant` |
+| Администратор | Подготовить раунд, контролировать доступ, запустить scoring, управлять leaderboard | `admin` |
+| Спикер | Объяснить цепочки, факторы и ограничения модели | `admin`, read-oriented use cases |
+| Оператор | Поддерживать VM, сеть, backup и monitoring | SSH/infra, не прикладная роль |
 
-## Состояния раунда
+## 2. Жизненный цикл раунда
 
 ```mermaid
 stateDiagram-v2
-    [*] --> draft: создание
-    draft --> active: activate
-    active --> scoring: score
-    scoring --> completed: commit результатов
-    scoring --> active: rollback при ошибке
-    active --> completed: активация следующего раунда
+    [*] --> draft: создать
+    draft --> draft: изменить config revision
+    draft --> active: validate and activate
+    active --> scoring: score command and row lock
+    scoring --> completed: atomic publish
+    scoring --> active: transaction rollback
     completed --> [*]
 ```
 
-- В `draft` разрешено менять название, правила и набор карточек.
-- В `active` участники сохраняют и отправляют сценарии; конфигурация заблокирована.
-- В `scoring` любые изменения сценариев запрещены.
-- В `completed` доступны результаты и доска, но данные неизменяемы.
-- Обратный переход из `completed` не поддерживается.
+| Статус | Разрешено | Запрещено |
+| --- | --- | --- |
+| `draft` | Редактировать config/card versions | Participant gameplay, score |
+| `active` | GET/PUT/submit scenario, stats, block | Изменять round config |
+| `scoring` | Только read/ожидание | Draft/submit/config/второй score |
+| `completed` | Result, leaderboard, admin detail/adjustment | Scenario/config mutation, rescore |
 
-## Состояния сценария
+Активация нового round не завершает существующий active автоматически. При конфликте
+администратор получает `409 active_round_exists`.
+
+## 3. Жизненный цикл сценария
 
 ```mermaid
 stateDiagram-v2
-    [*] --> draft: первый PUT
-    draft --> draft: сохранить изменения
-    draft --> submitted: submit
-    submitted --> draft: изменить до скоринга
-    submitted --> submitted: повторный submit без изменений
-    submitted --> scored: скоринг раунда
+    [*] --> draft: первый material PUT
+    draft --> draft: сохранить новую revision
+    draft --> submitted: submit current revision
+    submitted --> submitted: повторный submit той же revision
+    submitted --> draft: новый PUT пока round active
+    submitted --> scored: batch scoring
     scored --> [*]
 ```
 
-Повторная отправка разрешена только пока раунд `active`. Изменение отправленного
-сценария сначала создает новую `draft`-ревизию, чтобы участник явно подтвердил ее
-повторным submit.
+`revision` относится к содержимому steps. Повторная отправка до scoring разрешена, но
+после любого изменения пользователь обязан submit новую revision.
 
-## UC-P1: регистрация и вход
+## 4. Сквозной поток мероприятия
 
-**Предусловия:** participant UI доступен по HTTPS.
+```mermaid
+journey
+    title Путь участника и команды мастер-класса
+    section Подготовка
+      Настроить раунд: 5: Администратор
+      Проверить инфраструктуру: 5: Оператор
+      Активировать раунд: 5: Администратор
+    section Игра
+      Зарегистрироваться: 4: Участник
+      Собрать цепочку: 5: Участник
+      Исправить ограничения: 3: Участник
+      Отправить сценарий: 5: Участник
+    section Разбор
+      Запустить скоринг: 5: Администратор
+      Увидеть результат: 5: Участник
+      Разобрать факторы: 5: Спикер
+```
+
+## 5. UC-P1: регистрация и вход
+
+**Актор:** участник.
+
+**Предусловия:** participant UI доступен по HTTPS; регистрация открыта.
 
 **Основной поток:**
 
-1. Участник вводит email, отображаемое имя и пароль.
-2. Streamlit вызывает регистрацию и затем предлагает вход.
-3. FastAPI нормализует email, хеширует пароль и создает роль `participant`.
-4. При входе Streamlit получает JWT и хранит его в `st.session_state`.
-5. UI загружает активный раунд.
+1. Участник вводит email, псевдоним/display name и пароль.
+2. Streamlit отправляет `POST /auth/register` без сохранения пароля.
+3. FastAPI нормализует email, создает participant и возвращает user DTO.
+4. Участник выполняет login.
+5. Streamlit сохраняет JWT в `st.session_state` и вызывает `GET /auth/me`.
+6. UI открывает active round либо экран ожидания.
 
-**Альтернативы:** зарегистрированный пользователь сразу входит; при потерянной
-Streamlit-сессии повторно вводит пароль. Email уже существует — регистрация не раскрывает
-дополнительные сведения и предлагает вход.
+**Альтернативы:** существующий participant сразу входит; после restart Streamlit
+повторный login восстанавливает server draft.
 
-**Ошибки:** после серии неверных паролей учетная запись временно блокируется; при
-недоступности API UI не создает локальную учетную запись.
+**Ошибки:** duplicate email, weak password, auth rate limit, blocked account, API
+unavailable. UI не создает локальную учетную запись как fallback.
 
-## UC-P2: сборка и отправка сценария
+## 6. UC-P2: открыть конструктор
 
-**Предусловия:** пользователь вошел, существует активный раунд.
+**Предусловия:** JWT валиден, существует active round.
 
-1. UI загружает конфигурацию и карточки раунда.
-2. Участник добавляет, удаляет, настраивает или переставляет шаг.
-3. Streamlit немедленно показывает preview денег, энергии, комиссий, свободных действий
-   и выполнения цели.
-4. После структурного изменения UI выполняет `PUT` черновика.
-5. FastAPI пересчитывает правила и возвращает каноническую версию и нарушения.
-6. Кнопка отправки доступна только при локально корректном preview, но API все равно
-   повторяет проверку.
-7. Участник отправляет сценарий и видит статус «Ожидает скоринга».
+1. Streamlit загружает active round, card snapshot и собственный scenario.
+2. Для отсутствующего scenario создается пустая local draft с server revision 0.
+3. Для существующего scenario server copy полностью гидратирует UI.
+4. UI показывает ресурсы, objective, constraints и status сохранения.
+5. Рендер не выполняет write request.
 
-**Альтернативы:** участник возвращается позднее, входит и восстанавливает черновик из
-API; до запуска скоринга он может изменить и повторно отправить сценарий.
+**Альтернативы:** active round отсутствует — показывается ожидание; round completed — UI
+перенаправляет на result/leaderboard.
 
-**Ошибки:** недостаточно денег или энергии, превышен лимит шага, не достигнута цель,
-возврат больше предшествующих покупок, карточка не принадлежит раунду. Сервер возвращает
-конкретные нарушения, UI подсвечивает соответствующие шаги.
+## 7. UC-P3: добавить и настроить действие
 
-## UC-P3: просмотр результата
+```mermaid
+sequenceDiagram
+    actor U as Участник
+    participant S as Streamlit
+    participant F as FastAPI
 
-1. До завершения раунда endpoint результата возвращает `null`, UI показывает ожидание.
-2. После скоринга участник обновляет страницу или нажимает «Проверить результат».
-3. UI показывает score, метку, остатки ресурсов и top factors.
-4. Полный набор факторов доступен в раскрываемом учебном разборе.
+    U->>S: Выбирает тип действия
+    S->>S: Создает step ID и форму по card fields
+    U->>S: Заполняет специфичные параметры
+    S->>S: Local preview and widget validation
+    U->>S: Подтверждает форму
+    S->>F: PUT full draft with expected revision
+    F->>F: Strict action schema and game validation
+    F-->>S: Canonical steps, resources, new revision
+    S-->>U: Обновленная цепочка и ограничения
+```
 
-Участник не получает сценарии, email или результаты других участников.
+Поля зависят от карточки. Например, crypto показывает площадку/кошелек/asset profile,
+refund — причину и связь с purchase, transfer — назначение и связь с recipient.
 
-## UC-A1: подготовка и активация раунда
+**Допустимые действия:** add, edit, delete, reorder, duplicate при сохранении нового
+`step_id` и повторной валидации.
 
-1. Администратор входит под заранее созданной учетной записью.
-2. Создает `draft`, задает баланс, энергию, число действий, цель, scoring config и
-   версии карточек.
-3. API валидирует конфигурацию при каждом сохранении.
-4. Перед активацией UI показывает итоговый снимок правил.
-5. Активация блокирует конфигурацию и завершает ранее активный раунд.
-6. Participant UI видит новый раунд не позднее чем через TTL кэша активного раунда.
+**Ошибки:** неизвестное поле, недопустимая option, amount/frequency limit, недостаток
+balance/energy/time/trust, category quota, missing prerequisite. UI привязывает violation
+к step/widget по `step_id + field`.
 
-## UC-A2: контроль готовности
+## 8. UC-P4: синхронизация и конфликт
 
-Admin UI показывает число зарегистрированных участников, черновиков, отправленных и
-просчитанных сценариев. Обновление выполняется явной кнопкой или контролируемым rerun,
-без межпользовательского `st.cache_data`.
+**Основной поток:** callback создает mutation ID, PUT succeeds, local draft заменяется
+server response.
 
-Администратор запускает скоринг, когда количество отправленных сценариев соответствует
-ожиданиям аудитории. Неотправленные черновики в скоринг не включаются.
+**Timeout:** local state остается dirty; retry выполняется с тем же mutation ID.
 
-## UC-A3: скоринг и публикация
+**Два окна:** stale expected revision получает `409`; UI загружает canonical state и
+предлагает осознанно повторить изменение. Silent last-write-wins запрещен.
+
+## 9. UC-P5: отправить сценарий
+
+**Предусловия:** round active, local draft синхронизирован, hard constraints выполнены,
+objective достигнута.
+
+1. При dirty state UI сначала сохраняет draft.
+2. Streamlit отправляет submit с current revision.
+3. FastAPI блокирует round/scenario и полностью пересчитывает правила.
+4. Scenario переходит в `submitted`.
+5. UI показывает revision и состояние «Ожидает скоринга».
+
+**Повторная отправка:** до scoring пользователь может изменить scenario. Новый PUT
+возвращает status `draft`, после чего нужен новый submit.
+
+**Ошибки:** round успел перейти в scoring, objective не достигнута, hard constraint
+нарушен, revision stale, user blocked.
+
+## 10. UC-P6: результат и лидерборд
+
+1. Пока round не completed, result endpoint возвращает `null`.
+2. После повторного входа UI находит completed round через `GET /rounds/mine`, даже если
+   прежняя Streamlit session потеряна.
+3. После публикации participant получает base model result, explanation, resource score,
+   game score и rank.
+4. Public leaderboard показывает псевдонимы и игровые метрики без ID/email/chain.
+5. Если leaderboard overlay применен, UI явно показывает маркер корректировки.
+6. Blocked participants не входят в public ranking.
+
+Участник не может запросить чужой scenario/result по ID.
+
+## 11. UC-A1: подготовить draft-round
+
+1. Admin входит под bootstrap-account.
+2. Выбирает версии карточек из catalog.
+3. Задает initial balance/energy/time/trust, max actions, objective и quotas.
+4. Выбирает поддерживаемые ruleset/scoring/leaderboard versions и weights.
+5. UI выполняет локальные range checks и отправляет full config с expected revision.
+6. API возвращает canonical draft и computed warnings.
+7. Admin preview показывает, что будет зафиксировано.
+
+**Ошибка concurrency:** stale config revision -> `409 round_config_conflict`.
+
+## 12. UC-A2: активировать раунд
 
 ```mermaid
 sequenceDiagram
     actor A as Администратор
     participant S as Admin Streamlit
     participant F as FastAPI
-    participant P as PostgreSQL
-    participant M as Scoring service
+    participant D as PostgreSQL
 
-    A->>S: Запустить скоринг
-    S->>F: POST /api/v1/admin/rounds/{id}/score
-    F->>P: BEGIN + lock round FOR UPDATE
-    F->>P: Загрузить submitted сценарии и карточки
-    loop Каждый сценарий
-        F->>M: score(steps, fixed config)
-        M-->>F: score, label, explanation
-        F->>P: Upsert result, status scored
+    A->>S: Подтверждает snapshot
+    S->>F: POST activate + Idempotency-Key
+    F->>D: Lock active-round scope
+    F->>F: Validate config, cards and implementations
+    alt no active round
+        F->>D: status=active, config hash, audit event
+        F-->>S: RoundAdminOut active
+        S->>S: Clear active-round/card cache and rerun
+    else active exists
+        F-->>S: 409 active_round_exists
     end
-    F->>P: round = completed + COMMIT
-    F-->>S: Сводка скоринга
-    S->>F: GET stats и board
-    F-->>S: Опубликованные результаты
-    S-->>A: Доска для разбора
 ```
 
-При исключении транзакция откатывается целиком. Раунд возвращается в `active`, частичная
-доска не публикуется, оператор получает `request_id` для поиска ошибки.
+После activate любое изменение config возвращает `409 round_config_locked`.
 
-## UC-S1: общий разбор
+## 13. UC-A3: контролировать готовность
 
-Спикер сортирует доску по риску, выбирает несколько характерных сценариев и обсуждает:
+Admin monitoring показывает:
 
-- какие признаки дали наибольший вклад;
-- почему похожие сценарии получили разные результаты;
-- где модель дает ложные срабатывания или пропуски;
-- почему демонстрационные правила не заменяют расследование и человеческое решение.
+- registered/active/blocked participants;
+- without scenario/draft/submitted/scored;
+- последнее обновление сценария;
+- технический статус API/DB;
+- готовность кнопки scoring.
 
-Доска показывает display name, score, label и top factors, но не email и пароль.
+Stats не кэшируется между users. Refresh — явная кнопка или контролируемый interval,
+который прекращается при уходе со страницы.
 
-## Сценарий 45 минут
+Неотправленные drafts не попадают в scoring. Перед запуском UI требует подтверждение с
+числом submitted/excluded drafts.
 
-| Время | Этап | Действие системы |
+## 14. UC-A4: найти игрока и посмотреть всю цепочку
+
+1. Admin выбирает active/completed round.
+2. Фильтрует participants по display name, exact email, access и scenario status.
+3. Выбирает игрока.
+4. API возвращает account state, timestamps, full chain, resource snapshots, base/effective
+   scores, explanation и recent admin activity.
+5. UI показывает шаги в исходном порядке с action-specific details и factor links.
+
+Список не загружает chains всех игроков. Full payload читается только для выбранного
+participant, что сохраняет интерфейс и API масштабируемыми.
+
+## 15. UC-A5: блокировать или разблокировать игрока
+
+**Предусловия:** admin выбрал participant и указал reason.
+
+1. UI показывает confirmation и текущее access state.
+2. Admin подтверждает desired state.
+3. API сравнивает token version, меняет state, увеличивает version и пишет audit event.
+4. Уже выпущенный participant JWT перестает работать на следующем запросе.
+5. Scenario/result сохраняются; public leaderboard исключает blocked player.
+
+**Ошибки:** self-block, stale token version, participant not found, reason too short.
+
+## 16. UC-A6: запустить скоринг
+
+```mermaid
+sequenceDiagram
+    actor A as Администратор
+    participant S as Admin Streamlit
+    participant F as FastAPI
+    participant D as PostgreSQL
+    participant R as Rules engines
+
+    A->>S: Confirm submitted count
+    S->>F: POST score + Idempotency-Key
+    F->>D: BEGIN and lock round NOWAIT
+    F->>D: Load immutable snapshot and submitted scenarios
+    loop Stable scenario order
+        F->>R: Validate and score
+        R-->>F: Result and explanation
+    end
+    F->>D: Bulk publish results and mark completed
+    D-->>F: COMMIT
+    F-->>S: Scoring summary
+    S->>F: GET stats and admin leaderboard
+    F-->>S: Published board
+```
+
+**Ошибка в середине:** transaction rollback; round снова виден как active; partial board
+отсутствует.
+
+**Timeout UI:** admin не нажимает повторно. UI читает round/status/stats и только после
+подтвержденного active разрешает новую команду.
+
+## 17. UC-A7: скорректировать leaderboard
+
+1. Admin выбирает scored participant.
+2. UI показывает рядом base и effective values.
+3. Admin задает только необходимые overrides и обязательное основание.
+4. API проверяет range/revision, сохраняет overlay и audit event.
+5. Admin/public leaderboard пересчитывает rank; строка помечается adjusted.
+6. Clear adjustment возвращает base values и создает новый audit event.
+
+Корректировка не меняет risk explanation и не запускает scoring повторно.
+
+## 18. UC-S1: общий разбор
+
+Спикер использует admin leaderboard и participant detail:
+
+1. выбирает несколько характерных сценариев;
+2. сопоставляет шаги с top risk/protective/sequence factors;
+3. сравнивает похожие цепочки с разным context/action details;
+4. показывает trade-off между низким risk и сохранением ресурсов;
+5. объясняет false positive/false negative и роль человека;
+6. напоминает, что это учебная модель.
+
+Email и технические security fields не выводятся на общий экран. Для демонстрации
+используется pseudonym/display name.
+
+## 19. Сценарий 45 минут
+
+| Время | Этап | Действия людей | Поведение системы |
+| --- | --- | --- | --- |
+| 0–3 | Вход | Спикер задает цель, admin показывает QR | Active round уже проверен |
+| 3–8 | AML/антифрод | Краткое введение и ограничения автоматизации | Participant registration открыта |
+| 8–12 | Интерфейс | Показ карточек, ресурсов и objective | Cards загружаются из snapshot |
+| 12–24 | Конструктор | Участники собирают цепочки | PUT revisions, server preview, violations |
+| 24–28 | Итерация | Участники меняют параметры и сравнивают эффекты | Explanation preview без раскрытия финального score при выбранной методике |
+| 28–30 | Submit | Финальная отправка | Admin видит submitted count |
+| 30–32 | Скоринг | Admin подтверждает batch | Round lock, atomic result publication |
+| 32–39 | Разбор | Спикер открывает leaderboard и цепочки | Base/effective scores и factors |
+| 39–43 | Ограничения ИИ | False positives, drift, human review | Disclaimer виден в result |
+| 43–45 | Вопросы | Ответы участников | Система остается в completed/read-only |
+
+## 20. Ошибочные и резервные потоки
+
+| Ситуация | UX | Каноническое состояние |
 | --- | --- | --- |
-| 0–5 мин | Введение | Admin UI открыт, раунд подготовлен, участникам показана ссылка/QR |
-| 5–10 мин | AML и антифрод | Participant UI принимает регистрацию; скоринг еще не раскрывается |
-| 10–25 мин | Конструктор | Черновики сохраняются, UI показывает ресурсы и ограничения |
-| 25–30 мин | Финальная отправка | Администратор контролирует счетчики submitted |
-| 30–33 мин | Скоринг | Раунд блокируется, результаты рассчитываются и публикуются |
-| 33–41 мин | Разбор | Спикер показывает доску и объяснимые факторы |
-| 41–45 мин | Ограничения и вопросы | Обсуждаются ошибки моделей, безопасность и роль человека |
+| Нет active round | Экран ожидания, редкий refresh | Без изменений |
+| JWT истек | Login; draft восстановится | Scenario в PG |
+| User blocked | Отдельный access screen | Scenario/result сохранены |
+| API временно недоступен | Local dirty copy + retry action | Success не заявляется |
+| DB недоступна | Service unavailable | Нет LocalStore fallback |
+| Draft revision conflict | Выбор server/reapply | Server revision побеждает по умолчанию |
+| Score lock занят | Pending/refresh | Второй batch не запускается |
+| Нет submissions | Admin получает `no_submissions` | Round active |
+| Streamlit restart | Повторный login | PG данные не потеряны |
+| Полный outage | Теоретическая часть и заранее подготовленные обезличенные примеры | Нельзя объявлять несохраненные результаты |
 
-## Пограничные ситуации
+## 21. Матрица use case — state
 
-- **Нет активного раунда:** participant UI показывает ожидание и периодически обновляет
-  только короткоживущий кэш активного раунда.
-- **JWT истек:** UI очищает сессию и переводит на вход без потери серверного черновика.
-- **Два окна одного участника:** последнее успешное сохранение становится каноническим;
-  `revision` позволяет UI предупредить о более новой версии.
-- **Раунд заблокирован во время отправки:** API возвращает `409 round_locked`, UI не
-  показывает ложное подтверждение.
-- **Повторный клик скоринга:** блокировка строки и статус предотвращают параллельный запуск.
-- **Нет отправленных сценариев:** скоринг завершается с нулевым счетчиком только после
-  явного подтверждения администратора либо возвращает `409 no_submissions` согласно UI-политике;
-  для v1 выбирается `409 no_submissions`, чтобы избежать случайного закрытия раунда.
+| Use case | draft round | active round | scoring round | completed round |
+| --- | ---: | ---: | ---: | ---: |
+| Update round config | Да | Нет | Нет | Нет |
+| Participant PUT/submit | Нет | Да | Нет | Нет |
+| View own scenario | Нет | Да | Да | Да |
+| Block/unblock participant | Да | Да | Да, с осторожностью | Да |
+| Score | Нет | Да | Нет | Возврат existing summary |
+| Public leaderboard | Нет | Нет | Нет | Да |
+| Admin player detail | Ограниченно | Да | Да | Да |
+| Leaderboard adjustment | Нет | Нет | Нет | Да |
