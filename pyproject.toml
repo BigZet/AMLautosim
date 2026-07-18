@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aml-workshop-simulator"
+version = "0.1.0"
+description = "AML workshop simulator with FastAPI, PostgreSQL and Streamlit"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.116",
+  "email-validator>=2.2",
+  "uvicorn[standard]>=0.35",
+  "sqlalchemy>=2.0",
+  "psycopg[binary]>=3.2",
+  "pydantic-settings>=2.10",
+  "python-jose[cryptography]>=3.5",
+  "passlib[bcrypt]>=1.7",
+  "python-multipart>=0.0.20",
+  "streamlit>=1.46",
+  "requests>=2.32",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.12",
+  "pytest>=8.4",
+  "httpx>=0.28",
+]
+
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

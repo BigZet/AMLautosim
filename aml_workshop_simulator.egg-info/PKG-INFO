@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: aml-workshop-simulator
+Version: 0.1.0
+Summary: AML workshop simulator with FastAPI, PostgreSQL and Streamlit
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.116
+Requires-Dist: email-validator>=2.2
+Requires-Dist: uvicorn[standard]>=0.35
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: psycopg[binary]>=3.2
+Requires-Dist: pydantic-settings>=2.10
+Requires-Dist: python-jose[cryptography]>=3.5
+Requires-Dist: passlib[bcrypt]>=1.7
+Requires-Dist: python-multipart>=0.0.20
+Requires-Dist: streamlit>=1.46
+Requires-Dist: requests>=2.32
+Provides-Extra: dev
+Requires-Dist: ruff>=0.12; extra == "dev"
+Requires-Dist: pytest>=8.4; extra == "dev"
+Requires-Dist: httpx>=0.28; extra == "dev"
