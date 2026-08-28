@@ -1,0 +1,14 @@
+[theme]
+base = "light"
+font = "sans-serif"
+baseRadius = "small"
+
+[client]
+toolbarMode = "viewer"
+
+[server]
+headless = true
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

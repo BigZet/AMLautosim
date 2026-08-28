@@ -1,190 +1,225 @@
+"""Idempotent database bootstrap.
+
+Running it repeatedly leaves exactly one row per card version, one bootstrap
+administrator and one demo round draft. Nothing is duplicated and no existing
+participant data is touched.
+
+    python -m scripts.seed_database --migrate
 """
-Database seed script for AML Workshop Simulator.
-Seeds:
-- Admin user: admin@aml.local / admin12345
-- Participant user: demo@aml.local / demo12345
-- Catalog of Action Cards
-- Initial Active Round with full reference game config
-"""
+
 from __future__ import annotations
 
+import argparse
 import asyncio
-import os
 import sys
-from datetime import datetime, timezone
-from decimal import Decimal
+import time
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
-# Add project root to sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
+from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy import select
-from src.aml_workshop_simulator.core.config import settings
-from src.aml_workshop_simulator.core.security import get_password_hash
-from src.aml_workshop_simulator.db.session import AsyncSessionLocal
-from src.aml_workshop_simulator.db.models.users import User
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.services.local_rules import (
-    ACTION_CARDS,
-    INITIAL_BALANCE,
-    INITIAL_ENERGY,
-    INITIAL_TIME,
-    INITIAL_TRUST,
-    MAX_ACTIONS,
-    MAX_IDENTICAL_STEPS,
-    MAX_NIGHT_OPERATIONS,
-    ROUND_LIMITS,
-    TARGET_OUTFLOW,
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.aml_workshop_simulator.core.config import settings  # noqa: E402
+from src.aml_workshop_simulator.core.security import get_password_hash  # noqa: E402
+from src.aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
+from src.aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
+from src.aml_workshop_simulator.db.models.users import User  # noqa: E402
+from src.aml_workshop_simulator.db.session import AsyncSessionLocal, async_engine  # noqa: E402
+from src.aml_workshop_simulator.domain.catalog import (  # noqa: E402
+    CARD_CATALOG,
+    build_parameter_schema,
 )
-from src.aml_workshop_simulator.services.action_parameters import (
-    action_fields_for,
-    context_fields_for,
-)
+from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG  # noqa: E402
+
+DEMO_ROUND_TITLE = "Мастер-класс AML"
 
 
-async def seed() -> None:
-    async with AsyncSessionLocal() as session:
-        print("[1/4] Checking and creating initial Users...")
-        # 1. Admin user
-        admin_res = await session.execute(select(User).where(User.email == "admin@aml.local"))
-        admin_user = admin_res.scalars().first()
-        if not admin_user:
-            admin_user = User(
-                email="admin@aml.local",
-                display_name="Организатор Мастер-класса",
-                hashed_password=get_password_hash("admin12345"),
-                role="admin",
-                is_blocked=False,
-                access_revision=1,
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
-            )
-            session.add(admin_user)
-            await session.flush()
-            print("  -> Created Admin user: admin@aml.local")
-        else:
-            print("  -> Admin user already exists")
+async def wait_for_db(timeout_seconds: int = 60) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    last_error: Exception | None = None
+    while time.monotonic() < deadline:
+        try:
+            async with async_engine.connect() as connection:
+                await connection.execute(text("SELECT 1"))
+            return
+        except Exception as exc:  # noqa: BLE001 - retried until the deadline
+            last_error = exc
+            await asyncio.sleep(1.0)
+    raise RuntimeError(f"database not reachable: {last_error}")
 
-        # 2. Demo Participant user
-        demo_res = await session.execute(select(User).where(User.email == "demo@aml.local"))
-        demo_user = demo_res.scalars().first()
-        if not demo_user:
-            demo_user = User(
-                email="demo@aml.local",
-                display_name="Финансовый детектив",
-                hashed_password=get_password_hash("demo12345"),
-                role="participant",
-                is_blocked=False,
-                access_revision=1,
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc),
-            )
-            session.add(demo_user)
-            await session.flush()
-            print("  -> Created Demo Participant user: demo@aml.local")
 
-        print("[2/4] Seeding Action Cards catalog...")
-        card_versions_config = []
-        for card_data in ACTION_CARDS:
-            code = card_data["code"]
-            version = card_data["version"]
-            card_res = await session.execute(
-                select(ActionCard).where(ActionCard.code == code, ActionCard.version == version)
-            )
-            card = card_res.scalars().first()
-            
-            param_schema = {
-                "schema_version": 1,
-                "context_fields": [dict(f) for f in context_fields_for(code)],
-                "action_fields": [dict(f) for f in action_fields_for(code)],
-            }
-            
-            if not card:
-                card = ActionCard(
-                    code=code,
-                    version=version,
-                    title=card_data["title"],
-                    category=card_data["category"],
-                    flow=card_data["flow"],
-                    risk_weight=Decimal(str(card_data["risk_weight"])),
-                    energy_cost=card_data["energy_cost"],
-                    time_cost=card_data["time_cost"],
-                    trust_cost=card_data["trust_cost"],
-                    fee_rate=Decimal(str(card_data["fee_rate"])),
-                    min_amount=Decimal(str(card_data["min_amount"])),
-                    max_amount=Decimal(str(card_data["max_amount"])),
-                    max_frequency=card_data["max_frequency"],
-                    requires_card_code=card_data["requires_card_code"],
-                    parameter_schema=param_schema,
-                    is_active=True,
-                    created_at=datetime.now(timezone.utc),
+def run_migrations() -> None:
+    from alembic import command
+    from alembic.config import Config
+
+    config = Config(str(ROOT / "alembic.ini"))
+    config.set_main_option("script_location", str(ROOT / "migrations"))
+    command.upgrade(config, "head")
+
+
+async def seed_cards(db: AsyncSession) -> list[ActionCard]:
+    """Insert or refresh every catalog version; published rows keep their id."""
+    now = datetime.now(UTC)
+    result: list[ActionCard] = []
+    for entry in CARD_CATALOG:
+        card = (
+            await db.execute(
+                select(ActionCard).where(
+                    ActionCard.code == entry["code"],
+                    ActionCard.version == entry["version"],
                 )
-                session.add(card)
-                await session.flush()
-                print(f"  -> Added card: {code} (v{version})")
-            
-            card_versions_config.append({"id": card.id, "code": code, "version": version})
-
-        print("[3/4] Checking Active Round...")
-        round_res = await session.execute(select(Round).where(Round.status.in_(["active", "draft"])))
-        current_round = round_res.scalars().first()
-
-        if not current_round:
-            game_config = {
-                "schema_version": 2,
-                "config_version": "round-config-v1:default",
-                "resources": {
-                    "initial_balance": str(INITIAL_BALANCE),
-                    "initial_energy": INITIAL_ENERGY,
-                    "initial_time": INITIAL_TIME,
-                    "initial_trust": INITIAL_TRUST,
-                },
-                "objectives": {
-                    "target_outflow": str(TARGET_OUTFLOW),
-                    "max_actions": MAX_ACTIONS,
-                },
-                "constraints": {
-                    "max_identical_steps": MAX_IDENTICAL_STEPS,
-                    "max_night_operations": MAX_NIGHT_OPERATIONS,
-                    "category_limits": {k: str(v["limit"]) for k, v in ROUND_LIMITS.items()},
-                },
-                "card_versions": card_versions_config,
-                "ruleset_version": "game-rules-v2",
-                "scoring": {
-                    "version": "risk-rules-v2",
-                    "review_threshold": "35.00",
-                    "suspicious_threshold": "65.00",
-                },
-                "leaderboard": {
-                    "version": "leaderboard-v1",
-                    "weights": {"stealth": "0.60", "resources": "0.40"},
-                },
-            }
-
-            active_round = Round(
-                title="Мастер-класс AML: Построение цепочек и обход риск-правил",
-                status="active",
-                config_revision=1,
-                game_config=game_config,
-                scoring_summary=None,
-                created_by_user_id=admin_user.id,
-                created_at=datetime.now(timezone.utc),
-                activated_at=datetime.now(timezone.utc),
-                completed_at=None,
             )
-            session.add(active_round)
-            await session.flush()
-            print(f"  -> Created and Activated Round ID {active_round.id}: {active_round.title}")
+        ).scalars().first()
+        schema = build_parameter_schema(entry)
+        if card is None:
+            card = ActionCard(
+                code=entry["code"],
+                version=entry["version"],
+                title=entry["title"],
+                category=entry["category"],
+                flow=entry["flow"],
+                risk_weight=entry["risk_weight"],
+                energy_cost=entry["energy_cost"],
+                time_cost=entry["time_cost"],
+                trust_cost=entry["trust_cost"],
+                fee_rate=entry["fee_rate"],
+                min_amount=entry["min_amount"],
+                max_amount=entry["max_amount"],
+                max_frequency=entry["max_frequency"],
+                requires_card_code=entry["requires_card_code"],
+                parameter_schema=schema,
+                is_active=True,
+                created_at=now,
+            )
+            db.add(card)
         else:
-            print(f"  -> Found existing round ID {current_round.id} with status '{current_round.status}'")
+            card.title = entry["title"]
+            card.category = entry["category"]
+            card.flow = entry["flow"]
+            card.risk_weight = entry["risk_weight"]
+            card.energy_cost = entry["energy_cost"]
+            card.time_cost = entry["time_cost"]
+            card.trust_cost = entry["trust_cost"]
+            card.fee_rate = entry["fee_rate"]
+            card.min_amount = entry["min_amount"]
+            card.max_amount = entry["max_amount"]
+            card.max_frequency = entry["max_frequency"]
+            card.requires_card_code = entry["requires_card_code"]
+            card.parameter_schema = schema
+            card.is_active = True
+        result.append(card)
+    await db.flush()
+    return result
 
-        await session.commit()
-        print("[4/4] [SUCCESS] Database seeding complete!")
+
+async def seed_admin(db: AsyncSession) -> User:
+    email = settings.BOOTSTRAP_ADMIN_EMAIL.strip().lower()
+    admin = (await db.execute(select(User).where(User.email == email))).scalars().first()
+    now = datetime.now(UTC)
+    if admin is None:
+        admin = User(
+            email=email,
+            display_name="Организатор",
+            hashed_password=get_password_hash(settings.BOOTSTRAP_ADMIN_PASSWORD),
+            role="admin",
+            is_blocked=False,
+            access_revision=1,
+            failed_login_count=0,
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(admin)
+        await db.flush()
+    return admin
+
+
+def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
+    config = {key: value for key, value in REFERENCE_GAME_CONFIG.items()}
+    config["card_versions"] = [
+        {"id": card.id, "code": card.code, "version": card.version} for card in cards
+    ]
+    return config
+
+
+async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]) -> Round:
+    round_obj = (
+        await db.execute(select(Round).where(Round.title == DEMO_ROUND_TITLE))
+    ).scalars().first()
+    if round_obj is not None:
+        if round_obj.status == "draft":
+            round_obj.game_config = reference_game_config(cards)
+        return round_obj
+    round_obj = Round(
+        title=DEMO_ROUND_TITLE,
+        status="draft",
+        config_revision=1,
+        game_config=reference_game_config(cards),
+        created_by_user_id=admin.id,
+        created_at=datetime.now(UTC),
+    )
+    db.add(round_obj)
+    await db.flush()
+    return round_obj
+
+
+async def seed(activate_round: bool = False) -> dict[str, Any]:
+    async with AsyncSessionLocal() as db:
+        cards = await seed_cards(db)
+        admin = await seed_admin(db)
+        round_obj = await seed_demo_round(db, admin, cards)
+        if activate_round and round_obj.status == "draft":
+            other = (
+                await db.execute(
+                    select(Round).where(Round.status.in_(["active", "scoring"]))
+                )
+            ).scalars().first()
+            if other is None:
+                config = dict(round_obj.game_config)
+                from src.aml_workshop_simulator.api.routers.admin import config_version
+
+                config["config_version"] = config_version(config)
+                round_obj.game_config = config
+                round_obj.status = "active"
+                round_obj.activated_at = datetime.now(UTC)
+        await db.commit()
+        return {
+            "cards": len(cards),
+            "admin_id": admin.id,
+            "round_id": round_obj.id,
+            "round_status": round_obj.status,
+        }
+
+
+async def main_async(args: argparse.Namespace) -> None:
+    if args.wait_for_db:
+        await wait_for_db()
+    if args.migrate:
+        run_migrations()
+    summary = await seed(activate_round=args.activate_round)
+    await async_engine.dispose()
+    print(
+        "seed complete: "
+        f"cards={summary['cards']} admin_id={summary['admin_id']} "
+        f"round_id={summary['round_id']} status={summary['round_status']}"
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Seed the AML simulator database")
+    parser.add_argument("--migrate", action="store_true", help="run alembic upgrade head first")
+    parser.add_argument("--wait-for-db", action="store_true", help="wait until PostgreSQL answers")
+    parser.add_argument(
+        "--activate-round",
+        action="store_true",
+        help="activate the demo round when no other round is active",
+    )
+    asyncio.run(main_async(parser.parse_args()))
 
 
 if __name__ == "__main__":
-    asyncio.run(seed())
+    main()

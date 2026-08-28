@@ -1,101 +1,115 @@
 from __future__ import annotations
 
-import time
 import uuid
 from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from src.aml_workshop_simulator.api.errors import ApiError
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
 )
 
-# CORS middleware for local development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+#: Request/response headers that must never reach logs or audit events.
+SENSITIVE_HEADERS = {"x-session-id", "authorization", "cookie"}
 
 
 @app.middleware("http")
-async def add_correlation_and_timing_middleware(
-        request: Request, call_next: Any) -> Any:
-    request_id = request.headers.get(
-        "X-Request-ID") or f"req_{uuid.uuid4().hex[:12]}"
+async def correlation_middleware(request: Request, call_next: Any) -> Any:
+    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
     request.state.request_id = request_id
-    start_time = time.time()
-
     response = await call_next(request)
-
-    process_time = time.time() - start_time
     response.headers["X-Request-ID"] = request_id
-    response.headers["X-Process-Time"] = f"{process_time:.4f}"
+    response.headers.setdefault("Cache-Control", "no-store")
     return response
 
 
-@app.exception_handler(StarletteHTTPException)
-async def custom_http_exception_handler(
-        request: Request,
-        exc: StarletteHTTPException) -> JSONResponse:
+def _envelope(
+    request: Request,
+    status_code: int,
+    code: str,
+    message: str,
+    details: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
+) -> JSONResponse:
     request_id = getattr(request.state, "request_id", None)
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "code": "http_error",
-            "message": str(exc.detail),
-            "details": None,
-            "request_id": request_id,
-        },
-        headers={"X-Request-ID": request_id} if request_id else None,
+    payload = {
+        "code": code,
+        "message": message,
+        "details": details,
+        "request_id": request_id,
+    }
+    response_headers = dict(headers or {})
+    if request_id:
+        response_headers["X-Request-ID"] = request_id
+    return JSONResponse(status_code=status_code, content=payload, headers=response_headers)
+
+
+@app.exception_handler(ApiError)
+async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
+    return _envelope(
+        request, exc.status_code, exc.code, exc.message, exc.details, exc.headers
     )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> JSONResponse:
+    default_codes = {
+        401: "session_missing",
+        403: "forbidden",
+        404: "not_found",
+        405: "method_not_allowed",
+        409: "conflict",
+        413: "payload_too_large",
+    }
+    code = default_codes.get(exc.status_code, "http_error")
+    return _envelope(request, exc.status_code, code, str(exc.detail))
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
-        request: Request,
-        exc: RequestValidationError) -> JSONResponse:
-    request_id = getattr(request.state, "request_id", None)
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "code": "validation_error",
-            "message": "Некорректные параметры запроса",
-            "details": {"errors": exc.errors()},
-            "request_id": request_id,
-        },
-        headers={"X-Request-ID": request_id} if request_id else None,
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    violations = [
+        {
+            "field": ".".join(str(part) for part in error.get("loc", ())[1:]) or "body",
+            "reason": error.get("type", "value_error"),
+            "message": error.get("msg", "Некорректное значение"),
+        }
+        for error in exc.errors()
+    ]
+    return _envelope(
+        request,
+        422,
+        "validation_error",
+        "Запрос не соответствует контракту API",
+        {"violations": violations},
     )
 
 
-# Health checks (unversioned per docs/api.md)
-app.include_router(health.router, tags=["Health"])
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    return _envelope(
+        request,
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "internal_error",
+        "Внутренняя ошибка сервиса",
+    )
 
-# Application routers
-app.include_router(
-    auth.router,
-    prefix=f"{
-        settings.API_V1_STR}/auth",
-    tags=["Auth"])
-app.include_router(
-    rounds.router,
-    prefix=f"{
-        settings.API_V1_STR}/rounds",
-    tags=["Rounds & Participant"])
-app.include_router(
-    admin.router,
-    prefix=f"{
-        settings.API_V1_STR}/admin",
-    tags=["Admin"])
+
+app.include_router(health.router, tags=["Health"])
+app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Auth"])
+app.include_router(rounds.router, prefix=f"{settings.API_V1_STR}/rounds", tags=["Rounds"])
+app.include_router(admin.router, prefix=f"{settings.API_V1_STR}/admin", tags=["Admin"])

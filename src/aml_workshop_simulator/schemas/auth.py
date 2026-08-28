@@ -1,31 +1,38 @@
 from __future__ import annotations
 
-from typing import Literal, Optional
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+STRICT = ConfigDict(extra="forbid")
+
+#: Documented password policy: 10..128 characters.
+PASSWORD_MIN_LENGTH = 10
+PASSWORD_MAX_LENGTH = 128
 
 
 class RegisterIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    email: str = Field(min_length=3, max_length=320)
+    model_config = STRICT
+
+    email: EmailStr
     display_name: str = Field(min_length=2, max_length=120)
-    password: str = Field(min_length=4, max_length=128)
+    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
 
 class UserRegisteredOut(BaseModel):
     id: int
-    email: str
+    email: EmailStr
     display_name: str
     role: str
     created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
-
 
 class LoginIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    email: str = Field(min_length=3, max_length=320)
-    password: str
+    model_config = STRICT
+
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
     audience: Literal["play", "admin"] = "play"
 
 
@@ -33,8 +40,6 @@ class UserInfo(BaseModel):
     id: int
     display_name: str
     role: str
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class SessionCreatedOut(BaseModel):
@@ -47,9 +52,7 @@ class SessionCreatedOut(BaseModel):
 class UserSessionOut(BaseModel):
     id: int
     display_name: str
-    email: Optional[str] = None
     role: str
+    audience: str
     is_blocked: bool = False
     access_revision: int = 1
-
-    model_config = ConfigDict(from_attributes=True)

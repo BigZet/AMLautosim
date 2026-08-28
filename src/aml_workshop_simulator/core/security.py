@@ -1,28 +1,46 @@
-from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
+"""Password hashing and opaque session identifiers.
+
+No JWT is issued: authentication state lives entirely in the `sessions` table.
+Only `SHA-256(session_id)` is persisted, never the raw identifier.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import secrets
+
 from passlib.context import CryptContext
-from .config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+SESSION_ID_BYTES = 32
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except ValueError:
+        return False
 
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_access_token(
-        data: dict,
-        expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(
-            timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
-    return encoded_jwt
+def new_session_id() -> str:
+    """32 CSPRNG bytes, base64url without padding."""
+    return secrets.token_urlsafe(SESSION_ID_BYTES)
+
+
+def hash_session_id(session_id: str) -> str:
+    return hashlib.sha256(session_id.encode("utf-8")).hexdigest()
+
+
+def session_hash_matches(session_id: str, expected_hash: str) -> bool:
+    return hmac.compare_digest(hash_session_id(session_id), expected_hash)
+
+
+def hash_idempotency_key(key: str) -> str:
+    """Irreversible digest stored in audit events; the raw key is never kept."""
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()

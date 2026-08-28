@@ -1,735 +1,1111 @@
 from __future__ import annotations
 
-import time
-from datetime import datetime, timezone
+import hashlib
+import json
+from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, update, func, desc
+from fastapi import APIRouter, Depends, Header, Query, Request, Response, status
+from sqlalchemy import func, or_, select, update
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import get_current_admin
+from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
+from src.aml_workshop_simulator.api.errors import (
+    ApiError,
+    Conflict,
+    Forbidden,
+    NotFound,
+    ValidationFailed,
+)
+from src.aml_workshop_simulator.api.routers.rounds import card_out
+from src.aml_workshop_simulator.core.security import hash_idempotency_key
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import LeaderboardAdjustment
+from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
+    LeaderboardAdjustment,
+)
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.db.models.sessions import Session
 from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.session import get_db
+from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
+from src.aml_workshop_simulator.domain.scoring import (
+    LEADERBOARD_VERSION,
+    SCORING_VERSION,
+    weights_sum_to_one,
+)
 from src.aml_workshop_simulator.schemas.admin import (
     AccessUpdateIn,
     AuditEventOut,
     AuditPageOut,
     LeaderboardAdjustmentIn,
+    LeaderboardAdjustmentOut,
     PlayerDetailOut,
     PlayerDetailUserOut,
     PlayerSummaryOut,
+    PlayerSummaryPageOut,
     RoundAdminOut,
     RoundCreateIn,
     RoundStatsOut,
     RoundUpdateIn,
     ScoringSummaryOut,
 )
-from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
-from src.aml_workshop_simulator.services.action_parameters import (
-    action_fields_for,
-    context_fields_for,
+from src.aml_workshop_simulator.schemas.leaderboard import (
+    AdminLeaderboardPageOut,
+    AdminLeaderboardRowOut,
 )
-from src.aml_workshop_simulator.services.local_rules import ACTION_CARDS
-from src.aml_workshop_simulator.services.scoring import score_steps
+from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
+from src.aml_workshop_simulator.services.leaderboard_service import (
+    build_admin_leaderboard,
+)
+from src.aml_workshop_simulator.services.scoring_service import NoSubmissions, score_round
 
 router = APIRouter()
 
+SUPPORTED_RULESETS = {RULESET_VERSION}
+SUPPORTED_SCORING = {SCORING_VERSION}
+SUPPORTED_LEADERBOARD = {LEADERBOARD_VERSION}
 
-@router.get("/action-cards", response_model=list[ActionCardOut])
-async def get_all_action_cards(
-    admin: User = Depends(get_current_admin),
+
+def round_out(round_obj: Round) -> RoundAdminOut:
+    return RoundAdminOut(
+        id=round_obj.id,
+        title=round_obj.title,
+        status=round_obj.status,
+        config_revision=round_obj.config_revision,
+        game_config=round_obj.game_config or {},
+        scoring_summary=round_obj.scoring_summary,
+        created_at=round_obj.created_at,
+        activated_at=round_obj.activated_at,
+        completed_at=round_obj.completed_at,
+    )
+
+
+def config_version(game_config: dict[str, Any]) -> str:
+    payload = {key: value for key, value in game_config.items() if key != "config_version"}
+    blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return f"round-config-v2:sha256:{hashlib.sha256(blob.encode('utf-8')).hexdigest()}"
+
+
+async def _get_round(db: AsyncSession, round_id: int) -> Round:
+    round_obj = (
+        await db.execute(select(Round).where(Round.id == round_id))
+    ).scalars().first()
+    if round_obj is None:
+        raise NotFound("Раунд не найден.", code="round_not_found")
+    return round_obj
+
+
+async def _audit(
+    db: AsyncSession,
+    *,
+    actor_user_id: int,
+    event_type: str,
+    round_id: int | None = None,
+    scenario_id: int | None = None,
+    target_type: str | None = None,
+    target_id: str | None = None,
+    reason: str | None = None,
+    request_id: str | None = None,
+    idempotency_key_hash: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> None:
+    db.add(
+        AuditEvent(
+            actor_user_id=actor_user_id,
+            round_id=round_id,
+            scenario_id=scenario_id,
+            event_type=event_type,
+            target_type=target_type,
+            target_id=target_id,
+            reason=reason,
+            request_id=request_id,
+            idempotency_key_hash=idempotency_key_hash,
+            metadata_=metadata,
+            created_at=datetime.now(UTC),
+        )
+    )
+
+
+# --------------------------------------------------------------------------
+# Catalog
+# --------------------------------------------------------------------------
+
+
+@router.get(
+    "/action-cards",
+    response_model=list[ActionCardOut],
+    operation_id="admin_action_cards",
+)
+async def list_action_cards(
+    include_inactive: bool = Query(default=False),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> list[ActionCardOut]:
-    cards_stmt = select(ActionCard).order_by(ActionCard.id)
-    cards_res = await db.execute(cards_stmt)
-    cards = cards_res.scalars().all()
+    stmt = select(ActionCard).order_by(ActionCard.id)
+    if not include_inactive:
+        stmt = stmt.where(ActionCard.is_active)
+    rows = (await db.execute(stmt)).scalars().all()
+    return [card_out(row) for row in rows]
 
-    cards_out = []
-    for c in cards:
-        code = c.code
-        local_card = next(
-            (item for item in ACTION_CARDS if item["code"] == code), None)
-        channels = local_card["channels"] if local_card else [
-            "bank", "mobile", "web"]
-        freq_limit = local_card["round_frequency_limit"] if local_card else 3
-        description = local_card["description"] if local_card else ""
 
-        cards_out.append(
-            ActionCardOut(
-                id=c.id,
-                code=c.code,
-                version=c.version,
-                title=c.title,
-                description=description,
-                category=c.category,
-                flow=c.flow,
-                risk_weight=str(c.risk_weight),
-                costs={"energy": c.energy_cost, "time": c.time_cost, "trust": c.trust_cost},
-                fee_rate=str(c.fee_rate),
-                min_amount=str(c.min_amount),
-                max_amount=str(c.max_amount),
-                max_frequency=c.max_frequency,
-                round_frequency_limit=freq_limit,
-                requires_card_code=c.requires_card_code,
-                channels=channels,
-                fields=[dict(f) for f in action_fields_for(code)],
-                context_fields=[dict(f) for f in context_fields_for(code)],
-            )
+# --------------------------------------------------------------------------
+# Rounds
+# --------------------------------------------------------------------------
+
+
+def _validate_game_config(db_cards: list[ActionCard], game_config: dict[str, Any]) -> None:
+    ruleset = game_config.get("ruleset_version")
+    if ruleset not in SUPPORTED_RULESETS:
+        raise Conflict(
+            f"Версия правил «{ruleset}» отсутствует в этой сборке. "
+            f"Доступны: {', '.join(sorted(SUPPORTED_RULESETS))}.",
+            code="round_configuration_invalid",
         )
-    return cards_out
+    scoring_version = (game_config.get("scoring") or {}).get("version")
+    if scoring_version not in SUPPORTED_SCORING:
+        raise Conflict(
+            f"Версия скоринга «{scoring_version}» отсутствует в этой сборке.",
+            code="round_configuration_invalid",
+        )
+    board_version = (game_config.get("leaderboard") or {}).get("version")
+    if board_version not in SUPPORTED_LEADERBOARD:
+        raise Conflict(
+            f"Версия лидерборда «{board_version}» отсутствует в этой сборке.",
+            code="round_configuration_invalid",
+        )
+    if not weights_sum_to_one(game_config):
+        raise Conflict(
+            "Веса лидерборда должны в сумме давать 1.",
+            code="round_configuration_invalid",
+        )
+    refs = game_config.get("card_versions") or []
+    if not refs:
+        raise Conflict(
+            "Не указан ни один card_version для раунда.",
+            code="round_configuration_invalid",
+        )
+    available = {(card.code, card.version): card for card in db_cards if card.is_active}
+    for ref in refs:
+        key = (str(ref.get("code")), int(ref.get("version", 0)))
+        card = available.get(key)
+        if card is None:
+            raise Conflict(
+                f"Карточка «{key[0]}» версии {key[1]} не найдена или неактивна.",
+                code="round_configuration_invalid",
+            )
+        if int(ref.get("id", card.id)) != card.id:
+            raise Conflict(
+                f"Идентификатор карточки «{key[0]}» не совпадает с каталогом.",
+                code="round_configuration_invalid",
+            )
 
 
-@router.post("/rounds", response_model=RoundAdminOut,
-             status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/rounds",
+    response_model=RoundAdminOut,
+    status_code=status.HTTP_201_CREATED,
+    operation_id="admin_round_create",
+)
 async def create_round(
     payload: RoundCreateIn,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> RoundAdminOut:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     round_obj = Round(
         title=payload.title,
         status="draft",
         config_revision=1,
         game_config=payload.game_config,
-        scoring_summary=None,
-        created_by_user_id=admin.id,
+        created_by_user_id=principal.user_id,
         created_at=now,
-        activated_at=None,
-        completed_at=None,
     )
     db.add(round_obj)
-    await db.commit()
-    await db.refresh(round_obj)
-
-    # Audit event
-    audit = AuditEvent(
-        actor_user_id=admin.id,
-        round_id=round_obj.id,
+    await db.flush()
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
         event_type="round_created",
+        round_id=round_obj.id,
         target_type="round",
         target_id=str(round_obj.id),
-        reason="Admin created new round draft",
-        created_at=now,
+        request_id=getattr(request.state, "request_id", None),
     )
-    db.add(audit)
     await db.commit()
+    await db.refresh(round_obj)
+    return round_out(round_obj)
 
-    return round_obj
 
-
-@router.get("/rounds", response_model=list[RoundAdminOut])
+@router.get(
+    "/rounds", response_model=list[RoundAdminOut], operation_id="admin_round_list"
+)
 async def list_rounds(
-    admin: User = Depends(get_current_admin),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> list[RoundAdminOut]:
-    stmt = select(Round).order_by(desc(Round.id))
-    rounds = (await db.execute(stmt)).scalars().all()
-    return list(rounds)
+    rounds = (
+        (await db.execute(select(Round).order_by(Round.id.desc()))).scalars().all()
+    )
+    return [round_out(item) for item in rounds]
 
 
-@router.get("/rounds/{round_id}", response_model=RoundAdminOut)
+@router.get(
+    "/rounds/{round_id}", response_model=RoundAdminOut, operation_id="admin_round_get"
+)
 async def get_round(
     round_id: int,
-    admin: User = Depends(get_current_admin),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> RoundAdminOut:
-    stmt = select(Round).where(Round.id == round_id)
-    round_obj = (await db.execute(stmt)).scalars().first()
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="round_not_found")
-    return round_obj
+    return round_out(await _get_round(db, round_id))
 
 
-@router.put("/rounds/{round_id}", response_model=RoundAdminOut)
-async def update_round_config(
+@router.put(
+    "/rounds/{round_id}", response_model=RoundAdminOut, operation_id="admin_round_update"
+)
+async def update_round(
     round_id: int,
     payload: RoundUpdateIn,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> RoundAdminOut:
-    stmt = select(Round).where(Round.id == round_id)
-    round_obj = (await db.execute(stmt)).scalars().first()
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="round_not_found")
+    round_obj = await _get_round(db, round_id)
     if round_obj.status != "draft":
-        raise HTTPException(status_code=409, detail="round_config_locked")
+        raise Conflict(
+            "Конфигурация активированного раунда неизменяема.",
+            code="round_config_locked",
+        )
     if round_obj.config_revision != payload.expected_config_revision:
-        raise HTTPException(status_code=409, detail="round_config_conflict")
-
-    if payload.title:
+        raise Conflict(
+            "Конфигурация изменена другим администратором. Перезагрузите форму "
+            f"(актуальная ревизия {round_obj.config_revision}).",
+            code="round_config_conflict",
+            details={"current_config_revision": round_obj.config_revision},
+        )
+    if payload.title is not None:
         round_obj.title = payload.title
-    if payload.game_config:
+    if payload.game_config is not None:
         round_obj.game_config = payload.game_config
     round_obj.config_revision += 1
-
-    await db.commit()
-    await db.refresh(round_obj)
-    return round_obj
-
-
-@router.post("/rounds/{round_id}/activate", response_model=RoundAdminOut)
-async def activate_round(
-    round_id: int,
-    admin: User = Depends(get_current_admin),
-    db: AsyncSession = Depends(get_db),
-) -> RoundAdminOut:
-    stmt = select(Round).where(Round.id == round_id)
-    round_obj = (await db.execute(stmt)).scalars().first()
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="round_not_found")
-
-    if round_obj.status == "active":
-        return round_obj
-
-    # Check if another round is active
-    active_stmt = select(Round).where(Round.status.in_(["active", "scoring"]))
-    active_exists = (await db.execute(active_stmt)).scalars().first()
-    if active_exists and active_exists.id != round_obj.id:
-        raise HTTPException(status_code=409, detail="active_round_exists")
-
-    now = datetime.now(timezone.utc)
-    round_obj.status = "active"
-    round_obj.activated_at = now
-
-    audit = AuditEvent(
-        actor_user_id=admin.id,
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
+        event_type="round_updated",
         round_id=round_obj.id,
-        event_type="round_activated",
         target_type="round",
         target_id=str(round_obj.id),
-        reason="Admin activated round",
-        created_at=now,
+        request_id=getattr(request.state, "request_id", None),
+        metadata={"config_revision_after": round_obj.config_revision},
     )
-    db.add(audit)
     await db.commit()
     await db.refresh(round_obj)
-    return round_obj
+    return round_out(round_obj)
 
 
-@router.post("/rounds/{round_id}/score", response_model=ScoringSummaryOut)
+@router.post(
+    "/rounds/{round_id}/activate",
+    response_model=RoundAdminOut,
+    operation_id="admin_round_activate",
+)
+async def activate_round(
+    round_id: int,
+    request: Request,
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    principal: CurrentPrincipal = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> RoundAdminOut:
+    round_obj = await _get_round(db, round_id)
+    if round_obj.status == "active":
+        return round_out(round_obj)
+    if round_obj.status in {"scoring", "completed"}:
+        raise Conflict(
+            "Раунд уже завершен и не может быть активирован повторно.",
+            code="round_locked",
+        )
+
+    other = (
+        await db.execute(
+            select(Round).where(Round.status.in_(["active", "scoring"]), Round.id != round_id)
+        )
+    ).scalars().first()
+    if other is not None:
+        raise Conflict(
+            f"Уже есть активный раунд #{other.id}. Завершите его перед активацией нового.",
+            code="active_round_exists",
+            details={"active_round_id": other.id},
+        )
+
+    cards = (await db.execute(select(ActionCard))).scalars().all()
+    game_config = dict(round_obj.game_config or {})
+    _validate_game_config(cards, game_config)
+    game_config["config_version"] = config_version(game_config)
+
+    now = datetime.now(UTC)
+    round_obj.game_config = game_config
+    round_obj.status = "active"
+    round_obj.activated_at = now
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
+        event_type="round_activated",
+        round_id=round_obj.id,
+        target_type="round",
+        target_id=str(round_obj.id),
+        request_id=getattr(request.state, "request_id", None),
+        idempotency_key_hash=(
+            hash_idempotency_key(idempotency_key) if idempotency_key else None
+        ),
+        metadata={"config_version": game_config["config_version"]},
+    )
+    try:
+        await db.commit()
+    except IntegrityError as exc:  # partial unique index on active/scoring rounds
+        await db.rollback()
+        raise Conflict(
+            "Другой раунд уже активен.", code="active_round_exists"
+        ) from exc
+    await db.refresh(round_obj)
+    return round_out(round_obj)
+
+
+@router.post(
+    "/rounds/{round_id}/score",
+    response_model=ScoringSummaryOut,
+    operation_id="admin_round_score",
+)
 async def trigger_scoring(
     round_id: int,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> ScoringSummaryOut:
-    round_stmt = select(Round).where(Round.id == round_id)
-    round_obj = (await db.execute(round_stmt)).scalars().first()
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="round_not_found")
+    round_obj = await _get_round(db, round_id)
 
     if round_obj.status == "completed" and round_obj.scoring_summary:
-        s = round_obj.scoring_summary
+        summary = round_obj.scoring_summary
         return ScoringSummaryOut(
             round_id=round_obj.id,
             status=round_obj.status,
-            submitted_count=s.get("submitted_count", 0),
-            scored_count=s.get("scored_count", 0),
-            excluded_draft_count=s.get("excluded_draft_count", 0),
-            duration_ms=s.get("duration_ms", 0),
-            scoring_version=s.get("scoring_version", "risk-rules-v2"),
-            leaderboard_version=s.get("leaderboard_version", "leaderboard-v1"),
-            completed_at=round_obj.completed_at or datetime.now(timezone.utc),
+            submitted_count=summary.get("submitted_count", 0),
+            scored_count=summary.get("scored_count", 0),
+            excluded_draft_count=summary.get("excluded_draft_count", 0),
+            duration_ms=summary.get("duration_ms", 0),
+            scoring_version=summary.get("scoring_version", SCORING_VERSION),
+            leaderboard_version=summary.get("leaderboard_version", LEADERBOARD_VERSION),
+            completed_at=round_obj.completed_at or datetime.now(UTC),
         )
 
-    # Fetch submitted scenarios
-    start_time = time.time()
-    scenarios_stmt = select(Scenario).where(
-        Scenario.round_id == round_id,
-        Scenario.status == "submitted")
-    scenarios = (await db.execute(scenarios_stmt)).scalars().all()
+    if round_obj.status != "active":
+        raise Conflict("Скоринг доступен только для активного раунда.", code="round_locked")
 
-    draft_count_stmt = select(
-        func.count(
-            Scenario.id)).where(
-        Scenario.round_id == round_id,
-        Scenario.status == "draft")
-    draft_count = (await db.execute(draft_count_stmt)).scalar() or 0
-
-    if not scenarios:
-        raise HTTPException(status_code=400, detail="no_submissions")
-
-    card_weights = {
-        card["code"]: float(
-            card["risk_weight"]) for card in ACTION_CARDS}
-    now = datetime.now(timezone.utc)
-    scored_count = 0
-
-    for scen in scenarios:
-        risk_score, risk_label, explanation = score_steps(
-            scen.steps or [], card_weights)
-        res_snapshot = scen.resource_snapshot or {}
-        resource_score = float(res_snapshot.get("resource_score", 50.0))
-        stealth_score = round(max(0.0, 100.0 - risk_score), 1)
-
-        # Composite game score: 60% stealth + 40% resources
-        game_score = round((stealth_score * 0.6) + (resource_score * 0.4), 1)
-
-        # Check existing result or create new
-        existing_res = (await db.execute(select(ScoringResult).where(ScoringResult.scenario_id == scen.id))).scalars().first()
-        if not existing_res:
-            res_obj = ScoringResult(
-                scenario_id=scen.id,
-                risk_score=Decimal(str(risk_score)),
-                risk_label=risk_label.value,
-                stealth_score=Decimal(str(stealth_score)),
-                resource_score=Decimal(str(resource_score)),
-                game_score=Decimal(str(game_score)),
-                explanation=explanation,
-                scoring_version="risk-rules-v2",
-                leaderboard_version="leaderboard-v1",
-                created_at=now,
+    # Serialise concurrent score commands without waiting on a long lock.
+    try:
+        locked = (
+            await db.execute(
+                select(Round).where(Round.id == round_id).with_for_update(nowait=True)
             )
-            db.add(res_obj)
-        else:
-            existing_res.risk_score = Decimal(str(risk_score))
-            existing_res.risk_label = risk_label.value
-            existing_res.stealth_score = Decimal(str(stealth_score))
-            existing_res.resource_score = Decimal(str(resource_score))
-            existing_res.game_score = Decimal(str(game_score))
-            existing_res.explanation = explanation
+        ).scalars().first()
+    except DBAPIError as exc:
+        await db.rollback()
+        raise Conflict(
+            "Скоринг уже выполняется другим администратором.",
+            code="scoring_in_progress",
+        ) from exc
+    if locked is None:
+        raise NotFound("Раунд не найден.", code="round_not_found")
 
-        scen.status = "scored"
-        scored_count += 1
+    try:
+        summary = await score_round(
+            db,
+            locked,
+            actor_user_id=principal.user_id,
+            request_id=getattr(request.state, "request_id", None),
+            idempotency_key_hash=(
+                hash_idempotency_key(idempotency_key) if idempotency_key else None
+            ),
+        )
+    except NoSubmissions as exc:
+        await db.rollback()
+        raise ApiError(
+            "В раунде нет отправленных сценариев для скоринга.",
+            code="no_submissions",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        ) from exc
+    except Exception:
+        await db.rollback()
+        raise
 
-    duration_ms = int((time.time() - start_time) * 1000)
-    round_obj.status = "completed"
-    round_obj.completed_at = now
-    round_obj.scoring_summary = {
-        "submitted_count": len(scenarios),
-        "scored_count": scored_count,
-        "excluded_draft_count": draft_count,
-        "duration_ms": duration_ms,
-        "scoring_version": "risk-rules-v2",
-        "leaderboard_version": "leaderboard-v1",
-        "completed_at": now.isoformat(),
-    }
-
-    audit = AuditEvent(
-        actor_user_id=admin.id,
-        round_id=round_obj.id,
-        event_type="round_scored",
-        target_type="round",
-        target_id=str(round_obj.id),
-        reason=f"Batch scored {scored_count} scenarios",
-        created_at=now,
-    )
-    db.add(audit)
     await db.commit()
-
+    await db.refresh(locked)
     return ScoringSummaryOut(
-        round_id=round_obj.id,
-        status="completed",
-        submitted_count=len(scenarios),
-        scored_count=scored_count,
-        excluded_draft_count=draft_count,
-        duration_ms=duration_ms,
-        scoring_version="risk-rules-v2",
-        leaderboard_version="leaderboard-v1",
-        completed_at=now,
+        round_id=locked.id,
+        status=locked.status,
+        submitted_count=summary["submitted_count"],
+        scored_count=summary["scored_count"],
+        excluded_draft_count=summary["excluded_draft_count"],
+        duration_ms=summary["duration_ms"],
+        scoring_version=summary["scoring_version"],
+        leaderboard_version=summary["leaderboard_version"],
+        completed_at=locked.completed_at or datetime.now(UTC),
     )
 
 
-@router.get("/rounds/{round_id}/stats", response_model=RoundStatsOut)
-async def get_round_stats(
+@router.get(
+    "/rounds/{round_id}/stats",
+    response_model=RoundStatsOut,
+    operation_id="admin_round_stats",
+)
+async def round_stats(
     round_id: int,
-    admin: User = Depends(get_current_admin),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> RoundStatsOut:
-    users_total = (await db.execute(select(func.count(User.id)).where(User.role == "participant"))).scalar() or 0
-    blocked_total = (await db.execute(select(func.count(User.id)).where(User.role == "participant", User.is_blocked))).scalar() or 0
-    active_users = users_total - blocked_total
+    await _get_round(db, round_id)
 
-    draft_scen = (await db.execute(select(func.count(Scenario.id)).where(Scenario.round_id == round_id, Scenario.status == "draft"))).scalar() or 0
-    sub_scen = (await db.execute(select(func.count(Scenario.id)).where(Scenario.round_id == round_id, Scenario.status == "submitted"))).scalar() or 0
-    scored_scen = (await db.execute(select(func.count(Scenario.id)).where(Scenario.round_id == round_id, Scenario.status == "scored"))).scalar() or 0
+    async def count(stmt: Any) -> int:
+        return int((await db.execute(stmt)).scalar() or 0)
 
-    with_scen = draft_scen + sub_scen + scored_scen
-    without_scen = max(0, users_total - with_scen)
-
-    last_update = (await db.execute(select(func.max(Scenario.updated_at)).where(Scenario.round_id == round_id))).scalar()
+    registered = await count(
+        select(func.count(User.id)).where(User.role == "participant")
+    )
+    blocked = await count(
+        select(func.count(User.id)).where(User.role == "participant", User.is_blocked)
+    )
+    drafts = await count(
+        select(func.count(Scenario.id)).where(
+            Scenario.round_id == round_id, Scenario.status == "draft"
+        )
+    )
+    submitted = await count(
+        select(func.count(Scenario.id)).where(
+            Scenario.round_id == round_id, Scenario.status == "submitted"
+        )
+    )
+    scored = await count(
+        select(func.count(Scenario.id)).where(
+            Scenario.round_id == round_id, Scenario.status == "scored"
+        )
+    )
+    public_rows = await count(
+        select(func.count(ScoringResult.id))
+        .select_from(ScoringResult)
+        .join(Scenario, Scenario.id == ScoringResult.scenario_id)
+        .join(User, User.id == Scenario.participant_id)
+        .where(Scenario.round_id == round_id, User.is_blocked.is_(False))
+    )
+    last_update = (
+        await db.execute(
+            select(func.max(Scenario.updated_at)).where(Scenario.round_id == round_id)
+        )
+    ).scalar()
 
     return RoundStatsOut(
-        registered_users=users_total,
-        active_users=active_users,
-        blocked_users=blocked_total,
-        without_scenario=without_scen,
-        draft_scenarios=draft_scen,
-        submitted_scenarios=sub_scen,
-        scored_scenarios=scored_scen,
-        public_leaderboard_rows=scored_scen,
+        registered_users=registered,
+        active_users=registered - blocked,
+        blocked_users=blocked,
+        without_scenario=max(0, registered - (drafts + submitted + scored)),
+        draft_scenarios=drafts,
+        submitted_scenarios=submitted,
+        scored_scenarios=scored,
+        public_leaderboard_rows=public_rows,
         last_scenario_update_at=last_update,
     )
 
 
-@router.get("/rounds/{round_id}/participants",
-            response_model=list[PlayerSummaryOut])
+# --------------------------------------------------------------------------
+# Participants
+# --------------------------------------------------------------------------
+
+
+@router.get(
+    "/rounds/{round_id}/participants",
+    response_model=PlayerSummaryPageOut,
+    operation_id="admin_participants",
+)
 async def list_participants(
     round_id: int,
-    query: Optional[str] = Query(None),
-    access: Optional[str] = Query("all"),
-    scenario_status: Optional[str] = Query(None),
-    admin: User = Depends(get_current_admin),
+    query: str | None = Query(default=None, max_length=320),
+    access: str = Query(default="all", pattern="^(all|active|blocked)$"),
+    scenario_status: str | None = Query(
+        default=None, pattern="^(none|draft|submitted|scored)$"
+    ),
+    limit: int = Query(default=100, ge=1, le=100),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
-) -> list[PlayerSummaryOut]:
+) -> PlayerSummaryPageOut:
+    await _get_round(db, round_id)
     stmt = (
-        select(
-            User,
+        select(User, Scenario, ScoringResult)
+        .outerjoin(
             Scenario,
-            ScoringResult) .outerjoin(
-            Scenario,
-            (User.id == Scenario.participant_id) & (
-                Scenario.round_id == round_id)) .outerjoin(
-                    ScoringResult,
-                    Scenario.id == ScoringResult.scenario_id) .where(
-                        User.role == "participant") .order_by(
-                            User.id))
+            (Scenario.participant_id == User.id) & (Scenario.round_id == round_id),
+        )
+        .outerjoin(ScoringResult, ScoringResult.scenario_id == Scenario.id)
+        .where(User.role == "participant")
+        .order_by(User.id)
+    )
     if access == "active":
-        stmt = stmt.where(User.is_blocked == False)
+        stmt = stmt.where(User.is_blocked.is_(False))
     elif access == "blocked":
-        stmt = stmt.where(User.is_blocked)
-
+        stmt = stmt.where(User.is_blocked.is_(True))
     if query:
-        q_norm = f"%{query.strip().lower()}%"
+        pattern = f"%{query.strip().lower()}%"
         stmt = stmt.where(
-            (func.lower(
-                User.email).like(q_norm)) | (
-                func.lower(
-                    User.display_name).like(q_norm)))
-
-    records = (await db.execute(stmt)).all()
-
-    results = []
-    for user_obj, scen_obj, sr_obj in records:
-        if scenario_status and (
-                not scen_obj or scen_obj.status != scenario_status):
-            continue
-        results.append(
-            PlayerSummaryOut(
-                id=user_obj.id,
-                email=user_obj.email,
-                display_name=user_obj.display_name or user_obj.email,
-                role=user_obj.role,
-                is_blocked=user_obj.is_blocked,
-                scenario_status=scen_obj.status if scen_obj else "none",
-                game_score=str(sr_obj.game_score) if sr_obj else None,
-                risk_label=sr_obj.risk_label if sr_obj else None,
-                last_login_at=user_obj.last_login_at,
+            or_(
+                func.lower(User.email).like(pattern),
+                func.lower(User.display_name).like(pattern),
             )
         )
-    return results
+
+    rows: list[PlayerSummaryOut] = []
+    for user, scenario, result in (await db.execute(stmt)).all():
+        status_value = scenario.status if scenario else "none"
+        if scenario_status and status_value != scenario_status:
+            continue
+        rows.append(
+            PlayerSummaryOut(
+                id=user.id,
+                email=user.email,
+                display_name=user.display_name or user.email,
+                is_blocked=bool(user.is_blocked),
+                access_revision=int(user.access_revision or 1),
+                scenario_status=status_value,
+                scenario_revision=scenario.revision if scenario else None,
+                game_score=str(result.game_score) if result else None,
+                risk_label=result.risk_label if result else None,
+                last_login_at=user.last_login_at,
+            )
+        )
+        if len(rows) >= limit:
+            break
+    return PlayerSummaryPageOut(rows=rows, next_cursor=None)
 
 
-@router.get("/rounds/{round_id}/participants/{participant_id}",
-            response_model=PlayerDetailOut)
-async def get_participant_detail(
+@router.get(
+    "/rounds/{round_id}/participants/{participant_id}",
+    response_model=PlayerDetailOut,
+    operation_id="admin_participant_detail",
+)
+async def participant_detail(
     round_id: int,
     participant_id: int,
-    admin: User = Depends(get_current_admin),
+    response: Response,
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> PlayerDetailOut:
-    user_stmt = select(User).where(User.id == participant_id)
-    user_obj = (await db.execute(user_stmt)).scalars().first()
-    if not user_obj:
-        raise HTTPException(status_code=404, detail="participant_not_found")
+    await _get_round(db, round_id)
+    user = (
+        await db.execute(
+            select(User).where(User.id == participant_id, User.role == "participant")
+        )
+    ).scalars().first()
+    if user is None:
+        raise NotFound("Участник не найден.", code="participant_not_found")
 
-    scen_stmt = select(Scenario).where(
-        Scenario.round_id == round_id,
-        Scenario.participant_id == participant_id)
-    scen_obj = (await db.execute(scen_stmt)).scalars().first()
+    scenario = (
+        await db.execute(
+            select(Scenario).where(
+                Scenario.round_id == round_id, Scenario.participant_id == participant_id
+            )
+        )
+    ).scalars().first()
 
-    result_payload = None
-    if scen_obj:
-        sr_stmt = select(ScoringResult).where(
-            ScoringResult.scenario_id == scen_obj.id)
-        sr = (await db.execute(sr_stmt)).scalars().first()
-        adj_stmt = select(LeaderboardAdjustment).where(
-            LeaderboardAdjustment.scenario_id == scen_obj.id)
-        adj = (await db.execute(adj_stmt)).scalars().first()
-
-        if sr:
+    result_payload: dict[str, Any] | None = None
+    if scenario is not None:
+        result = (
+            await db.execute(
+                select(ScoringResult).where(ScoringResult.scenario_id == scenario.id)
+            )
+        ).scalars().first()
+        adjustment = (
+            await db.execute(
+                select(LeaderboardAdjustment).where(
+                    LeaderboardAdjustment.scenario_id == scenario.id
+                )
+            )
+        ).scalars().first()
+        if result is not None:
             result_payload = {
                 "base": {
-                    "risk_score": str(
-                        sr.risk_score),
-                    "risk_label": sr.risk_label,
-                    "stealth_score": str(
-                        sr.stealth_score),
-                    "resource_score": str(
-                        sr.resource_score),
-                    "game_score": str(
-                        sr.game_score),
+                    "risk_score": str(result.risk_score),
+                    "risk_label": result.risk_label,
+                    "stealth_score": str(result.stealth_score),
+                    "resource_score": str(result.resource_score),
+                    "game_score": str(result.game_score),
                 },
                 "effective": {
                     "risk_score": str(
-                        adj.risk_score_override) if (
-                        adj and adj.risk_score_override is not None) else str(
-                        sr.risk_score),
+                        adjustment.risk_score_override
+                        if adjustment and adjustment.risk_score_override is not None
+                        else result.risk_score
+                    ),
                     "resource_score": str(
-                        adj.resource_score_override) if (
-                        adj and adj.resource_score_override is not None) else str(
-                        sr.resource_score),
+                        adjustment.resource_score_override
+                        if adjustment and adjustment.resource_score_override is not None
+                        else result.resource_score
+                    ),
                     "game_score": str(
-                        adj.game_score_override) if (
-                        adj and adj.game_score_override is not None) else str(
-                        sr.game_score),
+                        adjustment.game_score_override
+                        if adjustment and adjustment.game_score_override is not None
+                        else result.game_score
+                    ),
                 },
-                "explanation": sr.explanation,
-                "adjustment": {
-                    "revision": adj.revision,
-                    "reason": adj.reason,
-                    "risk_score_override": str(
-                        adj.risk_score_override) if adj.risk_score_override is not None else None,
-                    "game_score_override": str(
-                        adj.game_score_override) if adj.game_score_override is not None else None,
-                } if adj else None,
+                "explanation": result.explanation or {},
+                "adjustment": (
+                    {
+                        "revision": adjustment.revision,
+                        "reason": adjustment.reason,
+                        "admin_user_id": adjustment.admin_user_id,
+                        "updated_at": adjustment.updated_at.isoformat(),
+                    }
+                    if adjustment
+                    else None
+                ),
             }
 
-    # Audit activity
-    audit_stmt = select(AuditEvent).where(
-        ((AuditEvent.scenario_id == (
-            scen_obj.id if scen_obj else -
-            1)) | (
-            AuditEvent.target_id == str(participant_id)))).order_by(
-                desc(
-                    AuditEvent.created_at)).limit(10)
-    audit_rows = (await db.execute(audit_stmt)).scalars().all()
-
+    activity = (
+        (
+            await db.execute(
+                select(AuditEvent)
+                .where(AuditEvent.round_id == round_id, AuditEvent.target_id == str(user.id))
+                .order_by(AuditEvent.created_at.desc())
+                .limit(20)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    response.headers["Cache-Control"] = "no-store"
     return PlayerDetailOut(
         user=PlayerDetailUserOut(
-            id=user_obj.id,
-            email=user_obj.email,
-            display_name=user_obj.display_name or user_obj.email,
-            is_blocked=user_obj.is_blocked,
-            access_revision=user_obj.access_revision,
-            created_at=user_obj.created_at,
-            last_login_at=user_obj.last_login_at,
+            id=user.id,
+            email=user.email,
+            display_name=user.display_name or user.email,
+            is_blocked=bool(user.is_blocked),
+            blocked_reason=user.blocked_reason,
+            access_revision=int(user.access_revision or 1),
+            created_at=user.created_at,
+            last_login_at=user.last_login_at,
         ),
-        scenario={
-            "id": scen_obj.id,
-            "status": scen_obj.status,
-            "revision": scen_obj.revision,
-            "steps": scen_obj.steps,
-            "resources": scen_obj.resource_snapshot,
-            "updated_at": scen_obj.updated_at.isoformat() if scen_obj.updated_at else None,
-            "submitted_at": scen_obj.submitted_at.isoformat() if scen_obj.submitted_at else None,
-        } if scen_obj else None,
+        scenario=(
+            {
+                "id": scenario.id,
+                "status": scenario.status,
+                "revision": scenario.revision,
+                "steps": scenario.steps or [],
+                "resources": scenario.resource_snapshot or {},
+                "updated_at": scenario.updated_at.isoformat(),
+                "submitted_at": (
+                    scenario.submitted_at.isoformat() if scenario.submitted_at else None
+                ),
+            }
+            if scenario
+            else None
+        ),
         result=result_payload,
         recent_activity=[
-            {"event_type": a.event_type, "reason": a.reason, "created_at": a.created_at.isoformat()}
-            for a in audit_rows
+            {
+                "event_type": event.event_type,
+                "reason": event.reason,
+                "created_at": event.created_at.isoformat(),
+            }
+            for event in activity
         ],
     )
 
 
-@router.put("/rounds/{round_id}/participants/{participant_id}/access",
-            response_model=PlayerSummaryOut)
+@router.put(
+    "/rounds/{round_id}/participants/{participant_id}/access",
+    response_model=PlayerSummaryOut,
+    operation_id="admin_participant_access",
+)
 async def update_participant_access(
     round_id: int,
     participant_id: int,
     payload: AccessUpdateIn,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> PlayerSummaryOut:
-    if admin.id == participant_id:
-        raise HTTPException(status_code=400, detail="self_block_prohibited")
+    await _get_round(db, round_id)
+    if participant_id == principal.user_id:
+        raise Forbidden("Администратор не может заблокировать сам себя.", code="forbidden")
 
-    user_stmt = select(User).where(User.id == participant_id)
-    user_obj = (await db.execute(user_stmt)).scalars().first()
-    if not user_obj:
-        raise HTTPException(status_code=404, detail="participant_not_found")
-
-    if payload.expected_access_revision > 0 and user_obj.access_revision != payload.expected_access_revision:
-        raise HTTPException(
-            status_code=409,
-            detail="participant_access_conflict")
-
-    now = datetime.now(timezone.utc)
-    user_obj.is_blocked = payload.blocked
-    user_obj.blocked_reason = payload.reason if payload.blocked else None
-    user_obj.blocked_at = now if payload.blocked else None
-    user_obj.blocked_by_user_id = admin.id if payload.blocked else None
-    user_obj.access_revision += 1
-
-    # Revoke sessions if blocked
-    if payload.blocked:
+    user = (
         await db.execute(
-            update(Session)
-            .where(Session.user_id == participant_id, Session.revoked_at.is_(None))
-            .values(revoked_at=now, revoke_reason="blocked", revoked_by_user_id=admin.id)
+            select(User)
+            .where(User.id == participant_id, User.role == "participant")
+            .with_for_update()
+        )
+    ).scalars().first()
+    if user is None:
+        raise NotFound("Участник не найден.", code="participant_not_found")
+
+    if bool(user.is_blocked) == payload.blocked:
+        # Idempotent repeat of the same desired state.
+        return await _player_summary(db, round_id, user)
+
+    if int(user.access_revision or 0) != payload.expected_access_revision:
+        raise Conflict(
+            "Состояние доступа изменено другим администратором. Обновите список "
+            f"(актуальная ревизия {user.access_revision}).",
+            code="participant_access_conflict",
+            details={"current_access_revision": int(user.access_revision or 0)},
         )
 
-    # Audit event
-    event_type = "participant_blocked" if payload.blocked else "participant_unblocked"
-    audit = AuditEvent(
-        actor_user_id=admin.id,
+    now = datetime.now(UTC)
+    user.is_blocked = payload.blocked
+    user.access_revision = int(user.access_revision or 0) + 1
+    user.updated_at = now
+    if payload.blocked:
+        user.blocked_reason = payload.reason
+        user.blocked_at = now
+        user.blocked_by_user_id = principal.user_id
+        # Blocking revokes every active session in the same transaction.
+        await db.execute(
+            update(Session)
+            .where(Session.user_id == user.id, Session.revoked_at.is_(None))
+            .values(revoked_at=now, revoke_reason="account_blocked",
+                    revoked_by_user_id=principal.user_id)
+        )
+    else:
+        user.blocked_reason = None
+        user.blocked_at = None
+        user.blocked_by_user_id = None
+
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
+        event_type="participant_blocked" if payload.blocked else "participant_unblocked",
         round_id=round_id,
-        event_type=event_type,
         target_type="user",
-        target_id=str(participant_id),
+        target_id=str(user.id),
         reason=payload.reason,
-        created_at=now,
+        request_id=getattr(request.state, "request_id", None),
+        metadata={"access_revision_after": user.access_revision},
     )
-    db.add(audit)
     await db.commit()
-    await db.refresh(user_obj)
+    await db.refresh(user)
+    return await _player_summary(db, round_id, user)
 
+
+async def _player_summary(db: AsyncSession, round_id: int, user: User) -> PlayerSummaryOut:
+    scenario = (
+        await db.execute(
+            select(Scenario).where(
+                Scenario.round_id == round_id, Scenario.participant_id == user.id
+            )
+        )
+    ).scalars().first()
+    result = None
+    if scenario is not None:
+        result = (
+            await db.execute(
+                select(ScoringResult).where(ScoringResult.scenario_id == scenario.id)
+            )
+        ).scalars().first()
     return PlayerSummaryOut(
-        id=user_obj.id,
-        email=user_obj.email,
-        display_name=user_obj.display_name or user_obj.email,
-        role=user_obj.role,
-        is_blocked=user_obj.is_blocked,
-        last_login_at=user_obj.last_login_at,
+        id=user.id,
+        email=user.email,
+        display_name=user.display_name or user.email,
+        is_blocked=bool(user.is_blocked),
+        access_revision=int(user.access_revision or 1),
+        scenario_status=scenario.status if scenario else "none",
+        scenario_revision=scenario.revision if scenario else None,
+        game_score=str(result.game_score) if result else None,
+        risk_label=result.risk_label if result else None,
+        last_login_at=user.last_login_at,
     )
 
 
-@router.put("/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment")
-async def adjust_leaderboard(
+# --------------------------------------------------------------------------
+# Leaderboard adjustments
+# --------------------------------------------------------------------------
+
+
+async def _load_result(
+    db: AsyncSession, round_id: int, participant_id: int
+) -> tuple[Scenario, ScoringResult]:
+    scenario = (
+        await db.execute(
+            select(Scenario).where(
+                Scenario.round_id == round_id, Scenario.participant_id == participant_id
+            )
+        )
+    ).scalars().first()
+    if scenario is None:
+        raise NotFound("Сценарий участника не найден.", code="scenario_not_found")
+    result = (
+        await db.execute(
+            select(ScoringResult).where(ScoringResult.scenario_id == scenario.id)
+        )
+    ).scalars().first()
+    if result is None:
+        raise Conflict(
+            "Результат еще не рассчитан: сначала выполните скоринг раунда.",
+            code="result_not_available",
+        )
+    return scenario, result
+
+
+@router.put(
+    "/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment",
+    response_model=LeaderboardAdjustmentOut,
+    operation_id="admin_adjustment_put",
+)
+async def upsert_adjustment(
     round_id: int,
     participant_id: int,
     payload: LeaderboardAdjustmentIn,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
-) -> dict:
-    scen_stmt = select(Scenario).where(
-        Scenario.round_id == round_id,
-        Scenario.participant_id == participant_id)
-    scen_obj = (await db.execute(scen_stmt)).scalars().first()
-    if not scen_obj:
-        raise HTTPException(status_code=404, detail="scenario_not_found")
+) -> LeaderboardAdjustmentOut:
+    await _get_round(db, round_id)
+    overrides = (
+        payload.risk_score_override,
+        payload.resource_score_override,
+        payload.game_score_override,
+    )
+    if all(value is None for value in overrides):
+        raise ValidationFailed(
+            "Укажите хотя бы одно значение корректировки.",
+            details={
+                "violations": [
+                    {
+                        "field": "game_score_override",
+                        "reason": "no_override_provided",
+                        "message": "Заполните минимум одно поле корректировки.",
+                    }
+                ]
+            },
+        )
 
-    sr_stmt = select(ScoringResult).where(
-        ScoringResult.scenario_id == scen_obj.id)
-    sr = (await db.execute(sr_stmt)).scalars().first()
-    if not sr:
-        raise HTTPException(status_code=409, detail="result_not_available")
+    scenario, result = await _load_result(db, round_id, participant_id)
+    adjustment = (
+        await db.execute(
+            select(LeaderboardAdjustment)
+            .where(LeaderboardAdjustment.scenario_id == scenario.id)
+            .with_for_update()
+        )
+    ).scalars().first()
+    current_revision = adjustment.revision if adjustment else 0
+    if current_revision != payload.expected_revision:
+        raise Conflict(
+            "Корректировка изменена другим администратором "
+            f"(актуальная ревизия {current_revision}).",
+            code="adjustment_revision_conflict",
+            details={"current_revision": current_revision},
+        )
 
-    adj_stmt = select(LeaderboardAdjustment).where(
-        LeaderboardAdjustment.scenario_id == scen_obj.id)
-    adj = (await db.execute(adj_stmt)).scalars().first()
-
-    now = datetime.now(timezone.utc)
-    if not adj:
-        adj = LeaderboardAdjustment(
-            scenario_id=scen_obj.id,
-            admin_user_id=admin.id,
+    now = datetime.now(UTC)
+    before = {
+        "game_score": str(
+            adjustment.game_score_override if adjustment else result.game_score
+        )
+    }
+    if adjustment is None:
+        adjustment = LeaderboardAdjustment(
+            scenario_id=scenario.id,
+            admin_user_id=principal.user_id,
             revision=1,
-            risk_score_override=Decimal(
-                payload.risk_score_override) if payload.risk_score_override else None,
-            resource_score_override=Decimal(
-                payload.resource_score_override) if payload.resource_score_override else None,
-            game_score_override=Decimal(
-                payload.game_score_override) if payload.game_score_override else None,
             reason=payload.reason,
             updated_at=now,
         )
-        db.add(adj)
+        db.add(adjustment)
     else:
-        if payload.expected_revision > 0 and adj.revision != payload.expected_revision:
-            raise HTTPException(
-                status_code=409,
-                detail="adjustment_revision_conflict")
-        adj.risk_score_override = Decimal(
-            payload.risk_score_override) if payload.risk_score_override else None
-        adj.resource_score_override = Decimal(
-            payload.resource_score_override) if payload.resource_score_override else None
-        adj.game_score_override = Decimal(
-            payload.game_score_override) if payload.game_score_override else None
-        adj.reason = payload.reason
-        adj.revision += 1
-        adj.updated_at = now
+        adjustment.revision += 1
+        adjustment.admin_user_id = principal.user_id
+        adjustment.reason = payload.reason
+        adjustment.updated_at = now
 
-    audit = AuditEvent(
-        actor_user_id=admin.id,
-        round_id=round_id,
-        scenario_id=scen_obj.id,
+    adjustment.risk_score_override = payload.risk_score_override
+    adjustment.resource_score_override = payload.resource_score_override
+    adjustment.game_score_override = payload.game_score_override
+
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
         event_type="leaderboard_adjusted",
-        target_type="scenario",
-        target_id=str(scen_obj.id),
+        round_id=round_id,
+        scenario_id=scenario.id,
+        target_type="user",
+        target_id=str(participant_id),
         reason=payload.reason,
-        created_at=now,
+        request_id=getattr(request.state, "request_id", None),
+        metadata={
+            "revision_before": current_revision,
+            "revision_after": adjustment.revision,
+            "game_score_before": before["game_score"],
+            "game_score_after": str(
+                payload.game_score_override
+                if payload.game_score_override is not None
+                else result.game_score
+            ),
+        },
     )
-    db.add(audit)
     await db.commit()
+    await db.refresh(adjustment)
 
-    return {"status": "ok", "revision": adj.revision}
+    def effective(override: Decimal | None, base: Any) -> str:
+        return str(override if override is not None else base)
+
+    return LeaderboardAdjustmentOut(
+        scenario_id=scenario.id,
+        revision=adjustment.revision,
+        base={
+            "risk_score": str(result.risk_score),
+            "resource_score": str(result.resource_score),
+            "game_score": str(result.game_score),
+        },
+        effective={
+            "risk_score": effective(adjustment.risk_score_override, result.risk_score),
+            "resource_score": effective(
+                adjustment.resource_score_override, result.resource_score
+            ),
+            "game_score": effective(adjustment.game_score_override, result.game_score),
+        },
+        reason=adjustment.reason,
+        admin_user_id=adjustment.admin_user_id,
+        updated_at=adjustment.updated_at,
+    )
 
 
 @router.delete(
     "/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment",
-    status_code=status.HTTP_204_NO_CONTENT)
-async def clear_leaderboard_adjustment(
+    status_code=status.HTTP_204_NO_CONTENT,
+    operation_id="admin_adjustment_delete",
+)
+async def clear_adjustment(
     round_id: int,
     participant_id: int,
-    admin: User = Depends(get_current_admin),
+    request: Request,
+    expected_revision: int = Query(ge=0),
+    principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    scen_stmt = select(Scenario).where(
-        Scenario.round_id == round_id,
-        Scenario.participant_id == participant_id)
-    scen_obj = (await db.execute(scen_stmt)).scalars().first()
-    if not scen_obj:
-        return
-
-    adj_stmt = select(LeaderboardAdjustment).where(
-        LeaderboardAdjustment.scenario_id == scen_obj.id)
-    adj = (await db.execute(adj_stmt)).scalars().first()
-    if adj:
-        now = datetime.now(timezone.utc)
-        audit = AuditEvent(
-            actor_user_id=admin.id,
-            round_id=round_id,
-            scenario_id=scen_obj.id,
-            event_type="leaderboard_adjustment_cleared",
-            target_type="scenario",
-            target_id=str(scen_obj.id),
-            reason="Admin cleared leaderboard adjustment",
-            created_at=now,
+    await _get_round(db, round_id)
+    scenario, _result = await _load_result(db, round_id, participant_id)
+    adjustment = (
+        await db.execute(
+            select(LeaderboardAdjustment)
+            .where(LeaderboardAdjustment.scenario_id == scenario.id)
+            .with_for_update()
         )
-        db.add(audit)
-        await db.delete(adj)
-        await db.commit()
+    ).scalars().first()
+    if adjustment is None:
+        return
+    if adjustment.revision != expected_revision:
+        raise Conflict(
+            "Корректировка изменена другим администратором "
+            f"(актуальная ревизия {adjustment.revision}).",
+            code="adjustment_revision_conflict",
+            details={"current_revision": adjustment.revision},
+        )
+    await _audit(
+        db,
+        actor_user_id=principal.user_id,
+        event_type="leaderboard_adjustment_cleared",
+        round_id=round_id,
+        scenario_id=scenario.id,
+        target_type="user",
+        target_id=str(participant_id),
+        reason=adjustment.reason,
+        request_id=getattr(request.state, "request_id", None),
+        metadata={
+            "revision_before": adjustment.revision,
+            "game_score_before": str(adjustment.game_score_override),
+        },
+    )
+    await db.delete(adjustment)
+    await db.commit()
 
 
-@router.get("/rounds/{round_id}/audit-events", response_model=AuditPageOut)
-async def list_audit_events(
+@router.get(
+    "/rounds/{round_id}/leaderboard",
+    response_model=AdminLeaderboardPageOut,
+    operation_id="admin_leaderboard",
+)
+async def admin_leaderboard(
     round_id: int,
-    event_type: Optional[str] = Query(None),
-    admin: User = Depends(get_current_admin),
+    _: CurrentPrincipal = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> AdminLeaderboardPageOut:
+    await _get_round(db, round_id)
+    rows = await build_admin_leaderboard(db, round_id)
+    return AdminLeaderboardPageOut(
+        rows=[
+            AdminLeaderboardRowOut(
+                rank=row["rank"],
+                participant_id=row["participant_id"],
+                display_name=row["display_name"],
+                email=row["email"],
+                scenario_id=row["scenario_id"],
+                is_blocked=row["is_blocked"],
+                base_game_score=f"{row['base_game_score']:.2f}",
+                effective_game_score=f"{row['effective_game_score']:.2f}",
+                base_risk_score=f"{row['base_risk_score']:.2f}",
+                effective_risk_score=f"{row['effective_risk_score']:.2f}",
+                base_resource_score=f"{row['base_resource_score']:.2f}",
+                effective_resource_score=f"{row['effective_resource_score']:.2f}",
+                stealth_score=f"{row['stealth_score']:.2f}",
+                risk_label=row["risk_label"],
+                is_adjusted=row["is_adjusted"],
+                adjustment_reason=row["adjustment_reason"],
+            )
+            for row in rows
+        ],
+        next_cursor=None,
+        generated_at=datetime.now(UTC),
+    )
+
+
+@router.get(
+    "/rounds/{round_id}/audit-events",
+    response_model=AuditPageOut,
+    operation_id="admin_audit_events",
+)
+async def audit_events(
+    round_id: int,
+    event_type: str | None = Query(default=None, max_length=64),
+    limit: int = Query(default=50, ge=1, le=200),
+    _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> AuditPageOut:
-    stmt = select(AuditEvent).where(
-        AuditEvent.round_id == round_id).order_by(
-        desc(
-            AuditEvent.created_at)).limit(100)
+    await _get_round(db, round_id)
+    stmt = (
+        select(AuditEvent)
+        .where(AuditEvent.round_id == round_id)
+        .order_by(AuditEvent.created_at.desc(), AuditEvent.id.desc())
+        .limit(limit)
+    )
     if event_type:
         stmt = stmt.where(AuditEvent.event_type == event_type)
     events = (await db.execute(stmt)).scalars().all()
-
-    rows = [
-        AuditEventOut(
-            id=e.id,
-            actor_user_id=e.actor_user_id,
-            round_id=e.round_id,
-            scenario_id=e.scenario_id,
-            event_type=e.event_type,
-            target_type=e.target_type,
-            target_id=e.target_id,
-            reason=e.reason,
-            request_id=e.request_id,
-            metadata=e.metadata_,
-            created_at=e.created_at,
-        )
-        for e in events
-    ]
-    return AuditPageOut(rows=rows, next_cursor=None)
+    return AuditPageOut(
+        rows=[
+            AuditEventOut(
+                id=event.id,
+                actor_user_id=event.actor_user_id,
+                round_id=event.round_id,
+                scenario_id=event.scenario_id,
+                event_type=event.event_type,
+                target_type=event.target_type,
+                target_id=event.target_id,
+                reason=event.reason,
+                request_id=event.request_id,
+                metadata=event.metadata_,
+                created_at=event.created_at,
+            )
+            for event in events
+        ],
+        next_cursor=None,
+    )

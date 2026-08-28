@@ -1,19 +1,18 @@
 """initial_schema
 
-Revision ID: a11a2eb7ba20
+Revision ID: 2988b0ed1f98
 Revises: 
-Create Date: 2026-08-28 19:33:28.068334
+Create Date: 2026-08-28 21:29:31.163450
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import Text
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'a11a2eb7ba20'
+revision: str = '2988b0ed1f98'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,7 +36,7 @@ def upgrade() -> None:
     sa.Column('max_amount', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('max_frequency', sa.Integer(), nullable=False),
     sa.Column('requires_card_code', sa.String(), nullable=True),
-    sa.Column('parameter_schema', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=False),
+    sa.Column('parameter_schema', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -56,8 +55,8 @@ def upgrade() -> None:
     sa.Column('access_revision', sa.Integer(), nullable=False),
     sa.Column('failed_login_count', sa.Integer(), nullable=False),
     sa.Column('locked_until', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('last_login_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['blocked_by_user_id'], ['users.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
@@ -68,8 +67,8 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('status', sa.String(), nullable=False),
     sa.Column('config_revision', sa.Integer(), nullable=False),
-    sa.Column('game_config', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=False),
-    sa.Column('scoring_summary', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=True),
+    sa.Column('game_config', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=False),
+    sa.Column('scoring_summary', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=True),
     sa.Column('created_by_user_id', sa.Integer().with_variant(sa.BigInteger(), 'postgresql'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('activated_at', sa.DateTime(timezone=True), nullable=True),
@@ -102,8 +101,8 @@ def upgrade() -> None:
     sa.Column('round_id', sa.Integer().with_variant(sa.BigInteger(), 'postgresql'), nullable=False),
     sa.Column('participant_id', sa.Integer().with_variant(sa.BigInteger(), 'postgresql'), nullable=False),
     sa.Column('status', sa.String(), nullable=False),
-    sa.Column('steps', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=False),
-    sa.Column('resource_snapshot', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=True),
+    sa.Column('steps', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=False),
+    sa.Column('resource_snapshot', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=True),
     sa.Column('revision', sa.Integer(), nullable=False),
     sa.Column('last_client_mutation_id', sa.Uuid(), nullable=True),
     sa.Column('payload_hash', sa.String(), nullable=True),
@@ -126,7 +125,7 @@ def upgrade() -> None:
     sa.Column('reason', sa.String(), nullable=True),
     sa.Column('request_id', sa.String(), nullable=True),
     sa.Column('idempotency_key_hash', sa.String(), nullable=True),
-    sa.Column('metadata', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=True),
+    sa.Column('metadata', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['actor_user_id'], ['users.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['round_id'], ['rounds.id'], ),
@@ -156,7 +155,7 @@ def upgrade() -> None:
     sa.Column('stealth_score', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('resource_score', sa.Numeric(precision=14, scale=2), nullable=False),
     sa.Column('game_score', sa.Numeric(precision=14, scale=2), nullable=False),
-    sa.Column('explanation', sa.JSON().with_variant(postgresql.JSONB(astext_type=Text()), 'postgresql'), nullable=False),
+    sa.Column('explanation', sa.JSON().with_variant(postgresql.JSONB(astext_type=sa.Text()), 'postgresql'), nullable=False),
     sa.Column('scoring_version', sa.String(), nullable=False),
     sa.Column('leaderboard_version', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),

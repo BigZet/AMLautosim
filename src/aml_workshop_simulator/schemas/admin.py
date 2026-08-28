@@ -1,19 +1,27 @@
 from __future__ import annotations
 
-from typing import Any, Optional
 from datetime import datetime
+from decimal import Decimal
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
+
+STRICT = ConfigDict(extra="forbid")
 
 
 class RoundCreateIn(BaseModel):
-    title: str
+    model_config = STRICT
+
+    title: str = Field(min_length=3, max_length=160)
     game_config: dict[str, Any]
 
 
 class RoundUpdateIn(BaseModel):
-    expected_config_revision: int
-    title: Optional[str] = None
-    game_config: Optional[dict[str, Any]] = None
+    model_config = STRICT
+
+    expected_config_revision: int = Field(ge=1)
+    title: str | None = Field(default=None, min_length=3, max_length=160)
+    game_config: dict[str, Any] | None = None
 
 
 class RoundAdminOut(BaseModel):
@@ -22,12 +30,10 @@ class RoundAdminOut(BaseModel):
     status: str
     config_revision: int
     game_config: dict[str, Any]
-    scoring_summary: Optional[dict[str, Any]] = None
+    scoring_summary: dict[str, Any] | None = None
     created_at: datetime
-    activated_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-
-    model_config = ConfigDict(from_attributes=True)
+    activated_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 class RoundStatsOut(BaseModel):
@@ -39,7 +45,7 @@ class RoundStatsOut(BaseModel):
     submitted_scenarios: int
     scored_scenarios: int
     public_leaderboard_rows: int
-    last_scenario_update_at: Optional[datetime] = None
+    last_scenario_update_at: datetime | None = None
 
 
 class ScoringSummaryOut(BaseModel):
@@ -58,12 +64,18 @@ class PlayerSummaryOut(BaseModel):
     id: int
     email: str
     display_name: str
-    role: str
     is_blocked: bool
-    scenario_status: Optional[str] = None
-    game_score: Optional[str] = None
-    risk_label: Optional[str] = None
-    last_login_at: Optional[datetime] = None
+    access_revision: int
+    scenario_status: str = "none"
+    scenario_revision: int | None = None
+    game_score: str | None = None
+    risk_label: str | None = None
+    last_login_at: datetime | None = None
+
+
+class PlayerSummaryPageOut(BaseModel):
+    rows: list[PlayerSummaryOut]
+    next_cursor: str | None = None
 
 
 class PlayerDetailUserOut(BaseModel):
@@ -71,46 +83,61 @@ class PlayerDetailUserOut(BaseModel):
     email: str
     display_name: str
     is_blocked: bool
+    blocked_reason: str | None = None
     access_revision: int
     created_at: datetime
-    last_login_at: Optional[datetime] = None
+    last_login_at: datetime | None = None
 
 
 class PlayerDetailOut(BaseModel):
     user: PlayerDetailUserOut
-    scenario: Optional[dict[str, Any]] = None
-    result: Optional[dict[str, Any]] = None
-    recent_activity: list[dict[str, Any]] = []
+    scenario: dict[str, Any] | None = None
+    result: dict[str, Any] | None = None
+    recent_activity: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class AccessUpdateIn(BaseModel):
+    model_config = STRICT
+
     blocked: bool
-    reason: str = Field(min_length=3, max_length=500)
-    expected_access_revision: int
+    reason: str = Field(min_length=10, max_length=500)
+    expected_access_revision: int = Field(ge=0)
 
 
 class LeaderboardAdjustmentIn(BaseModel):
-    expected_revision: int
-    risk_score_override: Optional[str] = None
-    resource_score_override: Optional[str] = None
-    game_score_override: Optional[str] = None
-    reason: str = Field(min_length=5, max_length=500)
+    model_config = STRICT
+
+    expected_revision: int = Field(ge=0)
+    risk_score_override: Decimal | None = Field(default=None, ge=0, le=100)
+    resource_score_override: Decimal | None = Field(default=None, ge=0, le=100)
+    game_score_override: Decimal | None = Field(default=None, ge=0, le=100)
+    reason: str = Field(min_length=10, max_length=500)
+
+
+class LeaderboardAdjustmentOut(BaseModel):
+    scenario_id: int
+    revision: int
+    base: dict[str, str]
+    effective: dict[str, str]
+    reason: str
+    admin_user_id: int
+    updated_at: datetime
 
 
 class AuditEventOut(BaseModel):
     id: int
-    actor_user_id: Optional[int] = None
-    round_id: Optional[int] = None
-    scenario_id: Optional[int] = None
+    actor_user_id: int | None = None
+    round_id: int | None = None
+    scenario_id: int | None = None
     event_type: str
-    target_type: Optional[str] = None
-    target_id: Optional[str] = None
-    reason: Optional[str] = None
-    request_id: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
+    target_type: str | None = None
+    target_id: str | None = None
+    reason: str | None = None
+    request_id: str | None = None
+    metadata: dict[str, Any] | None = None
     created_at: datetime
 
 
 class AuditPageOut(BaseModel):
     rows: list[AuditEventOut]
-    next_cursor: Optional[str] = None
+    next_cursor: str | None = None

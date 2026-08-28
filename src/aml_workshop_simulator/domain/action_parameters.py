@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from copy import deepcopy
 from typing import Any
 
@@ -570,82 +571,24 @@ ACTION_PARAMETER_SCHEMAS: dict[str,
 
 
 def context_fields_for(card_code: str) -> tuple[dict[str, Any], ...]:
+    """Declarative context-field specs that apply to one card code."""
     return tuple(
-        deepcopy(
-            CONTEXT_FIELDS[key]) for key in ACTION_CONTEXT_FIELDS.get(
-            card_code,
-            ()))
+        deepcopy(CONTEXT_FIELDS[key])
+        for key in ACTION_CONTEXT_FIELDS.get(card_code, ())
+    )
 
 
 def action_fields_for(card_code: str) -> tuple[dict[str, Any], ...]:
+    """Declarative action-detail field specs for one card code."""
     return deepcopy(ACTION_PARAMETER_SCHEMAS.get(card_code, ()))
 
 
 def default_context(card_code: str) -> dict[str, Any]:
-    return {
-        field["key"]: field["default"]
-        for field in context_fields_for(card_code)
-    }
+    return {field["key"]: field["default"] for field in context_fields_for(card_code)}
 
 
 def default_action_details(card_code: str) -> dict[str, Any]:
-    return {
-        field["key"]: field["default"]
-        for field in action_fields_for(card_code)
-    }
-
-
-def normalize_action_details(
-        card_code: str, details: dict | None) -> dict[str, Any]:
-    supplied = details or {}
-    normalized: dict[str, Any] = {}
-    for field in action_fields_for(card_code):
-        allowed = {option["value"] for option in field.get("options", [])}
-        value = supplied.get(field["key"], field["default"])
-        normalized[field["key"]
-                   ] = value if value in allowed else field["default"]
-    return normalized
-
-
-def action_detail_effects(
-        card_code: str, details: dict | None) -> dict[str, Any]:
-    normalized = normalize_action_details(card_code, details)
-    result: dict[str, Any] = {
-        "risk_points": 0.0,
-        "trust_cost": 0,
-        "time_cost": 0,
-        "energy_cost": 0,
-        "factors": [],
-    }
-    for field in action_fields_for(card_code):
-        value = normalized[field["key"]]
-        option = next(
-            option for option in field["options"] if option["value"] == value
-        )
-        factor = {
-            "field_key": field["key"],
-            "field_label": field["label"],
-            "value": value,
-            "value_label": option["label"],
-            "risk_points": float(option.get("risk_points", 0)),
-            "description": option.get("description", ""),
-        }
-        result["factors"].append(factor)
-        result["risk_points"] += factor["risk_points"]
-        result["trust_cost"] += int(option.get("trust_cost", 0))
-        result["time_cost"] += int(option.get("time_cost", 0))
-        result["energy_cost"] += int(option.get("energy_cost", 0))
-    result["risk_points"] = round(result["risk_points"], 2)
-    return result
-
-
-def action_detail_summary(card_code: str, details: dict |
-                          None) -> list[dict[str, str]]:
-    effects = action_detail_effects(card_code, details)
-    return [
-        {"label": factor["field_label"], "value": factor["value_label"]}
-        for factor in effects["factors"]
-    ]
+    return {field["key"]: field["default"] for field in action_fields_for(card_code)}
 
 
 def context_value_label(field_key: str, value: Any) -> str:
@@ -661,14 +604,22 @@ def context_value_label(field_key: str, value: Any) -> str:
     return option["label"] if option else str(value)
 
 
+def option_label(fields: Sequence[dict[str, Any]], field_key: str, value: Any) -> str:
+    """Label of one option inside a declarative field list."""
+    for field in fields:
+        if field["key"] != field_key:
+            continue
+        option = next(
+            (item for item in field.get("options", []) if item["value"] == value),
+            None,
+        )
+        return option["label"] if option else str(value)
+    return str(value)
+
+
 def detail_factor_label(card_code: str, field_key: str, value: Any) -> str:
     for field in action_fields_for(card_code):
         if field["key"] != field_key:
             continue
-        option = next(
-            (item for item in field["options"] if item["value"] == value),
-            None,
-        )
-        value_label = option["label"] if option else str(value)
-        return f"{field['label']}: {value_label}"
+        return f"{field['label']}: {option_label([field], field_key, value)}"
     return f"{field_key}: {value}"

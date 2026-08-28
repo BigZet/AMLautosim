@@ -1,17 +1,87 @@
-version: '3.8'
 services:
   db:
-    image: postgres:15
+    image: postgres:16
     container_name: aml_postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: amldb
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aml}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-aml} -d ${POSTGRES_DB:-aml_simulator}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: aml_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:-aml}@db:5432/${POSTGRES_DB:-aml_simulator}
+      SECRET_KEY: ${SECRET_KEY:-change-me-for-production}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-admin12345}
+    command: >-
+      sh -c "python -m scripts.seed_database --wait-for-db --migrate
+      && uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "${API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  play:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: aml_play_ui
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_URL: http://api:8000
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    command: >-
+      streamlit run src/aml_workshop_simulator/ui/participant/app.py
+      --server.port 8501 --server.address 0.0.0.0 --server.headless true
+    ports:
+      - "${PLAY_PORT:-8501}:8501"
+
+  admin:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    container_name: aml_admin_ui
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_URL: http://api:8000
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    command: >-
+      streamlit run src/aml_workshop_simulator/ui/admin/app.py
+      --server.port 8502 --server.address 0.0.0.0 --server.headless true
+    ports:
+      - "${ADMIN_PORT:-8502}:8502"
 
 volumes:
   postgres_data:
