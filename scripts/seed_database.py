@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
 from src.aml_workshop_simulator.core.config import settings  # noqa: E402
 from src.aml_workshop_simulator.core.security import get_password_hash  # noqa: E402
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
+from src.aml_workshop_simulator.db.models.audit_events import AuditEvent  # noqa: E402
 from src.aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
 from src.aml_workshop_simulator.db.models.users import User  # noqa: E402
 from src.aml_workshop_simulator.db.session import AsyncSessionLocal, async_engine  # noqa: E402
@@ -154,15 +155,30 @@ async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]
         if round_obj.status == "draft":
             round_obj.game_config = reference_game_config(cards)
         return round_obj
+    now = datetime.now(UTC)
     round_obj = Round(
         title=DEMO_ROUND_TITLE,
         status="draft",
         config_revision=1,
         game_config=reference_game_config(cards),
         created_by_user_id=admin.id,
-        created_at=datetime.now(UTC),
+        created_at=now,
     )
     db.add(round_obj)
+    await db.flush()
+    # The audit trail must show how the round came to exist, even when it was
+    # created by the seed rather than by an administrator command.
+    db.add(
+        AuditEvent(
+            actor_user_id=admin.id,
+            round_id=round_obj.id,
+            event_type="round_created",
+            target_type="round",
+            target_id=str(round_obj.id),
+            reason="Seeded demo round",
+            created_at=now,
+        )
+    )
     await db.flush()
     return round_obj
 
@@ -195,18 +211,10 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
         }
 
 
-async def main_async(args: argparse.Namespace) -> None:
-    if args.wait_for_db:
-        await wait_for_db()
-    if args.migrate:
-        run_migrations()
-    summary = await seed(activate_round=args.activate_round)
+async def _seed_and_dispose(activate_round: bool) -> dict[str, Any]:
+    summary = await seed(activate_round=activate_round)
     await async_engine.dispose()
-    print(
-        "seed complete: "
-        f"cards={summary['cards']} admin_id={summary['admin_id']} "
-        f"round_id={summary['round_id']} status={summary['round_status']}"
-    )
+    return summary
 
 
 def main() -> None:
@@ -218,7 +226,18 @@ def main() -> None:
         action="store_true",
         help="activate the demo round when no other round is active",
     )
-    asyncio.run(main_async(parser.parse_args()))
+    args = parser.parse_args()
+    if args.wait_for_db:
+        asyncio.run(wait_for_db())
+    if args.migrate:
+        # Alembic opens its own event loop, so migrations must run outside ours.
+        run_migrations()
+    summary = asyncio.run(_seed_and_dispose(args.activate_round))
+    print(
+        "seed complete: "
+        f"cards={summary['cards']} admin_id={summary['admin_id']} "
+        f"round_id={summary['round_id']} status={summary['round_status']}"
+    )
 
 
 if __name__ == "__main__":

@@ -952,7 +952,17 @@ async def upsert_adjustment(
             ),
         },
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        # Two administrators created the first overlay at the same time: the
+        # unique index decides, the loser retries with the new revision.
+        await db.rollback()
+        raise Conflict(
+            "Корректировка уже создана другим администратором. Обновите страницу.",
+            code="adjustment_revision_conflict",
+            details={"current_revision": 1},
+        ) from exc
     await db.refresh(adjustment)
 
     def effective(override: Decimal | None, base: Any) -> str:

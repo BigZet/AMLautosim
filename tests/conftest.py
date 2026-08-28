@@ -131,7 +131,9 @@ def client(clean_database: None) -> Iterator[Any]:
 
     from src.aml_workshop_simulator.api.main import app
 
-    with TestClient(app) as test_client:
+    # Unhandled server errors must surface as the documented envelope, exactly
+    # as they would behind uvicorn, instead of propagating into the test.
+    with TestClient(app, raise_server_exceptions=False) as test_client:
         yield test_client
 
 
