@@ -124,6 +124,29 @@ def test_native_pydantic_failures_use_the_same_envelope(client, participant, act
     assert body["details"]["violations"]
 
 
+def test_short_registration_password_has_an_actionable_message(client) -> None:
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "short-password@example.com",
+            "display_name": "Игрок",
+            "password": "short1234",
+        },
+    )
+
+    assert response.status_code == 422
+    body = response.json()
+    assert body["code"] == "validation_error"
+    assert body["message"] == "Пароль должен содержать не менее 10 символов."
+    assert body["details"]["violations"] == [
+        {
+            "field": "password",
+            "reason": "string_too_short",
+            "message": "Пароль должен содержать не менее 10 символов.",
+        }
+    ]
+
+
 def test_money_is_serialised_as_a_fixed_point_string(client, active_round, cards) -> None:
     card = cards["salary"]
     assert card["min_amount"] == "10000.00"

@@ -32,6 +32,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:-aml}@db:5432/${POSTGRES_DB:-aml_simulator}
+      DB_POOL_DISABLED: "true"
       SECRET_KEY: ${SECRET_KEY:-change-me-for-production}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}

@@ -82,19 +82,28 @@ async def http_exception_handler(
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
-    violations = [
-        {
-            "field": ".".join(str(part) for part in error.get("loc", ())[1:]) or "body",
-            "reason": error.get("type", "value_error"),
-            "message": error.get("msg", "Некорректное значение"),
-        }
-        for error in exc.errors()
-    ]
+    violations = []
+    for error in exc.errors():
+        field = ".".join(str(part) for part in error.get("loc", ())[1:]) or "body"
+        reason = error.get("type", "value_error")
+        message = error.get("msg", "Некорректное значение")
+        if field == "password" and reason == "string_too_short":
+            minimum = (error.get("ctx") or {}).get("min_length", 10)
+            message = f"Пароль должен содержать не менее {minimum} символов."
+        violations.append({"field": field, "reason": reason, "message": message})
+
+    response_message = "Запрос не соответствует контракту API"
+    if (
+        len(violations) == 1
+        and violations[0]["field"] == "password"
+        and violations[0]["reason"] == "string_too_short"
+    ):
+        response_message = violations[0]["message"]
     return _envelope(
         request,
         422,
         "validation_error",
-        "Запрос не соответствует контракту API",
+        response_message,
         {"violations": violations},
     )
 
