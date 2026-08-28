@@ -1,8 +1,18 @@
 from __future__ import annotations
 
 import os
+import uuid
 from typing import Any, Optional
+
 import httpx
+
+#: Per-method (connect, read) timeouts from docs/api.md section 16.
+TIMEOUTS = {
+    "GET": httpx.Timeout(connect=3.0, read=10.0, write=10.0, pool=5.0),
+    "AUTH": httpx.Timeout(connect=3.0, read=10.0, write=10.0, pool=5.0),
+    "WRITE": httpx.Timeout(connect=3.0, read=15.0, write=15.0, pool=5.0),
+    "SCORE": httpx.Timeout(connect=3.0, read=30.0, write=30.0, pool=5.0),
+}
 
 
 class APIClientError(Exception):
@@ -26,17 +36,29 @@ class SimulatorAPIClient:
                 "API_URL",
                 "http://127.0.0.1:8000")).rstrip("/")
         self.api_prefix = "/api/v1"
-        self._client = httpx.Client(base_url=self.base_url, timeout=30.0)
+        # The shared transport carries no session id: every protected call
+        # passes X-Session-ID explicitly.
+        self._client = httpx.Client(base_url=self.base_url, timeout=TIMEOUTS["GET"])
 
     def _url(self, path: str) -> str:
         if path.startswith("/"):
             return f"{self.api_prefix}{path}"
         return f"{self.api_prefix}/{path}"
 
-    def _headers(self, session_id: str | None = None) -> dict[str, str]:
-        headers = {"Content-Type": "application/json"}
+    def _headers(
+        self,
+        session_id: str | None = None,
+        request_id: str | None = None,
+        idempotency_key: str | None = None,
+    ) -> dict[str, str]:
+        headers = {
+            "Content-Type": "application/json",
+            "X-Request-ID": request_id or str(uuid.uuid4()),
+        }
         if session_id:
             headers["X-Session-ID"] = session_id
+        if idempotency_key:
+            headers["Idempotency-Key"] = idempotency_key
         return headers
 
     def _handle_response(self, response: httpx.Response) -> Any:
@@ -113,17 +135,29 @@ class SimulatorAPIClient:
             headers=self._headers(session_id))
         return self._handle_response(resp)
 
-    def put_scenario(self,
-                     round_id: int,
-                     steps: list[dict[str,
-                                      Any]],
-                     expected_revision: int,
-                     session_id: str) -> dict[str,
-                                              Any]:
+    def put_scenario(
+        self,
+        round_id: int,
+        steps: list[dict[str, Any]],
+        expected_revision: int,
+        session_id: str,
+        client_mutation_id: str,
+    ) -> dict[str, Any]:
+        """Full draft replacement.
+
+        `client_mutation_id` makes the call safe to retry: the same id with the
+        same payload returns the original result instead of creating a second
+        revision.
+        """
         resp = self._client.put(
             self._url(f"/rounds/{round_id}/scenario"),
-            json={"expected_revision": expected_revision, "steps": steps},
+            json={
+                "expected_revision": expected_revision,
+                "client_mutation_id": client_mutation_id,
+                "steps": steps,
+            },
             headers=self._headers(session_id),
+            timeout=TIMEOUTS["WRITE"],
         )
         return self._handle_response(resp)
 
@@ -136,6 +170,7 @@ class SimulatorAPIClient:
             self._url(f"/rounds/{round_id}/scenario/submit"),
             json={"expected_revision": expected_revision},
             headers=self._headers(session_id),
+            timeout=TIMEOUTS["WRITE"],
         )
         return self._handle_response(resp)
 
@@ -209,19 +244,23 @@ class SimulatorAPIClient:
         return self._handle_response(resp)
 
     def admin_activate_round(
-            self, round_id: int, session_id: str) -> dict[str, Any]:
+        self, round_id: int, session_id: str, idempotency_key: str | None = None
+    ) -> dict[str, Any]:
         resp = self._client.post(
-            self._url(
-                f"/admin/rounds/{round_id}/activate"),
-            headers=self._headers(session_id))
+            self._url(f"/admin/rounds/{round_id}/activate"),
+            headers=self._headers(session_id, idempotency_key=idempotency_key),
+            timeout=TIMEOUTS["WRITE"],
+        )
         return self._handle_response(resp)
 
     def admin_trigger_scoring(
-            self, round_id: int, session_id: str) -> dict[str, Any]:
+        self, round_id: int, session_id: str, idempotency_key: str | None = None
+    ) -> dict[str, Any]:
         resp = self._client.post(
-            self._url(
-                f"/admin/rounds/{round_id}/score"),
-            headers=self._headers(session_id))
+            self._url(f"/admin/rounds/{round_id}/score"),
+            headers=self._headers(session_id, idempotency_key=idempotency_key),
+            timeout=TIMEOUTS["SCORE"],
+        )
         return self._handle_response(resp)
 
     def admin_get_stats(self, round_id: int,
@@ -237,8 +276,7 @@ class SimulatorAPIClient:
                                 query: str | None,
                                 access: str,
                                 status: str | None,
-                                session_id: str) -> list[dict[str,
-                                                              Any]]:
+                                session_id: str) -> dict[str, Any]:
         params = {"access": access}
         if query:
             params["query"] = query
@@ -275,6 +313,7 @@ class SimulatorAPIClient:
                 "reason": reason,
                 "expected_access_revision": expected_access_revision},
             headers=self._headers(session_id),
+            timeout=TIMEOUTS["WRITE"],
         )
         return self._handle_response(resp)
 
@@ -299,19 +338,34 @@ class SimulatorAPIClient:
                 "game_score_override": game_override,
             },
             headers=self._headers(session_id),
+            timeout=TIMEOUTS["WRITE"],
         )
         return self._handle_response(resp)
 
     def admin_clear_leaderboard_adjustment(
-            self,
-            round_id: int,
-            participant_id: int,
-            session_id: str) -> None:
+        self,
+        round_id: int,
+        participant_id: int,
+        session_id: str,
+        expected_revision: int,
+    ) -> None:
         resp = self._client.delete(
             self._url(
-                f"/admin/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment"),
-            headers=self._headers(session_id))
+                f"/admin/rounds/{round_id}/participants/{participant_id}"
+                "/leaderboard-adjustment"
+            ),
+            params={"expected_revision": expected_revision},
+            headers=self._headers(session_id),
+            timeout=TIMEOUTS["WRITE"],
+        )
         self._handle_response(resp)
+
+    def admin_get_leaderboard(self, round_id: int, session_id: str) -> dict[str, Any]:
+        resp = self._client.get(
+            self._url(f"/admin/rounds/{round_id}/leaderboard"),
+            headers=self._headers(session_id),
+        )
+        return self._handle_response(resp)
 
     def admin_get_audit_events(
             self, round_id: int, session_id: str) -> dict[str, Any]:

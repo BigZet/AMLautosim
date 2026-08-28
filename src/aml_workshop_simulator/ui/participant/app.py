@@ -1,933 +1,876 @@
+"""Participant Streamlit application.
+
+Every piece of state shown here comes from `/api/v1`; the UI owns no game rule
+of its own. The card contract served by the API decides which channels, context
+fields and action details a step may contain, so the form can never offer a
+value the server would reject.
+"""
+
 from __future__ import annotations
 
 import sys
+import uuid
 from html import escape
 from pathlib import Path
 from typing import Any
-from uuid import uuid4
 
-# Ensure project root is in sys.path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
+ROOT = Path(__file__).resolve().parents[4]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-import pandas as pd
-import streamlit as st
+import streamlit as st  # noqa: E402
 
-from src.aml_workshop_simulator.ui.shared.api_client import (
-    SimulatorAPIClient,
-    APIClientError,
-)
-from src.aml_workshop_simulator.ui.shared.components import (
-    render_catboost_features_inspector,
-)
-from src.aml_workshop_simulator.services.local_rules import (
-    INITIAL_BALANCE,
-    INITIAL_ENERGY,
-    INITIAL_TIME,
-    INITIAL_TRUST,
-    MAX_ACTIONS,
-    MAX_IDENTICAL_STEPS,
-    MAX_NIGHT_OPERATIONS,
-    TARGET_OUTFLOW,
-    CHANNEL_LABELS,
-    COUNTRY_RISK_LABELS,
-    RECIPIENT_TYPE_LABELS,
-    TIME_OF_DAY_LABELS,
-    VELOCITY_LABELS,
-)
-from src.aml_workshop_simulator.services.action_parameters import (
-    action_fields_for,
-    context_fields_for,
-    context_value_label,
-    default_action_details,
-    default_context,
-    detail_factor_label,
-    normalize_action_details,
-    action_detail_summary,
-)
-from src.aml_workshop_simulator.services.scenario_service import (
-    calculate_resource_snapshot,
+from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
+from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
+    PLAY_COOKIE,
+    clear_session,
+    get_api_client,
+    get_cookie_controller,
+    reset_user_state,
+    resolve_session,
+    store_session,
 )
 
 st.set_page_config(
-    page_title="AML: игра против алгоритма",
+    page_title="AML Workshop Simulator",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-st.markdown(
-    """
-    <style>
-    :root {
-        --aml-ink: var(--text-color);
-        --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
-        --aml-line: color-mix(in srgb, var(--text-color) 18%, transparent);
-        --aml-surface: var(--secondary-background-color);
-        --aml-soft: color-mix(in srgb, var(--primary-color) 9%, var(--background-color));
-        --aml-primary: var(--primary-color);
-        --aml-warning: #d89022;
-        --aml-danger: #d65353;
-        --aml-success: #2e9e5b;
-    }
-    .block-container {
-        max-width: 1180px;
-        padding-top: 1.5rem;
-        padding-bottom: 4rem;
-    }
-    [data-testid="stSidebar"] {
-        border-right: 1px solid var(--aml-line);
-    }
-    [data-testid="stMetric"] {
-        min-height: 88px;
-        padding: .8rem .9rem;
-        border: 1px solid var(--aml-line);
-        border-radius: 6px;
-        background: var(--aml-surface);
-    }
-    .aml-kicker {
-        margin-bottom: .35rem;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--aml-primary);
-    }
-    .aml-page-title {
-        margin: 0 0 .35rem;
-        font-size: 32px !important;
-        font-weight: 800;
-        line-height: 1.15 !important;
-    }
-    .aml-subtitle {
-        max-width: 780px;
-        margin: 0 0 1.25rem;
-        color: var(--aml-muted);
-        font-size: 15px;
-    }
-    .aml-brand {
-        padding: .35rem 0 .8rem;
-        border-bottom: 1px solid var(--aml-line);
-    }
-    .aml-brand-title {font-size: 17px; font-weight: 700;}
-    .aml-brand-caption {margin-top: .2rem; font-size: 12px; color: var(--aml-muted);}
-    .aml-player {
-        padding: .75rem;
-        border: 1px solid var(--aml-line);
-        border-radius: 6px;
-        background: var(--aml-surface);
-        margin: .5rem 0;
-    }
-    .aml-player-name {font-weight: 700;}
-    .aml-player-email {color: var(--aml-muted); font-size: 12px;}
-    .aml-card-specs {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: .5rem;
-        margin: .75rem 0;
-    }
-    .aml-spec {
-        padding: .5rem .6rem;
-        border: 1px solid var(--aml-line);
-        border-radius: 6px;
-        background: var(--aml-surface);
-        font-size: 12px;
-    }
-    .aml-spec span {display: block; color: var(--aml-muted); font-size: 11px;}
-    .aml-spec strong {display: block; margin-top: .15rem;}
-    .aml-impact-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: .5rem;
-        margin: .5rem 0 .8rem;
-    }
-    .aml-impact {
-        padding: .5rem .6rem;
-        border: 1px solid var(--aml-line);
-        border-radius: 6px;
-        background: var(--aml-surface);
-        font-size: 12px;
-    }
-    .aml-impact span {display: block; color: var(--aml-muted); font-size: 11px;}
-    .aml-impact strong {display: block; margin-top: .15rem; color: var(--aml-primary);}
-    .aml-score-hero {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: .75rem;
-        margin: 1rem 0;
-    }
-    .aml-score-main {
-        padding: 1rem;
-        border: 2px solid var(--aml-primary);
-        border-radius: 8px;
-        background: var(--aml-soft);
-    }
-    .aml-score-detail {
-        padding: 1rem;
-        border: 1px solid var(--aml-line);
-        border-radius: 8px;
-        background: var(--aml-surface);
-    }
-    .aml-score-label {color: var(--aml-muted); font-size: 13px;}
-    .aml-score-value {font-size: 22px; font-weight: 700; margin-top: .25rem;}
-    .aml-status-box {
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid var(--aml-primary);
-        background: var(--aml-surface);
-        margin: 1rem 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+STYLES = """
+<style>
+:root {
+    --aml-line: color-mix(in srgb, var(--text-color) 18%, transparent);
+    --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
+    --aml-danger: #c0392b;
+    --aml-ok: #1e8449;
+}
+.block-container { max-width: 1240px; padding-top: 1.2rem; padding-bottom: 3rem; }
+[data-testid="stMetric"] {
+    padding: .7rem .8rem;
+    border: 1px solid var(--aml-line);
+    border-radius: 6px;
+    background: var(--secondary-background-color);
+}
+.aml-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase;
+    color: var(--primary-color); margin-bottom: .3rem; }
+.aml-title { font-size: 30px; font-weight: 800; line-height: 1.2; margin: 0 0 .3rem; }
+.aml-subtitle { color: var(--aml-muted); font-size: 15px; margin: 0 0 1rem; max-width: 820px; }
+.aml-violation {
+    border-left: 4px solid var(--aml-danger);
+    background: color-mix(in srgb, var(--aml-danger) 10%, var(--background-color));
+    padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
+}
+.aml-violation strong { color: var(--aml-danger); }
+.aml-ok-box {
+    border-left: 4px solid var(--aml-ok);
+    background: color-mix(in srgb, var(--aml-ok) 10%, var(--background-color));
+    padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
+}
+.aml-step-meta { color: var(--aml-muted); font-size: 13px; }
+.aml-status-badge {
+    display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+    border: 1px solid var(--aml-line); font-size: 12px; font-weight: 600;
+}
+table.aml-board { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.aml-board th, table.aml-board td {
+    border-bottom: 1px solid var(--aml-line); padding: .45rem .5rem; text-align: left;
+}
+.aml-scroll { overflow-x: auto; }
+</style>
+"""
+st.markdown(STYLES, unsafe_allow_html=True)
+
+STATUS_LABELS = {
+    "draft": "Черновик",
+    "submitted": "Отправлен",
+    "scored": "Оценен",
+    "none": "Не создан",
+}
+RISK_LABELS = {
+    "normal": "Норма",
+    "review": "Требует проверки",
+    "suspicious": "Подозрительно",
+}
 
 
-@st.cache_resource
-def get_api_client() -> SimulatorAPIClient:
-    return SimulatorAPIClient()
+# --------------------------------------------------------------------------
+# State helpers
+# --------------------------------------------------------------------------
 
 
 def init_state() -> None:
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = None
-    if "user" not in st.session_state:
-        st.session_state.user = None
-    if "draft_steps" not in st.session_state:
-        st.session_state.draft_steps = []
-    if "expected_revision" not in st.session_state:
-        st.session_state.expected_revision = 0
-    if "server_scenario" not in st.session_state:
-        st.session_state.server_scenario = None
-    if "loaded_user_id" not in st.session_state:
-        st.session_state.loaded_user_id = None
+    defaults: dict[str, Any] = {
+        "draft_steps": [],
+        "server_revision": 0,
+        "server_scenario": None,
+        "field_errors": {},
+        "chain_violations": [],
+        "flash": None,
+        "editing_step_id": None,
+        "pending_command": None,
+    }
+    for key, value in defaults.items():
+        st.session_state.setdefault(key, value)
 
 
-def format_money(val: float | int) -> str:
-    return f"{val:,.0f} ₽".replace(",", " ")
-
-
-def signed_money(val: float | int) -> str:
-    sign = "+" if val > 0 else ""
-    return f"{sign}{val:,.0f} ₽".replace(",", " ")
-
-
-def render_page_header(kicker: str, title: str, subtitle: str) -> None:
-    st.markdown(f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="aml-page-title">{escape(title)}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True)
-
-
-def sync_scenario_from_server(client: SimulatorAPIClient, round_id: int, session_id: str, user_id: int) -> dict[str, Any] | None:
-    """Fetch scenario from server and sync session_state if not already synced for this user."""
+def money(value: Any) -> str:
     try:
-        scen = client.get_scenario(round_id, session_id)
-        st.session_state.server_scenario = scen
-        if scen:
-            st.session_state.draft_steps = scen.get("steps", [])
-            st.session_state.expected_revision = scen.get("revision", 0)
-        st.session_state.loaded_user_id = user_id
-        return scen
-    except Exception as e:
-        return None
+        return f"{float(value):,.0f} ₽".replace(",", " ")
+    except (TypeError, ValueError):
+        return str(value)
 
 
-def login_screen(client: SimulatorAPIClient) -> None:
-    render_page_header(
-        "AML Workshop Simulator",
-        "Вход в симулятор",
-        "Авторизуйтесь или создайте игровой профиль для участия в раунде.",
+def header(kicker: str, title: str, subtitle: str) -> None:
+    st.markdown(f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="aml-title">{escape(title)}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True
     )
 
-    tab_login, tab_register = st.tabs(["Вход в систему", "Регистрация"])
+
+def marker(testid: str, value: Any) -> None:
+    """Hidden, stable DOM anchor for browser assertions."""
+    st.markdown(
+        f'<span data-testid="{escape(testid)}" style="display:none">{escape(str(value))}</span>',
+        unsafe_allow_html=True,
+    )
+
+
+def show_flash() -> None:
+    flash = st.session_state.get("flash")
+    if not flash:
+        return
+    kind, message = flash
+    container = {"success": st.success, "error": st.error, "warning": st.warning}.get(
+        kind, st.info
+    )
+    container(message)
+    marker(f"flash-{kind}", message)
+    st.session_state["flash"] = None
+
+
+def set_flash(kind: str, message: str) -> None:
+    st.session_state["flash"] = (kind, message)
+
+
+def apply_error(error: APIClientError) -> None:
+    """Map an error envelope onto per-step field errors and a flash message."""
+    violations = (error.details or {}).get("violations", []) if error.details else []
+    field_errors: dict[str, str] = {}
+    chain: list[dict[str, Any]] = []
+    for violation in violations:
+        step_id = violation.get("step_id")
+        field = violation.get("field")
+        if step_id and field:
+            field_errors[f"{step_id}::{field}"] = violation.get("message", "")
+        chain.append(violation)
+    st.session_state["field_errors"] = field_errors
+    st.session_state["chain_violations"] = chain
+    set_flash("error", error.message)
+
+
+def store_scenario(scenario: dict[str, Any]) -> None:
+    st.session_state["server_scenario"] = scenario
+    st.session_state["server_revision"] = scenario.get("revision", 0)
+    st.session_state["draft_steps"] = [dict(step) for step in scenario.get("steps", [])]
+    resources = scenario.get("resources") or {}
+    violations = resources.get("violations", [])
+    st.session_state["chain_violations"] = violations
+    st.session_state["field_errors"] = {
+        f"{item['step_id']}::{item['field']}": item.get("message", "")
+        for item in violations
+        if item.get("step_id") and item.get("field")
+    }
+
+
+def load_scenario(client: Any, round_id: int, session_id: str) -> None:
+    scenario = client.get_scenario(round_id, session_id)
+    if scenario:
+        store_scenario(scenario)
+    else:
+        st.session_state["server_scenario"] = None
+        st.session_state["server_revision"] = 0
+        st.session_state["draft_steps"] = []
+        st.session_state["chain_violations"] = []
+        st.session_state["field_errors"] = {}
+    st.session_state["loaded_for"] = (round_id, session_id)
+
+
+# --------------------------------------------------------------------------
+# Server commands
+# --------------------------------------------------------------------------
+
+
+def save_draft(
+    client: Any, round_id: int, session_id: str, *, quiet: bool = False
+) -> dict[str, Any] | None:
+    """PUT the local draft; returns the canonical scenario or None on error."""
+    if st.session_state.get("pending_command"):
+        return None
+    st.session_state["pending_command"] = "save"
+    try:
+        scenario = client.put_scenario(
+            round_id,
+            st.session_state["draft_steps"],
+            st.session_state["server_revision"],
+            session_id,
+            client_mutation_id=str(uuid.uuid4()),
+        )
+    except APIClientError as error:
+        apply_error(error)
+        return None
+    finally:
+        st.session_state["pending_command"] = None
+
+    store_scenario(scenario)
+    if not quiet:
+        resources = scenario.get("resources") or {}
+        if resources.get("valid"):
+            set_flash(
+                "success",
+                f"Черновик сохранен на сервере (ревизия {scenario['revision']}).",
+            )
+        else:
+            set_flash(
+                "warning",
+                f"Черновик сохранен (ревизия {scenario['revision']}), "
+                "но содержит нарушения правил — отправка недоступна.",
+            )
+    return scenario
+
+
+def submit_scenario(client: Any, round_id: int, session_id: str) -> None:
+    if st.session_state.get("pending_command"):
+        return
+    saved = save_draft(client, round_id, session_id, quiet=True)
+    if saved is None:
+        return
+    st.session_state["pending_command"] = "submit"
+    try:
+        scenario = client.submit_scenario(round_id, saved["revision"], session_id)
+    except APIClientError as error:
+        apply_error(error)
+        return
+    finally:
+        st.session_state["pending_command"] = None
+    store_scenario(scenario)
+    set_flash("success", "Сценарий отправлен и ожидает скоринга организатора.")
+
+
+# --------------------------------------------------------------------------
+# Login
+# --------------------------------------------------------------------------
+
+
+def login_screen(client: Any, controller: Any) -> None:
+    header(
+        "AML Workshop Simulator",
+        "Вход в симулятор",
+        "Войдите или создайте игровой профиль, чтобы собрать цепочку операций.",
+    )
+    marker("auth-state", "anonymous")
+    show_flash()
+
+    tab_login, tab_register = st.tabs(["Вход", "Регистрация"])
 
     with tab_login:
         with st.form("login_form"):
-            email = st.text_input("Email", value="demo@aml.local")
-            password = st.text_input("Пароль", type="password", value="demo12345")
-            submit = st.form_submit_button("Войти в игру", use_container_width=True, type="primary")
-
-            if submit:
-                try:
-                    res = client.login(email.strip(), password, audience="play")
-                    st.session_state.session_id = res["session_id"]
-                    st.session_state.user = res["user"]
-                    st.session_state.loaded_user_id = None
-                    st.success("Успешный вход!")
-                    st.rerun()
-                except APIClientError as e:
-                    st.error(f"Ошибка входа: {e.message}")
+            email = st.text_input("Email", key="login_email")
+            password = st.text_input("Пароль", type="password", key="login_password")
+            submitted = st.form_submit_button(
+                "Войти", use_container_width=True, type="primary"
+            )
+        if submitted:
+            try:
+                created = client.login(email.strip(), password, audience="play")
+            except APIClientError as error:
+                set_flash("error", error.message)
+                st.rerun()
+                return
+            st.session_state["session_id"] = created["session_id"]
+            st.session_state["user"] = created["user"]
+            store_session(
+                controller, PLAY_COOKIE, created["session_id"], created.get("expires_at")
+            )
+            st.rerun()
 
     with tab_register:
         with st.form("register_form"):
-            reg_name = st.text_input("Игровой псевдоним", value="Финансовый стратег")
-            reg_email = st.text_input("Email")
-            reg_pass = st.text_input("Пароль", type="password")
-            reg_submit = st.form_submit_button("Зарегистрироваться", use_container_width=True)
-
-            if reg_submit:
-                try:
-                    client.register(reg_email.strip(), reg_name.strip(), reg_pass)
-                    st.success("Регистрация успешна! Теперь выполните вход на вкладке 'Вход'.")
-                except APIClientError as e:
-                    st.error(f"Ошибка регистрации: {e.message}")
-
-
-def render_resource_dashboard(resources: dict[str, Any]) -> None:
-    res = resources.get("resources_after", {}) if "resources_after" in resources else resources
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.metric("Баланс", format_money(float(res.get("balance", 0))))
-    with c2:
-        st.metric("Энергия", f"{int(res.get('energy', 0))} ед.")
-    with c3:
-        st.metric("Время", f"{int(res.get('time', 0))} ч.")
-    with c4:
-        st.metric("Доверие", f"{int(res.get('trust', 0))} %")
-    with c5:
-        st.metric("Слотов свободно", f"{int(res.get('slots', 0))}")
-
-
-def render_round_limits(resources: dict[str, Any]) -> None:
-    limits = resources.get("limits", [])
-    if limits:
-        rows = []
-        for item in limits:
-            rows.append(
-                {
-                    "Квота": item["label"],
-                    "Использовано": format_money(item["used"]),
-                    "Лимит": format_money(item["limit"]),
-                    "Осталось": format_money(item["remaining"]),
-                    "Статус": "⚠️ Превышен" if item["used"] > item["limit"] else "✅ В норме",
-                }
+            display_name = st.text_input("Игровой псевдоним", key="register_name")
+            reg_email = st.text_input("Email", key="register_email")
+            reg_password = st.text_input(
+                "Пароль (не менее 10 символов)", type="password", key="register_password"
             )
-        st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
-    st.caption(
-        f"Дополнительно: не более {MAX_NIGHT_OPERATIONS} ночных операций и "
-        f"не более {MAX_IDENTICAL_STEPS} одинаковых шагов подряд."
-    )
-
-
-def render_home() -> None:
-    client = get_api_client()
-    session_id = st.session_state.session_id
-    user = st.session_state.user
-
-    try:
-        active_round = client.get_active_round()
-    except Exception as e:
-        st.error(f"Ошибка загрузки раунда: {e}")
-        return
-
-    if not active_round:
-        render_page_header("AML Simulator", f"Добро пожаловать, {user.get('display_name')}", "Ожидание раунда")
-        st.warning("В данный момент нет активного раунда. Ожидайте запуска организатором.")
-        if st.button("🔄 Проверить статус"):
+            registered = st.form_submit_button("Зарегистрироваться", use_container_width=True)
+        if registered:
+            try:
+                client.register(reg_email.strip(), display_name.strip(), reg_password)
+            except APIClientError as error:
+                set_flash("error", error.message)
+                st.rerun()
+                return
+            set_flash("success", "Регистрация выполнена. Теперь войдите на вкладке «Вход».")
             st.rerun()
-        return
 
-    round_id = active_round["id"]
-    scenario_info = st.session_state.server_scenario
 
-    render_page_header(
-        f"Раунд #{round_id} · {active_round['title']}",
-        f"Добро пожаловать, {user.get('display_name')}",
-        "Проведите нужный оборот, сохраните ресурсы и соберите оптимальный маршрут.",
-    )
+# --------------------------------------------------------------------------
+# Scenario builder
+# --------------------------------------------------------------------------
 
-    task_col, rating_col = st.columns([1.35, 1], gap="large")
-    with task_col:
-        st.subheader("🎯 Игровая задача")
-        st.write(
-            f"Проведите не менее **{format_money(TARGET_OUTFLOW)}** через расходные операции "
-            f"максимум за **{MAX_ACTIONS}** действий. Баланс, энергия, время и доверие не должны опуститься ниже нуля."
+
+def default_step(card: dict[str, Any]) -> dict[str, Any]:
+    context: dict[str, Any] = {
+        "country_risk": "low",
+        "recipient_type": "known_counterparty",
+        "time_of_day": "day",
+        "velocity": "normal",
+        "channel": card["channels"][0],
+        "has_documents": True,
+    }
+    for field in card.get("context_fields", []):
+        context[field["key"]] = field["default"]
+    return {
+        "step_id": str(uuid.uuid4()),
+        "card": {"id": card["id"], "code": card["code"], "version": card["version"]},
+        "amount": f"{float(card['min_amount']):.2f}",
+        "frequency": 1,
+        "context": context,
+        "action_details": {
+            field["key"]: field["default"] for field in card.get("fields", [])
+        },
+    }
+
+
+def render_step_form(
+    card: dict[str, Any],
+    step: dict[str, Any],
+    key_prefix: str,
+) -> dict[str, Any]:
+    """Render every editable field of one step and return the updated step."""
+    context = dict(step["context"])
+    details = dict(step["action_details"])
+
+    amount_col, frequency_col, channel_col = st.columns([1.3, 0.7, 1.2])
+    with amount_col:
+        amount = st.number_input(
+            f"Сумма, ₽ (от {float(card['min_amount']):,.0f} до {float(card['max_amount']):,.0f})".replace(
+                ",", " "
+            ),
+            min_value=0.0,
+            value=float(step["amount"]),
+            step=1000.0,
+            format="%.2f",
+            key=f"{key_prefix}_amount",
         )
-        c_goal, c_bal, c_stat = st.columns(3)
-        with c_goal:
-            st.metric("Цель оборота", format_money(TARGET_OUTFLOW))
-        with c_bal:
-            st.metric("Стартовый баланс", format_money(INITIAL_BALANCE))
-        with c_stat:
-            status_text = "Черновик"
-            if scenario_info:
-                if scenario_info.get("status") == "submitted":
-                    status_text = "🟢 Отправлен"
-                elif scenario_info.get("status") == "scored":
-                    status_text = "🏁 Оценен"
-                else:
-                    status_text = "✏️ Черновик"
-            st.metric("Статус сценария", status_text)
-
-    with rating_col:
-        st.subheader("📊 Формула рейтинга")
-        st.write(
-            "60% итогового балла дает незаметность для AML-модели (100 − Риск). "
-            "Остальные 40% зависят от сохраненных ресурсов, комиссий и числа действий."
+    with frequency_col:
+        frequency = st.number_input(
+            f"Повторов (до {card['max_frequency']})",
+            min_value=1,
+            max_value=20,
+            value=int(step["frequency"]),
+            step=1,
+            key=f"{key_prefix}_frequency",
         )
-        st.progress(0.6, text="Незаметность (ML Модель) · 60%")
-        st.progress(0.4, text="Эффективность ресурсов · 40%")
-
-    st.divider()
-    c_btn1, c_btn2 = st.columns([2, 1])
-    with c_btn1:
-        if st.button("🛠️ Перейти в Конструктор сценария", type="primary", use_container_width=True):
-            st.switch_page(scenario_page)
-    with c_btn2:
-        if st.button("🏆 Открыть Лидерборд", use_container_width=True):
-            st.switch_page(leaderboard_page)
-
-
-def render_scenario() -> None:
-    client = get_api_client()
-    session_id = st.session_state.session_id
-    steps = st.session_state.draft_steps
-    server_scen = st.session_state.server_scenario
-
-    try:
-        active_round = client.get_active_round()
-    except Exception as e:
-        st.error(f"Ошибка загрузки раунда: {e}")
-        return
-
-    if not active_round:
-        st.warning("Нет активного раунда.")
-        return
-
-    round_id = active_round["id"]
-    try:
-        cards_catalog = client.get_round_cards(round_id)
-    except Exception as e:
-        st.error(f"Ошибка загрузки карточек: {e}")
-        return
-
-    is_submitted = server_scen and server_scen.get("status") == "submitted"
-
-    render_page_header(
-        "Конструктор сценария",
-        "Соберите финансовый маршрут" if not is_submitted else "Зафиксированный сценарий",
-        "Добавляйте операции и проверяйте порядок шагов, ресурсы и ограничения раунда." if not is_submitted else "Ваш сценарий успешно отправлен в БД и ожидает запуска общего скоринга.",
-    )
-
-    resources = calculate_resource_snapshot(steps, active_round.get("game_config"))
-    render_resource_dashboard(resources)
-
-    with st.expander("Квоты и жесткие ограничения"):
-        render_round_limits(resources)
-
-    st.markdown("---")
-
-    if is_submitted:
-        st.success(
-            f"✅ **Сценарий зафиксирован в базе данных (Ревизия #{server_scen.get('revision')}).** "
-            "Изменение заблокировано. Ожидайте запуска общего скоринга организатором мероприятия."
-        )
-
-        col_left, col_right = st.columns([1.2, 0.8], gap="large")
-        with col_left:
-            render_scenario_steps_readonly(steps, cards_catalog, resources)
-        with col_right:
-            st.subheader("🎯 Результаты валидации")
-            st.write(f"Оборот: **{format_money(float(resources['totals']['gross_outflow']))}** из {format_money(TARGET_OUTFLOW)}")
-            st.write(f"Уплачено комиссий: **{format_money(float(resources['totals']['fees']))}**")
-            st.write(f"Действий в цепочке: **{len(steps)}** из {MAX_ACTIONS}")
-            if st.button("🔄 Проверить готовность результатов", type="primary", use_container_width=True):
-                st.switch_page(result_page)
-        return
-
-    # Normal Editable Builder
-    builder_col, sequence_col = st.columns([1.05, 0.95], gap="large")
-    with builder_col:
-        render_action_builder(steps, cards_catalog)
-    with sequence_col:
-        render_scenario_steps(steps, cards_catalog, resources, round_id, client, session_id)
-
-
-def render_action_builder(steps: list[dict[str, Any]], cards_catalog: list[dict[str, Any]]) -> None:
-    st.subheader("➕ Настройка новой операции")
-    card_options = {f"{c['title']} · {c['category']}": c for c in cards_catalog}
-    selected_label = st.selectbox("Тип операции", list(card_options.keys()))
-    card = card_options[selected_label]
-    code = card["code"]
-
-    desc = card.get("description", "")
-    if desc:
-        st.caption(f"💡 {desc}")
-
-    specs = (
-        ("Сумма", f"{format_money(float(card['min_amount']))} - {format_money(float(card['max_amount']))}"),
-        ("Повторы", f"до {card['max_frequency']} за шаг"),
-        ("Ресурсы", f"{card['costs'].get('energy', 1)} эн. · {card['costs'].get('time', 1)} вр."),
-        ("Комиссия", f"{float(card['fee_rate']) * 100:g}%"),
-    )
-    spec_html = "".join(
-        f'<div class="aml-spec"><span>{escape(label)}</span><strong>{escape(value)}</strong></div>'
-        for label, value in specs
-    )
-    st.markdown(f'<div class="aml-card-specs">{spec_html}</div>', unsafe_allow_html=True)
-
-    basic_tab, context_tab = st.tabs(["Операция", "Контекст"])
-
-    with basic_tab:
-        amount_col, freq_col = st.columns([1.55, 0.85])
-        with amount_col:
-            amount = st.number_input(
-                "Сумма платежа, ₽",
-                min_value=float(card["min_amount"]),
-                max_value=float(card["max_amount"]),
-                value=min(50_000.0, float(card["max_amount"])),
-                step=5000.0,
-                key=f"new_amount_{code}",
-            )
-        with freq_col:
-            frequency = st.number_input(
-                "Повторов",
-                min_value=1,
-                max_value=int(card["max_frequency"]),
-                value=1,
-                key=f"new_freq_{code}",
-            )
-
-        channel_options = card.get("channels", ["bank", "mobile", "web"])
+    with channel_col:
+        channels: list[str] = card["channels"]
+        labels: dict[str, str] = card.get("channel_labels", {})
+        current = context.get("channel", channels[0])
+        index = channels.index(current) if current in channels else 0
         channel = st.selectbox(
             "Канал",
-            channel_options,
-            format_func=lambda v: CHANNEL_LABELS.get(v, v),
-            key=f"new_chan_{code}",
+            channels,
+            index=index,
+            format_func=lambda value: labels.get(value, value),
+            key=f"{key_prefix}_channel",
+        )
+    context["channel"] = channel
+
+    context_fields = card.get("context_fields", [])
+    if context_fields:
+        st.caption("Контекст операции")
+        columns = st.columns(min(3, len(context_fields)))
+        for position, field in enumerate(context_fields):
+            column = columns[position % len(columns)]
+            with column:
+                key = field["key"]
+                widget_key = f"{key_prefix}_ctx_{key}"
+                if field.get("kind") == "toggle":
+                    context[key] = st.toggle(
+                        field["label"],
+                        value=bool(context.get(key, field["default"])),
+                        key=widget_key,
+                    )
+                else:
+                    options = [option["value"] for option in field.get("options", [])]
+                    option_labels = {
+                        option["value"]: option["label"]
+                        for option in field.get("options", [])
+                    }
+                    value = context.get(key, field["default"])
+                    context[key] = st.selectbox(
+                        field["label"],
+                        options,
+                        index=options.index(value) if value in options else 0,
+                        format_func=lambda item, mapping=option_labels: mapping.get(
+                            item, item
+                        ),
+                        key=widget_key,
+                    )
+
+    action_fields = card.get("fields", [])
+    if action_fields:
+        st.caption("Параметры операции")
+        columns = st.columns(min(3, len(action_fields)))
+        for position, field in enumerate(action_fields):
+            column = columns[position % len(columns)]
+            with column:
+                key = field["key"]
+                options = [option["value"] for option in field.get("options", [])]
+                option_labels = {
+                    option["value"]: option["label"] for option in field.get("options", [])
+                }
+                value = details.get(key, field["default"])
+                details[key] = st.selectbox(
+                    field["label"],
+                    options,
+                    index=options.index(value) if value in options else 0,
+                    format_func=lambda item, mapping=option_labels: mapping.get(item, item),
+                    key=f"{key_prefix}_detail_{key}",
+                )
+
+    return {
+        **step,
+        "amount": f"{float(amount):.2f}",
+        "frequency": int(frequency),
+        "context": context,
+        "action_details": details,
+    }
+
+
+def render_builder(cards: dict[str, dict[str, Any]]) -> None:
+    st.subheader("Новая операция")
+    codes = list(cards)
+    selected = st.selectbox(
+        "Тип операции",
+        codes,
+        format_func=lambda code: f"{cards[code]['title']} · {cards[code]['category']}",
+        key="builder_card",
+    )
+    card = cards[selected]
+    st.caption(card.get("description", ""))
+    marker("builder-channels", ",".join(card["channels"]))
+
+    draft_key = f"builder_step_{selected}"
+    if draft_key not in st.session_state:
+        st.session_state[draft_key] = default_step(card)
+    step = render_step_form(card, st.session_state[draft_key], f"builder_{selected}")
+    st.session_state[draft_key] = step
+
+    limit_reached = len(st.session_state["draft_steps"]) >= 8
+    if st.button(
+        "Добавить в цепочку",
+        type="primary",
+        use_container_width=True,
+        key="add_step",
+        disabled=limit_reached,
+    ):
+        new_step = {**step, "step_id": str(uuid.uuid4())}
+        st.session_state["draft_steps"].append(new_step)
+        st.session_state[draft_key] = default_step(card)
+        st.rerun()
+    if limit_reached:
+        st.warning("Достигнут лимит действий раунда: удалите шаг, чтобы добавить новый.")
+
+
+def render_chain(
+    cards_by_key: dict[tuple[str, int], dict[str, Any]],
+    editable: bool,
+) -> None:
+    steps: list[dict[str, Any]] = st.session_state["draft_steps"]
+    st.subheader(f"Цепочка операций ({len(steps)})")
+    marker("chain-length", len(steps))
+    if not steps:
+        st.info("Цепочка пуста. Настройте операцию слева и добавьте её в цепочку.")
+        return
+
+    per_step = {
+        item["step_id"]: item
+        for item in ((st.session_state.get("server_scenario") or {}).get("resources") or {}).get(
+            "per_step", []
+        )
+    }
+    field_errors: dict[str, str] = st.session_state["field_errors"]
+    move: tuple[int, int] | None = None
+    delete_index: int | None = None
+    duplicate_index: int | None = None
+
+    for index, step in enumerate(steps):
+        card = cards_by_key.get((step["card"]["code"], step["card"]["version"]))
+        title = card["title"] if card else step["card"]["code"]
+        step_id = step["step_id"]
+        step_errors = {
+            key.split("::", 1)[1]: value
+            for key, value in field_errors.items()
+            if key.startswith(f"{step_id}::")
+        }
+        with st.container(border=True):
+            st.markdown(
+                f'<div data-testid="step-card-{escape(step_id)}">'
+                f"<strong>{index + 1}. {escape(title)}</strong></div>",
+                unsafe_allow_html=True,
+            )
+            impact = per_step.get(step_id, {})
+            channel_label = (card or {}).get("channel_labels", {}).get(
+                step["context"]["channel"], step["context"]["channel"]
+            )
+            st.markdown(
+                f'<div class="aml-step-meta">{money(step["amount"])} × {step["frequency"]}'
+                f' · канал: <span data-testid="step-channel-{escape(step_id)}">'
+                f"{escape(channel_label)}</span>"
+                + (
+                    f' · баланс после: {money(impact.get("balance_after"))}'
+                    if impact
+                    else ""
+                )
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+            for field, message in step_errors.items():
+                st.markdown(
+                    f'<div class="aml-violation" data-testid="step-error-{escape(step_id)}-'
+                    f'{escape(field)}"><strong>{escape(field)}</strong>: {escape(message)}</div>',
+                    unsafe_allow_html=True,
+                )
+
+            if editable and card is not None:
+                with st.expander("Изменить шаг", expanded=st.session_state["editing_step_id"] == step_id):
+                    updated = render_step_form(card, step, f"edit_{step_id}")
+                    if updated != step:
+                        steps[index] = updated
+                col_up, col_down, col_copy, col_delete = st.columns(4)
+                with col_up:
+                    if st.button(
+                        "Вверх", key=f"up_{step_id}", disabled=index == 0,
+                        use_container_width=True,
+                    ):
+                        move = (index, index - 1)
+                with col_down:
+                    if st.button(
+                        "Вниз", key=f"down_{step_id}",
+                        disabled=index == len(steps) - 1, use_container_width=True,
+                    ):
+                        move = (index, index + 1)
+                with col_copy:
+                    if st.button(
+                        "Дублировать", key=f"copy_{step_id}", use_container_width=True
+                    ):
+                        duplicate_index = index
+                with col_delete:
+                    if st.button(
+                        "Удалить", key=f"delete_{step_id}", use_container_width=True
+                    ):
+                        delete_index = index
+
+    if move is not None:
+        source, target = move
+        steps[source], steps[target] = steps[target], steps[source]
+        st.rerun()
+    if duplicate_index is not None:
+        clone = {
+            **steps[duplicate_index],
+            "step_id": str(uuid.uuid4()),
+            "context": dict(steps[duplicate_index]["context"]),
+            "action_details": dict(steps[duplicate_index]["action_details"]),
+        }
+        steps.insert(duplicate_index + 1, clone)
+        st.rerun()
+    if delete_index is not None:
+        steps.pop(delete_index)
+        st.rerun()
+
+
+def render_resources(scenario: dict[str, Any] | None) -> None:
+    resources = (scenario or {}).get("resources") or {}
+    after = resources.get("resources_after", {})
+    totals = resources.get("totals", {})
+    objective = resources.get("objective", {})
+
+    columns = st.columns(5)
+    values = (
+        ("Баланс", money(after.get("balance", 0)), "balance"),
+        ("Энергия", after.get("energy", 0), "energy"),
+        ("Время", after.get("time", 0), "time"),
+        ("Доверие", after.get("trust", 0), "trust"),
+        ("Слоты", after.get("slots", 0), "slots"),
+    )
+    for column, (label, value, testid) in zip(columns, values, strict=False):
+        with column:
+            st.metric(label, value)
+            marker(f"resource-{testid}", value)
+
+    reached = bool(objective.get("reached"))
+    marker("objective-reached", "true" if reached else "false")
+    marker("resources-valid", "true" if resources.get("valid") else "false")
+    st.caption(
+        f"Расходный оборот {money(totals.get('gross_outflow', 0))} из "
+        f"{money(objective.get('target_outflow', 0))} · комиссии "
+        f"{money(totals.get('fees', 0))}"
+    )
+
+
+def render_violations() -> None:
+    violations = st.session_state.get("chain_violations") or []
+    marker("violation-count", len(violations))
+    if not violations:
+        st.markdown(
+            '<div class="aml-ok-box" data-testid="no-violations">'
+            "Нарушений правил раунда нет.</div>",
+            unsafe_allow_html=True,
+        )
+        return
+    st.markdown("**Нарушения правил раунда**")
+    for violation in violations:
+        st.markdown(
+            f'<div class="aml-violation" data-testid="violation-{escape(violation.get("reason", ""))}">'
+            f"{escape(violation.get('message', ''))}</div>",
+            unsafe_allow_html=True,
         )
 
-        action_fields = card.get("fields", [])
-        detail_values: dict[str, Any] = {}
-        if action_fields:
-            st.markdown("##### Детали платежа")
-            for af in action_fields:
-                k = af["key"]
-                opts = {o["label"]: o["value"] for o in af.get("options", [])}
-                if opts:
-                    chosen = st.selectbox(af["label"], list(opts.keys()), key=f"new_detail_{k}_{code}")
-                    detail_values[k] = opts[chosen]
 
-    with context_tab:
-        ctx_fields = card.get("context_fields", [])
-        context_values: dict[str, Any] = {}
-        for cf in ctx_fields:
-            k = cf["key"]
-            if cf.get("kind") == "toggle":
-                context_values[k] = st.toggle(cf["label"], value=cf.get("default", True), key=f"new_ctx_{k}_{code}")
-            elif cf.get("options"):
-                opts = {o["label"]: o["value"] for o in cf["options"]}
-                chosen = st.selectbox(cf["label"], list(opts.keys()), key=f"new_ctx_{k}_{code}")
-                context_values[k] = opts[chosen]
+def page_scenario() -> None:
+    client = get_api_client()
+    session_id = st.session_state["session_id"]
+    active_round = client.get_active_round()
+    if not active_round:
+        header("Раунд", "Ожидание раунда", "Организатор ещё не активировал раунд.")
+        marker("round-status", "none")
+        return
 
-    proposed_step = {
-        "uid": str(uuid4()),
-        "card_code": code,
-        "card": {"id": card["id"], "code": code, "version": card["version"]},
-        "amount": amount,
-        "frequency": frequency,
-        "channel": channel,
-        "context": {**context_values, "channel": channel},
-        "action_details": detail_values,
-        "details": detail_values,
-    }
+    round_id = active_round["id"]
+    if st.session_state.get("loaded_for") != (round_id, session_id):
+        load_scenario(client, round_id, session_id)
 
-    proposed_res = calculate_resource_snapshot([*steps, proposed_step])
-    proposed_impacts = proposed_res.get("steps") or proposed_res.get("per_step") or []
-    proposed_impact = proposed_impacts[-1] if proposed_impacts else {
-        "money_delta": 0, "energy_cost": 0, "time_cost": 0, "trust_cost": 0
-    }
-    impacts = (
-        ("Баланс", signed_money(proposed_impact.get("money_delta", 0))),
-        ("Энергия", f"−{proposed_impact.get('energy_cost', 0)}"),
-        ("Время", f"−{proposed_impact.get('time_cost', 0)}"),
-        ("Доверие", f"−{proposed_impact.get('trust_cost', 0)}"),
+    cards_list = client.get_round_cards(round_id)
+    cards = {card["code"]: card for card in cards_list}
+    cards_by_key = {(card["code"], card["version"]): card for card in cards_list}
+
+    scenario = st.session_state.get("server_scenario")
+    status = (scenario or {}).get("status", "none")
+    editable = status in {"draft", "none"} and active_round["status"] == "active"
+
+    header(
+        f"Раунд #{round_id}",
+        "Конструктор сценария",
+        "Соберите цепочку операций, сохраните черновик и отправьте её на скоринг.",
     )
-    impact_html = "".join(
-        f'<div class="aml-impact"><span>{escape(label)}</span><strong>{escape(value)}</strong></div>'
-        for label, value in impacts
-    )
+    marker("scenario-status", status)
+    marker("scenario-revision", (scenario or {}).get("revision", 0))
+    marker("round-status", active_round["status"])
     st.markdown(
-        '<div style="font-size:12px; font-weight:700; margin-top:.5rem;">Влияние нового шага:</div>'
-        f'<div class="aml-impact-grid">{impact_html}</div>',
+        f'<span class="aml-status-badge" data-testid="status-badge">'
+        f"Статус: {escape(STATUS_LABELS.get(status, status))}"
+        f"{' · ревизия ' + str(scenario['revision']) if scenario else ''}</span>",
+        unsafe_allow_html=True,
+    )
+    show_flash()
+    render_resources(scenario)
+    render_violations()
+    st.divider()
+
+    if not editable:
+        st.info(
+            "Сценарий зафиксирован сервером. Изменение доступно только пока раунд "
+            "активен и сценарий находится в черновике."
+        )
+        render_chain(cards_by_key, editable=False)
+        return
+
+    builder_column, chain_column = st.columns([1.0, 1.1], gap="large")
+    with builder_column:
+        render_builder(cards)
+    with chain_column:
+        render_chain(cards_by_key, editable=True)
+
+        st.divider()
+        resources = (scenario or {}).get("resources") or {}
+        synchronized = st.session_state["draft_steps"] == (scenario or {}).get("steps", [])
+        can_submit = (
+            bool(scenario)
+            and synchronized
+            and bool(resources.get("valid"))
+            and bool((resources.get("objective") or {}).get("reached"))
+        )
+        marker("submit-enabled", "true" if can_submit else "false")
+
+        save_column, submit_column = st.columns(2)
+        with save_column:
+            if st.button(
+                "Сохранить черновик",
+                key="save_draft",
+                use_container_width=True,
+                disabled=bool(st.session_state.get("pending_command")),
+            ):
+                save_draft(client, round_id, session_id)
+                st.rerun()
+        with submit_column:
+            if st.button(
+                "Отправить сценарий",
+                key="submit_scenario",
+                type="primary",
+                use_container_width=True,
+                disabled=not can_submit or bool(st.session_state.get("pending_command")),
+            ):
+                submit_scenario(client, round_id, session_id)
+                st.rerun()
+        if not can_submit:
+            st.caption(
+                "Отправка доступна, когда сохранённая на сервере цепочка не содержит "
+                "нарушений и достигает цели раунда."
+            )
+
+
+def page_result() -> None:
+    client = get_api_client()
+    session_id = st.session_state["session_id"]
+    header("Результат", "Оценка учебной модели", "Разбор факторов и ресурсов.")
+
+    rounds = client.get_my_rounds(session_id).get("rows", [])
+    if not rounds:
+        st.info("Пока нет раундов с вашим сценарием.")
+        marker("result-state", "empty")
+        return
+
+    options = {f"#{row['id']} · {row['title']}": row for row in rounds}
+    chosen = st.selectbox("Раунд", list(options), key="result_round")
+    row = options[chosen]
+    result = client.get_result(row["id"], session_id)
+    if not result:
+        st.info(
+            "Результат появится после запуска общего скоринга организатором. "
+            f"Текущий статус сценария: {STATUS_LABELS.get(row.get('scenario_status') or 'none')}."
+        )
+        marker("result-state", "pending")
+        return
+
+    marker("result-state", "ready")
+    base = result["base"]
+    board = result["leaderboard"]
+    columns = st.columns(4)
+    columns[0].metric("Игровой балл", board["effective_game_score"])
+    columns[1].metric("Риск", base["risk_score"])
+    columns[2].metric("Незаметность", base["stealth_score"])
+    columns[3].metric("Ресурсы", base["resource_score"])
+    marker("result-game-score", board["effective_game_score"])
+    marker("result-risk-label", base["risk_label"])
+    st.markdown(
+        f'<span class="aml-status-badge" data-testid="result-label">'
+        f"Решение модели: {escape(RISK_LABELS.get(base['risk_label'], base['risk_label']))}"
+        "</span>",
         unsafe_allow_html=True,
     )
 
-    cannot_add = len(steps) >= MAX_ACTIONS or not proposed_res["valid"]
-    if st.button("➕ Добавить в цепочку", type="primary", use_container_width=True, disabled=cannot_add):
-        steps.append(proposed_step)
-        st.session_state.draft_steps = steps
-        st.rerun()
-
-    if cannot_add:
-        reason = (
-            f"Достигнут лимит: {MAX_ACTIONS} действий."
-            if len(steps) >= MAX_ACTIONS
-            else proposed_res["violations"][0]
-        )
-        st.warning(reason)
-
-
-def render_scenario_steps_readonly(
-    steps: list[dict[str, Any]],
-    cards_catalog: list[dict[str, Any]],
-    resources: dict[str, Any],
-) -> None:
-    st.subheader(f"📋 Зафиксированная цепочка ({len(steps)} из {MAX_ACTIONS} действий)")
-    card_lookup = {c["code"]: c for c in cards_catalog}
-    step_impacts = resources.get("steps") or resources.get("per_step") or []
-
-    for idx, step in enumerate(steps):
-        code = step["card_code"]
-        card = card_lookup.get(code, {"title": code, "icon": "💳"})
-        impact = step_impacts[idx] if idx < len(step_impacts) else {}
-
-        with st.container(border=True):
-            st.markdown(f"**{idx + 1}. {card['title']}** — `{format_money(step['amount'])}` × `{step['frequency']}`")
-            st.caption(
-                f"баланс {signed_money(impact.get('money_delta', 0))} · "
-                f"энергия −{impact.get('energy_cost', 0)} · время −{impact.get('time_cost', 0)} · "
-                f"доверие −{impact.get('trust_cost', 0)}"
+    explanation = result.get("explanation") or {}
+    risk_tab, protective_tab = st.tabs(["Факторы риска", "Защитные факторы"])
+    with risk_tab:
+        for factor in explanation.get("top_risk_factors", []):
+            st.markdown(
+                f"**+{factor['points']}** · {escape(factor['description'])}",
+                unsafe_allow_html=True,
             )
-            ctx = step.get("context", {})
-            summary_parts = []
-            if ctx.get("country_risk") == "high":
-                summary_parts.append("⚠️ Высокий риск страны")
-            if ctx.get("recipient_type") == "anonymous_wallet":
-                summary_parts.append("🕵️ Анонимный кошелек")
-            if ctx.get("time_of_day") == "night":
-                summary_parts.append("🌙 Ночь")
-            if ctx.get("velocity") == "rapid":
-                summary_parts.append("⚡ Быстрый темп")
-            if not ctx.get("has_documents", True):
-                summary_parts.append("❌ Без документов")
-            if summary_parts:
-                st.caption(" | ".join(summary_parts))
+    with protective_tab:
+        for factor in explanation.get("protective_factors", []):
+            st.markdown(
+                f"**{factor['points']}** · {escape(factor['description'])}",
+                unsafe_allow_html=True,
+            )
+    st.caption(explanation.get("disclaimer", ""))
 
 
-def render_scenario_steps(
-    steps: list[dict[str, Any]],
-    cards_catalog: list[dict[str, Any]],
-    resources: dict[str, Any],
-    round_id: int,
-    client: SimulatorAPIClient,
-    session_id: str,
-) -> None:
-    c_title, c_cnt = st.columns([3, 1])
-    with c_title:
-        st.subheader("📋 Цепочка операций")
-    with c_cnt:
-        st.caption(f"{len(steps)} из {MAX_ACTIONS} действий")
+def page_leaderboard() -> None:
+    client = get_api_client()
+    session_id = st.session_state["session_id"]
+    header("Лидерборд", "Итоги раунда", "Обезличенный рейтинг участников.")
 
-    if not steps:
-        st.info("Цепочка пока пуста. Настройте и добавьте первую операцию слева.")
+    rounds = client.get_my_rounds(session_id).get("rows", [])
+    if not rounds:
+        st.info("Раундов пока нет.")
         return
+    options = {f"#{row['id']} · {row['title']}": row for row in rounds}
+    chosen = st.selectbox("Раунд", list(options), key="board_round")
+    board = client.get_leaderboard(options[chosen]["id"], session_id)
+    rows = board.get("rows", [])
+    marker("leaderboard-rows", len(rows))
+    if not rows:
+        st.info("Лидерборд появится после завершения раунда.")
+        return
+    body = "".join(
+        "<tr>"
+        f"<td>{row['rank']}</td>"
+        f"<td>{escape(row['display_name'])}</td>"
+        f"<td>{row['game_score']}</td>"
+        f"<td>{row['stealth_score']}</td>"
+        f"<td>{row['resource_score']}</td>"
+        f"<td>{escape(RISK_LABELS.get(row['risk_label'], row['risk_label']))}</td>"
+        "</tr>"
+        for row in rows
+    )
+    st.markdown(
+        '<div class="aml-scroll"><table class="aml-board" data-testid="leaderboard-table">'
+        "<thead><tr><th>Место</th><th>Участник</th><th>Балл</th><th>Незаметность</th>"
+        f"<th>Ресурсы</th><th>Оценка</th></tr></thead><tbody>{body}</tbody></table></div>",
+        unsafe_allow_html=True,
+    )
 
-    card_lookup = {c["code"]: c for c in cards_catalog}
-    move_action = None
-    delete_idx = None
-    step_impacts = resources.get("steps") or resources.get("per_step") or []
 
-    for idx, step in enumerate(steps):
-        code = step["card_code"]
-        card = card_lookup.get(code, {"title": code, "icon": "💳"})
-        impact = step_impacts[idx] if idx < len(step_impacts) else {}
+# --------------------------------------------------------------------------
+# Entry point
+# --------------------------------------------------------------------------
 
-        with st.container(border=True):
-            st.markdown(f"**{idx + 1}. {card['title']}**")
-            st.caption(
-                f"{format_money(step['amount'])} × {step['frequency']} · "
-                f"баланс {signed_money(impact.get('money_delta', 0))} · "
-                f"энергия −{impact.get('energy_cost', 0)} · время −{impact.get('time_cost', 0)} · "
-                f"доверие −{impact.get('trust_cost', 0)}"
-            )
 
-            ctx = step.get("context", {})
-            summary_parts = []
-            if ctx.get("country_risk") == "high":
-                summary_parts.append("⚠️ Высокий риск страны")
-            if ctx.get("recipient_type") == "anonymous_wallet":
-                summary_parts.append("🕵️ Анонимный кошелек")
-            if ctx.get("time_of_day") == "night":
-                summary_parts.append("🌙 Ночь")
-            if ctx.get("velocity") == "rapid":
-                summary_parts.append("⚡ Быстрый темп")
-            if not ctx.get("has_documents", True):
-                summary_parts.append("❌ Без документов")
-            if summary_parts:
-                st.caption(" | ".join(summary_parts))
+def main() -> None:
+    init_state()
+    client = get_api_client()
+    controller = get_cookie_controller("aml_play_cookies")
+    session = resolve_session(controller, PLAY_COOKIE, client)
 
-            c_up, c_down, c_del = st.columns(3)
-            with c_up:
-                if st.button("⬆️", key=f"up_{idx}", disabled=idx == 0, use_container_width=True):
-                    move_action = (idx, idx - 1)
-            with c_down:
-                if st.button("⬇️", key=f"down_{idx}", disabled=idx == len(steps) - 1, use_container_width=True):
-                    move_action = (idx, idx + 1)
-            with c_del:
-                if st.button("🗑️", key=f"del_{idx}", use_container_width=True):
-                    delete_idx = idx
+    if session.pending:
+        st.info("Восстанавливаем сессию…")
+        marker("auth-state", "pending")
+        st.stop()
 
-    if move_action is not None:
-        src, dst = move_action
-        steps[src], steps[dst] = steps[dst], steps[src]
-        st.session_state.draft_steps = steps
-        st.rerun()
+    if not session.authenticated:
+        login_screen(client, controller)
+        st.stop()
 
-    if delete_idx is not None:
-        steps.pop(delete_idx)
-        st.session_state.draft_steps = steps
-        st.rerun()
-
-    st.markdown("---")
-    c_s1, c_s2, c_s3 = st.columns(3)
-
-    with c_s1:
-        if st.button("💾 Сохранить черновик", use_container_width=True):
+    user = session.user or {}
+    with st.sidebar:
+        st.markdown("### AML Workshop Simulator")
+        st.markdown(
+            f'<div data-testid="current-user">{escape(str(user.get("display_name", "")))}</div>',
+            unsafe_allow_html=True,
+        )
+        marker("auth-state", "authenticated")
+        if st.button("Выйти", key="logout", use_container_width=True):
             try:
-                res = client.put_scenario(
-                    round_id,
-                    steps,
-                    st.session_state.expected_revision,
-                    session_id,
-                )
-                st.session_state.expected_revision = res["revision"]
-                st.session_state.server_scenario = res
-                st.success(f"Черновик сохранен (ревизия #{res['revision']})!")
-            except APIClientError as e:
-                st.error(f"Ошибка сохранения: {e.message}")
-
-    with c_s2:
-        can_submit = resources["valid"] and resources["goal_reached"]
-        if st.button("🚀 Отправить сценарий", type="primary", use_container_width=True, disabled=not can_submit):
-            try:
-                put_res = client.put_scenario(
-                    round_id,
-                    steps,
-                    st.session_state.expected_revision,
-                    session_id,
-                )
-                st.session_state.expected_revision = put_res["revision"]
-                sub_res = client.submit_scenario(
-                    round_id,
-                    st.session_state.expected_revision,
-                    session_id,
-                )
-                st.session_state.server_scenario = sub_res
-                st.balloons()
-                st.success("Сценарий успешно отправлен на скоринг!")
-                st.switch_page(result_page)
-            except APIClientError as e:
-                st.error(f"Ошибка отправки: {e.message}")
-
-    with c_s3:
-        if st.button("🧹 Очистить", use_container_width=True):
-            st.session_state.draft_steps = []
+                client.logout(st.session_state["session_id"])
+            except APIClientError:
+                st.warning("Сервер не подтвердил выход, локальная сессия очищена.")
+            clear_session(controller, PLAY_COOKIE)
+            reset_user_state()
+            st.session_state.pop("loaded_for", None)
             st.rerun()
 
-
-def render_result() -> None:
-    client = get_api_client()
-    session_id = st.session_state.session_id
-    server_scen = st.session_state.server_scenario
-
-    try:
-        active_round = client.get_active_round()
-    except Exception as e:
-        st.error(f"Ошибка загрузки раунда: {e}")
-        return
-
-    if not active_round:
-        st.info("Нет активного раунда.")
-        return
-
-    round_id = active_round["id"]
-    render_page_header(
-        "Результат раунда",
-        "Решение AML-модели и Анализ",
-        "Сравните оценку риска с затратами ресурсов и разберите признаки модели.",
+    navigation = st.navigation(
+        [
+            st.Page(page_scenario, title="Конструктор", url_path="scenario", default=True),
+            st.Page(page_result, title="Результат", url_path="result"),
+            st.Page(page_leaderboard, title="Лидерборд", url_path="leaderboard"),
+        ],
+        position="sidebar",
     )
-
-    try:
-        res_data = client.get_result(round_id, session_id)
-    except Exception as e:
-        st.error(f"Ошибка получения результата: {e}")
-        return
-
-    if not res_data:
-        if server_scen and server_scen.get("status") == "submitted":
-            st.info(
-                f"⏳ **Ваш сценарий (Ревизия #{server_scen.get('revision')}) успешно принят и зафиксирован в базе данных.**\n\n"
-                "Ожидайте запуска общего скоринга организатором мастер-класса. После запуска здесь появится детальный разбор решения модели."
-            )
-            if st.button("🔄 Обновить статус", type="primary"):
-                st.rerun()
-            return
-        else:
-            st.info("Сценарий еще не отправлен на скоринг.")
-            if st.button("Перейти в конструктор", type="primary"):
-                st.switch_page(scenario_page)
-            return
-
-    base = res_data["base"]
-    leaderboard_meta = res_data.get("leaderboard", {})
-    explanation = res_data.get("explanation", {})
-
-    label = base.get("risk_label", "normal")
-    label_views = {
-        "normal": ("Операция пропущена", "Низкий риск", "success"),
-        "review": ("Назначена проверка", "Средний риск", "warning"),
-        "suspicious": ("Сценарий заблокирован", "Высокий риск", "error"),
-    }
-    desc, risk_title, callout_type = label_views.get(label, ("Обработано", "Оценка", "info"))
-
-    score_items = (
-        ("Итоговый балл", f"{float(leaderboard_meta.get('effective_game_score', base.get('game_score', 0))):.1f} / 100", "main"),
-        ("Риск модели", f"{float(base.get('risk_score', 0)):.1f} / 100", "detail"),
-        ("Ресурсы", f"{float(base.get('resource_score', 0)):.1f} / 100", "detail"),
-        ("Решение", desc, "detail"),
-    )
-    score_html = "".join(
-        f'<div class="aml-score-{kind}"><div class="aml-score-label">{escape(label_txt)}</div>'
-        f'<div class="aml-score-value">{escape(val)}</div></div>'
-        for label_txt, val, kind in score_items
-    )
-    st.markdown(f'<div class="aml-score-hero">{score_html}</div>', unsafe_allow_html=True)
-    getattr(st, callout_type)(f"**{risk_title}**. {desc}.")
-
-    factors_tab, resources_tab, catboost_tab = st.tabs(
-        ["🔍 Почему так решила модель", "💰 Ресурсы", "🤖 Вектор признаков CatBoost"]
-    )
-
-    with factors_tab:
-        st.subheader("🚨 Главные факторы риска (Top Factors)")
-        top_risks = explanation.get("top_risk_factors", [])
-        if top_risks:
-            for f in top_risks:
-                st.warning(f"**+{f.get('points', 0)} баллов:** {f.get('description', '')}")
-        else:
-            st.info("Критических факторов риска не обнаружено.")
-
-        st.subheader("🛡️ Защитные сигналы")
-        protect = explanation.get("protective_factors", [])
-        if protect:
-            for f in protect:
-                st.success(f"**{f.get('points', 0)} баллов:** {f.get('description', '')}")
-        else:
-            st.caption("Защитных факторов не зафиксировано.")
-
-    with resources_tab:
-        st.subheader("Сохраненные ресурсы")
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Остаток баланса", format_money(float(base.get("remaining_balance", 0))))
-        c2.metric("Остаток энергии", f"{int(base.get('remaining_energy', 0))} ед.")
-        c3.metric("Остаток времени", f"{int(base.get('remaining_time', 0))} ч.")
-        c4.metric("Уплачено комиссий", format_money(float(base.get("total_fees", 0))))
-
-    with catboost_tab:
-        cb_payload = explanation.get("catboost_features_payload", {})
-        if cb_payload:
-            render_catboost_features_inspector(cb_payload)
-        else:
-            st.info("Признаки CatBoost формируются при скоринге сценария.")
+    navigation.run()
 
 
-def render_leaderboard() -> None:
-    client = get_api_client()
-    session_id = st.session_state.session_id
-    user = st.session_state.user
-
-    try:
-        active_round = client.get_active_round()
-    except Exception as e:
-        st.error(f"Ошибка загрузки раунда: {e}")
-        return
-
-    if not active_round:
-        st.info("Нет активного раунда.")
-        return
-
-    round_id = active_round["id"]
-    render_page_header(
-        "Таблица лидеров",
-        f"Рейтинг раунда #{round_id}",
-        "Сравните свой результат с другими участниками мастер-класса.",
-    )
-
-    try:
-        lb_data = client.get_leaderboard(round_id, session_id)
-        rows = lb_data.get("rows", [])
-    except Exception as e:
-        st.error(f"Ошибка загрузки лидерборда: {e}")
-        return
-
-    if rows:
-        df = pd.DataFrame(rows)
-        df_display = df[["rank", "display_name", "game_score", "stealth_score", "resource_score", "risk_label"]].copy()
-        df_display.columns = ["Место", "Участник", "Итоговый балл", "Скрытность (100−Риск)", "Ресурсы", "Оценка риска"]
-        st.dataframe(df_display, hide_index=True, use_container_width=True)
-    else:
-        st.info("Лидерборд появится после завершения раунда и запуска скоринга администратором.")
-
-
-# Navigation Setup
-init_state()
-client = get_api_client()
-
-if not st.session_state.session_id or not st.session_state.user:
-    login_screen(client)
-    st.stop()
-
-# Ensure scenario is loaded for the current user session
-user = st.session_state.user
-if st.session_state.loaded_user_id != user.get("id"):
-    try:
-        cur_round = client.get_active_round()
-        if cur_round:
-            sync_scenario_from_server(client, cur_round["id"], st.session_state.session_id, user["id"])
-    except Exception:
-        pass
-
-# Define Navigation Pages
-home_page = st.Page(render_home, title="Главная", icon=":material/home:", default=True)
-scenario_page = st.Page(render_scenario, title="Сценарий", icon=":material/account_tree:")
-result_page = st.Page(render_result, title="Результат", icon=":material/analytics:")
-leaderboard_page = st.Page(render_leaderboard, title="Лидерборд", icon=":material/leaderboard:")
-
-with st.sidebar:
-    st.markdown(
-        """
-        <div class="aml-brand">
-            <div class="aml-brand-title">AML Workshop Simulator</div>
-            <div class="aml-brand-caption">Интерактивный симулятор финансовых цепочек</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f"""
-        <div class="aml-player">
-            <div class="aml-player-name">👤 {escape(user.get('display_name', 'Участник'))}</div>
-            <div class="aml-player-email">{escape(user.get('email', ''))}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    if st.button("Выйти из профиля", icon=":material/logout:", use_container_width=True):
-        try:
-            client.logout(st.session_state.session_id)
-        except Exception:
-            pass
-        st.session_state.session_id = None
-        st.session_state.user = None
-        st.session_state.draft_steps = []
-        st.session_state.server_scenario = None
-        st.session_state.expected_revision = 0
-        st.session_state.loaded_user_id = None
-        st.rerun()
-
-navigation = st.navigation(
-    {
-        "Игра": [home_page, scenario_page],
-        "Раунд": [result_page, leaderboard_page],
-    },
-    position="sidebar",
-)
-navigation.run()
+main()

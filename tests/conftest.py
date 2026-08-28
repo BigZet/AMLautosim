@@ -85,7 +85,7 @@ def _migrate() -> None:
     command.upgrade(config, "head")
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def database() -> Iterator[None]:
     """Create and migrate the test database once per session."""
     try:
@@ -97,11 +97,11 @@ def database() -> Iterator[None]:
 
 
 @pytest.fixture()
-def db_dsn() -> str:
+def db_dsn(database: None) -> str:
     return _sync_dsn()
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def clean_database(database: None) -> Iterator[None]:
     """Truncate every table and re-seed the catalog before each test."""
     import asyncio
@@ -125,7 +125,7 @@ def clean_database(database: None) -> Iterator[None]:
 
 
 @pytest.fixture()
-def client() -> Iterator[Any]:
+def client(clean_database: None) -> Iterator[Any]:
     """FastAPI test client bound to a single event loop for its lifetime."""
     from fastapi.testclient import TestClient
 

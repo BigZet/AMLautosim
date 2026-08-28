@@ -9,23 +9,57 @@ import json
 import os
 import random
 import sys
+import uuid
 from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from src.aml_workshop_simulator.domain.rules import (
+    REFERENCE_GAME_CONFIG,
+    card_spec_from_catalog,
+    specs_by_key,
+)
+from src.aml_workshop_simulator.domain.scoring import score_scenario
 from src.aml_workshop_simulator.services.catboost_features import (
     extract_catboost_features,
-    get_catboost_feature_names,
     get_catboost_categorical_feature_names,
+    get_catboost_feature_names,
 )
-from src.aml_workshop_simulator.services.scoring import score_steps
-from src.aml_workshop_simulator.services.local_rules import ACTION_CARDS
+
+CARD_SPECS = specs_by_key(
+    card_spec_from_catalog(entry, index)
+    for index, entry in enumerate(CARD_CATALOG, start=1)
+)
+CARD_IDS = {spec.code: spec.id for spec in CARD_SPECS.values()}
+
+
+def canonical(step: dict) -> dict:
+    """Convert a generator step into the canonical scenario step format."""
+    code = step["card_code"]
+    context = {
+        "country_risk": "low",
+        "recipient_type": "known_counterparty",
+        "time_of_day": "day",
+        "velocity": "normal",
+        "channel": "bank",
+        "has_documents": True,
+        **step.get("context", {}),
+    }
+    return {
+        "step_id": str(uuid.uuid4()),
+        "card": {"id": CARD_IDS[code], "code": code, "version": 1},
+        "amount": f"{float(step['amount']):.2f}",
+        "frequency": int(step["frequency"]),
+        "context": context,
+        "action_details": step.get("details", {}),
+    }
 
 
 def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
     """Generates realistic AML simulation scenarios for training data."""
-    card_codes = [c["code"] for c in ACTION_CARDS]
+    card_codes = [spec.code for spec in CARD_SPECS.values()]
     channels = ["bank", "mobile", "web", "atm", "branch", "exchange"]
     country_risks = ["low", "low", "low", "medium", "high"]
     recipient_types = ["known_counterparty", "known_counterparty", "new_counterparty", "anonymous_wallet"]
@@ -103,11 +137,12 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
                 "details": {"transfer_purpose": "investment", "payment_route": "fintech_gateway"}
             })
 
-        # Calculate ground truth rule risk score
-        weights = {card["code"]: card["weight"] for card in ACTION_CARDS}
-        risk_score, risk_label, _ = score_steps(steps, weights)
-        
-        # Features for CatBoost
+        # Ground truth from the versioned ruleset
+        steps = [canonical(step) for step in steps]
+        scored = score_scenario(steps, CARD_SPECS, REFERENCE_GAME_CONFIG)
+        risk_score = float(scored["risk_score"])
+        risk_label = scored["risk_label"]
+
         features = extract_catboost_features(steps)
         features["target_risk_score"] = risk_score
         features["target_risk_label"] = risk_label.value
