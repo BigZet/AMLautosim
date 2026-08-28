@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+psycopg2-binary
+alembic
+passlib[bcrypt]
+bcrypt==3.2.2
+python-jose[cryptography]
+pydantic[email]
+streamlit
+streamlit-cookies-controller
+requests

@@ -80,7 +80,7 @@ journey
 2. Streamlit отправляет `POST /auth/register` без сохранения пароля.
 3. FastAPI нормализует email, создает participant и возвращает user DTO.
 4. Участник выполняет login.
-5. Streamlit сохраняет JWT в `st.session_state` и вызывает `GET /auth/me`.
+5. FastAPI создает server-side session; Streamlit устанавливает route-scoped session cookie и вызывает `GET /auth/session`.
 6. UI открывает active round либо экран ожидания.
 
 **Альтернативы:** существующий participant сразу входит; после restart Streamlit
@@ -91,7 +91,7 @@ unavailable. UI не создает локальную учетную запис
 
 ## 6. UC-P2: открыть конструктор
 
-**Предусловия:** JWT валиден, существует active round.
+**Предусловия:** server-side session активна, существует active round.
 
 1. Streamlit загружает active round, card snapshot и собственный scenario.
 2. Для отсутствующего scenario создается пустая local draft с server revision 0.
@@ -241,11 +241,11 @@ participant, что сохраняет интерфейс и API масштаб�
 
 1. UI показывает confirmation и текущее access state.
 2. Admin подтверждает desired state.
-3. API сравнивает token version, меняет state, увеличивает version и пишет audit event.
-4. Уже выпущенный participant JWT перестает работать на следующем запросе.
+3. API сравнивает access revision, меняет state, отзывает active sessions и пишет audit event.
+4. Все уже выданные participant session ID перестают работать на следующем запросе.
 5. Scenario/result сохраняются; public leaderboard исключает blocked player.
 
-**Ошибки:** self-block, stale token version, participant not found, reason too short.
+**Ошибки:** self-block, stale access revision, participant not found, reason too short.
 
 ## 16. UC-A6: запустить скоринг
 
@@ -323,7 +323,7 @@ Email и технические security fields не выводятся на о�
 | Ситуация | UX | Каноническое состояние |
 | --- | --- | --- |
 | Нет active round | Экран ожидания, редкий refresh | Без изменений |
-| JWT истек | Login; draft восстановится | Scenario в PG |
+| Server-side session истекла | Cookie удаляется, login; draft восстановится | Scenario в PG |
 | User blocked | Отдельный access screen | Scenario/result сохранены |
 | API временно недоступен | Local dirty copy + retry action | Success не заявляется |
 | DB недоступна | Service unavailable | Нет LocalStore fallback |

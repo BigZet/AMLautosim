@@ -34,7 +34,7 @@ organization cluster.
 **Решение.** Browser обращается только к Streamlit. Python-процесс Streamlit вызывает
 FastAPI по внутренней Docker-сети.
 
-**Причины.** Bearer JWT не попадает в browser storage, CORS не нужен, API attack surface
+**Причины.** Browser session ID не дает браузеру прямой маршрут к FastAPI, CORS не нужен, API attack surface
 меньше, UI остается быстрым для прототипирования мастер-класса.
 
 **Последствия.** Streamlit sessions связаны с WebSocket/process; при масштабировании
@@ -160,31 +160,34 @@ read-back flow при неопределенном ответе. Crash прив�
 **Пересмотреть, если:** scoring >10 s, тяжелая ML model, progress/retry jobs, несколько
 rounds или transaction pressure. Тогда вводится job resource + queue/worker.
 
-## D13. Email/password и event-lifetime JWT
+## D13. Email/password и server-side sessions в PostgreSQL
 
-**Решение.** Participant регистрируется по email/password; bcrypt hash в DB; JWT default
-4 часа хранится в `st.session_state`.
+**Решение.** Participant регистрируется по email/password; password hash хранится в DB.
+После login FastAPI создает server-side session, а Streamlit сохраняет непрозрачный ID в
+route-scoped session cookie (`/play` или `/admin`) через `streamlit-cookies-controller`. В БД хранится только SHA-256 ID.
 
-**Причины.** Повторный login восстанавливает draft после потери UI session; current
-backend уже использует эту модель.
+**Причины.** Cookie восстанавливает вход после потери Streamlit WebSocket/session;
+server-side row дает немедленный revoke, аудит и простую проверку роли без self-contained claims.
 
-**Последствия.** Требуются data notice/retention, password policy, lockout и deletion.
-Refresh token v1 отсутствует.
+**Последствия.** Компонентная cookie не может быть `HttpOnly`: обязательны HTTPS,
+Secure, SameSite=Strict, XSS-защита и короткий lifetime. Появляются таблица `sessions`,
+cleanup job и session lookup на каждом защищенном request.
 
-**Пересмотреть, если:** организатор запрещает email, доступен SSO или event code +
-anonymous identity. Это требует privacy и account-recovery redesign.
+**Пересмотреть, если:** требуется `HttpOnly`, SSO или event-code anonymous identity. Для
+`HttpOnly` cookie должен выставлять HTTP BFF/proxy, а не JS-компонент.
 
 ## D14. Block state проверяется на каждом API request
 
-**Решение.** FastAPI сверяет DB `is_blocked` и `token_version`, а не доверяет только JWT.
+**Решение.** FastAPI проверяет session row и актуальный `users.is_blocked` на каждом
+защищенном request. Block/password reset в одной транзакции отзывают все active sessions.
 
 **Причины.** Admin должен немедленно прекратить уже активную participant session.
 
-**Последствия.** Protected request делает user lookup; его оптимизация не должна вводить
-опасный shared cache. Block increment revokes old tokens.
+**Последствия.** Protected request делает indexed session+user lookup; `last_seen_at`
+обновляется с throttling. Оптимизация не должна вводить опасный shared auth cache.
 
-**Пересмотреть, если:** вводится short-lived token + centralized revocation/cache с теми
-же security guarantees.
+**Пересмотреть, если:** вводится централизованный session cache с теми же revoke и
+consistency guarantees.
 
 ## D15. Game score объединяет риск и ресурсы
 
@@ -224,8 +227,8 @@ round/cards/static dictionaries. User/admin mutable data не cached globally.
 только локальный admin cache после success. Отдельный participant process видит изменения
 по active-round TTL и новому config-version key.
 
-Active round/cards читаются token-free только во внутренней app network. Это исключает
-JWT из process-wide cache; Streamlit по-прежнему требует login перед gameplay.
+Active round/cards читаются auth-free только во внутренней app network. Это исключает
+session ID из process-wide cache; Streamlit по-прежнему требует login перед gameplay.
 
 **Пересмотреть, если:** внешний shared cache добавляется по измерениям. Security/data
 ownership rules сохраняются.

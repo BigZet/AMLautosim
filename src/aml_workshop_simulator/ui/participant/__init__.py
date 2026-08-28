@@ -1,0 +1,1 @@
+"""Participant Streamlit application."""

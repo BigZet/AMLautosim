@@ -3,12 +3,12 @@
 ## 1. Контекст
 
 Система учебная, но обрабатывает учетные данные и поведение школьников. Упрощенный
-scoring не уменьшает требования к защите email, пароля, JWT, admin-команд и базы.
+scoring не уменьшает требования к защите email, пароля, session ID, admin-команд и базы.
 
 Основные активы:
 
 - учетные записи и email;
-- participant JWT и admin JWT;
+- participant/admin browser cookie и server-side sessions;
 - scenario chains и explanations;
 - immutable round/scoring configuration;
 - base results, leaderboard overlays и audit events;
@@ -44,8 +44,8 @@ flowchart LR
     adminBrowser --> internet
     proxy --> participantUi
     proxy --> adminUi
-    participantUi -->|"Internal HTTP plus participant JWT"| api
-    adminUi -->|"Internal HTTP plus admin JWT"| api
+    participantUi -->|"Internal HTTP plus X-Session-ID"| api
+    adminUi -->|"Internal HTTP plus X-Session-ID"| api
     api -->|"Least-privilege DB account"| db
     db --> volume
     operator["Authorized operator"] -->|"SSH key or VPN"| edge
@@ -55,22 +55,24 @@ flowchart LR
 
 ### Ключевое следствие
 
-JWT хранится в server-side `st.session_state`. Browser получает Streamlit session
-cookie/WebSocket, но не Bearer token и не имеет route к FastAPI. Это уменьшает риск
-утечки через localStorage, но не отменяет защиту Streamlit session, TLS и admin UI.
+Browser хранит отдельные `aml_play_session_id` (`Path=/play`) и `aml_admin_session_id` (`Path=/admin`), созданные JavaScript-компонентом
+`streamlit-cookies-controller`; FastAPI и PostgreSQL владеют server-side сессией.
+Браузер не имеет route к FastAPI, но cookie доступна JavaScript и не может быть
+`HttpOnly`. Поэтому XSS рассматривается как путь к краже сессии, а `Secure`,
+`SameSite=Strict`, host-only scope, HTTPS и короткий lifetime обязательны.
 
 ## 3. Threat matrix
 
 | Угроза | Актив | Мера v1 | Проверка |
 | --- | --- | --- | --- |
 | Подбор пароля | Accounts | Password policy, bcrypt, lockout, auth rate limit | Auth security tests |
-| Кража UI session | JWT/admin access | HTTPS, secure cookies, XSRF protection, short event lifetime | Browser/proxy tests |
-| Participant вызывает admin API | Results/config | JWT + DB role check on every request | RBAC matrix |
-| IDOR | чужой scenario/profile | Ownership derived from JWT; admin routes isolated | IDOR tests |
+| Кража UI session | Participant/admin access | HTTPS, Secure + SameSite=Strict cookie, XSRF/XSS protection, short lifetime, server revoke | Browser/proxy tests |
+| Participant вызывает admin API | Results/config | Session lookup + DB role check on every request | RBAC matrix |
+| IDOR | чужой scenario/profile | Ownership derived from server-side session; admin routes isolated | IDOR tests |
 | Подмена active config | Reproducibility | Immutable snapshot/hash and state transition lock | Integration tests |
 | Lost update | Scenario/admin overlay | Revisions, mutation IDs, row locks | Concurrency tests |
 | Повтор score | Round/result | Idempotency key, `FOR UPDATE NOWAIT`, completed summary | Concurrency tests |
-| Утечка через logs | Email/JWT/steps | Structured allowlist logging and redaction | Automated log scan |
+| Утечка через logs | Email/session ID/steps | Structured allowlist logging and redaction | Automated log scan |
 | Публикация DB/API | All data | No host ports, firewall, internal networks | External port scan |
 | XSS через display name/details | Admin/public UI | Output escaping, no unsafe HTML with user input | UI security tests |
 | SQL injection | DB | SQLAlchemy bound parameters, strict DTO | Fuzz/security tests |
@@ -96,19 +98,19 @@ cookie/WebSocket, но не Bearer token и не имеет route к FastAPI. Э
 Argon2id может заменить bcrypt отдельным решением с постепенным rehash при login; формат
 `hashed_password` не должен связывать API contract с конкретным алгоритмом.
 
-## 5. JWT и жизненный цикл сессии
+## 5. Server-side сессия и жизненный цикл
 
-JWT v1:
+Полная спецификация: [Browser cookie и серверные сессии](sessions-and-cookies.md).
 
-- asymmetric signing предпочтителен при нескольких независимых verifiers, но для одной
-  VM допустим сильный HMAC secret;
-- claims: `sub`, `role`, `token_version`, `iat`, `exp`, `jti`;
-- lifetime покрывает мероприятие, default 4 часа;
-- refresh token отсутствует;
-- clock skew ограничен 30–60 секундами;
-- secret/key имеет `kid` при поддержке ротации.
-
-FastAPI не доверяет role/block только из token:
+- FastAPI генерирует 32 случайных байта CSPRNG и возвращает raw `session_id` только в
+  login response.
+- PostgreSQL хранит только SHA-256 hash, user ID, created/expiry/last-seen/revoke
+  metadata.
+- Default lifetime — 4 часа, без refresh/sliding expiration в v1.
+- Session fixation запрещен: login всегда создает новый ID.
+- Logout отзывает текущую строку; block и password reset атомарно отзывают все активные
+  сессии пользователя.
+- `last_seen_at` обновляется с throttling, а не на каждом GET.
 
 ```mermaid
 sequenceDiagram
@@ -116,41 +118,41 @@ sequenceDiagram
     participant A as FastAPI
     participant D as PostgreSQL
 
-    S->>A: Request with JWT
-    A->>A: Verify signature, exp, claims
-    A->>D: Load user role, block, token version
-    alt valid current session
+    S->>A: Request with X-Session-ID
+    A->>A: Validate format and hash raw ID
+    A->>D: Load session and user
+    alt active session and account
         A-->>S: Authorized response
-    else token version differs
-        A-->>S: 401 token_revoked
+    else expired or revoked
+        A-->>S: 401 session_expired or session_revoked
     else user blocked
         A-->>S: 403 account_blocked
     end
 ```
 
-Block/unblock/security reset увеличивает `token_version`; старый JWT становится
-недействительным на следующем request. Logout participant очищает JWT из Streamlit
-session. Глобальный revoke при logout не нужен, иначе одно окно завершит все сессии.
-
-## 6. Streamlit session security
+## 6. Browser cookie и Streamlit security
 
 - `server.enableXsrfProtection=true` в production.
-- Cookie settings соответствуют HTTPS; proxy не понижает scheme в forwarded headers.
-- `st.session_state` не используется как shared process storage.
-- JWT не помещается в `st.cache_data`, `st.cache_resource`, query params или widget key.
-- Cached HTTP transport не содержит mutable default Authorization header.
+- `CookieController` создается со стабильным key; `None` до hydration не считается
+  logout.
+- Cookie: route-specific name/path, `Secure=true`, `SameSite=Strict`, host-only,
+  expiry не позже server-side сессии.
+- `HttpOnly` недоступен, поскольку компонент использует JavaScript/universal-cookie.
+- Session ID/cookie map не помещаются в `st.cache_data`, query params или widget keys.
+- Cached HTTP transport не содержит mutable default `X-Session-ID` header.
 - User-controlled text экранируется перед `unsafe_allow_html=True`; предпочтителен
   native Streamlit rendering.
 - Admin destructive actions требуют explicit confirmation и reason.
-- После logout очищаются auth, local draft, selected participant и pending command.
+- После logout удаляется cookie с идентичным scope и очищаются auth, local draft,
+  selected participant и pending command.
 - WebSocket origin/CORS settings ограничены каноническим доменом.
 
 ## 7. Авторизация
 
 ### Participant
 
-- Current participant определяется только `JWT.sub`.
-- Token-free active-round/cards reads разрешены только во внутренней app network,
+- Current participant определяется только `sessions.user_id` после проверки `X-Session-ID`.
+- Auth-free active-round/cards reads разрешены только во внутренней app network,
   содержат несекретный catalog snapshot и не проксируются browser.
 - Endpoint scenario/result не принимает participant ID.
 - Round ID проверяется на доступность и lifecycle.
@@ -231,7 +233,7 @@ static assets. `X-Frame-Options`/`frame-ancestors` запрещает embedding,
 flowchart LR
     ui["Admin confirmation"] --> dto["Strict command DTO"]
     dto --> rbac["Current DB role"]
-    rbac --> conflict["Expected revision or token version"]
+    rbac --> conflict["Expected access or aggregate revision"]
     conflict --> transaction["Mutation plus audit in one transaction"]
     transaction --> response["Canonical response"]
 ```
@@ -251,7 +253,6 @@ logs.
 | Secret | Потребитель | Ротация |
 | --- | --- | --- |
 | `DATABASE_URL`/password | FastAPI | До мероприятия или при инциденте |
-| JWT signing key | FastAPI | Между мероприятиями; emergency revoke sessions |
 | `POSTGRES_PASSWORD` | DB bootstrap/operator | По infrastructure policy |
 | TLS private key | Reverse proxy | ACME/организатор |
 | Backup credentials/key | Operator job | Отдельно от application secrets |
@@ -271,7 +272,7 @@ round ID, scenario ID, internal user ID, role, revisions, counts.
 **Запрещено:**
 
 - password/password hash;
-- JWT, cookie, Authorization header;
+- raw session ID, cookie, `X-Session-ID`, `sessions.session_id_hash`;
 - email и display name в техническом log;
 - request/response body auth/scenario;
 - full steps/action details/explanation;
@@ -319,11 +320,11 @@ observability key. Raw email остается доступен только че
 2. Default admin отсутствует; admin password проверен.
 3. Снаружи закрыты 8000/5432 и OpenAPI endpoints.
 4. TLS/WebSocket работают из внешней сети; certificate не истекает.
-5. Participant token получает `403` на все admin routes.
+5. Participant session получает `403` на все admin routes.
 6. Participant A не читает data B.
-7. Blocked user получает `403` со старым JWT.
+7. Blocked user получает `403`, а все его active sessions отозваны.
 8. Stale revisions дают `409`, а не overwrite.
-9. Logs не содержат email/JWT/password/steps.
+9. Logs не содержат email/session ID/session hash/password/steps.
 10. Public leaderboard не содержит IDs, email или chain.
 11. Rate limits проверены через общий NAT площадки.
 12. Backup зашифрован и restore проверен.
@@ -338,12 +339,12 @@ flowchart TD
     detect["Detect security event"] --> contain["Contain access or service"]
     contain --> preserve["Preserve safe logs and request IDs"]
     preserve --> assess["Assess affected accounts and data"]
-    assess --> rotate["Revoke tokens or rotate secrets"]
+    assess --> rotate["Revoke sessions or rotate secrets"]
     rotate --> recover["Restore verified service"]
     recover --> notify["Follow organizer and legal notification process"]
     notify --> delete["Apply retention and remediation"]
 ```
 
-При компрометации admin session блокируются admin-команды, повышается token version,
-ротируется signing key при необходимости и проверяется audit trail. Продолжение
+При компрометации admin session блокируются admin-команды, отзывается конкретная или все admin sessions,
+ротируются затронутые инфраструктурные secrets при необходимости и проверяется audit trail. Продолжение
 мастер-класса не важнее защиты данных.

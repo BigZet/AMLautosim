@@ -42,7 +42,7 @@
 | Ошибки | Менее 1% 5xx во время сценария нагрузки | Метрики и отчет теста |
 | Целостность | Нет потерянных обновлений и частично опубликованной доски | Concurrency/integration tests с PostgreSQL |
 | Восстановление | RTO до 30 минут; backup до события | Restore drill |
-| Конфиденциальность | Нет email/JWT/сценариев в логах и leaderboard | Security tests и log scan |
+| Конфиденциальность | Нет email/session ID/сценариев в логах и leaderboard | Security tests и log scan |
 | Доступность | Все 45 минут мероприятия без планового deploy | Preflight и change freeze |
 | Доступность интерфейса | Desktop, планшет и мобильный экран; light/dark theme | Playwright visual matrix |
 
@@ -72,7 +72,7 @@ Python-процесс Streamlit сам вызывает внутренний Fas
 ```mermaid
 flowchart LR
     browser["Browser"] -->|"HTTPS + WebSocket"| ui["Streamlit server-side UI"]
-    ui -->|"HTTP JSON + Bearer JWT"| api["FastAPI application service"]
+    ui -->|"HTTP JSON + X-Session-ID"| api["FastAPI application service"]
     api -->|"SQLAlchemy transaction"| db[("PostgreSQL")]
 
     browser -.->|"не имеет маршрута"| api
@@ -81,7 +81,7 @@ flowchart LR
 
 Следствия:
 
-1. JWT хранится в памяти Streamlit-сессии на сервере, а не в browser storage.
+1. Browser cookie хранит только непрозрачный session ID; Streamlit читает его через `streamlit-cookies-controller`, а FastAPI проверяет server-side сессию в PostgreSQL.
 2. CORS для прикладного API не нужен, поскольку браузер к нему не обращается.
 3. Любая бизнес-проверка в Streamlit является только UX-preview.
 4. При нескольких репликах Streamlit потребуется sticky session или вынос UI-state.
@@ -142,7 +142,7 @@ flowchart TB
   `client_mutation_id`.
 - **Local preview** повторяет расчет для мгновенной обратной связи, но его результат
   никогда не записывается как канонический.
-- **API client** добавляет timeout, JWT, request ID, retry policy и преобразует error
+- **API client** добавляет timeout, session ID per request, request ID, retry policy и преобразует error
   envelope в типизированную ошибку UI.
 - **View models** не меняют доменные значения, а только локализуют и форматируют их.
 
@@ -209,7 +209,7 @@ flowchart TB
 | Область | Streamlit | FastAPI | PostgreSQL |
 | --- | --- | --- | --- |
 | Навигация и виджеты | Владелец | Нет | Нет |
-| JWT | Хранит в `session_state`, передает на каждый запрос | Выпускает, проверяет, сверяет пользователя | Хранит роль, блокировку, `token_version` |
+| Сессия | Cookie controller читает/удаляет browser cookie и передает ID per request | Создает, проверяет, отзывает и авторизует | Хранит `sessions` и актуальные role/block пользователя |
 | Динамическая форма шага | Рендерит по card specification | Формирует спецификацию и строго валидирует | Хранит версию карточки и metadata |
 | Черновик | Локальная рабочая копия | Координирует GET/PUT/submit | Канонические steps и revision |
 | Ресурсный preview | Может считать приблизительно | Канонический расчет | Хранит принятый snapshot/result |
@@ -241,7 +241,7 @@ flowchart LR
 
 ### Открытие страницы конструктора
 
-1. Streamlit проверяет JWT в своей session state.
+1. Streamlit дожидается cookie bootstrap, читает route-scoped session cookie и проверяет сессию через FastAPI.
 2. Получает активный раунд с TTL не более 5 секунд.
 3. Получает карточки; неизменяемые карточки активированного раунда кэшируются по
    `round_id + config_version` до 5 минут.
@@ -298,7 +298,7 @@ flowchart LR
     submit["POST submit"] --> tx2["TX: lock round and scenario, revalidate, submitted"]
     activate["POST activate"] --> tx3["TX: validate snapshot, lock active scope, active"]
     score["POST score"] --> tx4["TX: lock round, calculate, bulk publish, completed"]
-    block["PUT player access"] --> tx5["TX: user state, token version, audit event"]
+    block["PUT player access"] --> tx5["TX: user state, revoke sessions, audit event"]
     adjust["PUT leaderboard adjustment"] --> tx6["TX: adjustment revision, audit event"]
 ```
 
@@ -309,7 +309,7 @@ scoring v1, допустимый только пока benchmark подтвер�
 
 | Сбой | Состояние данных | Поведение UI | Восстановление |
 | --- | --- | --- | --- |
-| Перезапуск Streamlit | PG не затронут | JWT/local draft потеряны | Повторный вход и GET сценария |
+| Перезапуск Streamlit | PG/session row не затронуты | UI-state потерян | Cookie повторно гидратирует server-side сессию и GET сценария |
 | Timeout GET | Нет изменения | Inline retry/error | Автоматически до 2 retry |
 | Timeout PUT | Результат неизвестен | Повтор с тем же mutation ID | API возвращает уже примененную ревизию |
 | Timeout POST submit | Результат неизвестен | GET scenario, затем решение | Не повторять без проверки статуса |
@@ -325,17 +325,17 @@ scoring v1, допустимый только пока benchmark подтвер�
 | Данные | Механизм | TTL/ключ | Инвалидация |
 | --- | --- | --- | --- |
 | HTTP connection pool | `st.cache_resource` | На процесс UI | Перезапуск/явный clear |
-| Active round | `st.cache_data` | До 5 с; без JWT в ключе/значении | Admin-local clear; participant TTL |
+| Active round | `st.cache_data` | До 5 с; без session ID в ключе/значении | Admin-local clear; participant TTL |
 | Round cards | `st.cache_data` | `round_id`, `config_version`, до 300 с | Новый config key; admin-local clear |
 | UI static dictionaries | `st.cache_data` | Версия UI | Deploy |
 | Scenario/result/profile/stats/leaderboard | Не кэшировать между сессиями | Нет | Всегда API |
 
-JWT не встраивается в cached client. SQLAlchemy session и соединение PostgreSQL никогда
+Session ID не встраивается в cached client и передается только локальным заголовком конкретного запроса. SQLAlchemy session и соединение PostgreSQL никогда
 не создаются в Streamlit. Полная политика описана в
 [Streamlit и FastAPI](streamlit-fastapi.md#11-кэширование-streamlit).
 
-Active-round/cards endpoints являются token-free только во внутренней app network и не
-содержат PII. Это осознанное исключение устраняет передачу JWT в process-wide cache;
+Active-round/cards endpoints являются auth-free только во внутренней app network и не
+содержат PII. Это осознанное исключение устраняет передачу session ID в process-wide cache;
 user-specific reads всегда авторизованы и не кэшируются глобально.
 
 Participant/admin Streamlit работают в разных процессах, поэтому `cache.clear()` в
@@ -374,7 +374,7 @@ flowchart LR
 - Не импортировать repository/SQLAlchemy из Streamlit.
 - Не считать локальный preview подтвержденным сохранением.
 - Не выполнять POST/PUT без пользовательского события при каждом rerun.
-- Не помещать JWT, user object, scenario или result в `st.cache_data`.
+- Не помещать session ID, cookie map, user object, scenario или result в `st.cache_data`.
 - Не редактировать исходный scoring result при ручной корректировке leaderboard.
 - Не завершать существующий active round неявно при активации нового.
 - Не включать LocalStore как production fallback.

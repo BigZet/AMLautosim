@@ -47,11 +47,11 @@
 | Risk factors/protective/sequence explanation | Описано | Частично | `test_scoring.py` | Нет snapshot/versioned persisted result |
 | Composite game score/leaderboard | Описано | MVP | Resource/leaderboard unit tests | Нет API/PG/public projection |
 | Admin player detail/full chain | Описано | MVP demo | `test_action_parameters.py` частично | Только admin session demo data |
-| Admin block/unblock | Описано | MVP demo | Unit test demo mutations | Не отзывает JWT и не пишет audit в PG |
+| Admin block/unblock | Описано | MVP demo | Unit test demo mutations | Не отзывает server-side sessions и не пишет audit в PG |
 | Admin leaderboard override | Описано | MVP demo | Unit test demo mutations | Меняет in-memory projection, нет base/overlay persistence |
 | FastAPI application | Описано | Частично | Smoke/unit only | Старые unversioned routes и упрощенные contracts |
 | SQLAlchemy/PostgreSQL entities | Описано | Частично | Требуется PG integration | Schema не соответствует target; нет Alembic |
-| Auth bcrypt/JWT/roles | Описано | Частично | Требуется auth suite | Нет target lockout/token version/block semantics |
+| Auth bcrypt/cookie/sessions/roles | Описано | Нет | Требуется auth+browser suite | Нет `sessions`, cookie bootstrap и revoke semantics |
 | Round create/activate/score/stats/board | Описано | Частично | Требуется integration | Нет snapshot/revisions/locks/atomic target guarantees |
 | Basic scenario submit/read/result | Описано | Частично | Требуется integration | Нет GET/PUT draft/revision/server preview |
 
@@ -71,7 +71,7 @@
 | Scoring transaction | Row lock NOWAIT + atomic batch | Round/scoring services | Mid-batch rollback test | Изменить |
 | Persisted scoring | Base risk/resource/game + versions/explanation | Result model/repository | Reproducibility tests | Изменить |
 | Leaderboard | Public/admin projections + stable rank | Query service/API | Privacy/tie-break tests | Изменить |
-| Block | DB state, token version, audit | User/auth/admin service | Existing JWT revoke test | Изменить |
+| Block | DB state, access revision, revoke sessions, audit | User/auth/admin service | Session revoke test | Изменить |
 | Adjustment | Separate overlay, not base overwrite | New model/service/API | Base immutability/conflict test | Изменить |
 | Streamlit cache | HTTP transport + round/cards only | ApiClient/apps | Cross-session cache tests | Изменить |
 | Error handling | Unified envelope/request ID/read-back | Middleware/ApiClient | 4xx/5xx/timeout tests | Изменить |
@@ -98,14 +98,14 @@
 | UI visual tests | Responsive light/dark | Playwright screenshot matrix | Добавить |
 | PG concurrency tests | Revisions/locks/atomicity | Real parallel connections | Добавить |
 | 500-user load profile | Capacity acceptance | Signed load report | Добавить |
-| Security test suite | RBAC/IDOR/JWT/logs/ports | Security gate report | Добавить |
+| Security test suite | RBAC/IDOR/cookie/session/logs/ports | Security gate report | Добавить |
 
 ## 6. Требования Streamlit–FastAPI
 
 | Инвариант | Документ | Реализация | Тест |
 | --- | --- | --- | --- |
-| JWT только в session state | `streamlit-fastapi.md` | Частично | Cross-session/auth test |
-| Shared cached client без JWT | `streamlit-fastapi.md` | Изменить | Two-user transport test |
+| Cookie хранит только opaque ID; PG хранит session | `sessions-and-cookies.md` | Добавить | Browser + DB auth test |
+| Shared cached client без session ID | `streamlit-fastapi.md` | Добавить | Two-user transport test |
 | Нет write при обычном rerun | `streamlit-fastapi.md` | Добавить guard | Rerun call-count test |
 | Dynamic form из card spec | `api.md` | MVP local registry | Contract/UI renderer test |
 | PUT full draft с revision | `api.md` | Добавить | Conflict/retry test |
@@ -140,10 +140,10 @@
 
 - [ ] Public leaderboard не содержит IDs/email/chain/factors других игроков.
 - [ ] Admin detail PII доступен только `admin`.
-- [ ] Block revokes existing JWT через token version.
+- [ ] Block атомарно отзывает все active sessions.
 - [ ] Adjustment не меняет scoring result.
 - [ ] Audit event в одной transaction с mutation.
-- [ ] Logs не содержат email/JWT/password/steps/action details.
+- [ ] Logs не содержат email/session ID/session hash/password/steps/action details.
 - [ ] Retention date/owner определены.
 - [ ] Backup retention не превышает primary data retention.
 
@@ -178,7 +178,7 @@
 9. Отклонить balance/energy/time/trust/quota/prerequisite violations.
 10. Submit, изменить revision и submit повторно.
 11. Выбрать participant в admin и увидеть full chain.
-12. Block participant и подтвердить revoke старого JWT; затем unblock.
+12. Block participant и подтвердить revoke всех active sessions; затем unblock и новый login.
 13. Запустить два concurrent score; publish должен быть один.
 14. Сверить submitted/scored и отсутствие partial results.
 15. Сверить participant result/public leaderboard/admin board.

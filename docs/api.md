@@ -22,7 +22,7 @@ OpenAPI является исполняемой спецификацией DTO, 
 | Encoding | JSON UTF-8 |
 | Money/Decimal | Строка с фиксированной точностью, например `"250000.00"` |
 | Time | ISO 8601 UTC, например `2026-10-05T08:17:02Z` |
-| Authentication | `Authorization: Bearer <JWT>` |
+| Authentication | `X-Session-ID: <opaque-session-id>` от Streamlit к внутреннему API |
 | Request correlation | `X-Request-ID`; API генерирует ULID/UUID, если заголовка нет |
 | Command identity | `Idempotency-Key` для activate/score и других указанных POST |
 | Pagination | `limit` + opaque `cursor`; offset не используется на растущих списках |
@@ -56,7 +56,7 @@ internal config secrets и stack traces в JSON не сериализуются.
 | HTTP | Категория | Примеры code |
 | ---: | --- | --- |
 | `400` | Валидный JSON, но команда бессмысленна | `scenario_validation_failed`, `no_submissions` |
-| `401` | Нет/просрочен/revoked JWT | `not_authenticated`, `token_expired`, `token_revoked` |
+| `401` | Нет/невалидна/истекла/отозвана сессия | `session_missing`, `session_invalid`, `session_expired`, `session_revoked` |
 | `403` | Роль, ownership или block | `forbidden`, `account_blocked` |
 | `404` | Объект не найден в доступной области | `round_not_found`, `scenario_not_found` |
 | `409` | State/revision/unique/lock conflict | `round_locked`, `scenario_revision_conflict` |
@@ -69,34 +69,25 @@ internal config secrets и stack traces в JSON не сериализуются.
 Для `422` middleware преобразует стандартный FastAPI payload в тот же envelope.
 `message` предназначен пользователю, `code/details` — стабильной логике Streamlit.
 
-## 4. JWT и RBAC
+## 4. Server-side sessions и RBAC
 
-JWT содержит:
+Cookie содержит только непрозрачный `session_id`; FastAPI хранит его SHA-256 hash и
+metadata в PostgreSQL. Streamlit передает raw ID в `X-Session-ID` на каждом защищенном
+внутреннем запросе. Подробная модель: [Browser cookie и серверные сессии](sessions-and-cookies.md).
 
-```json
-{
-  "sub": "57",
-  "role": "participant",
-  "token_version": 3,
-  "iat": 1780646400,
-  "exp": 1780660800,
-  "jti": "b2b8c2c4-3f2b-4a34-b0d7-5bbef72c278f"
-}
-```
-
-FastAPI на каждом защищенном запросе загружает пользователя и проверяет текущие
-`role`, `is_blocked` и `token_version`. Claim ускоряет первичную проверку, но не
-заменяет состояние БД.
+FastAPI загружает `sessions` вместе с `users` и проверяет `expires_at`, `revoked_at`,
+`role`, `is_blocked` и `sessions.audience`. Роль и participant identity никогда не берутся из входного DTO.
 
 | Scope | Разрешение |
 | --- | --- |
 | Public | register/login, live health |
-| Internal catalog read | Active round и immutable cards без JWT, только из Docker app network |
+| Internal catalog read | Active round и immutable cards без session ID, только из Docker app network |
 | Participant | Только собственный scenario/result и обезличенный leaderboard |
 | Admin | `/api/v1/admin/*`, включая PII detail и команды управления |
 | Operator | Нет отдельной API-роли v1; health/VM доступ вне прикладного API |
 
-Participant endpoints не принимают `participant_id`; он всегда берется из JWT user.
+Participant endpoints не принимают `participant_id`; он всегда берется из server-side
+сессии. Raw ID, cookie и `X-Session-ID` запрещены в логах и audit events.
 
 ## 5. DTO-каталог
 
@@ -104,8 +95,8 @@ Participant endpoints не принимают `participant_id`; он всегд�
 | --- | --- | --- |
 | `RegisterIn` | Регистрация | `email`, `display_name`, `password` |
 | `UserRegisteredOut` | Подтверждение регистрации | `id`, `email`, `display_name`, `role`, `created_at` |
-| `LoginIn` | Вход | `email`, `password` |
-| `TokenOut` | JWT | `access_token`, `expires_in`, `user` |
+| `LoginIn` | Вход | `email`, `password`, `audience=play|admin` |
+| `SessionCreatedOut` | Результат login | `session_id`, `expires_at`, `user` |
 | `UserSessionOut` | Текущий user | `id`, `display_name`, `role` |
 | `RoundPublicOut` | Активный round для participant | `id`, `title`, `status`, public game config |
 | `RoundSummaryOut` | История раундов participant | ID, status, scenario/result availability |
@@ -120,7 +111,7 @@ Participant endpoints не принимают `participant_id`; он всегд�
 | `RoundStatsOut` | Admin counters | registered/blocked/draft/submitted/scored |
 | `PlayerSummaryOut` | Admin player list | ID, display name, access/status/score summary |
 | `PlayerDetailOut` | Полный admin view | Account, scenario chain, base/effective result, activity |
-| `AccessUpdateIn` | Block/unblock | `blocked`, `reason`, `expected_token_version` |
+| `AccessUpdateIn` | Block/unblock | `blocked`, `reason`, `expected_access_revision` |
 | `LeaderboardAdjustmentIn` | Manual overlay | overrides, `reason`, `expected_revision` |
 | `AuditPageOut` | Admin audit | Sanitized events + cursor |
 
@@ -161,16 +152,16 @@ Request:
 ### `POST /api/v1/auth/login`
 
 ```json
-{"email": "student@example.com", "password": "correct-horse-42"}
+{"email": "student@example.com", "password": "correct-horse-42", "audience": "play"}
 ```
 
-`200 OK`:
+`200 OK` с `SessionCreatedOut`:
 
 ```json
 {
-  "access_token": "<jwt>",
-  "token_type": "bearer",
-  "expires_in": 14400,
+  "session_id": "<32-random-bytes-base64url>",
+  "expires_at": "2026-10-05T12:05:00Z",
+  "audience": "play",
   "user": {
     "id": 57,
     "display_name": "Финансовый детектив",
@@ -179,14 +170,27 @@ Request:
 }
 ```
 
+Raw `session_id` возвращается только при создании сессии. FastAPI сохраняет его
+SHA-256 hash. Streamlit устанавливает route-scoped cookie через
+`streamlit-cookies-controller` как `aml_play_session_id`/`aml_admin_session_id` с route-specific Path, `Secure`, `SameSite=Strict`, host-only scope и expiry
+не позже `expires_at`.
+
+`audience=admin` разрешен только DB-role `admin`; несовпадение role/audience дает generic
+`403 forbidden` после успешной проверки credentials и не создает session row.
+
 Ответ на неверный email и пароль одинаков. После policy threshold endpoint возвращает
 `429 login_temporarily_locked` без раскрытия наличия email.
 
-### `GET /api/v1/auth/me`
+### `GET /api/v1/auth/session`
 
-Возвращает `UserSessionOut`. Используется после восстановления Streamlit session и для
-проверки role/access state. Email возвращается только владельцу или admin detail, но не
-нужен participant navigation и может быть исключен из этого DTO.
+Возвращает `UserSessionOut` для `X-Session-ID`. Используется после cookie bootstrap и
+перезапуска Streamlit. Email возвращается только владельцу или admin detail.
+
+### `DELETE /api/v1/auth/session`
+
+Отзывает текущую сессию, ставит `revoked_at`/`revoke_reason=logout` и возвращает `204`.
+После подтвержденного ответа Streamlit удаляет cookie с теми же scope-параметрами.
+Повторный DELETE идемпотентен.
 
 ```mermaid
 sequenceDiagram
@@ -197,11 +201,11 @@ sequenceDiagram
 
     U->>S: Login form submit
     S->>A: POST /api/v1/auth/login
-    A->>D: Load user and auth state
-    A->>A: Verify password, sign JWT
-    A-->>S: TokenOut
-    S->>S: JWT only in session_state
-    S->>A: GET /api/v1/auth/me
+    A->>D: Verify user and insert sessions hash
+    A-->>S: SessionCreatedOut
+    S->>S: Set route-scoped session cookie
+    S->>A: GET /api/v1/auth/session + X-Session-ID
+    A->>D: Validate session and user state
     A-->>S: Current role and access
 ```
 
@@ -211,9 +215,9 @@ sequenceDiagram
 
 `200 OK` с `RoundPublicOut` или JSON `null`, если раунд не открыт.
 
-Endpoint не требует JWT, потому что содержит только несекретную конфигурацию учебной
+Endpoint не требует session ID, потому что содержит только несекретную конфигурацию учебной
 игры и доступен исключительно внутри Docker app network. Это позволяет безопасный общий
-Streamlit cache без token в аргументах. Participant UI все равно не открывает gameplay
+Streamlit cache без session ID в аргументах. Participant UI все равно не открывает gameplay
 до login. Все user-specific endpoints остаются авторизованными.
 
 ```json
@@ -271,7 +275,7 @@ response отсутствуют. `Cache-Control: no-store`.
 ### `GET /api/v1/rounds/{round_id}/cards`
 
 Возвращает только card versions из round snapshot. Ответ immutable после activate.
-Как и active-round read, endpoint token-free внутри app network и не проксируется
+Как и active-round read, endpoint auth-free внутри app network и не проксируется
 browser. Он не возвращает users, scenarios, results или admin metadata.
 
 ```json
@@ -633,7 +637,7 @@ Response summary не включает steps/explanation, чтобы списо�
     "email": "student@example.com",
     "display_name": "Финансовый детектив",
     "is_blocked": false,
-    "token_version": 3,
+    "access_revision": 3,
     "created_at": "2026-10-05T08:00:00Z",
     "last_login_at": "2026-10-05T08:05:00Z"
   },
@@ -666,15 +670,15 @@ Response summary не включает steps/explanation, чтобы списо�
 {
   "blocked": true,
   "reason": "Проверка учетной записи по запросу организатора",
-  "expected_token_version": 3
+  "expected_access_revision": 3
 }
 ```
 
 Успех возвращает обновленный user summary. API в одной транзакции:
 
 1. проверяет admin role и запрещает self-block;
-2. сравнивает token version;
-3. меняет access state и увеличивает token version;
+2. сравнивает access revision;
+3. меняет access state, увеличивает access revision и отзывает активные sessions;
 4. создает audit event;
 5. commit.
 
@@ -729,8 +733,8 @@ sequenceDiagram
 
 `GET /api/v1/admin/rounds/{round_id}/audit-events?event_type=...&limit=50&cursor=...`
 
-Возвращает sanitized append-only events. Полные scenario steps, password/JWT/email и
-Authorization headers отсутствуют. Доступен только admin.
+Возвращает sanitized append-only events. Полные scenario steps, password/raw session ID/email и
+`X-Session-ID` headers отсутствуют. Доступен только admin.
 
 ## 14. Stats
 
@@ -762,7 +766,7 @@ Stats — моментальный серверный snapshot. Admin Streamlit 
 | PUT round draft | config revision + desired full config | Да при идентичном desired state |
 | POST activate | row lock + current state + `Idempotency-Key` | После GET round |
 | POST score | row lock NOWAIT + completed summary + `Idempotency-Key` | Только после GET round/stats |
-| PUT access | token version + desired state | Да при идентичном desired state |
+| PUT access | access revision + desired state | Да при идентичном desired state |
 | PUT adjustment | adjustment revision + desired overlay | Да при идентичном desired state |
 | DELETE adjustment | expected revision + absent state | Да; absent returns `204` |
 
@@ -807,7 +811,7 @@ API устанавливает statement/lock timeouts ниже общего inf
 
 | Use case | Endpoints |
 | --- | --- |
-| Регистрация/вход | `POST auth/register`, `POST auth/login`, `GET auth/me` |
+| Регистрация/вход | `POST auth/register`, `POST auth/login`, `GET/DELETE auth/session` |
 | Открытие игры | `GET rounds/active`, `GET rounds/mine`, `GET rounds/{round_id}/cards`, `GET rounds/{round_id}/scenario` |
 | Редактирование | `PUT rounds/{round_id}/scenario` |
 | Финальная отправка | `POST rounds/{round_id}/scenario/submit` |
@@ -828,8 +832,9 @@ API устанавливает statement/lock timeouts ниже общего inf
 | Method/path | Input model | Output model | Role |
 | --- | --- | --- | --- |
 | `POST /api/v1/auth/register` | `RegisterIn` | `UserRegisteredOut` | Public |
-| `POST /api/v1/auth/login` | `LoginIn` | `TokenOut` | Public |
-| `GET /api/v1/auth/me` | — | `UserSessionOut` | Any authenticated |
+| `POST /api/v1/auth/login` | `LoginIn` | `SessionCreatedOut` | Public |
+| `GET /api/v1/auth/session` | — | `UserSessionOut` | Any authenticated |
+| `DELETE /api/v1/auth/session` | — | `204` | Any authenticated |
 | `GET /api/v1/rounds/active` | — | `Optional[RoundPublicOut]` | Internal UI read |
 | `GET /api/v1/rounds/mine` | `RoundHistoryQuery` | `RoundSummaryPageOut` | Participant |
 | `GET /api/v1/rounds/{round_id}/cards` | `RoundPath` | `list[ActionCardOut]` | Internal UI read |

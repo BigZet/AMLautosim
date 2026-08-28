@@ -111,7 +111,7 @@ flowchart TD
 
 1. Инициализировать Alembic.
 2. Снять baseline существующей dev schema без `create_all` в production startup.
-3. Расширить `users`: block fields, token version, auth lockout.
+3. Расширить `users`: block fields, access revision, auth lockout; добавить `sessions` с hash/expiry/revoke indexes.
 4. Расширить `action_cards`: versions, resources, limits, parameter schema.
 5. Добавить immutable `rounds.game_config` и config revision/timestamps.
 6. Добавить scenario steps/resource snapshot/revision/mutation ID/hash.
@@ -169,7 +169,7 @@ flowchart LR
 ### Порядок
 
 1. Request ID/error middleware и health.
-2. Auth/me/token version/block checks.
+2. Auth/session/logout, session lookup, expiry/revoke и block checks.
 3. Public round/cards endpoints.
 4. Scenario GET/PUT/submit с revisions.
 5. Result/public leaderboard.
@@ -198,8 +198,10 @@ flowchart LR
 
 ### Работы
 
-- Создать transport через `st.cache_resource` без JWT.
+- Создать transport через `st.cache_resource` без session ID в default headers.
 - Создать typed methods для всех participant/admin DTO.
+- Добавить CookieController adapter со стабильным key и состоянием pending/ready.
+- Передавать `X-Session-ID` только локальным header конкретного запроса.
 - Добавить request ID, timeouts, retry policy и error mapping.
 - Добавить `st.cache_data` только active round/cards.
 - Реализовать command guard/pending state для rerun.
@@ -217,7 +219,7 @@ flowchart LR
 
 ### Вертикальные slices
 
-1. Register/login/me.
+1. Register/login/session/logout + cookie bootstrap через `streamlit-cookies-controller`.
 2. Active round и immutable card forms.
 3. Initial scenario hydration.
 4. Add/edit/delete/reorder + PUT revision.
@@ -245,7 +247,7 @@ flowchart LR
 
 ### Вертикальные slices
 
-1. Admin login/me и round list.
+1. Admin login/session/logout, cookie bootstrap и round list.
 2. Full draft config/card catalog/revisions.
 3. Activate and cache invalidation.
 4. Monitoring/stats.
@@ -259,7 +261,7 @@ flowchart LR
 
 - Admin проводит полный round без terminal/DB.
 - Выбирает любого participant и видит его full chain.
-- Block старого JWT подтвержден интеграционным тестом.
+- Block отзывает все active sessions и подтвержден интеграционным тестом.
 - Adjustment не меняет base result.
 - API mode не использует demo session data.
 
@@ -362,7 +364,7 @@ versioned seed fixtures без PII.
 | Два окна теряют изменения | Expected revision conflict |
 | Старый admin client вызывает old paths | API client integration + remove compatibility on schedule |
 | Float меняет scores | Decimal migration + golden tests/version bump |
-| Block не отзывает JWT | DB state + token version per request |
+| Block не отзывает sessions | Atomic user update + revoke active session rows |
 | Adjustment разрушает model result | Separate overlay + audit |
 | Score transaction слишком длинная | Benchmark gate; async architecture trigger |
 | Demo bypass попадает в production | Build/profile test и startup assertion |

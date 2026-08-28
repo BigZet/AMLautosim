@@ -1,9 +1,46 @@
-.venv/
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Tooling caches
 .pytest_cache/
 .ruff_cache/
-.env
-.streamlit/secrets.toml
-postgres_data/
+.mypy_cache/
+.coverage
+htmlcov/
 
+# Secrets and local configuration
+.env
+.env.local
+*.env.local
+.streamlit/secrets.toml
+mvp/.streamlit/secrets.toml
+
+# Local databases and data volumes
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+pgdata/
+
+# Browser automation artifacts
+test-results/
+playwright-report/
+tests/artifacts/
+*.webm
+*.zip.trace
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,6 +1,0 @@
-{
-    "python-envs.defaultEnvManager": "ms-python.python:venv",
-    "python-envs.defaultPackageManager": "ms-python.python:pip",
-    "python.defaultInterpreterPath": "C:\\Users\\bz\\miniconda3\\envs\\streamlit_test\\python.exe",
-    "python.analysis.autoImportCompletions": true
-}

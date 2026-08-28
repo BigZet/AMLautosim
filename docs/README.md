@@ -23,6 +23,7 @@ Browser -> HTTPS reverse proxy -> Streamlit -> FastAPI -> PostgreSQL
 | Параметры действий | Динамические формы и правила MVP | Версионированные спецификации карточек из API |
 | Бизнес-правила | Часть правил живет в Streamlit/`LocalStore` | Только FastAPI принимает окончательные решения |
 | Состояние | Сбрасывается при перезапуске процесса | PostgreSQL является источником истины |
+| Аутентификация | Только demo/local UI | route-scoped cookie через cookie controller + `sessions` в PostgreSQL |
 | Скоринг | Локальный демонстрационный расчет | Синхронный пакетный скоринг раунда в FastAPI |
 | Лидерборд | Локальный составной игровой балл | Канонический расчет, audit trail и admin overlay в PostgreSQL |
 | Развертывание | Ручной запуск процессов | Одна VM, Docker Compose, HTTPS и внутренние сети |
@@ -36,15 +37,17 @@ Browser -> HTTPS reverse proxy -> Streamlit -> FastAPI -> PostgreSQL
 ### Для разработчика
 
 1. [Архитектура](architecture.md) — цели, контейнеры, компоненты и границы доверия.
-2. [Streamlit и FastAPI](streamlit-fastapi.md) — протокол UI/API, `session_state`,
+2. [Структура production-проекта](project-structure.md) — физические границы каталогов и правила зависимостей.
+3. [Streamlit и FastAPI](streamlit-fastapi.md) — протокол UI/API, `session_state`,
    rerun, синхронизация черновика, кэш и ошибки.
-3. [Модель данных](data-model.md) — PostgreSQL, snapshots, версии и инварианты.
-4. [API](api.md) — HTTP-контракты, DTO, ошибки и идемпотентность.
-5. [Скоринг и лидерборд](scoring-and-leaderboard.md) — риск, ресурсы, объяснения и
+4. [Browser cookie и серверные сессии](sessions-and-cookies.md) — cookie controller, lifecycle и ограничения безопасности.
+5. [Модель данных](data-model.md) — PostgreSQL, snapshots, версии и инварианты.
+6. [API](api.md) — HTTP-контракты, DTO, ошибки и идемпотентность.
+7. [Скоринг и лидерборд](scoring-and-leaderboard.md) — риск, ресурсы, объяснения и
    ручные корректировки.
-6. [Потоки мастер-класса](workshop-flow.md) — роли, состояния и use cases.
-7. [Стратегия тестирования](testing-strategy.md) — уровни тестов и приемочные ворота.
-8. [План миграции](migration-plan.md) — порядок перехода от MVP.
+8. [Потоки мастер-класса](workshop-flow.md) — роли, состояния и use cases.
+9. [Стратегия тестирования](testing-strategy.md) — уровни тестов и приемочные ворота.
+10. [План миграции](migration-plan.md) — порядок перехода от MVP.
 
 ### Для эксплуатации и безопасности
 
@@ -60,6 +63,8 @@ Browser -> HTTPS reverse proxy -> Streamlit -> FastAPI -> PostgreSQL
 flowchart LR
     overview["README: границы и навигация"] --> architecture["architecture: система"]
     architecture --> integration["streamlit-fastapi: протокол UI/API"]
+    integration --> sessions["sessions-and-cookies: browser/server session"]
+    sessions --> data
     architecture --> data["data-model: источник истины"]
     integration --> api["api: HTTP-контракты"]
     data --> api
@@ -96,12 +101,13 @@ flowchart LR
 | Лидерборд | Обезличенная ранжированная проекция опубликованных результатов. |
 | Ручная корректировка | Отдельный аудируемый слой отображаемых значений; исходный результат скоринга не изменяется. |
 | Rerun | Повторное исполнение Python-скрипта Streamlit после события UI. |
+| Session ID | Непрозрачный browser credential; все identity/role/expiry/revoke данные находятся в PostgreSQL. |
 | Источник истины | Компонент, чье состояние считается каноническим при расхождении копий. |
 
 ## Архитектурные инварианты
 
 1. Браузер никогда не вызывает FastAPI или PostgreSQL напрямую.
-2. Streamlit хранит только состояние интерфейса, JWT и локальную рабочую копию
+2. Browser cookie хранит только непрозрачный session ID; Streamlit хранит UI-state и локальную рабочую копию
    черновика; серверный сценарий всегда канонический.
 3. Команды записи выполняются только из обработчика пользовательского события или
    явного перехода состояния, но не как побочный эффект рендера страницы.
@@ -110,7 +116,7 @@ flowchart LR
 6. Исходные scoring results неизменяемы после публикации; admin correction хранится
    отдельно и всегда заметна в интерфейсе.
 7. PostgreSQL является единственным постоянным хранилищем.
-8. Email, JWT и полное содержимое сценария не попадают в технические логи.
+8. Email, raw session ID/session hash и полное содержимое сценария не попадают в технические логи.
 9. Значения 250 000 ₽, 14 энергии, 18 времени, 100 доверия, 8 действий и цель
    150 000 ₽ являются конфигурацией демонстрационного раунда, а не константами системы.
 10. Учебный скоринг не позиционируется как решение реального AML-расследования.

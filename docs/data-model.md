@@ -18,7 +18,7 @@ DTO `/api/v1`.
 
 | Группа | Таблицы | Назначение |
 | --- | --- | --- |
-| Identity | `users` | Учетная запись, роль, блокировка, token version |
+| Identity | `users`, `sessions` | Учетная запись, роль, блокировка и server-side сессии |
 | Game configuration | `action_cards`, `rounds` | Версии карточек и snapshot правил раунда |
 | Gameplay | `scenarios`, `scoring_results` | Цепочка, ресурсы, модельный и игровой результат |
 | Administration | `leaderboard_adjustments`, `audit_events` | Неизменяемый base result, ручной overlay и аудит |
@@ -27,6 +27,7 @@ DTO `/api/v1`.
 
 ```mermaid
 erDiagram
+    USERS ||--o{ SESSIONS : "has"
     USERS ||--o{ SCENARIOS : "owns"
     ROUNDS ||--o{ SCENARIOS : "contains"
     SCENARIOS ||--o| SCORING_RESULTS : "receives"
@@ -46,12 +47,26 @@ erDiagram
         varchar blocked_reason
         timestamptz blocked_at
         bigint blocked_by_user_id FK
-        integer token_version
+        integer access_revision
         integer failed_login_count
         timestamptz locked_until
         timestamptz created_at
     }
 
+
+    SESSIONS {
+        uuid id PK
+        bigint user_id FK
+        char session_id_hash UK
+        varchar audience
+        timestamptz created_at
+        timestamptz expires_at
+        timestamptz last_seen_at
+        timestamptz revoked_at
+        varchar revoke_reason
+        uuid rotated_from_session_id FK
+        bigint revoked_by_user_id FK
+    }
     ACTION_CARDS {
         bigint id PK
         varchar code
@@ -159,7 +174,7 @@ erDiagram
 | `blocked_reason` | `VARCHAR(500)`, nullable | Обязателен при `is_blocked=true` |
 | `blocked_at` | `TIMESTAMPTZ`, nullable | Время admin-команды |
 | `blocked_by_user_id` | self FK, nullable | Только admin |
-| `token_version` | `INTEGER` | Входит в JWT; увеличивается при принудительном revoke |
+| `access_revision` | `INTEGER` | Optimistic guard для admin block/unblock; увеличивается при изменении доступа |
 | `failed_login_count` | `INTEGER` | Неотрицательный, default 0 |
 | `locked_until` | `TIMESTAMPTZ`, nullable | Временная auth-блокировка |
 | `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC |
@@ -170,6 +185,34 @@ erDiagram
 
 Удаление participant выполняется контролируемой процедурой. FK на admin actor по
 умолчанию `SET NULL`, чтобы аудит сохранял факт действия без удержания лишней PII.
+
+## 4.1. `sessions`
+
+`session_id`, возвращаемый после login, является секретным browser credential. FastAPI генерирует 32
+случайных байта, отдает raw значение Streamlit ровно один раз и сохраняет только
+`SHA-256(session_id)`.
+
+| Поле | Тип | Правило |
+| --- | --- | --- |
+| `id` | `UUID` | Внутренний PK; не является browser credential |
+| `user_id` | `BIGINT` FK | Владелец; `ON DELETE CASCADE` |
+| `session_id_hash` | `CHAR(64)` | Hex SHA-256, unique; raw ID запрещен |
+| `audience` | enum | `play` или `admin`; проверяется на каждом request |
+| `created_at` | `TIMESTAMPTZ` | Время успешного login |
+| `expires_at` | `TIMESTAMPTZ` | Абсолютный срок, default 4 часа |
+| `last_seen_at` | `TIMESTAMPTZ` | Throttled update не чаще одного раза в 5 минут |
+| `revoked_at` | `TIMESTAMPTZ`, nullable | Немедленный server-side revoke |
+| `revoke_reason` | `VARCHAR(100)`, nullable | `logout`, `blocked`, `password_reset`, `admin`, `rotated` |
+| `rotated_from_session_id` | self FK, nullable | Аудируемая ротация без хранения raw session ID |
+| `revoked_by_user_id` | `BIGINT` FK, nullable | Admin/user actor; `SET NULL` |
+
+Индексы: unique по `session_id_hash` для auth lookup; `(user_id, expires_at)` для активных сессий;
+`expires_at` и `revoked_at` для cleanup. Active определяется запросом, а не отдельным
+mutable flag: `revoked_at IS NULL AND expires_at > now()`.
+
+Block и password reset в одной транзакции меняют user state и ставят `revoked_at` всем
+активным сессиям пользователя. Logout отзывает только текущую строку. Expired/revoked
+строки удаляются после короткого retention window, по умолчанию 7 дней.
 
 ## 5. `action_cards`
 
@@ -506,7 +549,7 @@ Append-only журнал содержит административные и к
 
 `metadata` содержит только безопасный diff: IDs, revisions, numeric before/after и
 status. `idempotency_key_hash` хранит необратимый hash ключа только для команд, которым
-нужна строгая дедупликация; raw key запрещен. Email, JWT, password, full steps и full
+нужна строгая дедупликация; raw key запрещен. Email, raw session ID, session hash, password, full steps и full
 explanation не сохраняются.
 
 ```json

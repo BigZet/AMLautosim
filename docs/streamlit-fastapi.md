@@ -32,8 +32,9 @@ sequenceDiagram
     S-->>B: Streamlit delta update
 ```
 
-Браузер не знает `API_BASE_URL`, не получает Bearer token и не вызывает API. JWT
-находится в памяти Python-процесса Streamlit в контексте конкретной WebSocket-сессии.
+Браузер не знает `API_BASE_URL` и не вызывает API. Он хранит только непрозрачный
+route-scoped session cookie (`aml_play_session_id` или `aml_admin_session_id`). Streamlit читает cookie через `streamlit-cookies-controller` и
+передает ID внутреннему FastAPI, который проверяет строку `sessions` в PostgreSQL.
 
 ## 3. Владение состоянием
 
@@ -41,7 +42,7 @@ sequenceDiagram
 | --- | --- | --- | --- |
 | Текущая страница | `st.session_state` | UI-сессия | Streamlit |
 | Значения widget | `st.session_state` | UI-сессия | Streamlit до submit формы |
-| JWT | `st.session_state` | До logout/expiry/rerun process loss | FastAPI выдает; Streamlit хранит копию |
+| Session ID | Browser cookie + controller-private session cache | До logout/server expiry | FastAPI создает; PostgreSQL хранит hash и metadata |
 | User ID/role/display name | Session snapshot | До повторной проверки | PostgreSQL через FastAPI |
 | Local draft | `st.session_state` | UI-сессия | Только рабочая копия |
 | Server revision | `st.session_state` | До следующего ответа | PostgreSQL |
@@ -72,7 +73,7 @@ flowchart TB
 `ApiClient` — тонкий адаптер, а не бизнес-сервис. Он:
 
 - строит URL только относительно `API_BASE_URL`;
-- передает JWT аргументом каждого защищенного вызова;
+- передает session ID аргументом каждого защищенного вызова в `X-Session-ID`;
 - добавляет `X-Request-ID` и при необходимости `Idempotency-Key`;
 - применяет connect/read/write/pool timeouts;
 - повторяет только явно безопасные операции;
@@ -84,19 +85,19 @@ flowchart TB
 
 Один `httpx.Client` или `requests.Session` на процесс создается через
 `st.cache_resource`. Он содержит connection pool и базовые transport-настройки, но не
-содержит JWT, user ID, round ID и mutable headers конкретного пользователя.
+содержит session ID, user ID, round ID и mutable headers конкретного пользователя.
 
 ```python
 @st.cache_resource
 def get_http_transport() -> httpx.Client:
     return httpx.Client(base_url=API_BASE_URL, timeout=DEFAULT_TIMEOUT)
 
-def api_get(path: str, token: str, request_id: str) -> dict:
+def api_get(path: str, session_id: str, request_id: str) -> dict:
     client = get_http_transport()
     return client.get(
         path,
         headers={
-            "Authorization": f"Bearer {token}",
+            "X-Session-ID": session_id,
             "X-Request-ID": request_id,
         },
     ).json()
@@ -111,7 +112,7 @@ def api_get(path: str, token: str, request_id: str) -> dict:
 
 ```text
 auth:
-  access_token
+  cookie_bootstrap  # pending | ready
   expires_at
   user_id
   role
@@ -159,7 +160,8 @@ Streamlit повторно выполняет файл при большинст
 ```mermaid
 flowchart TD
     start["Начало rerun"] --> init["Инициализировать отсутствующие session keys"]
-    init --> authCheck{"Есть JWT?"}
+    init --> cookie["Получить route-scoped session cookie через CookieController"]
+    cookie --> authCheck{"Сессия подтверждена FastAPI?"}
     authCheck -->|"нет"| login["Показать login form"]
     authCheck -->|"да"| read["Выполнить необходимые GET"]
     read --> reconcile["Согласовать server DTO и local state"]
@@ -405,7 +407,7 @@ scoring выполняет новый PUT, повышает revision и возв
 
 ### Запрещено кэшировать между пользователями
 
-- JWT и Authorization headers;
+- session ID, cookie map и `X-Session-ID`;
 - current user/profile/email;
 - scenario, local draft и server revision;
 - result и explanation;
@@ -414,12 +416,12 @@ scoring выполняет новый PUT, повышает revision и возв
 - leaderboard adjustments;
 - SQLAlchemy sessions или прямые DB connections.
 
-`st.cache_data` формирует общий process cache. Даже если token попадает в ключ, хранение
+`st.cache_data` формирует общий process cache. Даже если session ID попадает в ключ, хранение
 user response в нем увеличивает риск утечки и усложняет инвалидирование, поэтому в v1
 это запрещено.
 
-Active round и cards читаются token-free по внутренним несекретным endpoints. Поэтому
-cached function не принимает JWT даже как исключенный из hash аргумент и не обходит
+Active round и cards читаются auth-free по внутренним несекретным endpoints. Поэтому
+cached function не принимает session ID даже как исключенный из hash аргумент и не обходит
 проверку user-specific данных. Streamlit отдельно требует login перед gameplay.
 
 ### Инвалидация
@@ -440,44 +442,50 @@ flowchart LR
 Она не может очистить cache отдельного participant-процесса: тот обновляется по TTL и
 `config_version`. Кэш не используется для подтверждения успешной команды.
 
-## 12. Аутентификация и блокировка
+## 12. Аутентификация, cookie и блокировка
+
+Полная спецификация: [Browser cookie и серверные сессии](sessions-and-cookies.md).
 
 ```mermaid
 sequenceDiagram
     actor U as Пользователь
+    participant C as CookieController
     participant S as Streamlit
     participant A as FastAPI
     participant D as PostgreSQL
 
     U->>S: Email и пароль
     S->>A: POST /auth/login
-    A->>D: User, password hash, block state
-    A->>A: Verify password and issue JWT
-    A-->>S: TokenOut
-    S->>S: Store JWT in session_state
-    S->>A: Protected GET with JWT
-    A->>D: Load current role, is_blocked, token_version
-    alt active account
+    A->>D: Verify user, create sessions row
+    A-->>S: SessionCreatedOut with raw session_id once
+    S->>C: Set route-scoped cookie Secure SameSite=Strict
+    C-->>S: Cookie available after component bootstrap
+    S->>A: Protected GET with X-Session-ID
+    A->>D: Lookup session hash, expiry, revoke, role, block
+    alt active session and account
         A-->>S: 200 DTO
-    else blocked or token version stale
-        A-->>S: 403 account_blocked or 401 token_revoked
-        S->>S: Clear auth state
-        S-->>U: Показать состояние доступа
+    else expired or revoked
+        A-->>S: 401 session_expired or session_revoked
+        S->>C: Remove cookie with identical scope
+    else user blocked
+        A-->>S: 403 account_blocked
     end
 ```
 
-Блокировка должна действовать на уже выпущенный JWT. Для этого FastAPI на каждом
-защищенном запросе проверяет DB user state; `token_version` позволяет принудительно
-инвалидировать сессии при block/unblock/security action.
+`CookieController` создается со стабильным key до auth-routing. На первом рендере
+отсутствие значения может означать, что component еще не гидратирован; UI показывает
+loading state и не выполняет logout. Cookie хранит только непрозрачный ID. FastAPI
+принимает решение по `sessions` и `users`; block/password reset атомарно отзывает все
+активные сессии пользователя.
 
-При `401` UI очищает token и открывает login, но не удаляет серверный черновик. При
-`403 account_blocked` UI показывает отдельный экран и не выполняет автоматические retry.
+Из-за JavaScript-природы компонента cookie не может быть `HttpOnly`. Обязательны
+`Secure`, `SameSite=Strict`, host-only scope, HTTPS и строгая XSS-защита.
 
 ## 13. Ошибки и отображение
 
 | Категория API | Поведение Streamlit |
 | --- | --- |
-| `401 token_expired/token_revoked` | Очистить auth state, перейти на login |
+| `401 session_invalid/session_expired/session_revoked` | Удалить cookie, очистить auth state, перейти на login |
 | `403 account_blocked` | Экран блокировки; без retry |
 | `403 forbidden` | Сообщение о недостаточных правах; логировать request ID |
 | `200 null` от active-round endpoint | Экран ожидания или переход к `rounds/mine` |
@@ -522,7 +530,7 @@ sequenceDiagram
     A->>S: Выбирает игрока и указывает основание
     S->>S: Confirmation dialog
     S->>F: PUT participant access, blocked=true
-    F->>D: Update user, increment token_version
+    F->>D: Update user and revoke active sessions
     F->>D: Insert audit event in same transaction
     D-->>F: Commit
     F-->>S: PlayerDetailOut with new revision
@@ -586,13 +594,13 @@ application service и SQL latency.
 ## 18. Проверяемые правила реализации
 
 1. Повторный rerun без события не создает PUT/POST.
-2. Два пользователя, вызывающие cached transport, передают разные JWT только в локальных
+2. Два пользователя, вызывающие cached transport, передают разные session ID только в локальных
    headers запроса.
 3. Restart Streamlit и повторный login восстанавливают серверный draft.
 4. Timeout PUT и retry с тем же mutation ID дают одну новую revision.
 5. Два окна с одной revision приводят к одному `200` и одному `409`.
 6. Изменение submitted draft требует повторного submit.
-7. Block немедленно запрещает следующий запрос со старым JWT.
+7. Block отзывает все активные sessions и немедленно запрещает следующий запрос.
 8. Admin adjustment не меняет base scoring result.
 9. Timeout score разрешается GET-проверкой, а не слепым повтором.
 10. Ни одна Streamlit-функция с user data не использует `st.cache_data`.
@@ -600,8 +608,8 @@ application service и SQL latency.
 ## 19. Антипаттерны
 
 - `@st.cache_resource` над `LocalStore`, repository или SQLAlchemy session.
-- Глобальная mutable переменная с текущим пользователем/JWT.
-- `headers.update({"Authorization": ...})` на общем cached HTTP client.
+- Глобальная mutable переменная с текущим пользователем/session ID.
+- `headers.update({"X-Session-ID": ...})` на общем cached HTTP client.
 - PUT/POST в top-level ветке страницы, которая выполняется на каждом rerun.
 - Сохранение при каждом символе `text_input`.
 - Last-write-wins без revision conflict.

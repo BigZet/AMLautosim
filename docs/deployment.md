@@ -96,7 +96,7 @@ API_BASE_URL=http://api:8000/api/v1
 ```
 
 TLS внутри одной Docker host network в v1 необязателен, поскольку API не покидает VM.
-JWT все равно передается только per request и не логируется. При выносе API на другой
+Session ID передается только per request в `X-Session-ID` и не логируется. При выносе API на другой
 host внутренний канал становится TLS/mTLS через отдельное решение.
 
 ```mermaid
@@ -136,15 +136,25 @@ sequenceDiagram
 | `STREAMLIT_SERVER_BASE_URL_PATH` | `play` или `admin` |
 | `STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION` | `true` |
 | `STREAMLIT_BROWSER_GATHER_USAGE_STATS` | `false` |
+| `SESSION_COOKIE_NAME_PLAY` | `aml_play_session_id` |
+| `SESSION_COOKIE_NAME_ADMIN` | `aml_admin_session_id` |
+| `SESSION_COOKIE_PATH` | `/play` или `/admin` по приложению |
+| `SESSION_COOKIE_SECURE` | `true` в production |
+| `SESSION_COOKIE_SAME_SITE` | `strict` |
+
+Streamlit images обязаны устанавливать закрепленную версию
+`streamlit-cookies-controller`. Release gate включает browser smoke для `set/get/remove`
+с `Secure` и `SameSite=Strict`; обновление компонента выполняется только через lock-файл
+и regression test.
 
 ### FastAPI
 
 | Variable | Rule |
 | --- | --- |
 | `DATABASE_URL` | Internal host `db`, app DB user, не superuser |
-| `JWT_SECRET_KEY` | Случайно не менее 32 bytes для HMAC |
-| `JWT_ALGORITHM` | Allowlisted single algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Default 240 |
+| `SESSION_TTL_MINUTES` | Default 240 |
+| `SESSION_LAST_SEEN_WRITE_INTERVAL_SECONDS` | Default 300 |
+| `SESSION_RETENTION_DAYS` | Default 7 для expired/revoked rows |
 | `DB_POOL_SIZE` | Рассчитан на workers и max connections |
 | `DB_MAX_OVERFLOW` | Малый bounded запас |
 | `DB_STATEMENT_TIMEOUT_MS` | Защита от зависших SQL |

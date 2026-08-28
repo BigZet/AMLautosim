@@ -60,7 +60,7 @@ stateDiagram-v2
 - Тестовый round прошел create -> activate -> draft -> submit -> score -> result.
 - Admin видит participant chain, block/unblock и adjustment audit.
 - Public leaderboard не раскрывает PII.
-- Log scan не обнаруживает email/JWT/password/steps.
+- Log scan не обнаруживает email/session ID/session hash/password/steps.
 
 ## 5. Проверка за 30 минут
 
@@ -139,7 +139,7 @@ Events:
 - readiness transition;
 - backup/restore start/result in operator log.
 
-Не логируются email, display name, password/hash, JWT/cookie/Authorization, request body,
+Не логируются email, display name, password/hash, raw session ID/cookie/session hash/`X-Session-ID`, request body,
 full scenario, action details, explanation, DSN и raw idempotency key.
 
 ## 8. Request correlation
@@ -291,10 +291,10 @@ flowchart TD
 4. PostgreSQL rollback должен вернуть round active.
 5. Перезапустить API только если process не восстановился.
 
-## 18. Runbook: всплеск auth errors
+## 18. Runbook: всплеск auth/session errors
 
 1. Сравнить 401, 429 и WebSocket reconnect rate.
-2. Проверить clock synchronization и JWT key/version.
+2. Проверить clock synchronization, session expiry/revoke distribution и lookup latency.
 3. Проверить, не попала ли аудитория под слишком жесткий common-NAT limit.
 4. Не отключать password/security controls полностью.
 5. Изменять proxy burst только по утвержденному диапазону и записать время.
@@ -307,7 +307,7 @@ flowchart TD
 1. Открыть participant detail и audit event.
 2. Проверить actor/reason/request ID.
 3. Выполнить unblock через UI; прямой SQL запрещен.
-4. Participant входит повторно из-за token version change.
+4. Participant входит повторно после revoke/expiry; проверить причину в sanitized session metrics.
 
 ### Leaderboard adjustment
 
@@ -330,6 +330,14 @@ flowchart TD
 6. несохраненные local drafts и незавершенный round не объявляются результатами.
 
 Резервные материалы не содержат production email или chains участников.
+
+### Очистка server-side sessions
+
+- Ежедневно считать expired/revoked rows старше `SESSION_RETENTION_DAYS` в dry-run.
+- Удалять батчами с bounded transaction и наблюдать lock/latency.
+- Никогда не выводить `session_id_hash` или raw ID в отчет cleanup.
+- Перед мероприятием убедиться, что число active sessions согласуется с ожидаемой
+  аудиторией и отсутствуют сессии прошлых мероприятий.
 
 ## 21. После мероприятия
 
