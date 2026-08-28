@@ -23,19 +23,21 @@ import streamlit as st  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     PLAY_COOKIE,
-    clear_session,
+    apply_pending_cookie_command,
+    consume_hydration_flag,
     get_api_client,
     get_cookie_controller,
+    queue_cookie_clear,
+    queue_cookie_set,
     reset_user_state,
     resolve_session,
-    store_session,
 )
 
 st.set_page_config(
     page_title="AML Workshop Simulator",
     page_icon="🛡️",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 STYLES = """
@@ -78,6 +80,28 @@ table.aml-board th, table.aml-board td {
     border-bottom: 1px solid var(--aml-line); padding: .45rem .5rem; text-align: left;
 }
 .aml-scroll { overflow-x: auto; }
+[data-testid="stMetricValue"] {
+    font-size: clamp(1rem, 2.1vw, 1.6rem) !important;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+[data-testid="stMetricValue"] div { white-space: normal !important; }
+[data-testid="stMetricLabel"] p { white-space: normal; }
+@media (max-width: 1100px) {
+    [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        flex: 1 1 320px;
+        min-width: 260px;
+    }
+}
+@media (max-width: 640px) {
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+}
+:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
@@ -291,9 +315,7 @@ def login_screen(client: Any, controller: Any) -> None:
                 return
             st.session_state["session_id"] = created["session_id"]
             st.session_state["user"] = created["user"]
-            store_session(
-                controller, PLAY_COOKIE, created["session_id"], created.get("expires_at")
-            )
+            queue_cookie_set(created["session_id"], created.get("expires_at"))
             st.rerun()
 
     with tab_register:
@@ -591,11 +613,23 @@ def render_chain(
         st.rerun()
 
 
-def render_resources(scenario: dict[str, Any] | None) -> None:
+def render_resources(scenario: dict[str, Any] | None, game_config: dict[str, Any]) -> None:
+    """Server-computed resources; before the first save the round's own start values."""
     resources = (scenario or {}).get("resources") or {}
-    after = resources.get("resources_after", {})
-    totals = resources.get("totals", {})
-    objective = resources.get("objective", {})
+    config_resources = game_config.get("resources", {})
+    config_objectives = game_config.get("objectives", {})
+    after = resources.get("resources_after") or {
+        "balance": config_resources.get("initial_balance", "0"),
+        "energy": config_resources.get("initial_energy", 0),
+        "time": config_resources.get("initial_time", 0),
+        "trust": config_resources.get("initial_trust", 0),
+        "slots": config_objectives.get("max_actions", 0),
+    }
+    totals = resources.get("totals") or {"gross_outflow": "0", "fees": "0"}
+    objective = resources.get("objective") or {
+        "target_outflow": config_objectives.get("target_outflow", "0"),
+        "reached": False,
+    }
 
     columns = st.columns(5)
     values = (
@@ -675,7 +709,7 @@ def page_scenario() -> None:
         unsafe_allow_html=True,
     )
     show_flash()
-    render_resources(scenario)
+    render_resources(scenario, active_round.get("game_config") or {})
     render_violations()
     st.divider()
 
@@ -833,7 +867,11 @@ def main() -> None:
     init_state()
     client = get_api_client()
     controller = get_cookie_controller("aml_play_cookies")
+    apply_pending_cookie_command(controller, PLAY_COOKIE)
     session = resolve_session(controller, PLAY_COOKIE, client)
+    if consume_hydration_flag():
+        # Restart the run so the login tree is replaced, not overlaid.
+        st.rerun()
 
     if session.pending:
         st.info("Восстанавливаем сессию…")
@@ -857,9 +895,8 @@ def main() -> None:
                 client.logout(st.session_state["session_id"])
             except APIClientError:
                 st.warning("Сервер не подтвердил выход, локальная сессия очищена.")
-            clear_session(controller, PLAY_COOKIE)
+            queue_cookie_clear()
             reset_user_state()
-            st.session_state.pop("loaded_for", None)
             st.rerun()
 
     navigation = st.navigation(

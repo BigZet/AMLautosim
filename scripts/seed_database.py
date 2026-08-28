@@ -199,9 +199,22 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
                 from src.aml_workshop_simulator.api.routers.admin import config_version
 
                 config["config_version"] = config_version(config)
+                activated_at = datetime.now(UTC)
                 round_obj.game_config = config
                 round_obj.status = "active"
-                round_obj.activated_at = datetime.now(UTC)
+                round_obj.activated_at = activated_at
+                db.add(
+                    AuditEvent(
+                        actor_user_id=admin.id,
+                        round_id=round_obj.id,
+                        event_type="round_activated",
+                        target_type="round",
+                        target_id=str(round_obj.id),
+                        reason="Seeded demo round activated",
+                        metadata_={"config_version": config["config_version"]},
+                        created_at=activated_at,
+                    )
+                )
         await db.commit()
         return {
             "cards": len(cards),

@@ -52,9 +52,41 @@ def get_api_client() -> SimulatorAPIClient:
 
 
 def get_cookie_controller(key: str) -> CookieController:
-    if f"_cookie_controller_{key}" not in st.session_state:
-        st.session_state[f"_cookie_controller_{key}"] = CookieController(key=key)
-    return st.session_state[f"_cookie_controller_{key}"]
+    """A fresh controller per script run.
+
+    The controller reads `st.session_state[key]`, which Streamlit refreshes with
+    the component's answer. Caching the instance would freeze the empty first
+    reading and make every reload look like a logout.
+    """
+    return CookieController(key=key)
+
+
+#: Cookie writes are deferred to the top of the next script run: the component
+#: only reaches the browser when the script finishes, and `st.rerun()` right
+#: after a login would discard it.
+COOKIE_COMMAND_KEY = "_pending_cookie_command"
+
+
+def queue_cookie_set(session_id: str, expires_at: str | None) -> None:
+    st.session_state[COOKIE_COMMAND_KEY] = ("set", session_id, expires_at)
+
+
+def queue_cookie_clear() -> None:
+    st.session_state[COOKIE_COMMAND_KEY] = ("clear", None, None)
+
+
+def apply_pending_cookie_command(
+    controller: CookieController, cookie_name: str
+) -> None:
+    """Execute a queued cookie write during a normal render pass."""
+    command = st.session_state.pop(COOKIE_COMMAND_KEY, None)
+    if not command:
+        return
+    action, session_id, expires_at = command
+    if action == "set" and session_id:
+        store_session(controller, cookie_name, session_id, expires_at)
+    elif action == "clear":
+        clear_session(controller, cookie_name)
 
 
 def store_session(
@@ -124,7 +156,14 @@ def resolve_session(
 
     st.session_state["session_id"] = cookie_value
     st.session_state["user"] = profile
+    # Signals that this run switched from anonymous to authenticated, so the
+    # caller can start a clean render pass instead of mixing both trees.
+    st.session_state["_hydrated_from_cookie"] = True
     return UiSession(cookie_value, profile, pending=False)
+
+
+def consume_hydration_flag() -> bool:
+    return bool(st.session_state.pop("_hydrated_from_cookie", False))
 
 
 def reset_user_state() -> None:
@@ -141,5 +180,6 @@ def reset_user_state() -> None:
         "editing_step_id",
         "pending_command",
         "last_saved_hash",
+        "loaded_for",
     ):
         st.session_state.pop(key, None)

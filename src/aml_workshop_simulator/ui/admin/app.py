@@ -22,19 +22,21 @@ import streamlit as st  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     ADMIN_COOKIE,
-    clear_session,
+    apply_pending_cookie_command,
+    consume_hydration_flag,
     get_api_client,
     get_cookie_controller,
+    queue_cookie_clear,
+    queue_cookie_set,
     reset_user_state,
     resolve_session,
-    store_session,
 )
 
 st.set_page_config(
     page_title="AML Workshop Control",
     page_icon="🛠️",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 STYLES = """
@@ -51,6 +53,28 @@ table.aml-table th, table.aml-table td {
     border-bottom: 1px solid var(--aml-line); padding: .45rem .5rem; text-align: left;
 }
 .aml-scroll { overflow-x: auto; }
+[data-testid="stMetricValue"] {
+    font-size: clamp(1rem, 2.1vw, 1.6rem) !important;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+[data-testid="stMetricValue"] div { white-space: normal !important; }
+[data-testid="stMetricLabel"] p { white-space: normal; }
+@media (max-width: 1100px) {
+    [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        flex: 1 1 320px;
+        min-width: 260px;
+    }
+}
+@media (max-width: 640px) {
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+}
+:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
@@ -109,9 +133,7 @@ def login_screen(client: Any, controller: Any) -> None:
             return
         st.session_state["session_id"] = created["session_id"]
         st.session_state["user"] = created["user"]
-        store_session(
-            controller, ADMIN_COOKIE, created["session_id"], created.get("expires_at")
-        )
+        queue_cookie_set(created["session_id"], created.get("expires_at"))
         st.rerun()
 
 
@@ -426,7 +448,11 @@ def main() -> None:
     st.session_state.setdefault("pending_command", None)
     client = get_api_client()
     controller = get_cookie_controller("aml_admin_cookies")
+    apply_pending_cookie_command(controller, ADMIN_COOKIE)
     session = resolve_session(controller, ADMIN_COOKIE, client)
+    if consume_hydration_flag():
+        # Restart the run so the login tree is replaced, not overlaid.
+        st.rerun()
 
     if session.pending:
         st.info("Восстанавливаем сессию…")
@@ -449,7 +475,7 @@ def main() -> None:
                 client.logout(st.session_state["session_id"])
             except APIClientError:
                 st.warning("Сервер не подтвердил выход, локальная сессия очищена.")
-            clear_session(controller, ADMIN_COOKIE)
+            queue_cookie_clear()
             reset_user_state()
             st.rerun()
 
