@@ -76,7 +76,7 @@ def test_clean_database_reaches_alembic_head_and_seeds_idempotently() -> None:
                 cursor.execute("SELECT count(*) FROM audit_events")
                 assert cursor.fetchone()[0] == 1
                 cursor.execute("SELECT version_num FROM alembic_version")
-                assert cursor.fetchone()[0] == "b1c4d7e93a20"
+                assert cursor.fetchone()[0] == "c73f5a1e9d04"
         finally:
             connection.close()
     finally:

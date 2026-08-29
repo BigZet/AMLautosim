@@ -181,5 +181,10 @@ def reset_user_state() -> None:
         "pending_command",
         "last_saved_hash",
         "loaded_for",
+        "preview_cache",
+        "reveal_names",
+        "selected_version",
+        "auth_error",
+        "registered_email",
     ):
         st.session_state.pop(key, None)

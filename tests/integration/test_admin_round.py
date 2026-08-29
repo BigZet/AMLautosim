@@ -93,29 +93,26 @@ def test_a_second_active_round_is_refused(client, admin_headers, active_round) -
 
 
 def test_unknown_ruleset_version_is_refused(client, admin_headers, active_round) -> None:
+    """A ruleset this build cannot run is rejected when the round is created."""
     config = copy.deepcopy(active_round["game_config"])
     config["ruleset_version"] = "game-rules-v99"
-    created = client.post(
+    response = client.post(
         "/api/v1/admin/rounds",
         json={"title": "Раунд с чужими правилами", "game_config": config},
         headers=admin_headers,
-    ).json()
-    # The active round must be finished first, so use a fresh database state
-    # by checking the config error directly on activation.
-    response = client.post(
-        f"/api/v1/admin/rounds/{created['id']}/activate",
-        headers={**admin_headers, "Idempotency-Key": str(uuid.uuid4())},
     )
-    assert response.status_code == 409
-    assert response.json()["code"] in {"active_round_exists", "round_configuration_invalid"}
+    assert response.status_code == 409, response.text
+    assert response.json()["code"] == "round_configuration_invalid"
+    assert "game-rules-v99" in response.json()["message"]
 
 
-def test_broken_weights_are_refused_on_activation(client, admin_headers) -> None:
+def test_broken_weights_are_refused(client, admin_headers) -> None:
+    """Leaderboard weights that do not sum to 1 never reach the database."""
     rounds = client.get("/api/v1/admin/rounds", headers=admin_headers).json()
     draft = next(item for item in rounds if item["status"] == "draft")
     config = copy.deepcopy(draft["game_config"])
     config["leaderboard"]["weights"] = {"stealth": "0.70", "resources": "0.40"}
-    client.put(
+    update = client.put(
         f"/api/v1/admin/rounds/{draft['id']}",
         json={
             "expected_config_revision": draft["config_revision"],
@@ -123,12 +120,21 @@ def test_broken_weights_are_refused_on_activation(client, admin_headers) -> None
         },
         headers=admin_headers,
     )
-    response = client.post(
+    assert update.status_code == 422, update.text
+    assert update.json()["code"] == "validation_error"
+
+    unchanged = client.get(
+        f"/api/v1/admin/rounds/{draft['id']}", headers=admin_headers
+    ).json()
+    assert unchanged["game_config"]["leaderboard"]["weights"] == {
+        "resources": "0.40",
+        "stealth": "0.60",
+    }
+    activated = client.post(
         f"/api/v1/admin/rounds/{draft['id']}/activate",
         headers={**admin_headers, "Idempotency-Key": str(uuid.uuid4())},
     )
-    assert response.status_code == 409
-    assert response.json()["code"] == "round_configuration_invalid"
+    assert activated.status_code == 200, activated.text
 
 
 def test_only_one_active_round_at_the_database_level(client, admin_headers, active_round, db_dsn) -> None:

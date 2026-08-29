@@ -140,9 +140,20 @@ async def seed_admin(db: AsyncSession) -> User:
 
 
 def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
+    """Reference configuration pinned to the seeded card rows.
+
+    `operations` decides what is playable; `card_versions` repeats the same set
+    so a snapshot written by this seed stays readable by the older loader.
+    """
     config = {key: value for key, value in REFERENCE_GAME_CONFIG.items()}
+    enabled = {
+        (str(item["code"]), int(item.get("version", 1)))
+        for item in config.get("operations", [])
+    }
     config["card_versions"] = [
-        {"id": card.id, "code": card.code, "version": card.version} for card in cards
+        {"id": card.id, "code": card.code, "version": card.version}
+        for card in cards
+        if (card.code, card.version) in enabled
     ]
     return config
 
@@ -196,7 +207,7 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
             ).scalars().first()
             if other is None:
                 config = dict(round_obj.game_config)
-                from src.aml_workshop_simulator.api.routers.admin import config_version
+                from src.aml_workshop_simulator.api.routers.admin.common import config_version
 
                 config["config_version"] = config_version(config)
                 activated_at = datetime.now(UTC)

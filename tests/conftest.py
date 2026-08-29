@@ -133,7 +133,11 @@ def client(clean_database: None) -> Iterator[Any]:
 
     # Unhandled server errors must surface as the documented envelope, exactly
     # as they would behind uvicorn, instead of propagating into the test.
-    with TestClient(app, raise_server_exceptions=False) as test_client:
+    # A real peer address is supplied so the request metadata the API records
+    # (and the trusted-proxy rules around it) can be exercised.
+    with TestClient(
+        app, raise_server_exceptions=False, client=("127.0.0.1", 50000)
+    ) as test_client:
         yield test_client
 
 
@@ -202,5 +206,53 @@ def active_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
 @pytest.fixture()
 def cards(client: Any, active_round: dict[str, Any]) -> dict[str, dict[str, Any]]:
     response = client.get(f"/api/v1/rounds/{active_round['id']}/cards")
+    assert response.status_code == 200, response.text
+    return {card["code"]: card for card in response.json()}
+
+
+@pytest.fixture()
+def full_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
+    """A round configured the *legacy* way: all eight cards, nothing hidden.
+
+    Rounds created before the parameter surface was reduced look like this, and
+    their drafts must keep working. It is also the configuration that lets the
+    channel/parameter matrix be exercised across the whole catalog.
+    """
+    from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
+
+    catalog = client.get("/api/v1/admin/action-cards", headers=admin_headers).json()
+    config = {
+        key: value
+        for key, value in REFERENCE_GAME_CONFIG.items()
+        if key != "operations"
+    }
+    config["schema_version"] = 2
+    config["card_versions"] = [
+        {"id": card["id"], "code": card["code"], "version": card["version"]}
+        for card in catalog
+    ]
+
+    rounds = client.get("/api/v1/admin/rounds", headers=admin_headers).json()
+    draft = next(item for item in rounds if item["status"] == "draft")
+    updated = client.put(
+        f"/api/v1/admin/rounds/{draft['id']}",
+        json={
+            "expected_config_revision": draft["config_revision"],
+            "game_config": config,
+        },
+        headers=admin_headers,
+    )
+    assert updated.status_code == 200, updated.text
+    response = client.post(
+        f"/api/v1/admin/rounds/{draft['id']}/activate",
+        headers={**admin_headers, "Idempotency-Key": str(uuid.uuid4())},
+    )
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+@pytest.fixture()
+def full_cards(client: Any, full_round: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    response = client.get(f"/api/v1/rounds/{full_round['id']}/cards")
     assert response.status_code == 200, response.text
     return {card["code"]: card for card in response.json()}

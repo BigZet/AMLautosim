@@ -2,8 +2,12 @@ import uuid
 from datetime import datetime
 from typing import Optional
 from sqlalchemy import String, ForeignKey, Uuid
+from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base, BigIntVariant, TZDateTime
+
+# INET on PostgreSQL (IPv4 and IPv6), plain text elsewhere.
+IPAddress = String(45).with_variant(INET(), 'postgresql')
 
 
 class Session(Base):
@@ -24,3 +28,7 @@ class Session(Base):
         Uuid, ForeignKey('sessions.id'))
     revoked_by_user_id: Mapped[Optional[int]] = mapped_column(
         BigIntVariant, ForeignKey('users.id', ondelete='SET NULL'))
+    # Technical login metadata, visible to administrators only.
+    ip_address: Mapped[Optional[str]] = mapped_column(IPAddress)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(512))
+    accept_language: Mapped[Optional[str]] = mapped_column(String(120))

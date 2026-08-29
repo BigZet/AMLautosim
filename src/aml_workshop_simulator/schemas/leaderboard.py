@@ -32,11 +32,14 @@ class ResultOut(BaseModel):
 class LeaderboardRowOut(BaseModel):
     """Anonymised public row.
 
-    Deliberately carries no email, user id, scenario id, chain or factors.
+    Deliberately carries no email, user id, scenario id, chain or factors —
+    and, unless the caller explicitly asked to reveal them, no nickname either.
     """
 
     rank: int
+    #: Masked placeholder (`Игрок #1`) unless the caller asked to reveal names.
     display_name: str
+    masked: bool = True
     game_score: str
     stealth_score: str
     resource_score: str
@@ -49,6 +52,7 @@ class LeaderboardPageOut(BaseModel):
     rows: list[LeaderboardRowOut]
     next_cursor: str | None = None
     generated_at: datetime
+    revealed: bool = False
 
 
 class AdminLeaderboardRowOut(BaseModel):

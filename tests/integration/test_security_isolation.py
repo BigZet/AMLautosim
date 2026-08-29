@@ -19,7 +19,17 @@ ADMIN_ROUTES = [
     ("GET", "/api/v1/admin/rounds/{round_id}/leaderboard"),
     ("GET", "/api/v1/admin/rounds/{round_id}/audit-events"),
     ("POST", "/api/v1/admin/rounds/{round_id}/activate"),
+    ("POST", "/api/v1/admin/rounds/{round_id}/start"),
+    ("POST", "/api/v1/admin/rounds/{round_id}/stop"),
+    ("POST", "/api/v1/admin/rounds/{round_id}/restart"),
+    ("GET", "/api/v1/admin/rounds/{round_id}/scoring-plan"),
     ("POST", "/api/v1/admin/rounds/{round_id}/score"),
+    ("GET", "/api/v1/admin/rounds/{round_id}/participants/1/scenario-versions/1"),
+    ("GET", "/api/v1/admin/round-presets"),
+    ("POST", "/api/v1/admin/round-presets"),
+    ("GET", "/api/v1/admin/round-presets/1"),
+    ("PUT", "/api/v1/admin/round-presets/1"),
+    ("DELETE", "/api/v1/admin/round-presets/1"),
 ]
 
 
@@ -45,7 +55,7 @@ def test_participants_never_see_each_others_scenarios(
 ) -> None:
     round_id = active_round["id"]
     first_steps = [build_step(cards["salary"], 50000, 1, "bank")]
-    second_steps = [build_step(cards["online_purchase"], 7000, 1, "web")]
+    second_steps = [build_step(cards["card_transfer"], 7000, 1, "web")]
     put_scenario(client, round_id, participant["headers"], first_steps)
     put_scenario(client, round_id, second_participant["headers"], second_steps)
 
@@ -60,7 +70,82 @@ def test_participants_never_see_each_others_scenarios(
     assert second_view["participant_id"] == second_participant["id"]
     assert first_view["id"] != second_view["id"]
     assert first_view["steps"][0]["card"]["code"] == "salary"
-    assert second_view["steps"][0]["card"]["code"] == "online_purchase"
+    assert second_view["steps"][0]["card"]["code"] == "card_transfer"
+
+
+def test_the_version_history_is_scoped_to_its_own_participant(
+    client, participant, second_participant, active_round, cards
+) -> None:
+    """Two players saving in the same round never see each other's versions."""
+    round_id = active_round["id"]
+    put_scenario(
+        client,
+        round_id,
+        participant["headers"],
+        [build_step(cards["salary"], 50000, 1, "bank")],
+    )
+    put_scenario(
+        client,
+        round_id,
+        second_participant["headers"],
+        [build_step(cards["card_transfer"], 7000, 1, "web")],
+    )
+
+    first = client.get(
+        f"/api/v1/rounds/{round_id}/scenario/versions", headers=participant["headers"]
+    ).json()
+    second = client.get(
+        f"/api/v1/rounds/{round_id}/scenario/versions",
+        headers=second_participant["headers"],
+    ).json()
+
+    assert len(first["rows"]) == 1
+    assert len(second["rows"]) == 1
+    assert first["rows"][0]["id"] != second["rows"][0]["id"]
+
+    own = client.get(
+        f"/api/v1/rounds/{round_id}/scenario/versions/1", headers=participant["headers"]
+    ).json()
+    assert own["steps"][0]["card"]["code"] == "salary"
+    other = client.get(
+        f"/api/v1/rounds/{round_id}/scenario/versions/1",
+        headers=second_participant["headers"],
+    ).json()
+    # The same revision number means a different version for a different player.
+    assert other["steps"][0]["card"]["code"] == "card_transfer"
+
+
+def test_restoring_a_version_cannot_reach_another_participant(
+    client, participant, second_participant, active_round, cards
+) -> None:
+    """A revision that only the other player has is simply not found."""
+    round_id = active_round["id"]
+    put_scenario(
+        client,
+        round_id,
+        second_participant["headers"],
+        [build_step(cards["salary"], 50000, 1, "bank")],
+    )
+    put_scenario(
+        client,
+        round_id,
+        second_participant["headers"],
+        [build_step(cards["salary"], 60000, 1, "bank")],
+        expected_revision=1,
+    )
+    put_scenario(
+        client,
+        round_id,
+        participant["headers"],
+        [build_step(cards["card_transfer"], 7000, 1, "web")],
+    )
+
+    response = client.post(
+        f"/api/v1/rounds/{round_id}/scenario/versions/2/restore",
+        json={"expected_revision": 1, "client_mutation_id": str(uuid.uuid4())},
+        headers=participant["headers"],
+    )
+    assert response.status_code == 404, response.text
 
 
 def test_participant_id_cannot_be_injected_through_the_payload(
@@ -123,10 +208,14 @@ def test_public_leaderboard_contains_no_identifiers(
     response = client.get(f"/api/v1/rounds/{round_id}/leaderboard")
     body = response.text
     assert participant["email"] not in body
+    # The nickname is not in the default projection either: the row carries a
+    # neutral placeholder until somebody explicitly asks to reveal names.
+    assert participant["display_name"] not in body
     row = response.json()["rows"][0]
     assert set(row) == {
         "rank",
         "display_name",
+        "masked",
         "game_score",
         "stealth_score",
         "resource_score",
@@ -134,6 +223,8 @@ def test_public_leaderboard_contains_no_identifiers(
         "is_adjusted",
         "is_current_user",
     }
+    assert row["display_name"] == "Игрок #1"
+    assert row["masked"] is True
 
 
 def test_a_revoked_session_cannot_be_replayed(client, participant, active_round) -> None:

@@ -35,6 +35,8 @@ services:
       DB_POOL_DISABLED: "true"
       SECRET_KEY: ${SECRET_KEY:-change-me-for-production}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # Empty by default: only the socket address is believed.
+      TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-admin12345}
     command: >-

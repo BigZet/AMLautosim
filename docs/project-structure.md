@@ -7,12 +7,13 @@
 .
 ├── src/aml_workshop_simulator/
 │   ├── api/                       # FastAPI, routers, middleware, dependencies
-│   ├── core/                      # настройки, безопасность, логирование
+│   ├── core/                      # настройки, безопасность, метаданные запроса
 │   ├── schemas/                   # Pydantic request/response DTO
-│   ├── services/                  # use cases, игровые правила и scoring
+│   ├── domain/                    # правила игры, каталог, политика раунда
+│   ├── services/                  # use cases поверх домена и БД
 │   ├── db/                        # SQLAlchemy, repositories, DB session
 │   └── ui/
-│       ├── shared/                # API client, cookies, общие UI-функции
+│       ├── shared/                # API client, cookies, тема, браузерные заголовки
 │       ├── participant/           # participant Streamlit
 │       └── admin/                 # admin Streamlit
 ├── migrations/                    # Alembic и seed-данные
@@ -40,8 +41,24 @@ Router разбирает HTTP-запрос и вызывает service. SQL и 
 
 ### `core/`
 
-Общие технические настройки: `config.py`, `security.py`, `logging.py`. Игровые лимиты
-сюда не относятся: они должны быть частью versioned ruleset.
+Общие технические настройки: `config.py`, `security.py`, `enums.py`,
+`request_meta.py` (адрес клиента и браузерные заголовки с учетом trusted proxies).
+Игровые лимиты сюда не относятся: они должны быть частью versioned ruleset.
+
+### `domain/`
+
+Чистые правила, не знающие ни про HTTP, ни про SQLAlchemy:
+
+- `catalog.py` — каталог операций и их параметров, включая набор из шести операций,
+  которые раунд включает по умолчанию;
+- `round_policy.py` — политика раунда: какие операции доступны, какие параметры видимы
+  (не более двух на операцию) и какие значения закреплены сервером;
+- `rules.py` — валидация цепочки и расчет ресурсов, лимитов и цели;
+- `presentation.py` — разбор одного шага в набор подписанных параметров для admin-панели;
+- `action_parameters.py`, `channels.py`, `scoring.py` — справочники и формулы.
+
+Домен — единственный источник чисел: preview в UI и снимок при сохранении проходят через
+один и тот же код.
 
 ### `schemas/`
 
@@ -70,6 +87,11 @@ Pydantic DTO по функциональным областям: `auth.py`, `rou
 компоненты сначала можно держать рядом с приложением и выносить в подкаталоги только
 после роста. `ui/shared/` содержит typed API client, cookie adapter и работу с
 `st.session_state`.
+
+`ui/shared/theme.py` реализует переключатель темной и светлой темы поверх серверной
+темы Streamlit, `ui/shared/browser_meta.py` пересылает браузерные `User-Agent`,
+`Accept-Language` и адрес клиента в API, `ui/admin/config_editor.py` — структурный
+редактор конфигурации раунда.
 
 UI не обращается к `db/` напрямую и не сохраняет каноническое состояние локально.
 
@@ -100,9 +122,14 @@ src/aml_workshop_simulator/
 │   └── routers/
 │       ├── auth.py
 │       ├── rounds.py
-│       ├── scenarios.py
-│       ├── leaderboard.py
-│       └── admin.py
+│       ├── health.py
+│       └── admin/
+│           ├── rounds.py          # жизненный цикл и конфигурация
+│           ├── presets.py         # пресеты настроек
+│           ├── participants.py    # участники, версии, сессии
+│           ├── leaderboard.py
+│           ├── audit.py
+│           └── common.py
 ├── core/
 │   ├── config.py
 │   ├── security.py
@@ -113,12 +140,17 @@ src/aml_workshop_simulator/
 │   ├── scenarios.py
 │   ├── leaderboard.py
 │   └── errors.py
+├── domain/
+│   ├── catalog.py
+│   ├── round_policy.py
+│   ├── rules.py
+│   ├── presentation.py
+│   └── scoring.py
 ├── services/
-│   ├── auth.py
-│   ├── rounds.py
-│   ├── scenarios.py
-│   ├── scoring.py
-│   └── leaderboard.py
+│   ├── scenario_service.py
+│   ├── scenario_versions.py
+│   ├── scoring_service.py
+│   └── leaderboard_service.py
 ├── db/
 │   ├── session.py
 │   ├── models/
@@ -133,8 +165,9 @@ src/aml_workshop_simulator/
 └── ui/
     ├── shared/
     │   ├── api_client.py
-    │   ├── cookies.py
-    │   └── state.py
+    │   ├── browser_meta.py
+    │   ├── session.py
+    │   └── theme.py
     ├── participant/
     │   └── app.py
     └── admin/

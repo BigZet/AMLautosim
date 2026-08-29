@@ -1,9 +1,13 @@
 # Матрица готовности целевой архитектуры
 
-**Актуализировано:** 2026-07-17.
+**Актуализировано:** 2026-07-17; раздел 3.1 добавлен 2026-08-29.
 
 Матрица отдельно показывает документацию, текущую реализацию и тестовое подтверждение.
 Описание target contract не означает, что feature уже реализована.
+
+Разделы 3–6 отражают состояние на дату в заголовке и не перепроверялись целиком при
+последнем изменении. Раздел 3.1 перечисляет то, что было добавлено и проверено позже, с
+указанием конкретных наборов тестов.
 
 ## 1. Обозначения
 
@@ -54,6 +58,24 @@
 | Auth bcrypt/cookie/sessions/roles | Описано | Нет | Требуется auth+browser suite | Нет `sessions`, cookie bootstrap и revoke semantics |
 | Round create/activate/score/stats/board | Описано | Частично | Требуется integration | Нет snapshot/revisions/locks/atomic target guarantees |
 | Basic scenario submit/read/result | Описано | Частично | Требуется integration | Нет GET/PUT draft/revision/server preview |
+
+## 3.1. Вторая итерация: реализовано и проверено
+
+| Capability | Реализация | Тесты/evidence |
+| --- | --- | --- |
+| Политика раунда: 6 операций по умолчанию, не более двух видимых параметров | `domain/round_policy.py`, `domain/catalog.py` | `tests/unit/test_round_policy.py` |
+| Закрепленные значения скрытых параметров и их валидация | `services/scenario_service.py`, `domain/rules.py` | `tests/unit/test_round_policy.py`, `tests/integration/test_scenario_lifecycle.py` |
+| Совместимость с legacy-конфигурацией без блока `operations` | `domain/round_policy.py` | `tests/unit/` (фикстура legacy `game_config`) |
+| Мгновенный пересчет ресурсов до сохранения | `POST /scenario/preview`, `ui/participant/app.py` | `tests/integration/test_scenario_versions.py`, `tests/ui/test_selenium_flows.py` |
+| Append-only история черновиков и восстановление версии | `db/models/scenario_versions.py`, `services/scenario_versions.py` | `tests/integration/test_scenario_versions.py`, `tests/ui/test_selenium_flows.py` |
+| Полный жизненный цикл раунда со `stopped` и безопасным перезапуском | `api/routers/admin/rounds.py` | `tests/integration/test_round_lifecycle_and_presets.py`, `tests/e2e/test_full_round.py` |
+| Пресеты настроек раунда | `api/routers/admin/presets.py`, `ui/admin/config_editor.py` | `tests/integration/test_round_lifecycle_and_presets.py`, `tests/ui/test_playwright_admin.py` |
+| Структурный редактор всех параметров раунда | `ui/admin/config_editor.py` | `tests/ui/test_playwright_admin.py` |
+| IP/User-Agent/Accept-Language и trusted proxies | `core/request_meta.py`, `ui/shared/browser_meta.py` | `tests/integration/test_sessions_and_privacy.py`, `tests/ui/test_selenium_auth.py` |
+| Скрытые ники в лидерборде до явного раскрытия | `api/routers/rounds.py`, `ui/participant/app.py` | `tests/integration/test_sessions_and_privacy.py`, `tests/ui/test_selenium_flows.py` |
+| Полный набор параметров шага в admin-панели | `domain/presentation.py`, `api/routers/admin/participants.py` | `tests/ui/test_playwright_admin.py`, `tests/ui/test_selenium_flows.py` |
+| Темная и светлая тема с сохранением выбора | `ui/shared/theme.py` | `tests/ui/test_selenium_auth.py`, `tests/ui/test_selenium_flows.py` |
+| Alembic-миграция `c73f5a1e9d04` | `migrations/versions/` | `tests/integration/test_migrations_and_seed.py`, апгрейд compose-базы с данными |
 
 ## 4. Требуется изменить
 
@@ -120,16 +142,21 @@
 
 ### Round
 
-- [ ] Только `draft`, `active`, `scoring`, `completed` используются во всех layers.
-- [ ] Один partial unique active/scoring scope.
-- [ ] Activate не завершает другой round скрыто.
-- [ ] Config immutable после activate.
+- [x] Только `draft`, `active`, `stopped`, `scoring`, `completed` используются во всех layers.
+- [x] Один partial unique active/scoring scope (`uq_rounds_single_active`).
+- [x] Activate не завершает другой round скрыто.
+- [x] Раунд не начинается без явной команды организатора.
+- [x] `stopped` запрещает записи участников и ничего не удаляет.
+- [x] Restart создает новый раунд и не теряет историю прошлого.
+- [x] Config immutable после activate.
 - [ ] Score failure rollback возвращает observable state `active`.
 - [ ] Completed round не rescored.
 
 ### Scenario
 
 - [ ] Только `draft`, `submitted`, `scored`.
+- [x] Каждое явное сохранение добавляет версию; восстановление не удаляет более поздние.
+- [x] Скоринг читает зафиксированную `submitted_version_id`.
 - [ ] `UNIQUE(round_id, participant_id)`.
 - [ ] New PUT submitted scenario -> draft while round active.
 - [ ] Submit той же revision idempotent.

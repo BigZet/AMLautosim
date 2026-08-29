@@ -51,11 +51,15 @@ def put_scenario(
 
 
 def valid_chain(cards: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    """A hard-valid reference chain that reaches the 150 000 target outflow."""
+    """A hard-valid reference chain that reaches the 150 000 target outflow.
+
+    Built only from operations a default round enables, so it stays valid under
+    the reduced parameter surface.
+    """
     return [
         build_step(cards["salary"], 120000, 1, "bank"),
-        build_step(cards["online_purchase"], 100000, 1, "web"),
-        build_step(cards["card_transfer"], 60000, 1, "mobile"),
+        build_step(cards["card_transfer"], 100000, 1, "mobile"),
+        build_step(cards["cash_withdrawal"], 50000, 1, "atm"),
     ]
 
 

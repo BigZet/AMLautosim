@@ -14,7 +14,13 @@ class RoundPublicOut(BaseModel):
     status: str
     config_version: str | None = None
     activated_at: datetime | None = None
+    stopped_at: datetime | None = None
+    completed_at: datetime | None = None
     game_config: dict[str, Any]
+
+    @property
+    def accepts_changes(self) -> bool:
+        return self.status == "active"
 
 
 class RoundSummaryOut(BaseModel):
@@ -31,12 +37,27 @@ class RoundSummaryPageOut(BaseModel):
     next_cursor: str | None = None
 
 
+class VisibleParamOut(BaseModel):
+    """One control the participant is actually offered for an operation."""
+
+    param: str
+    key: str
+    namespace: str
+    label: str
+    kind: str = "select"
+    help: str | None = None
+    default: Any = None
+    options: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class ActionCardOut(BaseModel):
-    """One immutable card version plus its declarative UI/validation contract.
+    """One immutable card version plus its round-resolved UI contract.
 
     `channels`, `fields` and `context_fields` come from the very
     `parameter_schema` the server validates against, so the UI cannot offer an
-    option the API would reject.
+    option the API would reject. `visible_params` narrows that contract down to
+    what *this round* exposes; everything else is pinned server-side and listed
+    in `pinned_defaults`.
     """
 
     id: int
@@ -59,3 +80,6 @@ class ActionCardOut(BaseModel):
     channel_labels: dict[str, str] = Field(default_factory=dict)
     fields: list[dict[str, Any]] = Field(default_factory=list)
     context_fields: list[dict[str, Any]] = Field(default_factory=list)
+    visible_params: list[VisibleParamOut] = Field(default_factory=list)
+    show_frequency: bool = True
+    pinned_defaults: dict[str, Any] = Field(default_factory=dict)

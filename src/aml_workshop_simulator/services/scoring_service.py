@@ -29,7 +29,9 @@ from src.aml_workshop_simulator.domain.scoring import (
 from src.aml_workshop_simulator.services.scenario_service import (
     build_snapshot,
     load_round_card_specs,
+    round_policy,
 )
+from src.aml_workshop_simulator.services.scenario_versions import submitted_steps
 
 #: Test hook: called with the 1-based index of each scenario before it is
 #: written, so atomicity can be verified with a controlled failure.
@@ -73,6 +75,7 @@ async def score_round(
     ).scalar() or 0
 
     specs = await load_round_card_specs(db, round_obj)
+    policy = round_policy(round_obj, specs)
     game_config = round_obj.game_config or {}
     now = datetime.now(UTC)
     scored = 0
@@ -81,8 +84,10 @@ async def score_round(
         if SCORING_FAILURE_HOOK is not None:
             SCORING_FAILURE_HOOK(index, scenario)
 
-        steps = scenario.steps or []
-        snapshot = build_snapshot(steps, specs, game_config)
+        # Only the version the participant actually submitted is scored, even
+        # if a later draft exists in the history.
+        steps = await submitted_steps(db, scenario)
+        snapshot = build_snapshot(steps, specs, game_config, policy)
         scoring = score_scenario(steps, specs, game_config)
         risk: Decimal = scoring["risk_score"]
         resources = resource_score(snapshot, game_config)

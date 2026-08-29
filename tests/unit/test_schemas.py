@@ -74,12 +74,24 @@ def test_step_rejects_unknown_context_field() -> None:
         )
 
 
-def test_channel_is_required_and_must_be_a_known_value() -> None:
-    with pytest.raises(ValidationError):
-        ScenarioStepIn.model_validate(valid_step_payload(context={}))
+def test_channel_may_be_omitted_and_must_otherwise_be_a_known_value() -> None:
+    """An omitted channel is filled from the round policy, not guessed here."""
+    omitted = ScenarioStepIn.model_validate(valid_step_payload(context={}))
+    assert omitted.context.channel is None
+
     with pytest.raises(ValidationError) as raised:
         ScenarioStepIn.model_validate(valid_step_payload(context={"channel": "carrier_pigeon"}))
     assert "channel" in str(raised.value)
+
+
+def test_optional_context_fields_default_to_not_sent() -> None:
+    step = ScenarioStepIn.model_validate(valid_step_payload(context={"channel": "bank"}))
+    assert step.context.time_of_day is None
+    assert step.context.has_documents is None
+
+    payload = valid_step_payload(context={"channel": "bank"})
+    payload.pop("frequency")
+    assert ScenarioStepIn.model_validate(payload).frequency is None
 
 
 @pytest.mark.parametrize("channel", ["bank", "branch", "atm", "mobile", "web", "exchange", "pos"])

@@ -21,25 +21,32 @@ from tests.ui.conftest import (
     register,
 )
 from tests.ui.streamlit_driver import (
+    DEFAULT_TIMEOUT,
     button_is_disabled,
     choose_option,
     clipped_elements,
     click_button,
+    current_theme,
     expect_marker,
     expect_marker_at_least,
     fill_number,
+    fill_text,
     has_horizontal_overflow,
     login,
     logout,
     marker,
     marker_locator,
     open_app,
+    open_tab,
     select_options,
+    toggle_theme,
+    widget,
 )
 from tests.ui.streamlit_driver import register as register_in_ui
 
 playwright_api = pytest.importorskip("playwright.sync_api")
 
+#: The six operations a default round enables, with the channels each offers.
 EXPECTED_CHANNEL_LABELS = {
     "Получить зарплату": ["Банковское зачисление", "Отделение банка", "Мобильное приложение"],
     "Внести наличные": ["Банкомат", "Отделение банка"],
@@ -47,8 +54,29 @@ EXPECTED_CHANNEL_LABELS = {
     "Международный перевод": ["Интернет-банк", "Отделение банка"],
     "Снять наличные": ["Банкомат", "Отделение банка"],
     "Купить криптовалюту": ["Криптобиржа", "Интернет-банк"],
-    "Оплатить покупку": ["Мобильное приложение", "Интернет-банк"],
-    "Получить возврат": ["Мобильное приложение", "Интернет-банк"],
+}
+
+CODES = {
+    "Получить зарплату": "salary",
+    "Внести наличные": "cash_deposit",
+    "Перевести по карте": "card_transfer",
+    "Международный перевод": "international",
+    "Снять наличные": "cash_withdrawal",
+    "Купить криптовалюту": "crypto_exchange",
+}
+
+#: Still in the catalogue and still playable in a legacy draft, but not offered
+#: by a default round: the pair carries its own prerequisite mechanic.
+EXCLUDED_CARD_TITLES = ("Оплатить покупку", "Получить возврат")
+
+#: Exactly what each operation exposes: the channel plus one more parameter.
+EXPECTED_VISIBLE_PARAMS = {
+    "salary": "channel,context.time_of_day",
+    "cash_deposit": "channel,action.funds_source",
+    "card_transfer": "channel,context.recipient_type",
+    "international": "channel,context.country_risk",
+    "cash_withdrawal": "channel,context.time_of_day",
+    "crypto_exchange": "channel,action.wallet_owner",
 }
 
 ALL_CHANNEL_LABELS = {
@@ -60,18 +88,6 @@ ALL_CHANNEL_LABELS = {
     "Криптобиржа",
     "POS-терминал",
 }
-
-
-@pytest.fixture(scope="session")
-def browser() -> Iterator[Any]:
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as engine:
-        instance = engine.chromium.launch(headless=True)
-        try:
-            yield instance
-        finally:
-            instance.close()
 
 
 @pytest.fixture()
@@ -130,10 +146,26 @@ def add_step(
     expect_marker(page, "chain-length", str(before + 1))
 
 
+def expect_step_order(page: Any, step_ids: list[str]) -> None:
+    """Wait until the chain renders exactly these steps in this order."""
+    expected = [f"step-card-{step_id}" for step_id in step_ids]
+    page.wait_for_function(
+        """(expected) => {
+            const seen = [...document.querySelectorAll('[data-testid^="step-card-"]')]
+                .filter(node => !node.closest('[data-stale="true"]'))
+                .map(node => node.getAttribute('data-testid'));
+            return JSON.stringify(seen) === JSON.stringify(expected);
+        }""",
+        arg=expected,
+        timeout=DEFAULT_TIMEOUT,
+    )
+
+
 def build_valid_chain(page: Any) -> None:
-    add_step(page, "Получить зарплату", "Банковское зачисление", 120000, 1, "salary")
-    add_step(page, "Оплатить покупку", "Интернет-банк", 100000, 1, "online_purchase")
-    add_step(page, "Перевести по карте", "Мобильное приложение", 60000, 1, "card_transfer")
+    """Salary in, transfer out, cash out: exactly the 150 000 target outflow."""
+    add_step(page, "Получить зарплату", "Банковское зачисление", 120000, None, "salary")
+    add_step(page, "Перевести по карте", "Мобильное приложение", 100000, 1, "card_transfer")
+    add_step(page, "Снять наличные", "Банкомат", 50000, 1, "cash_withdrawal")
 
 
 # --------------------------------------------------------------------------
@@ -164,14 +196,19 @@ def test_login_with_a_wrong_password_shows_an_error(reset_state: Stack, page: An
     stack = reset_state
     player = register(stack, "Ошибочный вход")
     open_app(page, stack.play_url)
-    from tests.ui.streamlit_driver import fill_text
+    open_tab(page, "Вход")
 
     fill_text(page, "login_email", player["email"])
     fill_text(page, "login_password", "definitely-wrong")
     page.get_by_role("button", name="Войти", exact=True).click()
-    message = marker(page, "flash-error", timeout=60_000)
+    message = marker(page, "auth-error", timeout=60_000)
     assert "Неверный email или пароль" in message
     assert marker(page, "auth-state") == "anonymous"
+    assert db_query(
+        "SELECT count(*) FROM sessions s JOIN users u ON u.id = s.user_id "
+        "WHERE u.email = %s AND s.revoked_at IS NULL",
+        (player["email"],),
+    ) == [(0,)]
 
 
 # --------------------------------------------------------------------------
@@ -187,16 +224,7 @@ def test_channel_selector_offers_exactly_the_allowed_channels(
     player = register(stack, "Каналы")
     participant_login(page, stack, player["email"])
 
-    code = {
-        "Получить зарплату": "salary",
-        "Внести наличные": "cash_deposit",
-        "Перевести по карте": "card_transfer",
-        "Международный перевод": "international",
-        "Снять наличные": "cash_withdrawal",
-        "Купить криптовалюту": "crypto_exchange",
-        "Оплатить покупку": "online_purchase",
-        "Получить возврат": "refund",
-    }[card_label]
+    code = CODES[card_label]
 
     choose_option(page, "builder_card", card_label)
     offered = select_options(page, f"builder_{code}_channel")
@@ -212,23 +240,11 @@ def test_every_allowed_channel_of_every_card_can_be_added_and_saved(
 ) -> None:
     """One step per card/channel pair, each saved through the real UI."""
     stack = reset_state
-    codes = {
-        "Получить зарплату": "salary",
-        "Внести наличные": "cash_deposit",
-        "Перевести по карте": "card_transfer",
-        "Международный перевод": "international",
-        "Снять наличные": "cash_withdrawal",
-        "Купить криптовалюту": "crypto_exchange",
-        "Оплатить покупку": "online_purchase",
-        "Получить возврат": "refund",
-    }
     for card_label, channels in EXPECTED_CHANNEL_LABELS.items():
         for channel_label in channels:
             player = register(stack, "Канал")
             participant_login(page, stack, player["email"])
-            code = codes[card_label]
-            if code == "refund":
-                add_step(page, "Оплатить покупку", "Интернет-банк", 20000, 1, "online_purchase")
+            code = CODES[card_label]
             add_step(page, card_label, channel_label, None, None, code)
             click_button(page, "save_draft")
             expect_marker(page, "scenario-revision", "1")
@@ -243,6 +259,88 @@ def test_every_allowed_channel_of_every_card_can_be_added_and_saved(
                 "bank", "branch", "atm", "mobile", "web", "exchange",
             }
             logout(page)
+
+
+def test_the_builder_offers_exactly_the_operations_of_the_round(
+    reset_state: Stack, page: Any
+) -> None:
+    """Six operations, and the excluded pair is nowhere to be chosen."""
+    stack = reset_state
+    player = register(stack, "Каталог раунда")
+    participant_login(page, stack, player["email"])
+
+    offered = select_options(page, "builder_card")
+    titles = [label.split(" · ")[0] for label in offered]
+    assert sorted(titles) == sorted(EXPECTED_CHANNEL_LABELS), offered
+    for excluded in EXCLUDED_CARD_TITLES:
+        assert excluded not in titles
+
+
+@pytest.mark.parametrize("card_label", sorted(EXPECTED_CHANNEL_LABELS))
+def test_an_operation_exposes_at_most_two_parameters(
+    reset_state: Stack, page: Any, card_label: str
+) -> None:
+    """Amount, an optional repeat count and no more than two other controls."""
+    stack = reset_state
+    player = register(stack, "Две настройки")
+    participant_login(page, stack, player["email"])
+    code = CODES[card_label]
+
+    choose_option(page, "builder_card", card_label)
+    exposed = marker(page, "builder-params")
+    assert exposed == EXPECTED_VISIBLE_PARAMS[code], card_label
+    assert len(exposed.split(",")) <= 2
+
+    assert widget(page, f"builder_{code}_amount").count() == 1
+    assert widget(page, f"builder_{code}_channel").count() == 1
+    # Everything the round pins has no control at all.
+    for hidden in ("ctx_has_documents", "ctx_velocity", "detail_income_basis"):
+        assert widget(page, f"builder_{code}_{hidden}").count() == 0, hidden
+
+    shown_frequency = widget(page, f"builder_{code}_frequency").count()
+    assert shown_frequency == (
+        1 if code in {"cash_deposit", "card_transfer", "cash_withdrawal"} else 0
+    )
+
+
+def test_hidden_parameters_are_stored_and_survive_a_reload(
+    reset_state: Stack, page: Any
+) -> None:
+    """Hiding a parameter removes its control, not the value behind it."""
+    stack = reset_state
+    player = register(stack, "Скрытые параметры")
+    participant_login(page, stack, player["email"])
+    add_step(page, "Получить зарплату", "Банковское зачисление", 120000, None, "salary")
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "1")
+
+    stored = db_query(
+        "SELECT s.steps FROM scenarios s JOIN users u ON u.id = s.participant_id "
+        "WHERE u.email = %s",
+        (player["email"],),
+    )[0][0]
+    step = stored[0]
+    # The visible parameters carry what the participant chose...
+    assert step["context"]["channel"] == "bank"
+    assert step["context"]["time_of_day"] == "day"
+    # ...and the ones the round hides are still written down in full.
+    assert step["context"]["has_documents"] is True
+    assert step["action_details"]["employer_profile"] == "verified_employer"
+    assert step["action_details"]["income_basis"] == "payroll_registry"
+
+    page.reload(wait_until="domcontentloaded")
+    expect_marker(page, "auth-state", "authenticated", timeout=60_000)
+    expect_marker(page, "chain-length", "1")
+    expect_marker(page, "resources-valid", "true")
+
+    # Re-saving an unchanged chain is a no-op, not a new revision.
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "1")
+    assert db_query(
+        "SELECT count(*) FROM scenario_versions v JOIN scenarios s ON s.id = v.scenario_id "
+        "JOIN users u ON u.id = s.participant_id WHERE u.email = %s",
+        (player["email"],),
+    ) == [(1,)]
 
 
 # --------------------------------------------------------------------------
@@ -329,6 +427,7 @@ def test_edit_delete_reorder_and_duplicate_keep_step_identity(
 
     # Reorder: identity must survive.
     click_button(page, f"up_{ids[2]}")
+    expect_step_order(page, [ids[0], ids[2], ids[1]])
     click_button(page, "save_draft")
     expect_marker(page, "scenario-revision", "2")
     reordered = stored_steps()
@@ -336,6 +435,7 @@ def test_edit_delete_reorder_and_duplicate_keep_step_identity(
 
     # Duplicate: a new identity, same content.
     click_button(page, f"copy_{ids[0]}")
+    expect_marker(page, "chain-length", "4")
     click_button(page, "save_draft")
     expect_marker(page, "scenario-revision", "3")
     duplicated = stored_steps()
@@ -347,6 +447,7 @@ def test_edit_delete_reorder_and_duplicate_keep_step_identity(
 
     # Delete: the remaining identities are untouched.
     click_button(page, f"delete_{duplicated[1]['step_id']}")
+    expect_marker(page, "chain-length", "3")
     click_button(page, "save_draft")
     expect_marker(page, "scenario-revision", "4")
     remaining = stored_steps()
@@ -387,9 +488,10 @@ def test_business_violation_is_shown_per_step_and_blocks_submit(
     expect_marker(page, "submit-enabled", "false")
     assert button_is_disabled(page, "submit_scenario")
 
+    # The chain is kept: a business violation is stored, not thrown away.
     step_id = steps[0][0][0]["step_id"]
-    field_error = page.locator(f'[data-testid="step-error-{step_id}-amount"]').first
-    field_error.wait_for(state="visible", timeout=30_000)
+    assert page.locator(f'[data-testid="step-card-{step_id}"]').count() == 1
+    assert page.locator(f'[data-testid="step-impact-{step_id}"]').count() == 1
 
 
 def test_fixing_a_violation_enables_submit_and_completes_the_round(
@@ -400,10 +502,10 @@ def test_fixing_a_violation_enables_submit_and_completes_the_round(
     participant_login(page, stack, player["email"])
 
     # A chain that is structurally fine but breaks the crypto quota.
-    add_step(page, "Получить зарплату", "Банковское зачисление", 150000, 1, "salary")
-    add_step(page, "Купить криптовалюту", "Криптобиржа", 100000, 1, "crypto_exchange")
-    add_step(page, "Оплатить покупку", "Интернет-банк", 60000, 1, "online_purchase")
-    add_step(page, "Купить криптовалюту", "Криптобиржа", 50000, 1, "crypto_exchange")
+    add_step(page, "Получить зарплату", "Банковское зачисление", 150000, None, "salary")
+    add_step(page, "Купить криптовалюту", "Криптобиржа", 100000, None, "crypto_exchange")
+    add_step(page, "Перевести по карте", "Мобильное приложение", 60000, 1, "card_transfer")
+    add_step(page, "Купить криптовалюту", "Криптобиржа", 50000, None, "crypto_exchange")
     click_button(page, "save_draft")
     expect_marker(page, "resources-valid", "false")
     page.locator('[data-testid="violation-category_limit_exceeded"]').first.wait_for(
@@ -417,7 +519,8 @@ def test_fixing_a_violation_enables_submit_and_completes_the_round(
         (player["email"],),
     )[0][0]
     click_button(page, f"delete_{steps[3]['step_id']}")
-    add_step(page, "Перевести по карте", "Мобильное приложение", 50000, 1, "card_transfer")
+    expect_marker(page, "chain-length", "3")
+    add_step(page, "Снять наличные", "Банкомат", 50000, 1, "cash_withdrawal")
     click_button(page, "save_draft")
     expect_marker(page, "resources-valid", "true")
     expect_marker(page, "objective-reached", "true")
@@ -439,7 +542,7 @@ def test_submit_is_blocked_until_the_objective_is_reached(
     stack = reset_state
     player = register(stack, "Цель")
     participant_login(page, stack, player["email"])
-    add_step(page, "Оплатить покупку", "Интернет-банк", 50000, 1, "online_purchase")
+    add_step(page, "Перевести по карте", "Мобильное приложение", 50000, 1, "card_transfer")
     click_button(page, "save_draft")
     expect_marker(page, "scenario-revision", "1")
     expect_marker(page, "resources-valid", "true")
@@ -484,11 +587,11 @@ def test_two_participants_in_separate_contexts_stay_isolated(
         participant_login(page_a, stack, first["email"])
         participant_login(page_b, stack, second["email"])
 
-        add_step(page_a, "Получить зарплату", "Банковское зачисление", 100000, 1, "salary")
+        add_step(page_a, "Получить зарплату", "Банковское зачисление", 100000, None, "salary")
         click_button(page_a, "save_draft")
         expect_marker(page_a, "chain-length", "1")
 
-        add_step(page_b, "Оплатить покупку", "Интернет-банк", 30000, 1, "online_purchase")
+        add_step(page_b, "Снять наличные", "Банкомат", 30000, 1, "cash_withdrawal")
         add_step(page_b, "Перевести по карте", "Мобильное приложение", 10000, 1, "card_transfer")
         click_button(page_b, "save_draft")
         expect_marker(page_b, "chain-length", "2")
@@ -545,27 +648,36 @@ def test_logout_clears_the_session_and_the_visible_chain(
     [(360, 800), (768, 1024), (1366, 768), (1920, 1080)],
     ids=["mobile", "tablet", "laptop", "desktop"],
 )
-@pytest.mark.parametrize("scheme", ["light", "dark"])
-def test_responsive_and_theme_smoke(
-    reset_state: Stack, browser: Any, width: int, height: int, scheme: str
+def test_the_builder_fits_every_viewport_in_both_appearances(
+    reset_state: Stack, browser: Any, width: int, height: int
 ) -> None:
+    """The appearance comes from the app's own switch, not from the OS scheme.
+
+    Streamlit serves one server-side theme, so light mode is a per-browser
+    overlay the participant turns on; the layout must hold in both.
+    """
     stack = reset_state
     player = register(stack, "Адаптив")
-    context = browser.new_context(
-        viewport={"width": width, "height": height}, color_scheme=scheme
-    )
+    context = browser.new_context(viewport={"width": width, "height": height})
     try:
         page = context.new_page()
         participant_login(page, stack, player["email"])
-        add_step(page, "Получить зарплату", "Банковское зачисление", 120000, 1, "salary")
+        add_step(page, "Получить зарплату", "Банковское зачисление", 120000, None, "salary")
         click_button(page, "save_draft")
         expect_marker(page, "scenario-revision", "1")
 
-        assert not has_horizontal_overflow(page), (width, scheme)
-        assert clipped_elements(page) == [], (width, scheme)
-        page.screenshot(
-            path=str(ARTIFACTS / f"participant-{width}x{height}-{scheme}.png"),
-            full_page=True,
-        )
+        assert current_theme(page) == "dark"
+        for scheme in ("dark", "light"):
+            assert current_theme(page) == scheme
+            assert not has_horizontal_overflow(page), (width, scheme)
+            assert clipped_elements(page) == [], (width, scheme)
+            page.screenshot(
+                path=str(ARTIFACTS / f"participant-{width}x{height}-{scheme}.png"),
+                full_page=True,
+            )
+            if scheme == "dark":
+                # The in-page switch, not the sidebar one: a phone keeps the
+                # sidebar off-canvas.
+                assert toggle_theme(page, "theme_toggle_page") == "light"
     finally:
         context.close()

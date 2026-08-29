@@ -22,5 +22,14 @@ class Round(Base):
     created_at: Mapped[datetime] = mapped_column(TZDateTime)
     activated_at: Mapped[datetime | None] = mapped_column(
         TZDateTime, nullable=True)
+    stopped_at: Mapped[datetime | None] = mapped_column(
+        TZDateTime, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(
         TZDateTime, nullable=True)
+    # A restart never deletes anything: it creates a new round that points
+    # back at the one it replaced.
+    restarted_from_round_id: Mapped[int | None] = mapped_column(
+        BigIntVariant, ForeignKey('rounds.id'), nullable=True)
+    preset_id: Mapped[int | None] = mapped_column(
+        BigIntVariant, ForeignKey('round_presets.id', ondelete='SET NULL'),
+        nullable=True)

@@ -23,7 +23,7 @@ rounding (`ROUND_HALF_EVEN`) to two decimal places.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
@@ -32,9 +32,16 @@ from src.aml_workshop_simulator.domain.action_parameters import (
     option_label,
 )
 from src.aml_workshop_simulator.domain.channels import channel_label
+from src.aml_workshop_simulator.domain.round_policy import (
+    PARAM_CHANNEL,
+    OperationPolicy,
+    RoundPolicy,
+    action_param,
+    context_param,
+)
 
 RULESET_VERSION = "game-rules-v2"
-SNAPSHOT_SCHEMA_VERSION = 2
+SNAPSHOT_SCHEMA_VERSION = 3
 
 MONEY = Decimal("0.01")
 ZERO = Decimal("0.00")
@@ -112,6 +119,8 @@ class CardSpec:
     channels: tuple[str, ...]
     context_fields: tuple[dict[str, Any], ...] = ()
     fields: tuple[dict[str, Any], ...] = ()
+    default_visible_params: tuple[str, ...] = ()
+    default_show_frequency: bool = True
 
     @property
     def key(self) -> tuple[str, int]:
@@ -119,6 +128,33 @@ class CardSpec:
 
     def channel_labels(self) -> str:
         return ", ".join(f"«{channel_label(item)}»" for item in self.channels)
+
+    def with_overrides(self, overrides: dict[str, Any] | None) -> CardSpec:
+        """Card version re-tuned by the numeric overrides of one round."""
+        if not overrides:
+            return self
+        return replace(self, **overrides)
+
+    def field_spec(self, param: str) -> dict[str, Any] | None:
+        """Declarative spec of one parameter, or None when not declared."""
+        if param == PARAM_CHANNEL:
+            return {
+                "key": PARAM_CHANNEL,
+                "label": "Канал",
+                "kind": "select",
+                "default": self.channels[0] if self.channels else None,
+                "options": [
+                    {"value": item, "label": channel_label(item)}
+                    for item in self.channels
+                ],
+            }
+        for item in self.context_fields:
+            if context_param(item["key"]) == param:
+                return dict(item)
+        for item in self.fields:
+            if action_param(item["key"]) == param:
+                return dict(item)
+        return None
 
 
 def card_spec_from_row(row: Any) -> CardSpec:
@@ -146,6 +182,8 @@ def card_spec_from_row(row: Any) -> CardSpec:
         channels=tuple(schema.get("channels", ())),
         context_fields=tuple(schema.get("context_fields", ())),
         fields=tuple(schema.get("fields", ())),
+        default_visible_params=tuple(schema.get("default_visible_params", ())),
+        default_show_frequency=bool(schema.get("default_show_frequency", True)),
     )
 
 
@@ -176,6 +214,8 @@ def card_spec_from_catalog(entry: dict[str, Any], card_id: int) -> CardSpec:
         channels=tuple(str(channel) for channel in entry["channels"]),
         context_fields=tuple(schema["context_fields"]),
         fields=tuple(schema["fields"]),
+        default_visible_params=tuple(schema.get("default_visible_params", ())),
+        default_show_frequency=bool(schema.get("default_show_frequency", True)),
     )
 
 
@@ -248,8 +288,30 @@ class RoundRules:
         )
 
 
+def reference_operations() -> list[dict[str, Any]]:
+    """Default `operations` block: the standard six with two visible params."""
+    from src.aml_workshop_simulator.domain.catalog import (
+        CARD_CATALOG,
+        DEFAULT_OPERATION_CODES,
+        default_show_frequency,
+        default_visible_params,
+    )
+
+    return [
+        {
+            "code": entry["code"],
+            "version": entry["version"],
+            "visible_params": list(default_visible_params(entry["code"])),
+            "show_frequency": default_show_frequency(entry["code"]),
+        }
+        for entry in CARD_CATALOG
+        if entry["code"] in DEFAULT_OPERATION_CODES
+    ]
+
+
 REFERENCE_GAME_CONFIG: dict[str, Any] = {
-    "schema_version": 2,
+    "schema_version": 3,
+    "operations": reference_operations(),
     "resources": {
         "initial_balance": "250000.00",
         "initial_energy": 14,
@@ -308,15 +370,29 @@ def _step_label(index: int, spec: CardSpec | None) -> str:
     return f"Шаг {index} «{spec.title}»"
 
 
+def resolve_policy(
+    card_specs: dict[tuple[str, int], CardSpec],
+    game_config: dict[str, Any] | None,
+    policy: RoundPolicy | None = None,
+) -> RoundPolicy:
+    """Policy of one round, defaulting to the legacy all-visible behaviour."""
+    if policy is not None:
+        return policy
+    return RoundPolicy.from_config(game_config, card_specs)
+
+
 def validate_structure(
     steps: Sequence[dict[str, Any]],
     card_specs: dict[tuple[str, int], CardSpec],
+    policy: RoundPolicy | None = None,
 ) -> list[Violation]:
-    """Check every step against its card version contract.
+    """Check every step against its card version contract and round policy.
 
-    `steps` must already have passed Pydantic validation, so each entry has
-    `step_id`, `card`, `amount`, `frequency`, `context` and `action_details`.
+    `steps` must already have passed Pydantic validation and normalisation, so
+    each entry has `step_id`, `card`, `amount`, `frequency`, `context` and
+    `action_details` with concrete values.
     """
+    policy = resolve_policy(card_specs, None, policy)
     violations: list[Violation] = []
     seen_step_ids: set[str] = set()
 
@@ -365,6 +441,27 @@ def validate_structure(
             )
             continue
 
+        if not policy.legacy and not policy.is_enabled((code, version)):
+            enabled = ", ".join(
+                sorted(f"{item[0]} v{item[1]}" for item in policy.enabled_keys())
+            )
+            violations.append(
+                Violation(
+                    reason="card_not_in_round",
+                    step_id=step_id,
+                    step_index=index,
+                    field="card",
+                    current=f"{code} v{version}",
+                    allowed=enabled,
+                    message=(
+                        f"Шаг {index}: операция «{spec.title}» отключена настройками "
+                        f"этого раунда. Доступны: {enabled}. Замените шаг на одну из "
+                        "доступных операций."
+                    ),
+                )
+            )
+            continue
+
         card_id = card_ref.get("id")
         if card_id is not None and int(card_id) != spec.id:
             violations.append(
@@ -383,70 +480,165 @@ def validate_structure(
                 )
             )
 
-        violations.extend(_validate_channel(index, step_id, step, spec))
-        violations.extend(_validate_context_fields(index, step_id, step, spec))
-        violations.extend(_validate_action_details(index, step_id, step, spec))
+        operation = policy.for_card((code, version))
+        violations.extend(_validate_channel(index, step_id, step, spec, operation))
+        violations.extend(_validate_frequency_visibility(index, step_id, step, spec, operation))
+        violations.extend(_validate_context_fields(index, step_id, step, spec, operation))
+        violations.extend(_validate_action_details(index, step_id, step, spec, operation))
 
     return violations
 
 
+def _pinned_violation(
+    index: int,
+    step_id: str,
+    spec: CardSpec,
+    param: str,
+    label: str,
+    current: Any,
+    expected: Any,
+    field_name: str,
+    current_label: str | None = None,
+    expected_label: str | None = None,
+) -> Violation:
+    return Violation(
+        reason="parameter_not_editable",
+        step_id=step_id,
+        step_index=index,
+        field=field_name,
+        current=str(current),
+        allowed=str(expected),
+        message=(
+            f"{_step_label(index, spec)}, поле «{label}»: этот параметр закреплен "
+            f"настройками раунда и допускает только значение "
+            f"«{expected_label or expected}», получено «{current_label or current}». "
+            "Уберите поле из шага или верните значение раунда."
+        ),
+    )
+
+
 def _validate_channel(
-    index: int, step_id: str, step: dict[str, Any], spec: CardSpec
+    index: int,
+    step_id: str,
+    step: dict[str, Any],
+    spec: CardSpec,
+    operation: OperationPolicy | None,
 ) -> list[Violation]:
     channel = step["context"]["channel"]
-    if channel in spec.channels:
+    if channel not in spec.channels:
+        return [
+            Violation(
+                reason="channel_not_allowed",
+                step_id=step_id,
+                step_index=index,
+                field="context.channel",
+                current=channel,
+                allowed=", ".join(spec.channels),
+                message=(
+                    f"{_step_label(index, spec)}, поле «Канал»: значение "
+                    f"«{channel_label(channel)}» недоступно для этой карточки. "
+                    f"Допустимые каналы: {spec.channel_labels()}. "
+                    "Выберите один из допустимых каналов и сохраните шаг заново."
+                ),
+            )
+        ]
+    if operation is not None and not operation.is_visible(PARAM_CHANNEL):
+        expected = operation.default_for(PARAM_CHANNEL)
+        if expected is not None and channel != expected:
+            return [
+                _pinned_violation(
+                    index, step_id, spec, PARAM_CHANNEL, "Канал", channel, expected,
+                    "context.channel",
+                    current_label=channel_label(channel),
+                    expected_label=channel_label(str(expected)),
+                )
+            ]
+    return []
+
+
+def _validate_frequency_visibility(
+    index: int,
+    step_id: str,
+    step: dict[str, Any],
+    spec: CardSpec,
+    operation: OperationPolicy | None,
+) -> list[Violation]:
+    if operation is None or operation.show_frequency:
+        return []
+    frequency = int(step["frequency"])
+    if frequency == 1:
         return []
     return [
         Violation(
-            reason="channel_not_allowed",
+            reason="frequency_not_editable",
             step_id=step_id,
             step_index=index,
-            field="context.channel",
-            current=channel,
-            allowed=", ".join(spec.channels),
+            field="frequency",
+            current=str(frequency),
+            allowed="1",
             message=(
-                f"{_step_label(index, spec)}, поле «Канал»: значение "
-                f"«{channel_label(channel)}» недоступно для этой карточки. "
-                f"Допустимые каналы: {spec.channel_labels()}. "
-                "Выберите один из допустимых каналов и сохраните шаг заново."
+                f"{_step_label(index, spec)}, поле «Повторы»: в этом раунде операция "
+                f"выполняется один раз, получено {frequency}. Верните значение 1 или "
+                "добавьте отдельный шаг."
             ),
         )
     ]
 
 
 def _validate_context_fields(
-    index: int, step_id: str, step: dict[str, Any], spec: CardSpec
+    index: int,
+    step_id: str,
+    step: dict[str, Any],
+    spec: CardSpec,
+    operation: OperationPolicy | None,
 ) -> list[Violation]:
-    """A context field that the card does not declare must stay at its default."""
+    """Every context field the participant may not edit must hold its value."""
     declared = {item["key"] for item in spec.context_fields}
     violations: list[Violation] = []
     for key, default in CONTEXT_DEFAULTS.items():
-        if key in declared:
-            continue
-        value = step["context"].get(key, default)
-        if value == default:
-            continue
         label = CONTEXT_FIELDS[key]["label"]
+        param = context_param(key)
+        if key not in declared:
+            value = step["context"].get(key, default)
+            if value == default:
+                continue
+            violations.append(
+                Violation(
+                    reason="context_field_not_applicable",
+                    step_id=step_id,
+                    step_index=index,
+                    field=f"context.{key}",
+                    current=str(value),
+                    allowed=str(default),
+                    message=(
+                        f"{_step_label(index, spec)}, поле «{label}»: карточка не использует "
+                        f"этот признак, поэтому допустимо только значение по умолчанию "
+                        f"«{default}», получено «{value}». Уберите поле из шага или верните "
+                        "значение по умолчанию."
+                    ),
+                )
+            )
+            continue
+        if operation is None or operation.is_visible(param):
+            continue
+        expected = operation.default_for(param)
+        value = step["context"].get(key, expected)
+        if expected is None or value == expected:
+            continue
         violations.append(
-            Violation(
-                reason="context_field_not_applicable",
-                step_id=step_id,
-                step_index=index,
-                field=f"context.{key}",
-                current=str(value),
-                allowed=str(default),
-                message=(
-                    f"{_step_label(index, spec)}, поле «{label}»: карточка не использует этот "
-                    f"признак, поэтому допустимо только значение по умолчанию «{default}», "
-                    f"получено «{value}». Уберите поле из шага или верните значение по умолчанию."
-                ),
+            _pinned_violation(
+                index, step_id, spec, param, label, value, expected, f"context.{key}"
             )
         )
     return violations
 
 
 def _validate_action_details(
-    index: int, step_id: str, step: dict[str, Any], spec: CardSpec
+    index: int,
+    step_id: str,
+    step: dict[str, Any],
+    spec: CardSpec,
+    operation: OperationPolicy | None,
 ) -> list[Violation]:
     details: dict[str, Any] = dict(step.get("action_details") or {})
     violations: list[Violation] = []
@@ -470,6 +662,27 @@ def _validate_action_details(
         )
 
     for key, field_spec in declared.items():
+        param = action_param(key)
+        hidden = operation is not None and not operation.is_visible(param)
+        if hidden:
+            expected = operation.default_for(param)
+            if key in details and expected is not None and details[key] != expected:
+                violations.append(
+                    _pinned_violation(
+                        index,
+                        step_id,
+                        spec,
+                        param,
+                        field_spec["label"],
+                        details[key],
+                        expected,
+                        f"action_details.{key}",
+                        current_label=option_label([field_spec], key, details[key]),
+                        expected_label=option_label([field_spec], key, expected),
+                    )
+                )
+            continue
+
         required = bool(field_spec.get("required", True))
         if key not in details:
             if required:
@@ -583,12 +796,14 @@ def evaluate_scenario(
     steps: Sequence[dict[str, Any]],
     card_specs: dict[tuple[str, int], CardSpec],
     game_config: dict[str, Any] | None,
+    policy: RoundPolicy | None = None,
 ) -> dict[str, Any]:
     """Compute the canonical resource snapshot for a structurally valid chain.
 
     Raises `StructuralError` when the payload breaks a card version contract.
     """
-    structural = validate_structure(steps, card_specs)
+    policy = resolve_policy(card_specs, game_config, policy)
+    structural = validate_structure(steps, card_specs, policy)
     if structural:
         raise StructuralError(structural)
 
@@ -630,7 +845,17 @@ def evaluate_scenario(
 
     for index, step in enumerate(steps, start=1):
         step_id = str(step["step_id"])
-        spec = card_specs[(step["card"]["code"], int(step["card"]["version"]))]
+        card_key = (step["card"]["code"], int(step["card"]["version"]))
+        operation = policy.for_card(card_key)
+        spec = card_specs[card_key].with_overrides(
+            operation.overrides if operation else None
+        )
+        resources_before = {
+            "balance": str(balance),
+            "energy": energy,
+            "time": time_left,
+            "trust": trust,
+        }
         amount = money(step["amount"])
         frequency = int(step["frequency"])
         context = step["context"]
@@ -955,6 +1180,14 @@ def evaluate_scenario(
                 "step_index": index,
                 "card_code": spec.code,
                 "card_version": spec.version,
+                "card_title": spec.title,
+                "resources_before": resources_before,
+                "resources_after": {
+                    "balance": str(balance),
+                    "energy": energy,
+                    "time": time_left,
+                    "trust": trust,
+                },
                 "gross": str(gross),
                 "fee": str(fee),
                 "money_delta": str(money_delta),
@@ -1005,6 +1238,7 @@ def evaluate_scenario(
             {
                 "code": key,
                 "label": QUOTA_LABELS[key],
+                "kind": "money",
                 "used": str(quota_usage[key]),
                 "limit": str(rules.category_limits.get(key, ZERO)),
                 "remaining": str(
@@ -1013,6 +1247,34 @@ def evaluate_scenario(
             }
             for key in QUOTA_LABELS
             if key in rules.category_limits
+        ]
+        + [
+            {
+                "code": "night_operations",
+                "label": "Ночные операции",
+                "kind": "count",
+                "used": str(night_operations),
+                "limit": str(rules.max_night_operations),
+                "remaining": str(max(0, rules.max_night_operations - night_operations)),
+            },
+            {
+                "code": "anonymous_operations",
+                "label": "Анонимные получатели",
+                "kind": "count",
+                "used": str(anonymous_operations),
+                "limit": str(rules.max_anonymous_operations),
+                "remaining": str(
+                    max(0, rules.max_anonymous_operations - anonymous_operations)
+                ),
+            },
+            {
+                "code": "actions",
+                "label": "Действия в раунде",
+                "kind": "count",
+                "used": str(len(steps)),
+                "limit": str(rules.max_actions),
+                "remaining": str(max(0, rules.max_actions - len(steps))),
+            },
         ],
         "violations": [violation.as_dict() for violation in violations],
         "per_step": per_step,

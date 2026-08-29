@@ -25,6 +25,11 @@ class Settings(BaseSettings):
 
     COOKIE_SECURE: bool = False
 
+    #: Comma separated addresses/CIDRs of reverse proxies whose
+    #: `X-Forwarded-For` header may be believed. Empty means: trust nothing
+    #: but the socket peer.
+    TRUSTED_PROXY_IPS: str = ""
+
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
     BOOTSTRAP_ADMIN_PASSWORD: str = "admin12345"
 

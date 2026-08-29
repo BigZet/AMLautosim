@@ -19,11 +19,16 @@ DOCUMENTED_OPERATIONS = {
     ("get", "/api/v1/auth/session"),
     ("delete", "/api/v1/auth/session"),
     ("get", "/api/v1/rounds/active"),
+    ("get", "/api/v1/rounds/current"),
     ("get", "/api/v1/rounds/mine"),
     ("get", "/api/v1/rounds/{round_id}/cards"),
     ("get", "/api/v1/rounds/{round_id}/scenario"),
     ("put", "/api/v1/rounds/{round_id}/scenario"),
+    ("post", "/api/v1/rounds/{round_id}/scenario/preview"),
     ("post", "/api/v1/rounds/{round_id}/scenario/submit"),
+    ("get", "/api/v1/rounds/{round_id}/scenario/versions"),
+    ("get", "/api/v1/rounds/{round_id}/scenario/versions/{revision}"),
+    ("post", "/api/v1/rounds/{round_id}/scenario/versions/{revision}/restore"),
     ("get", "/api/v1/rounds/{round_id}/result"),
     ("get", "/api/v1/rounds/{round_id}/leaderboard"),
     ("get", "/api/v1/admin/action-cards"),
@@ -32,11 +37,25 @@ DOCUMENTED_OPERATIONS = {
     ("get", "/api/v1/admin/rounds/{round_id}"),
     ("put", "/api/v1/admin/rounds/{round_id}"),
     ("post", "/api/v1/admin/rounds/{round_id}/activate"),
+    ("post", "/api/v1/admin/rounds/{round_id}/start"),
+    ("post", "/api/v1/admin/rounds/{round_id}/stop"),
+    ("post", "/api/v1/admin/rounds/{round_id}/restart"),
+    ("get", "/api/v1/admin/rounds/{round_id}/scoring-plan"),
     ("post", "/api/v1/admin/rounds/{round_id}/score"),
+    ("get", "/api/v1/admin/round-presets"),
+    ("post", "/api/v1/admin/round-presets"),
+    ("get", "/api/v1/admin/round-presets/{preset_id}"),
+    ("put", "/api/v1/admin/round-presets/{preset_id}"),
+    ("delete", "/api/v1/admin/round-presets/{preset_id}"),
     ("get", "/api/v1/admin/rounds/{round_id}/stats"),
     ("get", "/api/v1/admin/rounds/{round_id}/leaderboard"),
     ("get", "/api/v1/admin/rounds/{round_id}/participants"),
     ("get", "/api/v1/admin/rounds/{round_id}/participants/{participant_id}"),
+    (
+        "get",
+        "/api/v1/admin/rounds/{round_id}/participants/{participant_id}"
+        "/scenario-versions/{revision}",
+    ),
     ("put", "/api/v1/admin/rounds/{round_id}/participants/{participant_id}/access"),
     (
         "put",
@@ -159,6 +178,59 @@ def test_card_contract_exposes_channels_and_labels(cards) -> None:
         assert card["channels"]
         assert set(card["channel_labels"]) == set(card["channels"])
         assert card["round_frequency_limit"] >= 1
+
+
+def test_card_contract_resolves_the_round_visible_parameters(cards) -> None:
+    """The UI is handed exactly the controls it may draw, already labelled."""
+    for card in cards.values():
+        params = card["visible_params"]
+        assert 1 <= len(params) <= 2, card["code"]
+        assert params[0]["param"] == "channel"
+        for param in params:
+            assert param["label"]
+            assert param["namespace"] in {"channel", "context", "action"}
+            if param["kind"] == "select":
+                assert param["options"]
+        # Everything that is not offered carries the value the server will use.
+        declared = (
+            {"channel"}
+            | {f"context.{item['key']}" for item in card["context_fields"]}
+            | {f"action.{item['key']}" for item in card["fields"]}
+        )
+        offered = {param["param"] for param in params}
+        assert set(card["pinned_defaults"]) == declared - offered
+        assert isinstance(card["show_frequency"], bool)
+
+
+def test_api_client_exposes_a_typed_method_per_new_endpoint() -> None:
+    for name in (
+        "get_current_round",
+        "preview_scenario",
+        "list_scenario_versions",
+        "get_scenario_version",
+        "restore_scenario_version",
+        "admin_start_round",
+        "admin_stop_round",
+        "admin_restart_round",
+        "admin_get_scoring_plan",
+        "admin_list_presets",
+        "admin_get_preset",
+        "admin_create_preset",
+        "admin_update_preset",
+        "admin_delete_preset",
+        "admin_get_participant_version",
+    ):
+        assert callable(getattr(SimulatorAPIClient, name)), name
+
+
+def test_api_client_reports_an_unreachable_api_as_an_envelope() -> None:
+    """A transport failure must reach the UI as a message, not a traceback."""
+    api = SimulatorAPIClient(base_url="http://127.0.0.1:1")
+    with pytest.raises(APIClientError) as raised:
+        api.get_active_round()
+    assert raised.value.code == "service_unavailable"
+    assert raised.value.status_code == 503
+    assert "Сервис недоступен" in raised.value.message
 
 
 # --------------------------------------------------------------------------

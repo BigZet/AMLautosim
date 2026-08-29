@@ -178,6 +178,7 @@ erDiagram
 | `failed_login_count` | `INTEGER` | Неотрицательный, default 0 |
 | `locked_until` | `TIMESTAMPTZ`, nullable | Временная auth-блокировка |
 | `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC |
+| `first_login_at` | `TIMESTAMPTZ`, nullable | Первый успешный вход; ставится один раз |
 | `last_login_at` | `TIMESTAMPTZ`, nullable | Не отображается leaderboard |
 
 `is_blocked` — административная блокировка, `locked_until` — автоматическая защита от
@@ -205,6 +206,19 @@ erDiagram
 | `revoke_reason` | `VARCHAR(100)`, nullable | `logout`, `blocked`, `password_reset`, `admin`, `rotated` |
 | `rotated_from_session_id` | self FK, nullable | Аудируемая ротация без хранения raw session ID |
 | `revoked_by_user_id` | `BIGINT` FK, nullable | Admin/user actor; `SET NULL` |
+| `ip_address` | `INET`, nullable | Адрес клиента, IPv4 и IPv6 |
+| `user_agent` | `VARCHAR(512)`, nullable | Строка браузера как есть, без разбора |
+| `accept_language` | `VARCHAR(120)`, nullable | Заголовок языка, если браузер его прислал |
+
+Технические поля нужны организатору, чтобы понять, с какого устройства заходил
+участник. Они не расширяют fingerprinting: ни пароля, ни raw session ID, ни canvas/
+device-hash в базе нет, а `ip_address` хранится как `INET`, а не как свободный текст.
+
+Адрес берется из сокета. `X-Forwarded-For` учитывается **только** если непосредственный
+клиент перечислен в `TRUSTED_PROXY_IPS` (CIDR через запятую): без этой настройки любой
+участник мог бы продиктовать серверу произвольный адрес. Streamlit — тоже HTTP-клиент,
+поэтому UI пересылает браузерные `User-Agent`, `Accept-Language` и адрес, а API решает,
+верить ли пересланному адресу, по тому же правилу.
 
 Индексы: unique по `session_id_hash` для auth lookup; `(user_id, expires_at)` для активных сессий;
 `expires_at` и `revoked_at` для cleanup. Active определяется запросом, а не отдельным
@@ -272,21 +286,55 @@ Block и password reset в одной транзакции меняют user sta
 
 ## 6. `rounds`
 
-Статусы: `draft`, `active`, `scoring`, `completed`.
+Статусы: `draft`, `active`, `stopped`, `scoring`, `completed`.
 
 ```mermaid
 stateDiagram-v2
     [*] --> draft
-    draft --> active: validate and activate
+    draft --> active: start
+    active --> stopped: stop
     active --> scoring: score command in transaction
+    stopped --> scoring: score command in transaction
     scoring --> completed: publish and commit
     scoring --> active: rollback
     completed --> [*]
 ```
 
-Не более одного раунда может находиться в `active` или `scoring`. Активация нового
-раунда при существующем активном возвращает `409 active_round_exists`; API никогда не
-завершает прежний раунд скрыто.
+Не более одного раунда может находиться в `active` или `scoring`. Инвариант держит
+частичный уникальный индекс `uq_rounds_single_active`, а не только код: активация
+второго раунда возвращает `409 active_round_exists`, и API никогда не завершает прежний
+раунд скрыто.
+
+Дополнительные поля жизненного цикла:
+
+| Поле | Тип | Правило |
+| --- | --- | --- |
+| `stopped_at` | `TIMESTAMPTZ`, nullable | Время команды «Остановить раунд» |
+| `restarted_from_round_id` | self FK, nullable | Раунд, вместо которого создан этот |
+| `preset_id` | FK на `round_presets`, nullable | Откуда взята конфигурация; `SET NULL` |
+
+`stopped` — рабочее состояние, а не удаление: сценарии, версии черновиков, результаты и
+журнал сохраняются, но любая запись участника получает `409 round_locked`. Перезапуск
+создает новую строку раунда с копией конфигурации и ссылкой `restarted_from_round_id`;
+повторный запрос находит уже созданную замену по этой ссылке и не создает вторую.
+
+## 6.1. `round_presets`
+
+Именованный набор настроек, подготовленный до мастер-класса.
+
+| Поле | Тип | Правило |
+| --- | --- | --- |
+| `id` | `BIGINT` | PK |
+| `name` | `VARCHAR(120)` | Unique, обязателен |
+| `description` | `VARCHAR(500)`, nullable | Свободный комментарий организатора |
+| `game_config` | `JSONB` | Проходит ту же валидацию, что и конфигурация раунда |
+| `revision` | `INTEGER` | Optimistic guard для `PUT` |
+| `created_by_user_id`, `updated_by_user_id` | FK на `users` | Автор и последний редактор |
+| `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC |
+
+Раунд, созданный из пресета, копирует конфигурацию в собственный снимок. Поэтому правка
+пресета никогда не меняет уже созданный раунд, а удаление пресета обнуляет
+`rounds.preset_id`, не трогая сам раунд.
 
 ### `game_config` snapshot
 
@@ -464,6 +512,33 @@ steps. Бизнес-невалидный draft (например, отрицат
 Неизвестная карточка, неверный тип или лишнее поле остаются schema error и не сохраняются.
 При submit и score snapshot считается заново по fixed round config; сохраненная копия
 используется для восстановления UX и аудита, но не отменяет revalidation.
+
+## 7.1. `scenario_versions`
+
+Append-only история черновиков. Каждое явное сохранение участника добавляет строку;
+ничего не перезаписывается и ничего не удаляется.
+
+| Поле | Тип | Правило |
+| --- | --- | --- |
+| `id` | `BIGINT` | PK |
+| `scenario_id` | FK на `scenarios` | `ON DELETE CASCADE` |
+| `revision` | `INTEGER` | Unique вместе с `scenario_id` |
+| `label` | `VARCHAR(120)`, nullable | Название версии, которое ввел участник |
+| `steps` | `JSONB` | Цепочка целиком, в канонической форме |
+| `resource_snapshot` | `JSONB`, nullable | Ресурсы, лимиты и нарушения этой версии |
+| `payload_hash` | `CHAR(64)`, nullable | Для сравнения версий без разбора JSON |
+| `restored_from_revision` | `INTEGER`, nullable | Источник, если версия создана восстановлением |
+| `created_by_user_id` | FK на `users` | Автор сохранения |
+| `created_at` | `TIMESTAMPTZ` | UTC |
+
+`scenarios` получает два указателя: `current_version_id` — версия, с которой участник
+сейчас работает, и `submitted_version_id` — та единственная версия, которая ушла на
+скоринг. Скоринг читает именно `submitted_version_id`, поэтому последующая правка
+черновика (если раунд еще идет) не может изменить уже отправленный результат.
+
+Восстановление старой версии создает **новую** запись с содержимым старой и заполненным
+`restored_from_revision`; более поздние версии остаются на месте. Организатор видит всю
+историю каждого участника, включая версии, которые никогда не отправлялись.
 
 ## 8. `scoring_results`
 

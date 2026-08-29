@@ -23,12 +23,79 @@ from src.aml_workshop_simulator.domain.action_parameters import (
     context_fields_for,
 )
 from src.aml_workshop_simulator.domain.channels import Channel
+from src.aml_workshop_simulator.domain.round_policy import (
+    action_param,
+    context_param,
+)
 
-CARD_SCHEMA_VERSION = 1
+CARD_SCHEMA_VERSION = 2
 
 #: Quota buckets a card contributes to. Context-driven buckets
 #: (`anonymous`, `high_risk_country`) are added by the ruleset, not by the card.
 QUOTA_CATEGORIES = ("cash", "international", "crypto", "anonymous", "high_risk_country")
+
+#: Operations a freshly created round offers by default.
+#:
+#: `online_purchase` and `refund` stay in the catalog and in PostgreSQL — old
+#: rounds and old drafts keep working — but they are not part of the standard
+#: set any more: the pair carries its own prerequisite mechanic (a refund is
+#: only legal after a purchase, bounded by the purchased amount) which doubles
+#: the rules a participant has to hold in their head while contributing nothing
+#: the remaining six cannot express. The round target (150 000 outflow from a
+#: 250 000 balance) stays reachable without them — a single `card_transfer`
+#: already clears it — and every quota, streak and resource rule keeps at least
+#: one operation that can trigger it.
+DEFAULT_OPERATION_CODES: tuple[str, ...] = (
+    "salary",
+    "cash_deposit",
+    "card_transfer",
+    "international",
+    "cash_withdrawal",
+    "crypto_exchange",
+)
+
+#: On top of amount and frequency a participant edits at most two parameters
+#: per operation. The channel is always one of them, so the channel matrix
+#: stays playable; the second one is the risk lever that makes the operation
+#: interesting and keeps every round-level limit reachable:
+#:
+#: * `time_of_day`     -> night operation quota
+#: * `recipient_type`  -> anonymous recipient quota
+#: * `country_risk`    -> high risk country quota
+#: * card-specific action detail -> the operation's own risk story
+DEFAULT_VISIBLE_PARAMS: dict[str, tuple[str, ...]] = {
+    "salary": (context_param("time_of_day"),),
+    "cash_deposit": (action_param("funds_source"),),
+    "card_transfer": (context_param("recipient_type"),),
+    "international": (context_param("country_risk"),),
+    "cash_withdrawal": (context_param("time_of_day"),),
+    "crypto_exchange": (action_param("wallet_owner"),),
+    "online_purchase": (context_param("country_risk"),),
+    "refund": (action_param("refund_destination"),),
+}
+
+#: Repeat counts are only offered where splitting an amount into several
+#: transactions is a real move (structuring). Everywhere else the frequency is
+#: pinned to 1 by the server.
+DEFAULT_SHOW_FREQUENCY: dict[str, bool] = {
+    "salary": False,
+    "cash_deposit": True,
+    "card_transfer": True,
+    "international": False,
+    "cash_withdrawal": True,
+    "crypto_exchange": False,
+    "online_purchase": False,
+    "refund": False,
+}
+
+
+def default_visible_params(code: str) -> tuple[str, ...]:
+    """Channel plus the card's own risk lever, in display order."""
+    return ("channel",) + DEFAULT_VISIBLE_PARAMS.get(code, ())
+
+
+def default_show_frequency(code: str) -> bool:
+    return DEFAULT_SHOW_FREQUENCY.get(code, True)
 
 
 CARD_CATALOG: tuple[dict[str, Any], ...] = (
@@ -210,6 +277,8 @@ def build_parameter_schema(entry: dict[str, Any]) -> dict[str, Any]:
         "description": entry["description"],
         "context_fields": [dict(field) for field in context_fields_for(code)],
         "fields": [dict(field) for field in action_fields_for(code)],
+        "default_visible_params": list(default_visible_params(code)),
+        "default_show_frequency": default_show_frequency(code),
     }
 
 

@@ -15,6 +15,19 @@ import pytest
 from src.aml_workshop_simulator.domain.channels import ALL_CHANNELS
 from tests.helpers import build_step, error_reasons, put_scenario, violation_reasons
 
+
+@pytest.fixture()
+def active_round(full_round):
+    """The whole matrix is exercised against a round that enables every card
+    version and every parameter, which is exactly what a legacy round does."""
+    return full_round
+
+
+@pytest.fixture()
+def cards(full_cards):
+    return full_cards
+
+
 EXPECTED_MATRIX = {
     "salary": ("bank", "branch", "mobile"),
     "cash_deposit": ("atm", "branch"),

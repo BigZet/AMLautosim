@@ -19,28 +19,21 @@ from tests.ui.conftest import (
 )
 from tests.ui.streamlit_driver import (
     button_is_disabled,
+    check,
     clipped_elements,
     click_button,
+    expect_flash,
     expect_marker,
+    fill_number,
     fill_text,
     has_horizontal_overflow,
     login,
     marker,
+    open_page,
+    open_tab,
 )
 
 pytest.importorskip("playwright.sync_api")
-
-
-@pytest.fixture(scope="session")
-def browser() -> Iterator[Any]:
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as engine:
-        instance = engine.chromium.launch(headless=True)
-        try:
-            yield instance
-        finally:
-            instance.close()
 
 
 @pytest.fixture()
@@ -99,8 +92,8 @@ def submit_chain_via_api(stack: Stack, player: dict[str, str]) -> dict[str, Any]
             "client_mutation_id": str(uuid.uuid4()),
             "steps": [
                 step("salary", "120000.00", "bank"),
-                step("online_purchase", "100000.00", "web"),
-                step("card_transfer", "60000.00", "mobile"),
+                step("card_transfer", "100000.00", "mobile"),
+                step("cash_withdrawal", "50000.00", "atm"),
             ],
         },
         session_id=session_id,
@@ -123,28 +116,48 @@ def test_admin_login_and_live_counters(reset_state: Stack, admin_page: Any) -> N
     expect_marker(admin_page, "stat-registered", "1")
     expect_marker(admin_page, "stat-submitted", "1")
     expect_marker(admin_page, "stat-scored", "0")
+    expect_marker(admin_page, "stat-versions", "1")
     expect_marker(admin_page, "round-status", "active")
+    expect_marker(admin_page, "scoring-can-score", "true")
 
 
-def test_admin_sees_the_full_chain_of_a_participant(
+def test_admin_sees_every_parameter_of_the_submitted_version(
     reset_state: Stack, admin_page: Any
 ) -> None:
+    """Not a printed dict: a labelled block per step, hidden defaults included."""
     stack = reset_state
     player = register(stack, "Цепочка")
     submit_chain_via_api(stack, player)
 
     admin_login(admin_page, stack)
-    admin_page.get_by_role("link", name="Участники").click()
+    open_page(admin_page, "Участники")
     expect_marker(admin_page, "participant-count", "1", timeout=60_000)
     expect_marker(admin_page, "detail-scenario-status", "submitted")
     expect_marker(admin_page, "detail-step-count", "3")
 
-    table = admin_page.locator('[data-testid="chain-table"]')
-    table.wait_for(state="visible", timeout=30_000)
-    body = table.text_content() or ""
-    for code in ("salary", "online_purchase", "card_transfer"):
-        assert code in body
-    assert "bank" in body and "web" in body and "mobile" in body
+    open_tab(admin_page, "Версии черновиков")
+    expect_marker(admin_page, "versions-count", "1")
+    expect_marker(admin_page, "admin-version-revision", "1")
+    expect_marker(admin_page, "admin-version-steps", "3")
+
+    blocks = admin_page.locator('[data-testid^="step-params-"]')
+    blocks.first.wait_for(state="visible", timeout=30_000)
+    assert blocks.count() == 3
+    body = "\n".join(blocks.all_text_contents())
+    for channel, raw in (
+        ("Банковское зачисление", "bank"),
+        ("Мобильное приложение", "mobile"),
+        ("Банкомат", "atm"),
+    ):
+        assert channel in body and f"({raw})" in body
+    # Parameters the round hides are still recorded and still displayed.
+    assert "Есть подтверждающие документы" in body
+    assert "Плательщик" in body
+
+    page_body = admin_page.locator('[data-testid="stMain"]').text_content() or ""
+    for code in ("salary", "card_transfer", "cash_withdrawal"):
+        assert code in page_body
+    assert "Ресурсы до" in page_body and "Ресурсы после" in page_body
 
 
 def test_scoring_from_the_admin_ui_publishes_participant_results(
@@ -156,6 +169,7 @@ def test_scoring_from_the_admin_ui_publishes_participant_results(
 
     admin_login(admin_page, stack)
     expect_marker(admin_page, "stat-submitted", "1")
+    check(admin_page, "confirm_scoring")
     click_button(admin_page, "run_scoring")
     admin_page.locator('[data-testid="flash-success"]').first.wait_for(
         state="attached", timeout=90_000
@@ -197,11 +211,16 @@ def test_admin_leaderboard_shows_base_and_effective_values(
     )
 
     admin_login(admin_page, stack)
-    admin_page.get_by_role("link", name="Лидерборд").click()
+    open_page(admin_page, "Лидерборд")
     expect_marker(admin_page, "admin-board-rows", "1", timeout=60_000)
     table = admin_page.locator('[data-testid="admin-board-table"]')
     table.wait_for(state="visible", timeout=30_000)
+    # The administrator keeps real identities...
     assert player["display_name"] in (table.text_content() or "")
+    # ...while the public board of the same round does not.
+    public = stack.request("GET", f"/api/v1/rounds/{prepared['round_id']}/leaderboard")
+    assert public["rows"][0]["display_name"] == "Игрок #1"
+    assert public["revealed"] is False
 
 
 def test_block_and_unblock_from_the_admin_ui(reset_state: Stack, admin_page: Any) -> None:
@@ -210,9 +229,10 @@ def test_block_and_unblock_from_the_admin_ui(reset_state: Stack, admin_page: Any
     prepared = submit_chain_via_api(stack, player)
 
     admin_login(admin_page, stack)
-    admin_page.get_by_role("link", name="Участники").click()
+    open_page(admin_page, "Участники")
     expect_marker(admin_page, "participant-count", "1", timeout=60_000)
     participant_id = int(marker(admin_page, "detail-participant-id"))
+    open_tab(admin_page, "Доступ и баллы")
 
     fill_text(admin_page, f"block_reason_{participant_id}", "Проверка учетной записи организатором")
     click_button(admin_page, "toggle_access")
@@ -241,7 +261,7 @@ def test_audit_trail_is_visible_and_free_of_pii(reset_state: Stack, admin_page: 
     submit_chain_via_api(stack, player)
 
     admin_login(admin_page, stack)
-    admin_page.get_by_role("link", name="Аудит").click()
+    open_page(admin_page, "Аудит")
     admin_page.locator('[data-testid="audit-table"]').first.wait_for(
         state="visible", timeout=60_000
     )
@@ -267,4 +287,88 @@ def test_scoring_button_is_disabled_without_submissions(
     stack = reset_state
     admin_login(admin_page, stack)
     expect_marker(admin_page, "stat-submitted", "0")
+    expect_marker(admin_page, "scoring-can-score", "false")
     assert button_is_disabled(admin_page, "run_scoring")
+    # Even a confirmed organiser cannot score a round with nothing submitted.
+    check(admin_page, "confirm_scoring")
+    assert button_is_disabled(admin_page, "run_scoring")
+
+
+# --------------------------------------------------------------------------
+# Presets and the configuration editor
+# --------------------------------------------------------------------------
+
+
+def test_a_preset_can_be_saved_and_turned_into_a_draft_round(
+    reset_state: Stack, admin_page: Any
+) -> None:
+    """Loading a preset prepares a round; it never starts the game by itself."""
+    stack = reset_state
+    admin_login(admin_page, stack)
+    open_page(admin_page, "Раунд и конфигурация")
+    open_tab(admin_page, "Создать раунд")
+
+    fill_number(admin_page, "new_target", 200000)
+    fill_number(admin_page, "new_max_actions", 6)
+    fill_text(admin_page, "new_preset_name", "Короткий мастер-класс")
+    fill_text(admin_page, "new_preset_description", "Шесть операций, цель 200 000")
+    click_button(admin_page, "save_preset")
+    expect_flash(admin_page, "Пресет «Короткий мастер-класс» сохранен")
+
+    presets = db_query("SELECT name, game_config FROM round_presets ORDER BY id")
+    assert [row[0] for row in presets] == ["Короткий мастер-класс"]
+    assert presets[0][1]["objectives"]["target_outflow"] == "200000.00"
+    assert presets[0][1]["objectives"]["max_actions"] == 6
+
+    open_page(admin_page, "Пресеты")
+    expect_marker(admin_page, "preset-count", "1", timeout=60_000)
+    fill_text(admin_page, "preset_round_title", "Раунд из пресета")
+    click_button(admin_page, "round_from_preset")
+    expect_flash(admin_page, "создан из пресета")
+
+    rounds = db_query("SELECT title, status, preset_id, game_config FROM rounds ORDER BY id")
+    assert len(rounds) == 2, rounds
+    title, status, preset_id, config = rounds[1]
+    assert title == "Раунд из пресета"
+    assert status == "draft", "a preset must never start the round on its own"
+    assert preset_id is not None
+    assert config["objectives"]["target_outflow"] == "200000.00"
+
+    # Editing the preset afterwards must not touch the round already created.
+    fill_number(admin_page, f"preset{preset_id}_target", 90000)
+    click_button(admin_page, "update_preset")
+    expect_flash(admin_page, "Пресет обновлен")
+    assert (
+        db_query("SELECT game_config FROM rounds ORDER BY id")[1][0]["objectives"][
+            "target_outflow"
+        ]
+        == "200000.00"
+    )
+    assert (
+        db_query("SELECT game_config FROM round_presets")[0][0]["objectives"][
+            "target_outflow"
+        ]
+        == "90000.00"
+    )
+
+
+def test_a_preset_is_deleted_only_after_confirmation(
+    reset_state: Stack, admin_page: Any
+) -> None:
+    stack = reset_state
+    admin_login(admin_page, stack)
+    open_page(admin_page, "Раунд и конфигурация")
+    open_tab(admin_page, "Создать раунд")
+    fill_text(admin_page, "new_preset_name", "Черновой пресет")
+    click_button(admin_page, "save_preset")
+    expect_flash(admin_page, "Пресет «Черновой пресет» сохранен")
+
+    open_page(admin_page, "Пресеты")
+    expect_marker(admin_page, "preset-count", "1", timeout=60_000)
+    assert button_is_disabled(admin_page, "delete_preset")
+
+    check(admin_page, "confirm_delete_preset")
+    click_button(admin_page, "delete_preset")
+    expect_flash(admin_page, "Пресет удален")
+    expect_marker(admin_page, "preset-count", "0", timeout=60_000)
+    assert db_query("SELECT count(*) FROM round_presets") == [(0,)]

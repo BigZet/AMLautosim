@@ -247,7 +247,7 @@ def test_duplicating_a_step_requires_a_new_step_id(
     client, participant, active_round, cards
 ) -> None:
     round_id = active_round["id"]
-    original = build_step(cards["online_purchase"], 20000, 1, "web")
+    original = build_step(cards["card_transfer"], 20000, 1, "web")
     duplicate_same_id = [original, dict(original)]
     response = put_scenario(client, round_id, participant["headers"], duplicate_same_id)
     assert response.status_code == 422

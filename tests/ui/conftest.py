@@ -46,8 +46,10 @@ TABLES = (
     "audit_events",
     "leaderboard_adjustments",
     "scoring_results",
+    "scenario_versions",
     "scenarios",
     "sessions",
+    "round_presets",
     "rounds",
     "users",
     "action_cards",
@@ -170,6 +172,10 @@ class Stack:
         self._stop("api")
         self.start_api()
 
+    def stop_api(self) -> None:
+        """Take the API down so the UI has to report an unreachable service."""
+        self._stop("api")
+
     def restart_play(self) -> None:
         self._stop("play")
         self.start_ui("play", "src/aml_workshop_simulator/ui/participant/app.py", self.play_port)
@@ -215,10 +221,12 @@ def _recreate_database() -> None:
         connection.close()
 
 
-def _seed(migrate: bool) -> None:
-    args = [sys.executable, "-m", "scripts.seed_database", "--activate-round"]
+def _seed(migrate: bool, activate: bool = True) -> None:
+    args = [sys.executable, "-m", "scripts.seed_database"]
+    if activate:
+        args.append("--activate-round")
     if migrate:
-        args.insert(3, "--migrate")
+        args.append("--migrate")
     completed = subprocess.run(
         args,
         cwd=str(ROOT),
@@ -229,6 +237,24 @@ def _seed(migrate: bool) -> None:
         timeout=300,
     )
     assert completed.returncode == 0, completed.stderr
+
+
+@pytest.fixture(scope="session")
+def browser() -> Iterator[Any]:
+    """One Chromium instance for every Playwright suite in the session.
+
+    `sync_playwright()` cannot be started twice in the same thread, so the
+    fixture lives here instead of being repeated in each test module.
+    """
+    pytest.importorskip("playwright.sync_api")
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as engine:
+        instance = engine.chromium.launch(headless=True)
+        try:
+            yield instance
+        finally:
+            instance.close()
 
 
 @pytest.fixture(scope="session")
@@ -246,20 +272,49 @@ def stack() -> Iterator[Stack]:
         instance.stop_all()
 
 
+def _truncate(attempts: int = 6) -> None:
+    """Empty the tables, waiting out the live services.
+
+    `TRUNCATE` needs an exclusive lock while the API and both Streamlit
+    processes keep reading, so a first attempt can deadlock or time out. A
+    bounded `lock_timeout` turns that into a retry instead of a failed test.
+    """
+    statement = "TRUNCATE TABLE " + ", ".join(TABLES) + " RESTART IDENTITY CASCADE"
+    last: Exception | None = None
+    for attempt in range(attempts):
+        connection = psycopg2.connect(E2E_SYNC_DSN)
+        connection.autocommit = True
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SET lock_timeout = '5s'")
+                cursor.execute(statement)
+            return
+        except (psycopg2.errors.LockNotAvailable, psycopg2.errors.DeadlockDetected) as error:
+            last = error
+            time.sleep(0.5 * (attempt + 1))
+        finally:
+            connection.close()
+    raise AssertionError(f"could not truncate the test database: {last}")
+
+
 @pytest.fixture()
 def reset_state(stack: Stack) -> Iterator[Stack]:
     """Empty the E2E database and re-seed an active round before each test."""
-    connection = psycopg2.connect(E2E_SYNC_DSN)
-    connection.autocommit = True
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "TRUNCATE TABLE " + ", ".join(TABLES) + " RESTART IDENTITY CASCADE"
-            )
-    finally:
-        connection.close()
+    _truncate()
     _seed(migrate=False)
     yield stack
+
+
+@pytest.fixture()
+def draft_state(stack: Stack) -> Iterator[Stack]:
+    """Like `reset_state`, but the seeded round is still waiting to be started."""
+    _truncate()
+    _seed(migrate=False, activate=False)
+    yield stack
+
+
+def unique_email(prefix: str = "p") -> str:
+    return f"{prefix}{uuid.uuid4().hex[:10]}@example.com"
 
 
 def register(stack: Stack, display_name: str = "Игрок") -> dict[str, str]:
@@ -272,6 +327,16 @@ def register(stack: Stack, display_name: str = "Игрок") -> dict[str, str]:
     return {"email": email, "password": PARTICIPANT_PASSWORD, "display_name": display_name}
 
 
+def db_execute(statement: str, params: tuple = ()) -> None:
+    connection = psycopg2.connect(E2E_SYNC_DSN)
+    connection.autocommit = True
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(statement, params)
+    finally:
+        connection.close()
+
+
 def db_query(query: str, params: tuple = ()) -> list[tuple]:
     connection = psycopg2.connect(E2E_SYNC_DSN)
     try:
@@ -280,3 +345,12 @@ def db_query(query: str, params: tuple = ()) -> list[tuple]:
             return cursor.fetchall()
     finally:
         connection.close()
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):
+    """Mark a failed browser test so its fixture can save the artefacts."""
+    outcome = yield
+    report = outcome.get_result()
+    if report.when == "call" and report.failed:
+        item._selenium_failed = True

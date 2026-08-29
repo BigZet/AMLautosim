@@ -32,6 +32,27 @@ def spec_by_code(specs: dict[tuple[str, int], CardSpec]) -> dict[str, CardSpec]:
 
 @pytest.fixture(scope="session")
 def game_config() -> dict[str, Any]:
+    """A *legacy* snapshot: no `operations` block, so nothing is hidden.
+
+    Rounds created before the parameter surface was reduced look exactly like
+    this, and their stored drafts must keep validating and scoring unchanged.
+    Most rules in this module are card rules rather than round rules, so this
+    is also the configuration that exercises them across the whole catalog.
+    `restricted_game_config` covers the configuration new rounds actually get.
+    """
+    legacy = {
+        key: value
+        for key, value in REFERENCE_GAME_CONFIG.items()
+        if key != "operations"
+    }
+    legacy["schema_version"] = 2
+    return legacy
+
+
+@pytest.fixture(scope="session")
+def restricted_game_config() -> dict[str, Any]:
+    """The configuration a freshly created round gets: six operations, two
+    editable parameters each."""
     return REFERENCE_GAME_CONFIG
 
 

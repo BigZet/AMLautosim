@@ -142,6 +142,12 @@ sequenceDiagram
 | `SESSION_COOKIE_SECURE` | `true` в production |
 | `SESSION_COOKIE_SAME_SITE` | `strict` |
 
+`TRUSTED_PROXY_IPS` перечисляет сети, чьему `X-Forwarded-For` API верит. По умолчанию
+пусто: заголовок игнорируется, и в `sessions.ip_address` попадает адрес того, кто реально
+открыл соединение. В compose-развертывании это адрес контейнера Streamlit, поэтому, если
+организатору нужен адрес браузера участника, в переменную вносится сеть UI-контейнеров —
+и только она. Список никогда не должен содержать сети, которыми организатор не управляет.
+
 Streamlit images обязаны устанавливать закрепленную версию
 `streamlit-cookies-controller`. Release gate включает browser smoke для `set/get/remove`
 с `Secure` и `SameSite=Strict`; обновление компонента выполняется только через lock-файл
@@ -153,6 +159,7 @@ Streamlit images обязаны устанавливать закрепленн�
 | --- | --- |
 | `DATABASE_URL` | Internal host `db`, app DB user, не superuser |
 | `SESSION_TTL_MINUTES` | Default 240 |
+| `TRUSTED_PROXY_IPS` | CIDR через запятую; пусто = верить только адресу сокета |
 | `SESSION_LAST_SEEN_WRITE_INTERVAL_SECONDS` | Default 300 |
 | `SESSION_RETENTION_DAYS` | Default 7 для expired/revoked rows |
 | `DB_POOL_SIZE` | Рассчитан на workers и max connections |

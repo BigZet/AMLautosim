@@ -75,8 +75,8 @@ def build_chain(stack: Stack, round_id: int, session_id: str) -> dict[str, Any]:
             "client_mutation_id": str(uuid.uuid4()),
             "steps": [
                 step("salary", "120000.00", "bank"),
-                step("online_purchase", "100000.00", "web"),
-                step("card_transfer", "60000.00", "mobile"),
+                step("card_transfer", "100000.00", "mobile"),
+                step("cash_withdrawal", "50000.00", "atm"),
             ],
         },
         session_id=session_id,
@@ -137,12 +137,27 @@ def test_full_round_from_registration_to_leaderboard(reset_state: Stack) -> None
     board = stack.request("GET", f"/api/v1/rounds/{round_id}/leaderboard")
     assert len(board["rows"]) == 2
     assert board["rows"][0]["rank"] == 1
-    for row in board["rows"]:
+    assert board["revealed"] is False
+    for position, row in enumerate(board["rows"], start=1):
         assert "email" not in row
         assert set(row) == {
             "rank", "display_name", "game_score", "stealth_score",
             "resource_score", "risk_label", "is_adjusted", "is_current_user",
+            "masked",
         }
+        # Nobody's nickname leaves the server until it is asked for.
+        assert row["masked"] is True
+        assert row["display_name"] == f"Игрок #{position}"
+    for player in players[:2]:
+        assert player["display_name"] not in str(board)
+
+    revealed = stack.request(
+        "GET", f"/api/v1/rounds/{round_id}/leaderboard?reveal=true"
+    )
+    assert revealed["revealed"] is True
+    assert {row["display_name"] for row in revealed["rows"]} == {
+        player["display_name"] for player in players[:2]
+    }
 
     # Manual adjustment changes only the effective projection.
     first_player = players[0]
@@ -167,6 +182,75 @@ def test_full_round_from_registration_to_leaderboard(reset_state: Stack) -> None
     assert after["base"] == before["base"]
     assert after["leaderboard"]["effective_game_score"] == "95.00"
     assert after["leaderboard"]["is_adjusted"] is True
+
+
+def test_the_lifecycle_survives_an_api_restart(draft_state: Stack) -> None:
+    """Start, stop and restart across a process boundary, losing nothing."""
+    stack = draft_state
+    admin_session = login(stack, ADMIN_EMAIL, ADMIN_PASSWORD, "admin")
+    rounds = stack.request("GET", "/api/v1/admin/rounds", session_id=admin_session)
+    round_id = rounds[0]["id"]
+    assert rounds[0]["status"] == "draft"
+
+    player = register(stack, "Жизненный цикл")
+    session_id = login(stack, player["email"], PARTICIPANT_PASSWORD, "play")
+
+    # Before the start there is nothing to play and nothing to write.
+    assert stack.request("GET", "/api/v1/rounds/active") is None
+    with pytest.raises(AssertionError, match="409"):
+        build_chain(stack, round_id, session_id)
+
+    stack.request(
+        "POST", f"/api/v1/admin/rounds/{round_id}/start", session_id=admin_session
+    )
+    saved = build_chain(stack, round_id, session_id)
+    assert saved["revision"] == 1
+
+    stack.restart_api()
+
+    stack.request(
+        "POST",
+        f"/api/v1/admin/rounds/{round_id}/stop",
+        {"confirm": True, "reason": "Перерыв мастер-класса"},
+        session_id=admin_session,
+    )
+    with pytest.raises(AssertionError, match="409"):
+        stack.request(
+            "PUT",
+            f"/api/v1/rounds/{round_id}/scenario",
+            {
+                "expected_revision": saved["revision"],
+                "client_mutation_id": str(uuid.uuid4()),
+                "steps": [],
+            },
+            session_id=session_id,
+        )
+
+    replacement = stack.request(
+        "POST",
+        f"/api/v1/admin/rounds/{round_id}/restart",
+        {"confirm": True, "title": "Второй прогон"},
+        session_id=admin_session,
+    )
+    assert replacement["status"] == "draft"
+    assert replacement["restarted_from_round_id"] == round_id
+
+    # Nothing from the first round was destroyed.
+    assert db_query(
+        "SELECT status FROM rounds ORDER BY id"
+    ) == [("stopped",), ("draft",)]
+    assert db_query(
+        "SELECT count(*) FROM scenario_versions v JOIN scenarios s ON s.id = v.scenario_id "
+        "WHERE s.round_id = %s",
+        (round_id,),
+    ) == [(1,)]
+
+    stack.request(
+        "POST",
+        f"/api/v1/admin/rounds/{replacement['id']}/start",
+        session_id=admin_session,
+    )
+    assert stack.request("GET", "/api/v1/rounds/active")["id"] == replacement["id"]
 
 
 def test_data_survives_a_postgresql_restart(reset_state: Stack) -> None:

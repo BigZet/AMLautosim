@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Response, status
+from fastapi import APIRouter, Depends, Header, Request, Response, status
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,7 @@ from src.aml_workshop_simulator.api.errors import (
     RateLimited,
 )
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.request_meta import request_meta
 from src.aml_workshop_simulator.core.security import (
     get_password_hash,
     hash_session_id,
@@ -93,6 +94,7 @@ async def register(
 @router.post("/login", response_model=SessionCreatedOut, operation_id="auth_login")
 async def login(
     payload: LoginIn,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> SessionCreatedOut:
     email = normalize_email(str(payload.email))
@@ -136,6 +138,7 @@ async def login(
 
     raw_session_id = new_session_id()
     expires_at = now + timedelta(minutes=settings.SESSION_TTL_MINUTES)
+    meta = request_meta(request)
     db.add(
         Session(
             user_id=user.id,
@@ -144,10 +147,15 @@ async def login(
             created_at=now,
             expires_at=expires_at,
             last_seen_at=now,
+            ip_address=meta.ip_address,
+            user_agent=meta.user_agent,
+            accept_language=meta.accept_language,
         )
     )
     user.failed_login_count = 0
     user.locked_until = None
+    if user.first_login_at is None:
+        user.first_login_at = now
     user.last_login_at = now
     await db.commit()
 

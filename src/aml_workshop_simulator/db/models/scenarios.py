@@ -33,3 +33,8 @@ class Scenario(Base):
     updated_at: Mapped[datetime] = mapped_column(TZDateTime)
     submitted_at: Mapped[datetime | None] = mapped_column(
         TZDateTime, nullable=True)
+    # Pointers into the append-only scenario_versions history.
+    current_version_id: Mapped[int | None] = mapped_column(
+        BigIntVariant, nullable=True)
+    submitted_version_id: Mapped[int | None] = mapped_column(
+        BigIntVariant, nullable=True)
