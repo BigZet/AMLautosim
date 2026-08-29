@@ -9,6 +9,6 @@ bcrypt==3.2.2
 pydantic[email]>=2.9
 pydantic-settings>=2.5
 httpx>=0.28
-streamlit>=1.46
+streamlit>=1.62
 streamlit-cookies-controller>=0.0.4
 pandas>=2.0

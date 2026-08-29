@@ -1,6 +1,6 @@
 [theme]
-# Dark is the starting look; the in-app switch flips to light per browser.
-base = "dark"
+# Streamlit owns theme selection. Viewers choose System, Light, or Dark from
+# the standard ⋮ menu; the two palettes below customise those modes.
 font = "sans-serif"
 headingFontSizes = ["34px", "24px", "18px", "16px", "14px", "13px"]
 baseRadius = "small"

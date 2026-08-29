@@ -14,7 +14,7 @@ task one flow at a time:
 * stopping the round makes the server refuse further writes;
 * restarting creates a new round and keeps the whole history;
 * the leaderboard hides a provocative nickname until it is revealed;
-* the appearance choice survives navigation in both panels.
+* navigation keeps the authenticated session in both panels.
 
 Every wait is a `WebDriverWait` on a concrete condition. There is no
 `time.sleep`, no "one of several things happened" assertion, and every check
@@ -51,7 +51,6 @@ from tests.ui.selenium_driver import (  # noqa: E402
     click,
     click_text,
     click_text_twice,
-    current_theme,
     expect_marker,
     fill,
     has_widget,
@@ -63,7 +62,6 @@ from tests.ui.selenium_driver import (  # noqa: E402
     page_contains,
     set_number,
     text_of,
-    toggle_theme,
 )
 from tests.ui.selenium_driver import login as ui_login  # noqa: E402
 
@@ -558,34 +556,3 @@ def test_restarting_creates_a_new_round_and_keeps_the_history(
         ("stopped",),
         ("active",),
     ]
-
-
-# --------------------------------------------------------------------------
-# 8. The appearance choice survives navigation in both panels
-# --------------------------------------------------------------------------
-
-
-def test_the_theme_choice_survives_navigation_in_both_panels(
-    reset_state: Stack, driver: Any
-) -> None:
-    stack = reset_state
-    player = register(stack, "Тёмный режим")
-
-    ui_login(driver, stack.play_url, player["email"], PARTICIPANT_PASSWORD)
-    assert current_theme(driver) == "dark", "dark is the default appearance"
-    assert toggle_theme(driver, "theme_toggle_app") == "light"
-    open_page(driver, "Лидерборд")
-    assert current_theme(driver) == "light"
-    open_page(driver, "Конструктор")
-    assert current_theme(driver) == "light"
-    driver.refresh()
-    expect_marker(driver, "theme-mode", "light")
-
-    # The choice belongs to the browser, so the admin panel opens in it too.
-    ui_login(driver, stack.admin_url, ADMIN_EMAIL, ADMIN_PASSWORD, admin=True)
-    assert current_theme(driver) == "light"
-    assert toggle_theme(driver, "theme_toggle_app") == "dark"
-    open_page(driver, "Участники")
-    assert current_theme(driver) == "dark"
-    open_page(driver, "Аудит")
-    assert current_theme(driver) == "dark"

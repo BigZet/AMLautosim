@@ -32,7 +32,6 @@ from tests.ui.selenium_driver import (  # noqa: E402
     capture,
     click_text,
     click_text_twice,
-    current_theme,
     emulate_viewport,
     expect_marker,
     field_value,
@@ -46,7 +45,6 @@ from tests.ui.selenium_driver import (  # noqa: E402
     register,
     reset_viewport,
     text_of,
-    toggle_theme,
     try_login,
     viewport_width,
     wait,
@@ -520,49 +518,7 @@ def test_the_session_survives_navigation_and_a_rerun(
 
 
 # --------------------------------------------------------------------------
-# 17. Theme switching on the auth screens
-# --------------------------------------------------------------------------
-
-
-def test_the_theme_can_be_switched_on_the_login_screen_and_is_remembered(
-    reset_state: Stack, driver: Any
-) -> None:
-    open_app(driver, reset_state.play_url)
-    assert current_theme(driver) == "dark", "dark must be the starting appearance"
-
-    switched = toggle_theme(driver, "theme_toggle_auth")
-    assert switched == "light"
-
-    background = driver.execute_script(
-        "return getComputedStyle(document.body).backgroundColor;"
-    )
-    assert background == "rgb(245, 247, 246)"
-
-    # A reload keeps the choice, and so does signing in.
-    open_app(driver, reset_state.play_url)
-    assert current_theme(driver) == "light"
-
-    email = unique_email("theme")
-    register(driver, reset_state.play_url, "Тема", email, PARTICIPANT_PASSWORD)
-    wait(driver).until(
-        lambda d: d.find_elements("css selector", '[data-testid="flash-success"]'),
-        "registration never succeeded",
-    )
-    ui_login(driver, reset_state.play_url, email, PARTICIPANT_PASSWORD)
-    assert current_theme(driver) == "light"
-    assert toggle_theme(driver, "theme_toggle_app") == "dark"
-
-
-def test_the_admin_login_screen_has_its_own_theme_switch(
-    reset_state: Stack, driver: Any
-) -> None:
-    open_app(driver, reset_state.admin_url)
-    assert current_theme(driver) == "dark"
-    assert toggle_theme(driver, "theme_toggle_auth") == "light"
-
-
-# --------------------------------------------------------------------------
-# 18. Mobile viewport
+# 17. Mobile viewport
 # --------------------------------------------------------------------------
 
 

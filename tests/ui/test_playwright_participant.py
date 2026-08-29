@@ -26,7 +26,6 @@ from tests.ui.streamlit_driver import (
     choose_option,
     clipped_elements,
     click_button,
-    current_theme,
     expect_marker,
     expect_marker_at_least,
     fill_number,
@@ -39,7 +38,6 @@ from tests.ui.streamlit_driver import (
     open_app,
     open_tab,
     select_options,
-    toggle_theme,
     widget,
 )
 from tests.ui.streamlit_driver import register as register_in_ui
@@ -639,7 +637,7 @@ def test_logout_clears_the_session_and_the_visible_chain(
 
 
 # --------------------------------------------------------------------------
-# Responsive and theme smoke matrix
+# Responsive and native-theme smoke matrix
 # --------------------------------------------------------------------------
 
 
@@ -648,17 +646,15 @@ def test_logout_clears_the_session_and_the_visible_chain(
     [(360, 800), (768, 1024), (1366, 768), (1920, 1080)],
     ids=["mobile", "tablet", "laptop", "desktop"],
 )
-def test_the_builder_fits_every_viewport_in_both_appearances(
-    reset_state: Stack, browser: Any, width: int, height: int
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_the_builder_fits_every_viewport_with_the_system_theme(
+    reset_state: Stack, browser: Any, width: int, height: int, scheme: str
 ) -> None:
-    """The appearance comes from the app's own switch, not from the OS scheme.
-
-    Streamlit serves one server-side theme, so light mode is a per-browser
-    overlay the participant turns on; the layout must hold in both.
-    """
     stack = reset_state
-    player = register(stack, "Адаптив")
-    context = browser.new_context(viewport={"width": width, "height": height})
+    player = register(stack, f"Адаптив {scheme}")
+    context = browser.new_context(
+        viewport={"width": width, "height": height}, color_scheme=scheme
+    )
     try:
         page = context.new_page()
         participant_login(page, stack, player["email"])
@@ -666,18 +662,12 @@ def test_the_builder_fits_every_viewport_in_both_appearances(
         click_button(page, "save_draft")
         expect_marker(page, "scenario-revision", "1")
 
-        assert current_theme(page) == "dark"
-        for scheme in ("dark", "light"):
-            assert current_theme(page) == scheme
-            assert not has_horizontal_overflow(page), (width, scheme)
-            assert clipped_elements(page) == [], (width, scheme)
-            page.screenshot(
-                path=str(ARTIFACTS / f"participant-{width}x{height}-{scheme}.png"),
-                full_page=True,
-            )
-            if scheme == "dark":
-                # The in-page switch, not the sidebar one: a phone keeps the
-                # sidebar off-canvas.
-                assert toggle_theme(page, "theme_toggle_page") == "light"
+        assert page.locator('[class*="st-key-theme_toggle"]').count() == 0
+        assert not has_horizontal_overflow(page), (width, scheme)
+        assert clipped_elements(page) == [], (width, scheme)
+        page.screenshot(
+            path=str(ARTIFACTS / f"participant-{width}x{height}-{scheme}.png"),
+            full_page=True,
+        )
     finally:
         context.close()

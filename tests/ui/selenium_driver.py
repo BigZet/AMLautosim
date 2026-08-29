@@ -523,20 +523,6 @@ def logout(driver: Any) -> None:
     expect_marker(driver, "auth-state", "anonymous")
 
 
-def current_theme(driver: Any) -> str:
-    return marker(driver, "theme-mode")
-
-
-def toggle_theme(driver: Any, key: str) -> str:
-    before = current_theme(driver)
-    click(driver, key)
-    wait(driver).until(
-        lambda d: d.execute_script(FRESH_MARKER, "theme-mode") not in (None, before),
-        "the theme never changed",
-    )
-    return current_theme(driver)
-
-
 # --------------------------------------------------------------------------
 # Failure artefacts
 # --------------------------------------------------------------------------
@@ -574,7 +560,6 @@ __all__ = [
     "click",
     "click_text",
     "click_text_twice",
-    "current_theme",
     "emulate_viewport",
     "expect_marker",
     "field_value",
@@ -594,7 +579,6 @@ __all__ = [
     "reset_viewport",
     "set_number",
     "text_of",
-    "toggle_theme",
     "try_login",
     "until",
     "viewport_width",

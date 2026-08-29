@@ -36,11 +36,6 @@ from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     reset_user_state,
     resolve_session,
 )
-from src.aml_workshop_simulator.ui.shared.theme import (  # noqa: E402
-    apply_theme,
-    init_theme,
-    theme_toggle,
-)
 
 st.set_page_config(
     page_title="AML Workshop Simulator",
@@ -51,6 +46,12 @@ st.set_page_config(
 
 STYLES = """
 <style>
+:root, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
+    --aml-line: var(--border-color);
+    --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
+    --aml-danger: color-mix(in srgb, #ff2b2b 78%, var(--text-color));
+    --aml-ok: color-mix(in srgb, #21c354 82%, var(--text-color));
+}
 .block-container { max-width: 1240px; padding-top: 1.2rem; padding-bottom: 3rem; }
 [data-testid="stMetric"] {
     padding: .7rem .8rem;
@@ -162,33 +163,17 @@ def money(value: Any) -> str:
         return str(value)
 
 
-def header(
-    kicker: str, title: str, subtitle: str, theme_key: str | None = None
-) -> None:
-    """Page heading, with the appearance switch when the page owns one.
-
-    The switch is repeated outside the sidebar on purpose: on a narrow screen
-    Streamlit keeps the sidebar off-canvas, and a control the user cannot reach
-    is the same as no control at all.
-    """
-    if theme_key is None:
-        title_area = st.container()
-        toggle_area = None
-    else:
-        title_area, toggle_area = st.columns([3, 1], vertical_alignment="center")
-    with title_area:
-        st.markdown(
-            f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'<div class="aml-title">{escape(title)}</div>', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True
-        )
-    if toggle_area is not None:
-        with toggle_area:
-            theme_toggle(theme_key)
+def header(kicker: str, title: str, subtitle: str) -> None:
+    """Render a page heading; appearance is controlled by Streamlit settings."""
+    st.markdown(
+        f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="aml-title">{escape(title)}</div>', unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True
+    )
 
 
 def marker(testid: str, value: Any) -> None:
@@ -398,15 +383,11 @@ def _registration_problems(
 
 
 def login_screen(client: Any) -> None:
-    top_left, top_right = st.columns([4, 1])
-    with top_left:
-        header(
-            "AML Workshop Simulator",
-            "Вход в симулятор",
-            "Войдите или создайте игровой профиль, чтобы собрать цепочку операций.",
-        )
-    with top_right:
-        theme_toggle("theme_toggle_auth")
+    header(
+        "AML Workshop Simulator",
+        "Вход в симулятор",
+        "Войдите или создайте игровой профиль, чтобы собрать цепочку операций.",
+    )
     marker("auth-state", "anonymous")
     show_flash()
 
@@ -1026,7 +1007,6 @@ def waiting_screen(round_obj: dict[str, Any] | None) -> None:
         "Ожидание раунда",
         "Организатор ещё не запустил раунд. Как только он нажмёт «Начать раунд», "
         "конструктор откроется автоматически — страницу можно просто обновить.",
-        theme_key="theme_toggle_page",
     )
     marker("round-status", status)
     marker("scenario-status", "none")
@@ -1073,7 +1053,6 @@ def page_scenario() -> None:
         f"Раунд #{round_id}",
         "Конструктор сценария",
         "Соберите цепочку операций, сохраните черновик и отправьте её на скоринг.",
-        theme_key="theme_toggle_page",
     )
     marker("scenario-status", status)
     marker("scenario-revision", (scenario or {}).get("revision", 0))
@@ -1161,7 +1140,6 @@ def page_result() -> None:
         "Результат",
         "Оценка учебной модели",
         "Разбор факторов и ресурсов.",
-        theme_key="theme_toggle_page",
     )
 
     rounds = client.get_my_rounds(session_id).get("rows", [])
@@ -1224,7 +1202,6 @@ def page_leaderboard() -> None:
         "Итоги раунда",
         "Ники скрыты по умолчанию: сервер отдаёт обезличенные места, пока их не "
         "раскроют явно.",
-        theme_key="theme_toggle_page",
     )
 
     rounds = client.get_my_rounds(session_id).get("rows", [])
@@ -1284,7 +1261,6 @@ def main() -> None:
     client = get_api_client()
     controller = get_cookie_controller("aml_play_cookies")
     apply_pending_cookie_command(controller, PLAY_COOKIE)
-    apply_theme(init_theme(controller))
     st.markdown(STYLES, unsafe_allow_html=True)
 
     session = resolve_session(controller, PLAY_COOKIE, client)
@@ -1309,7 +1285,6 @@ def main() -> None:
             unsafe_allow_html=True,
         )
         marker("auth-state", "authenticated")
-        theme_toggle("theme_toggle_app")
         if st.button("Выйти", key="logout", use_container_width=True):
             try:
                 client.logout(st.session_state["session_id"])

@@ -13,7 +13,7 @@
 │   ├── services/                  # use cases поверх домена и БД
 │   ├── db/                        # SQLAlchemy, repositories, DB session
 │   └── ui/
-│       ├── shared/                # API client, cookies, тема, браузерные заголовки
+│       ├── shared/                # API client, cookies, браузерные заголовки
 │       ├── participant/           # participant Streamlit
 │       └── admin/                 # admin Streamlit
 ├── migrations/                    # Alembic environment и revisions
@@ -86,8 +86,7 @@ HTTP-контур не входит — его использует `scripts/gen
 
 В `participant/app.py` и `admin/app.py` находятся точки запуска Streamlit.
 `ui/shared/` содержит typed API client, cookie adapter и работу с `st.session_state`:
-`api_client.py`, `session.py`, `theme.py` (переключатель темной и светлой темы поверх
-серверной темы Streamlit), `browser_meta.py` (пересылка `User-Agent`,
+`api_client.py`, `session.py`, `browser_meta.py` (пересылка `User-Agent`,
 `Accept-Language` и адреса клиента в API). `ui/admin/config_editor.py` — структурный
 редактор конфигурации раунда.
 

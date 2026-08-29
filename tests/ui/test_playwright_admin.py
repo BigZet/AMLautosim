@@ -31,6 +31,7 @@ from tests.ui.streamlit_driver import (
     marker,
     open_page,
     open_tab,
+    streamlit_theme_options,
 )
 
 pytest.importorskip("playwright.sync_api")
@@ -279,6 +280,15 @@ def test_admin_ui_has_no_overflow_or_clipped_text(reset_state: Stack, admin_page
     assert not has_horizontal_overflow(admin_page)
     assert clipped_elements(admin_page) == []
     admin_page.screenshot(path=str(ARTIFACTS / "admin-monitoring.png"), full_page=True)
+
+
+def test_theme_is_only_available_in_streamlit_menu(
+    reset_state: Stack, admin_page: Any
+) -> None:
+    stack = reset_state
+    admin_login(admin_page, stack)
+    assert admin_page.locator('[class*="st-key-theme_toggle"]').count() == 0
+    assert streamlit_theme_options(admin_page) == ["System", "Light", "Dark"]
 
 
 def test_scoring_button_is_disabled_without_submissions(

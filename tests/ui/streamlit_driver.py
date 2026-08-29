@@ -339,18 +339,13 @@ def clipped_elements(page: Page) -> list[str]:
     )
 
 
-def current_theme(page: Page) -> str:
-    return marker(page, "theme-mode")
-
-
-def toggle_theme(page: Page, key: str) -> str:
-    """Press the appearance switch and wait for the new mode to be rendered."""
-    before = current_theme(page)
-    click_button(page, key)
-    page.wait_for_function(
-        f"(was) => {{ const values = ({_FRESH_MARKERS})('theme-mode');"
-        " return values.length > 0 && values[values.length - 1] !== was; }",
-        arg=before,
-        timeout=DEFAULT_TIMEOUT,
-    )
-    return current_theme(page)
+def streamlit_theme_options(page: Page) -> list[str]:
+    """Open Streamlit's own menu and return its theme choices."""
+    page.locator('[data-testid="stMainMenuButton"]').click()
+    options = ["System", "Light", "Dark"]
+    for option in options:
+        page.get_by_text(option, exact=True).wait_for(
+            state="visible", timeout=DEFAULT_TIMEOUT
+        )
+    page.keyboard.press("Escape")
+    return options

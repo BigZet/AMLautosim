@@ -34,11 +34,6 @@ from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     reset_user_state,
     resolve_session,
 )
-from src.aml_workshop_simulator.ui.shared.theme import (  # noqa: E402
-    apply_theme,
-    init_theme,
-    theme_toggle,
-)
 
 st.set_page_config(
     page_title="AML Workshop Control",
@@ -49,6 +44,10 @@ st.set_page_config(
 
 STYLES = """
 <style>
+:root, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
+    --aml-line: var(--border-color);
+    --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
+}
 .block-container { max-width: 1400px; padding-top: 1.2rem; }
 .aml-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase;
     color: var(--primary-color); }
@@ -108,33 +107,17 @@ ROUND_STATUS_LABELS = {
 }
 
 
-def header(
-    kicker: str, title: str, subtitle: str, theme_key: str | None = None
-) -> None:
-    """Page heading, with the appearance switch when the page owns one.
-
-    The switch is repeated outside the sidebar on purpose: on a narrow screen
-    Streamlit keeps the sidebar off-canvas, and a control the user cannot reach
-    is the same as no control at all.
-    """
-    if theme_key is None:
-        title_area = st.container()
-        toggle_area = None
-    else:
-        title_area, toggle_area = st.columns([3, 1], vertical_alignment="center")
-    with title_area:
-        st.markdown(
-            f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'<div class="aml-title">{escape(title)}</div>', unsafe_allow_html=True
-        )
-        st.markdown(
-            f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True
-        )
-    if toggle_area is not None:
-        with toggle_area:
-            theme_toggle(theme_key)
+def header(kicker: str, title: str, subtitle: str) -> None:
+    """Render a page heading; appearance is controlled by Streamlit settings."""
+    st.markdown(
+        f'<div class="aml-kicker">{escape(kicker)}</div>', unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="aml-title">{escape(title)}</div>', unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="aml-subtitle">{escape(subtitle)}</div>', unsafe_allow_html=True
+    )
 
 
 def marker(testid: str, value: Any) -> None:
@@ -168,15 +151,11 @@ def money(value: Any) -> str:
 
 
 def login_screen(client: Any) -> None:
-    top_left, top_right = st.columns([4, 1])
-    with top_left:
-        header(
-            "AML Workshop Control",
-            "Вход администратора",
-            "Управление раундом, конфигурацией и скорингом.",
-        )
-    with top_right:
-        theme_toggle("theme_toggle_auth")
+    header(
+        "AML Workshop Control",
+        "Вход администратора",
+        "Управление раундом, конфигурацией и скорингом.",
+    )
     marker("auth-state", "anonymous")
     show_flash()
     with st.form("admin_login"):
@@ -249,7 +228,6 @@ def page_round_setup() -> None:
         "Раунд",
         "Конфигурация и запуск",
         "Настройте параметры, создайте черновик и запустите раунд явной командой.",
-        theme_key="theme_toggle_page",
     )
     show_flash()
 
@@ -471,7 +449,6 @@ def page_presets() -> None:
         "Пресеты",
         "Заготовки конфигураций",
         "Пресет — только шаблон: раунд получает собственную копию настроек.",
-        theme_key="theme_toggle_page",
     )
     show_flash()
 
@@ -590,7 +567,6 @@ def page_monitoring() -> None:
         "Мониторинг",
         "Состояние раунда",
         "Счётчики читаются напрямую из PostgreSQL.",
-        theme_key="theme_toggle_page",
     )
     show_flash()
 
@@ -734,7 +710,6 @@ def page_participants() -> None:
         "Участники",
         "Черновики, параметры и сессии",
         "Полная история версий каждого участника и технические данные входа.",
-        theme_key="theme_toggle_page",
     )
     show_flash()
 
@@ -1002,7 +977,6 @@ def page_leaderboard() -> None:
         "Лидерборд",
         "Базовые и эффективные значения",
         "Административный вид: настоящие имена и заблокированные участники видны здесь.",
-        theme_key="theme_toggle_page",
     )
     round_obj = select_round(client, session_id)
     if not round_obj:
@@ -1041,7 +1015,6 @@ def page_audit() -> None:
         "Аудит",
         "Журнал действий",
         "Только безопасные метаданные, без PII.",
-        theme_key="theme_toggle_page",
     )
     round_obj = select_round(client, session_id)
     if not round_obj:
@@ -1074,7 +1047,6 @@ def main() -> None:
     client = get_api_client()
     controller = get_cookie_controller("aml_admin_cookies")
     apply_pending_cookie_command(controller, ADMIN_COOKIE)
-    apply_theme(init_theme(controller))
     st.markdown(STYLES, unsafe_allow_html=True)
 
     session = resolve_session(controller, ADMIN_COOKIE, client)
@@ -1098,7 +1070,6 @@ def main() -> None:
             unsafe_allow_html=True,
         )
         marker("auth-state", "authenticated")
-        theme_toggle("theme_toggle_app")
         if st.button("Выйти", key="logout", use_container_width=True):
             try:
                 client.logout(st.session_state["session_id"])
