@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import desc, select
@@ -35,7 +34,6 @@ from src.aml_workshop_simulator.domain.channels import channel_label
 from src.aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
-    RoundPolicy,
     split_param,
 )
 from src.aml_workshop_simulator.domain.rules import (

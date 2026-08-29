@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import csv
 import json
-import os
 import random
 import sys
 import uuid
@@ -59,15 +58,8 @@ def canonical(step: dict) -> dict:
 
 def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
     """Generates realistic AML simulation scenarios for training data."""
-    card_codes = [spec.code for spec in CARD_SPECS.values()]
-    channels = ["bank", "mobile", "web", "atm", "branch", "exchange"]
-    country_risks = ["low", "low", "low", "medium", "high"]
-    recipient_types = ["known_counterparty", "known_counterparty", "new_counterparty", "anonymous_wallet"]
-    times_of_day = ["day", "day", "evening", "night"]
-    velocities = ["spaced", "normal", "normal", "rapid"]
-    
     samples = []
-    
+
     for i in range(n_samples):
         # Determine archetype: 0=benign retail, 1=smurfing/structuring, 2=rapid crypto evasion, 3=cross-border laundering
         archetype = random.choice(["retail", "smurfing", "crypto_evasion", "cross_border"])

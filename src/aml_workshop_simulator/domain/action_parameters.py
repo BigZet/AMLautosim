@@ -583,14 +583,6 @@ def action_fields_for(card_code: str) -> tuple[dict[str, Any], ...]:
     return deepcopy(ACTION_PARAMETER_SCHEMAS.get(card_code, ()))
 
 
-def default_context(card_code: str) -> dict[str, Any]:
-    return {field["key"]: field["default"] for field in context_fields_for(card_code)}
-
-
-def default_action_details(card_code: str) -> dict[str, Any]:
-    return {field["key"]: field["default"] for field in action_fields_for(card_code)}
-
-
 def context_value_label(field_key: str, value: Any) -> str:
     field = CONTEXT_FIELDS.get(field_key)
     if field is None:
@@ -615,11 +607,3 @@ def option_label(fields: Sequence[dict[str, Any]], field_key: str, value: Any) -
         )
         return option["label"] if option else str(value)
     return str(value)
-
-
-def detail_factor_label(card_code: str, field_key: str, value: Any) -> str:
-    for field in action_fields_for(card_code):
-        if field["key"] != field_key:
-            continue
-        return f"{field['label']}: {option_label([field], field_key, value)}"
-    return f"{field_key}: {value}"

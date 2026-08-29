@@ -13,7 +13,6 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "AML Workshop Simulator"
     API_V1_STR: str = "/api/v1"
 
-    SECRET_KEY: str = "change-me-for-production"
     SESSION_TTL_MINUTES: int = 240
     LOGIN_MAX_FAILED_ATTEMPTS: int = 10
     LOGIN_LOCKOUT_MINUTES: int = 5

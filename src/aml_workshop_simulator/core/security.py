@@ -7,7 +7,6 @@ Only `SHA-256(session_id)` is persisted, never the raw identifier.
 from __future__ import annotations
 
 import hashlib
-import hmac
 import secrets
 
 from passlib.context import CryptContext
@@ -35,10 +34,6 @@ def new_session_id() -> str:
 
 def hash_session_id(session_id: str) -> str:
     return hashlib.sha256(session_id.encode("utf-8")).hexdigest()
-
-
-def session_hash_matches(session_id: str, expected_hash: str) -> bool:
-    return hmac.compare_digest(hash_session_id(session_id), expected_hash)
 
 
 def hash_idempotency_key(key: str) -> str:

@@ -15,7 +15,6 @@ from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.domain.round_policy import (
     MAX_VISIBLE_PARAMS,
     declared_params,
-    field_default,
 )
 from src.aml_workshop_simulator.domain.rules import RULESET_VERSION, card_spec_from_row
 from src.aml_workshop_simulator.domain.scoring import (
@@ -220,10 +219,6 @@ def _validate_overrides(spec: Any, entry: dict[str, Any]) -> None:
             raise _config_error(
                 f"Операция «{spec.title}»: лимит повторов не может быть меньше 1."
             )
-
-
-def pinned_default(spec: Any, param: str) -> Any:
-    return field_default(spec, param)
 
 
 def require_confirmation(confirmed: bool, action: str) -> None:

@@ -7,7 +7,6 @@ error/violation payload and — where it matters — what PostgreSQL actually ho
 from __future__ import annotations
 
 import json
-import uuid
 
 import psycopg2
 import pytest

@@ -7,7 +7,6 @@ import uuid
 import psycopg2
 import pytest
 
-from tests.conftest import register_participant
 from tests.helpers import build_step, put_scenario, valid_chain
 
 ADMIN_ROUTES = [

@@ -8,7 +8,7 @@ import uuid
 import psycopg2
 import pytest
 
-from tests.helpers import build_step, put_scenario, valid_chain
+from tests.helpers import put_scenario, valid_chain
 
 
 def submit_valid_chain(client, round_id, headers, cards) -> dict:

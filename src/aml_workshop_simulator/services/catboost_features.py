@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import math
 from typing import Any
-from decimal import Decimal
 
 
 def _get_card_code(step: dict[str, Any]) -> str:

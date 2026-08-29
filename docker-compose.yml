@@ -1,14 +1,19 @@
+# Copy .env.example to .env and fill in the required secrets before the first
+# `docker compose up`. Variables written as ${VAR:?...} have no default on
+# purpose: the stack must refuse to start rather than ship a known password.
 services:
   db:
     image: postgres:16
-    container_name: aml_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
       POSTGRES_USER: ${POSTGRES_USER:-aml}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      # Loopback only: PostgreSQL is reached over the compose network by the
+      # api service. The published port exists for local psql and the test
+      # suite, and must not be visible off the host.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,25 +30,25 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile
-    container_name: aml_api
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:-aml}@db:5432/${POSTGRES_DB:-aml_simulator}
-      DB_POOL_DISABLED: "true"
-      SECRET_KEY: ${SECRET_KEY:-change-me-for-production}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-aml_simulator}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       # Empty by default: only the socket address is believed.
       TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-}
-      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
-      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-admin12345}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?set BOOTSTRAP_ADMIN_EMAIL in .env}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?set BOOTSTRAP_ADMIN_PASSWORD in .env, 10-128 characters}
     command: >-
       sh -c "python -m scripts.seed_database --wait-for-db --migrate
       && uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
     ports:
-      - "${API_PORT:-8000}:8000"
+      # Loopback only: the participant and admin UIs reach the API over the
+      # compose network. docs/deployment.md requires that /api never be served
+      # to browsers.
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status==200 else 1)\""]
       interval: 10s
@@ -54,7 +59,6 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile
-    container_name: aml_play_ui
     restart: unless-stopped
     depends_on:
       api:
@@ -67,12 +71,16 @@ services:
       --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:
       - "${PLAY_PORT:-8501}:8501"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
   admin:
     build:
       context: .
       dockerfile: deploy/Dockerfile
-    container_name: aml_admin_ui
     restart: unless-stopped
     depends_on:
       api:
@@ -85,6 +93,11 @@ services:
       --server.port 8502 --server.address 0.0.0.0 --server.headless true
     ports:
       - "${ADMIN_PORT:-8502}:8502"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8502/_stcore/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
 
 volumes:
   postgres_data:

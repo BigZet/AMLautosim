@@ -226,7 +226,7 @@ def test_admin_leaderboard_shows_base_and_effective_values(
 def test_block_and_unblock_from_the_admin_ui(reset_state: Stack, admin_page: Any) -> None:
     stack = reset_state
     player = register(stack, "Блокировка")
-    prepared = submit_chain_via_api(stack, player)
+    submit_chain_via_api(stack, player)
 
     admin_login(admin_page, stack)
     open_page(admin_page, "Участники")

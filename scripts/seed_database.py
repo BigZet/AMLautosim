@@ -41,17 +41,27 @@ DEMO_ROUND_TITLE = "Мастер-класс AML"
 
 
 async def wait_for_db(timeout_seconds: int = 60) -> None:
+    """Block until PostgreSQL answers, leaving no connection in the pool.
+
+    `main` drives several `asyncio.run` calls, each with its own event loop. A
+    connection kept by the pool here would be handed to the next loop and fail
+    with "attached to a different loop", so the engine is disposed before this
+    loop closes.
+    """
     deadline = time.monotonic() + timeout_seconds
     last_error: Exception | None = None
-    while time.monotonic() < deadline:
-        try:
-            async with async_engine.connect() as connection:
-                await connection.execute(text("SELECT 1"))
-            return
-        except Exception as exc:  # noqa: BLE001 - retried until the deadline
-            last_error = exc
-            await asyncio.sleep(1.0)
-    raise RuntimeError(f"database not reachable: {last_error}")
+    try:
+        while time.monotonic() < deadline:
+            try:
+                async with async_engine.connect() as connection:
+                    await connection.execute(text("SELECT 1"))
+                return
+            except Exception as exc:  # noqa: BLE001 - retried until the deadline
+                last_error = exc
+                await asyncio.sleep(1.0)
+        raise RuntimeError(f"database not reachable: {last_error}")
+    finally:
+        await async_engine.dispose()
 
 
 def run_migrations() -> None:
