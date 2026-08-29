@@ -225,15 +225,11 @@ def card_spec_from_catalog(entry: dict[str, Any], card_id: int) -> CardSpec:
 
 QUOTA_LABELS = {
     "cash": "Наличные операции",
-    "international": "Международные переводы",
-    "crypto": "Криптовалюта",
     "anonymous": "Анонимные получатели",
-    "high_risk_country": "Страны высокого риска",
 }
 
 CONTEXT_TRUST_COST: dict[str, dict[str, int]] = {
     "recipient_type": {"known_counterparty": 0, "new_counterparty": 3, "anonymous_wallet": 10},
-    "country_risk": {"low": 0, "medium": 4, "high": 10},
     "time_of_day": {"day": 0, "evening": 2, "night": 7},
     "velocity": {"spaced": 0, "normal": 1, "rapid": 7},
 }
@@ -244,8 +240,6 @@ CHANNEL_TRUST_MODIFIER: dict[str, int] = {
     "mobile": 0,
     "web": 2,
     "atm": 2,
-    "exchange": 4,
-    "pos": 1,
 }
 
 #: Channels that add extra handling time because a person is involved.
@@ -289,7 +283,7 @@ class RoundRules:
 
 
 def reference_operations() -> list[dict[str, Any]]:
-    """Default `operations` block: the standard six with two visible params."""
+    """Default `operations` block: four operations with two visible params."""
     from src.aml_workshop_simulator.domain.catalog import (
         CARD_CATALOG,
         DEFAULT_OPERATION_CODES,
@@ -325,10 +319,7 @@ REFERENCE_GAME_CONFIG: dict[str, Any] = {
         "max_anonymous_operations": 2,
         "category_limits": {
             "cash": "150000.00",
-            "international": "180000.00",
-            "crypto": "100000.00",
             "anonymous": "75000.00",
-            "high_risk_country": "100000.00",
         },
     },
     "ruleset_version": RULESET_VERSION,
@@ -817,8 +808,6 @@ def evaluate_scenario(
     inflow = ZERO
     outflow = ZERO
     fees = ZERO
-    refundable = ZERO
-
     night_operations = 0
     anonymous_operations = 0
     previous_code: str | None = None
@@ -826,7 +815,6 @@ def evaluate_scenario(
     card_frequencies: dict[str, int] = {}
     quota_usage: dict[str, Decimal] = {key: ZERO for key in QUOTA_LABELS}
     quota_reported: set[str] = set()
-    seen_codes: list[str] = []
     per_step: list[dict[str, Any]] = []
 
     if len(steps) > rules.max_actions:
@@ -860,7 +848,6 @@ def evaluate_scenario(
         frequency = int(step["frequency"])
         context = step["context"]
         channel = context["channel"]
-        country_risk = context.get("country_risk", CONTEXT_DEFAULTS["country_risk"])
         recipient_type = context.get("recipient_type", CONTEXT_DEFAULTS["recipient_type"])
         time_of_day = context.get("time_of_day", CONTEXT_DEFAULTS["time_of_day"])
         velocity = context.get("velocity", CONTEXT_DEFAULTS["velocity"])
@@ -987,48 +974,6 @@ def evaluate_scenario(
                     )
                 )
 
-        if spec.requires_card_code:
-            if spec.requires_card_code not in seen_codes:
-                required_title = next(
-                    (
-                        item.title
-                        for item in card_specs.values()
-                        if item.code == spec.requires_card_code
-                    ),
-                    spec.requires_card_code,
-                )
-                violations.append(
-                    Violation(
-                        reason="missing_prerequisite",
-                        step_id=step_id,
-                        step_index=index,
-                        field="card",
-                        current=spec.code,
-                        allowed=spec.requires_card_code,
-                        message=(
-                            f"{_step_label(index, spec)}: операция возможна только после шага "
-                            f"«{required_title}». Добавьте предшествующую операцию или "
-                            "переместите этот шаг ниже."
-                        ),
-                    )
-                )
-            elif gross > refundable:
-                violations.append(
-                    Violation(
-                        reason="refund_exceeds_purchases",
-                        step_id=step_id,
-                        step_index=index,
-                        field="amount",
-                        current=str(gross),
-                        allowed=str(refundable),
-                        message=(
-                            f"{_step_label(index, spec)}, поле «Сумма»: возврат на "
-                            f"{_fmt_money(gross)} превышает доступную сумму предыдущих покупок "
-                            f"{_fmt_money(refundable)}. Уменьшите сумму или добавьте покупку выше."
-                        ),
-                    )
-                )
-
         # ---- resource costs -------------------------------------------------
         energy_cost = spec.energy_cost * frequency + effects["energy_cost"]
         velocity_time = {
@@ -1048,7 +993,6 @@ def evaluate_scenario(
         )
         contextual_trust = (
             CONTEXT_TRUST_COST["recipient_type"].get(recipient_type, 0)
-            + CONTEXT_TRUST_COST["country_risk"].get(country_risk, 0)
             + CONTEXT_TRUST_COST["time_of_day"].get(time_of_day, 0)
             + CONTEXT_TRUST_COST["velocity"].get(velocity, 0)
             + CHANNEL_TRUST_MODIFIER.get(channel, 0)
@@ -1061,13 +1005,9 @@ def evaluate_scenario(
         if spec.flow == "credit":
             money_delta = money(gross - fee)
             inflow = money(inflow + gross)
-            if spec.requires_card_code == "online_purchase":
-                refundable = money(max(ZERO, refundable - gross))
         elif spec.flow == "debit":
             money_delta = money(-(gross + fee))
             outflow = money(outflow + gross)
-            if spec.code == "online_purchase":
-                refundable = money(refundable + gross)
         else:  # neutral
             money_delta = money(-fee)
 
@@ -1078,9 +1018,6 @@ def evaluate_scenario(
             )
         if recipient_type == "anonymous_wallet":
             quota_usage["anonymous"] = money(quota_usage["anonymous"] + gross)
-        if country_risk == "high":
-            quota_usage["high_risk_country"] = money(quota_usage["high_risk_country"] + gross)
-
         for quota_code, limit in rules.category_limits.items():
             if quota_code not in quota_usage:
                 continue
@@ -1173,7 +1110,6 @@ def evaluate_scenario(
                 )
             )
 
-        seen_codes.append(spec.code)
         per_step.append(
             {
                 "step_id": step_id,

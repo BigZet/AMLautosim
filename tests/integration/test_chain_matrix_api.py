@@ -31,11 +31,7 @@ EXPECTED_MATRIX = {
     "salary": ("bank", "branch", "mobile"),
     "cash_deposit": ("atm", "branch"),
     "card_transfer": ("mobile", "web", "branch"),
-    "international": ("web", "branch"),
     "cash_withdrawal": ("atm", "branch"),
-    "crypto_exchange": ("exchange", "web"),
-    "online_purchase": ("mobile", "web"),
-    "refund": ("mobile", "web"),
 }
 ALLOWED = [(code, ch) for code, chs in EXPECTED_MATRIX.items() for ch in chs]
 DISALLOWED = [
@@ -44,13 +40,6 @@ DISALLOWED = [
     for ch in ALL_CHANNELS
     if ch not in chs
 ]
-
-
-def prerequisite_steps(cards: dict, code: str) -> list[dict]:
-    requires = cards[code].get("requires_card_code")
-    if not requires:
-        return []
-    return [build_step(cards[requires], cards[requires]["max_amount"], 1)]
 
 
 # --------------------------------------------------------------------------
@@ -67,10 +56,7 @@ def test_allowed_channel_is_accepted_and_persisted(
     client, participant, active_round, cards, db_dsn, code, channel
 ) -> None:
     round_id = active_round["id"]
-    steps = [
-        *prerequisite_steps(cards, code),
-        build_step(cards[code], cards[code]["min_amount"], 1, channel),
-    ]
+    steps = [build_step(cards[code], cards[code]["min_amount"], 1, channel)]
     response = put_scenario(client, round_id, participant["headers"], steps)
     assert response.status_code == 200, response.text
     body = response.json()
@@ -95,10 +81,7 @@ def test_disallowed_known_channel_is_rejected_with_an_actionable_error(
     client, participant, active_round, cards, code, channel
 ) -> None:
     round_id = active_round["id"]
-    steps = [
-        *prerequisite_steps(cards, code),
-        build_step(cards[code], cards[code]["min_amount"], 1, channel),
-    ]
+    steps = [build_step(cards[code], cards[code]["min_amount"], 1, channel)]
     response = put_scenario(client, round_id, participant["headers"], steps)
     assert response.status_code == 422
     payload = response.json()
@@ -138,13 +121,12 @@ def test_every_declared_option_of_every_action_field_is_accepted(
     for field in cards[code]["fields"]:
         for option in field["options"]:
             steps = [
-                *prerequisite_steps(cards, code),
                 build_step(
                     cards[code],
                     cards[code]["min_amount"],
                     1,
                     action_details={field["key"]: option["value"]},
-                ),
+                )
             ]
             response = put_scenario(
                 client, round_id, participant["headers"], steps, expected_revision=revision
@@ -154,7 +136,7 @@ def test_every_declared_option_of_every_action_field_is_accepted(
 
 
 def test_unknown_action_field_is_rejected(client, participant, active_round, cards) -> None:
-    step = build_step(cards["crypto_exchange"], 5000, 1, "exchange")
+    step = build_step(cards["cash_deposit"], 5000, 1, "atm")
     step["action_details"]["not_a_field"] = "x"
     response = put_scenario(client, active_round["id"], participant["headers"], [step])
     assert response.status_code == 422
@@ -164,16 +146,16 @@ def test_unknown_action_field_is_rejected(client, participant, active_round, car
 def test_missing_required_action_field_is_rejected(
     client, participant, active_round, cards
 ) -> None:
-    step = build_step(cards["crypto_exchange"], 5000, 1, "exchange")
-    step["action_details"].pop("asset_profile")
+    step = build_step(cards["cash_deposit"], 5000, 1, "atm")
+    step["action_details"].pop("deposit_pattern")
     response = put_scenario(client, active_round["id"], participant["headers"], [step])
     assert response.status_code == 422
     assert "missing_action_parameter" in error_reasons(response)
 
 
 def test_unknown_option_value_is_rejected(client, participant, active_round, cards) -> None:
-    step = build_step(cards["crypto_exchange"], 5000, 1, "exchange")
-    step["action_details"]["asset_profile"] = "gold_bars"
+    step = build_step(cards["cash_deposit"], 5000, 1, "atm")
+    step["action_details"]["deposit_pattern"] = "gold_bars"
     response = put_scenario(client, active_round["id"], participant["headers"], [step])
     assert response.status_code == 422
     assert "invalid_action_parameter" in error_reasons(response)
@@ -197,7 +179,7 @@ def test_card_id_code_version_mismatch_is_rejected(
     client, participant, active_round, cards
 ) -> None:
     step = build_step(cards["salary"], 50000, 1, "bank")
-    step["card"]["id"] = cards["crypto_exchange"]["id"]
+    step["card"]["id"] = cards["cash_withdrawal"]["id"]
     response = put_scenario(client, active_round["id"], participant["headers"], [step])
     assert response.status_code == 422
     assert "card_reference_mismatch" in error_reasons(response)
@@ -216,7 +198,9 @@ def test_unknown_card_version_is_rejected(client, participant, active_round, car
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("code", ["salary", "cash_deposit", "crypto_exchange"])
+@pytest.mark.parametrize(
+    "code", ["salary", "cash_deposit", "card_transfer", "cash_withdrawal"]
+)
 def test_amount_boundary_classes_over_the_api(
     client, participant, active_round, cards, code
 ) -> None:
@@ -277,7 +261,7 @@ def test_round_frequency_limit_over_the_api(client, participant, active_round, c
     steps = [
         build_step(cards["salary"], 100000, 1, "bank"),
         build_step(cards["card_transfer"], 1000, 5, "mobile"),
-        build_step(cards["online_purchase"], 1000, 1, "web"),
+        build_step(cards["cash_withdrawal"], 5000, 1, "atm"),
         build_step(cards["card_transfer"], 1000, 2, "mobile"),
     ]
     at_limit = put_scenario(client, round_id, participant["headers"], steps).json()
@@ -295,50 +279,6 @@ def test_round_frequency_limit_over_the_api(client, participant, active_round, c
 # --------------------------------------------------------------------------
 
 
-def test_refund_sequences_over_the_api(client, participant, active_round, cards) -> None:
-    round_id = active_round["id"]
-    purchase = build_step(cards["online_purchase"], 20000, 1, "web")
-    refund = build_step(cards["refund"], 20000, 1, "web")
-
-    orphan = put_scenario(client, round_id, participant["headers"], [refund]).json()
-    assert "missing_prerequisite" in violation_reasons(orphan["resources"])
-
-    ordered = put_scenario(
-        client, round_id, participant["headers"], [purchase, refund],
-        expected_revision=orphan["revision"],
-    ).json()
-    assert "missing_prerequisite" not in violation_reasons(ordered["resources"])
-
-    reordered = put_scenario(
-        client, round_id, participant["headers"], [refund, purchase],
-        expected_revision=ordered["revision"],
-    ).json()
-    assert "missing_prerequisite" in violation_reasons(reordered["resources"])
-
-    too_large = put_scenario(
-        client,
-        round_id,
-        participant["headers"],
-        [purchase, build_step(cards["refund"], 40000, 1, "web")],
-        expected_revision=reordered["revision"],
-    ).json()
-    assert "refund_exceeds_purchases" in violation_reasons(too_large["resources"])
-
-
-def test_deleting_the_prerequisite_breaks_the_refund(
-    client, participant, active_round, cards
-) -> None:
-    round_id = active_round["id"]
-    purchase = build_step(cards["online_purchase"], 20000, 1, "web")
-    refund = build_step(cards["refund"], 20000, 1, "web")
-    saved = put_scenario(client, round_id, participant["headers"], [purchase, refund]).json()
-    assert saved["resources"]["valid"] is False or True  # persisted either way
-
-    after_delete = put_scenario(
-        client, round_id, participant["headers"], [refund],
-        expected_revision=saved["revision"],
-    ).json()
-    assert "missing_prerequisite" in violation_reasons(after_delete["resources"])
 
 
 def test_quota_and_constraint_violations_over_the_api(
@@ -349,7 +289,7 @@ def test_quota_and_constraint_violations_over_the_api(
     steps = [
         build_step(cards["cash_deposit"], 100000, 1, "atm", context=night),
         build_step(cards["cash_withdrawal"], 60000, 1, "atm", context=night),
-        build_step(cards["online_purchase"], 1000, 1, "web", context=night),
+        build_step(cards["salary"], 10000, 1, "bank", context=night),
     ]
     body = put_scenario(client, round_id, participant["headers"], steps).json()
     reasons = violation_reasons(body["resources"])
@@ -362,8 +302,8 @@ def test_max_actions_violation_over_the_api(client, participant, active_round, c
     round_id = active_round["id"]
     steps = []
     for index in range(9):
-        card = cards["online_purchase"] if index % 2 == 0 else cards["salary"]
-        amount = 1000 if index % 2 == 0 else 10000
+        card = cards["cash_withdrawal"] if index % 2 == 0 else cards["salary"]
+        amount = 5000 if index % 2 == 0 else 10000
         steps.append(build_step(card, amount))
     body = put_scenario(client, round_id, participant["headers"], steps).json()
     assert "max_actions_exceeded" in violation_reasons(body["resources"])

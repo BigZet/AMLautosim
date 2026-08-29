@@ -15,10 +15,7 @@ import streamlit as st
 
 QUOTA_LABELS = {
     "cash": "Наличные операции",
-    "international": "Международные переводы",
-    "crypto": "Криптовалюта",
     "anonymous": "Анонимные получатели",
-    "high_risk_country": "Страны высокого риска",
 }
 
 RESOURCE_WEIGHT_LABELS = {

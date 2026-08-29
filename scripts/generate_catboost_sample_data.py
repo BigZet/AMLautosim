@@ -38,7 +38,6 @@ def canonical(step: dict) -> dict:
     """Convert a generator step into the canonical scenario step format."""
     code = step["card_code"]
     context = {
-        "country_risk": "low",
         "recipient_type": "known_counterparty",
         "time_of_day": "day",
         "velocity": "normal",
@@ -46,13 +45,16 @@ def canonical(step: dict) -> dict:
         "has_documents": True,
         **step.get("context", {}),
     }
+    spec = next(spec for spec in CARD_SPECS.values() if spec.code == code)
+    details = {field["key"]: field["default"] for field in spec.fields}
+    details.update(step.get("details", {}))
     return {
         "step_id": str(uuid.uuid4()),
         "card": {"id": CARD_IDS[code], "code": code, "version": 1},
         "amount": f"{float(step['amount']):.2f}",
         "frequency": int(step["frequency"]),
         "context": context,
-        "action_details": step.get("details", {}),
+        "action_details": details,
     }
 
 
@@ -61,8 +63,9 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
     samples = []
 
     for i in range(n_samples):
-        # Determine archetype: 0=benign retail, 1=smurfing/structuring, 2=rapid crypto evasion, 3=cross-border laundering
-        archetype = random.choice(["retail", "smurfing", "crypto_evasion", "cross_border"])
+        archetype = random.choice(
+            ["retail", "smurfing", "rapid_cash_out", "transfer_burst"]
+        )
         n_steps = random.randint(2, 8)
         steps = []
         
@@ -71,15 +74,16 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
                 "card_code": "salary",
                 "amount": random.choice([50000, 80000, 120000]),
                 "frequency": 1,
-                "context": {"channel": "bank", "country_risk": "low", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "spaced", "has_documents": True},
+                "context": {"channel": "bank", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "spaced", "has_documents": True},
                 "details": {"employer_profile": "verified_employer", "income_basis": "payroll_registry"}
             })
             for _ in range(n_steps - 1):
+                code = random.choice(["card_transfer", "cash_withdrawal"])
                 steps.append({
-                    "card_code": random.choice(["card_transfer", "online_purchase"]),
-                    "amount": random.randint(3000, 40000),
+                    "card_code": code,
+                    "amount": random.randint(5000, 40000),
                     "frequency": random.randint(1, 2),
-                    "context": {"channel": random.choice(["mobile", "web"]), "country_risk": "low", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
+                    "context": {"channel": "mobile" if code == "card_transfer" else "atm", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
                     "details": {}
                 })
         elif archetype == "smurfing":
@@ -87,7 +91,7 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
                 "card_code": "cash_deposit",
                 "amount": 30000,
                 "frequency": 3,
-                "context": {"channel": "atm", "country_risk": "low", "recipient_type": "known_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
+                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
                 "details": {"funds_source": "unexplained", "deposit_pattern": "several_atms"}
             })
             for _ in range(n_steps - 1):
@@ -95,38 +99,38 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
                     "card_code": "card_transfer",
                     "amount": 29000,
                     "frequency": 1,
-                    "context": {"channel": "mobile", "country_risk": "low", "recipient_type": "new_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
+                    "context": {"channel": "mobile", "recipient_type": "new_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
                     "details": {"transfer_purpose": "no_purpose", "recipient_relationship": "unknown"}
                 })
-        elif archetype == "crypto_evasion":
+        elif archetype == "rapid_cash_out":
             steps.append({
                 "card_code": "cash_deposit",
                 "amount": 100000,
                 "frequency": 1,
-                "context": {"channel": "atm", "country_risk": "low", "recipient_type": "known_counterparty", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
+                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
                 "details": {"funds_source": "borrowed_cash", "deposit_pattern": "third_party"}
             })
             steps.append({
-                "card_code": "crypto_exchange",
+                "card_code": "cash_withdrawal",
                 "amount": 95000,
                 "frequency": 1,
-                "context": {"channel": "exchange", "country_risk": "high", "recipient_type": "anonymous_wallet", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
-                "details": {"platform_profile": "unknown_service", "wallet_owner": "third_party_wallet", "asset_profile": "privacy_asset"}
+                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
+                "details": {"cash_purpose": "unspecified", "withdrawal_location": "other_region"}
             })
-        else: # cross_border
+        else:  # transfer_burst
             steps.append({
                 "card_code": "salary",
                 "amount": 150000,
                 "frequency": 1,
-                "context": {"channel": "bank", "country_risk": "low", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
+                "context": {"channel": "bank", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
                 "details": {"employer_profile": "small_business", "income_basis": "service_contract"}
             })
             steps.append({
-                "card_code": "international",
+                "card_code": "card_transfer",
                 "amount": 140000,
                 "frequency": 1,
-                "context": {"channel": "web", "country_risk": "high", "recipient_type": "new_counterparty", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
-                "details": {"transfer_purpose": "investment", "payment_route": "fintech_gateway"}
+                "context": {"channel": "web", "recipient_type": "anonymous_wallet", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
+                "details": {"transfer_purpose": "no_purpose", "recipient_relationship": "unknown"}
             })
 
         # Ground truth from the versioned ruleset
@@ -155,6 +159,7 @@ def main() -> None:
     output_dir = Path(__file__).resolve().parent.parent / "resources" / "catboost_sample_data"
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    random.seed(42)
     samples = generate_synthetic_scenarios(300)
     
     # 1. Save JSON with full steps and features
@@ -168,7 +173,11 @@ def main() -> None:
     feature_keys = list(samples[0]["features"].keys())
     
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["scenario_id"] + feature_keys)
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["scenario_id"] + feature_keys,
+            lineterminator="\n",
+        )
         writer.writeheader()
         for s in samples:
             row = {"scenario_id": s["scenario_id"], **s["features"]}
@@ -189,17 +198,17 @@ This directory contains the feature extraction pipeline and ready-to-train sampl
 
 ### Numerical Features ({len(get_catboost_feature_names()) - len(get_catboost_categorical_feature_names())} features)
 - Financial aggregates: `total_turnover`, `total_inflow`, `total_outflow`, `net_turnover`, `outflow_to_inflow_ratio`, `fees_total`, `fees_ratio`
-- Channel/Channel category breakdowns: `cash_inflow_sum`, `cash_outflow_sum`, `cash_turnover_ratio`, `crypto_outflow_sum`, `crypto_turnover_ratio`, `international_outflow_sum`, `international_turnover_ratio`
-- Risk & Behavioral signals: `high_risk_country_turnover`, `high_risk_country_ratio`, `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`, `without_docs_large_sum`, `without_docs_ratio`
+- Cash breakdowns: `cash_inflow_sum`, `cash_outflow_sum`, `cash_turnover_ratio`
+- Risk & Behavioral signals: `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`, `without_docs_large_sum`, `without_docs_ratio`
 - Statistical amounts: `avg_step_amount`, `max_step_amount`, `std_step_amount`, `max_frequency_single_step`
-- Sequential patterns: `repeated_amount_count`, `rapid_credit_to_debit_count`, `cash_to_crypto_seq_flag`
-- Indicator flags: `has_crypto`, `has_cash`, `has_international`, `num_steps`, `unique_channels_count`, `unique_cards_count`
+- Sequential patterns: `repeated_amount_count`, `rapid_credit_to_debit_count`
+- Indicator flags: `has_cash`, `num_steps`, `unique_channels_count`, `unique_cards_count`
 
 ### Categorical Features
 `{get_catboost_categorical_feature_names()}`:
-- `primary_channel` (e.g., 'mobile', 'web', 'atm', 'branch', 'exchange')
-- `primary_category` (e.g., 'salary', 'cash', 'crypto', 'international', 'transfer', 'purchase')
-- `most_frequent_card` (e.g., 'crypto_exchange', 'cash_deposit', 'salary', ...)
+- `primary_channel` (e.g., 'mobile', 'web', 'atm', 'branch')
+- `primary_category` (`salary`, `cash`, `transfer`)
+- `most_frequent_card` (`salary`, `cash_deposit`, `card_transfer`, `cash_withdrawal`)
 
 ### Target Variables
 - `target_risk_score`: Continuous risk score (0.0 to 100.0) -> for `CatBoostRegressor(loss_function='RMSE')`

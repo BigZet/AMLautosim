@@ -30,28 +30,19 @@ from src.aml_workshop_simulator.domain.round_policy import (
 
 CARD_SCHEMA_VERSION = 2
 
-#: Quota buckets a card contributes to. Context-driven buckets
-#: (`anonymous`, `high_risk_country`) are added by the ruleset, not by the card.
-QUOTA_CATEGORIES = ("cash", "international", "crypto", "anonymous", "high_risk_country")
+#: Quota buckets a card contributes to. The context-driven `anonymous` bucket
+#: is added by the ruleset, not by the card.
+QUOTA_CATEGORIES = ("cash", "anonymous")
 
 #: Operations a freshly created round offers by default.
 #:
-#: `online_purchase` and `refund` stay in the catalog and in PostgreSQL — old
-#: rounds and old drafts keep working — but they are not part of the standard
-#: set any more: the pair carries its own prerequisite mechanic (a refund is
-#: only legal after a purchase, bounded by the purchased amount) which doubles
-#: the rules a participant has to hold in their head while contributing nothing
-#: the remaining six cannot express. The round target (150 000 outflow from a
-#: 250 000 balance) stays reachable without them — a single `card_transfer`
-#: already clears it — and every quota, streak and resource rule keeps at least
-#: one operation that can trigger it.
+#: This is also the complete catalog. Keeping one canonical list prevents
+#: removed operations from resurfacing in seeds, round presets or the UI.
 DEFAULT_OPERATION_CODES: tuple[str, ...] = (
     "salary",
     "cash_deposit",
     "card_transfer",
-    "international",
     "cash_withdrawal",
-    "crypto_exchange",
 )
 
 #: On top of amount and frequency a participant edits at most two parameters
@@ -61,17 +52,12 @@ DEFAULT_OPERATION_CODES: tuple[str, ...] = (
 #:
 #: * `time_of_day`     -> night operation quota
 #: * `recipient_type`  -> anonymous recipient quota
-#: * `country_risk`    -> high risk country quota
 #: * card-specific action detail -> the operation's own risk story
 DEFAULT_VISIBLE_PARAMS: dict[str, tuple[str, ...]] = {
     "salary": (context_param("time_of_day"),),
     "cash_deposit": (action_param("funds_source"),),
     "card_transfer": (context_param("recipient_type"),),
-    "international": (context_param("country_risk"),),
     "cash_withdrawal": (context_param("time_of_day"),),
-    "crypto_exchange": (action_param("wallet_owner"),),
-    "online_purchase": (context_param("country_risk"),),
-    "refund": (action_param("refund_destination"),),
 }
 
 #: Repeat counts are only offered where splitting an amount into several
@@ -81,11 +67,7 @@ DEFAULT_SHOW_FREQUENCY: dict[str, bool] = {
     "salary": False,
     "cash_deposit": True,
     "card_transfer": True,
-    "international": False,
     "cash_withdrawal": True,
-    "crypto_exchange": False,
-    "online_purchase": False,
-    "refund": False,
 }
 
 
@@ -160,26 +142,6 @@ CARD_CATALOG: tuple[dict[str, Any], ...] = (
         "channels": (Channel.mobile, Channel.web, Channel.branch),
     },
     {
-        "code": "international",
-        "version": 1,
-        "title": "Международный перевод",
-        "description": "Отправка средств в другую страну.",
-        "category": "Перевод",
-        "flow": "debit",
-        "risk_weight": Decimal("18.00"),
-        "energy_cost": 3,
-        "time_cost": 3,
-        "trust_cost": 12,
-        "fee_rate": Decimal("0.020000"),
-        "min_amount": Decimal("5000.00"),
-        "max_amount": Decimal("180000.00"),
-        "max_frequency": 3,
-        "round_frequency_limit": 3,
-        "requires_card_code": None,
-        "quota_category": "international",
-        "channels": (Channel.web, Channel.branch),
-    },
-    {
         "code": "cash_withdrawal",
         "version": 1,
         "title": "Снять наличные",
@@ -198,66 +160,6 @@ CARD_CATALOG: tuple[dict[str, Any], ...] = (
         "requires_card_code": None,
         "quota_category": "cash",
         "channels": (Channel.atm, Channel.branch),
-    },
-    {
-        "code": "crypto_exchange",
-        "version": 1,
-        "title": "Купить криптовалюту",
-        "description": "Перевод средств на криптовалютную площадку.",
-        "category": "Цифровые активы",
-        "flow": "debit",
-        "risk_weight": Decimal("20.00"),
-        "energy_cost": 3,
-        "time_cost": 3,
-        "trust_cost": 15,
-        "fee_rate": Decimal("0.015000"),
-        "min_amount": Decimal("5000.00"),
-        "max_amount": Decimal("100000.00"),
-        "max_frequency": 3,
-        "round_frequency_limit": 3,
-        "requires_card_code": None,
-        "quota_category": "crypto",
-        "channels": (Channel.exchange, Channel.web),
-    },
-    {
-        "code": "online_purchase",
-        "version": 1,
-        "title": "Оплатить покупку",
-        "description": "Оплата товара в интернет-магазине.",
-        "category": "Покупка",
-        "flow": "debit",
-        "risk_weight": Decimal("2.00"),
-        "energy_cost": 1,
-        "time_cost": 1,
-        "trust_cost": 0,
-        "fee_rate": Decimal("0.000000"),
-        "min_amount": Decimal("1000.00"),
-        "max_amount": Decimal("250000.00"),
-        "max_frequency": 5,
-        "round_frequency_limit": 6,
-        "requires_card_code": None,
-        "quota_category": None,
-        "channels": (Channel.mobile, Channel.web),
-    },
-    {
-        "code": "refund",
-        "version": 1,
-        "title": "Получить возврат",
-        "description": "Возврат возможен только после покупки в этой цепочке.",
-        "category": "Поступление",
-        "flow": "credit",
-        "risk_weight": Decimal("4.00"),
-        "energy_cost": 1,
-        "time_cost": 1,
-        "trust_cost": 2,
-        "fee_rate": Decimal("0.000000"),
-        "min_amount": Decimal("1000.00"),
-        "max_amount": Decimal("150000.00"),
-        "max_frequency": 3,
-        "round_frequency_limit": 3,
-        "requires_card_code": "online_purchase",
-        "quota_category": None,
-        "channels": (Channel.mobile, Channel.web),
     },
 )
 

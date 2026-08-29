@@ -18,11 +18,11 @@ from tests.unit.conftest import make_step
 
 def chain(spec_by_code, **overrides):
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     transfer = spec_by_code["card_transfer"]
     return [
         make_step(salary, Decimal("120000.00"), channel="bank"),
-        make_step(purchase, Decimal("100000.00"), channel="web", **overrides),
+        make_step(withdrawal, Decimal("100000.00"), channel="atm", **overrides),
         make_step(transfer, Decimal("60000.00"), channel="mobile"),
     ]
 
@@ -36,23 +36,22 @@ def test_same_input_gives_the_same_result(spec_by_code, specs, game_config) -> N
 
 
 def test_scores_are_clamped_to_the_zero_hundred_range(spec_by_code, specs, game_config) -> None:
-    crypto = spec_by_code["crypto_exchange"]
+    transfer = spec_by_code["card_transfer"]
     hostile = [
         make_step(
-            crypto,
+            transfer,
             Decimal("100000.00"),
-            frequency=3,
-            channel="exchange",
+            frequency=5,
+            channel="web",
             context={
-                "country_risk": "high",
+                "recipient_type": "anonymous_wallet",
                 "time_of_day": "night",
                 "velocity": "rapid",
                 "has_documents": False,
             },
             action_details={
-                "platform_profile": "unknown_service",
-                "wallet_owner": "third_party_wallet",
-                "asset_profile": "privacy_asset",
+                "transfer_purpose": "no_purpose",
+                "recipient_relationship": "unknown",
             },
         )
     ]
@@ -100,17 +99,16 @@ def test_thresholds_come_from_the_round_snapshot(spec_by_code, specs, game_confi
     assert score_scenario(steps, specs, lenient)["risk_label"] == RiskLabel.normal
 
 
-def test_sequence_factors_are_produced_for_cash_to_crypto(
+def test_sequence_factor_is_produced_for_rapid_cash_out(
     spec_by_code, specs, game_config
 ) -> None:
     deposit = spec_by_code["cash_deposit"]
-    crypto = spec_by_code["crypto_exchange"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     steps = [
         make_step(deposit, Decimal("100000.00"), channel="atm"),
-        make_step(crypto, Decimal("90000.00"), channel="exchange"),
+        make_step(withdrawal, Decimal("90000.00"), channel="atm"),
     ]
     codes = {item["code"] for item in score_scenario(steps, specs, game_config)["explanation"]["sequence_factors"]}
-    assert "sequence:cash_to_high_risk" in codes
     assert "sequence:rapid_turnover" in codes
 
 
@@ -118,9 +116,9 @@ def test_reordering_independent_steps_only_changes_sequence_factors(
     spec_by_code, specs, game_config
 ) -> None:
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     a = make_step(salary, Decimal("50000.00"))
-    b = make_step(purchase, Decimal("20000.00"))
+    b = make_step(withdrawal, Decimal("20000.00"))
     forward = score_scenario([a, b], specs, game_config)
     backward = score_scenario([b, a], specs, game_config)
     non_sequence = lambda result: sorted(  # noqa: E731
@@ -140,14 +138,14 @@ def test_resource_score_components_and_weights(spec_by_code, specs, game_config)
 
 def test_a_cheaper_chain_scores_at_least_as_well(spec_by_code, specs, game_config) -> None:
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
+    transfer = spec_by_code["card_transfer"]
     frugal = [
         make_step(salary, Decimal("150000.00")),
-        make_step(purchase, Decimal("150000.00")),
+        make_step(transfer, Decimal("150000.00")),
     ]
     wasteful = [
         make_step(salary, Decimal("150000.00")),
-        make_step(purchase, Decimal("150000.00")),
+        make_step(transfer, Decimal("150000.00")),
         make_step(spec_by_code["card_transfer"], Decimal("50000.00")),
     ]
     frugal_score = resource_score(evaluate_scenario(frugal, specs, game_config), game_config)

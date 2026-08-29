@@ -6,9 +6,7 @@ only place where a channel string becomes a legal value at schema level.
 Which of those values a concrete step may actually use is **not** decided here:
 it is declared per card version in `parameter_schema.channels`
 (see `domain.catalog`) and is enforced by `domain.rules`. A value that exists in
-this enum is therefore not automatically acceptable for a card — `pos` for
-example is a known channel with a UI label that no card version currently
-allows, and every request that uses it is rejected.
+this enum is therefore not automatically acceptable for a card.
 
 No aliasing is permitted: `bank` and `branch` are distinct channels.
 """
@@ -26,8 +24,6 @@ class Channel(StrEnum):
     atm = "atm"
     mobile = "mobile"
     web = "web"
-    exchange = "exchange"
-    pos = "pos"
 
 
 CHANNEL_LABELS: dict[str, str] = {
@@ -36,8 +32,6 @@ CHANNEL_LABELS: dict[str, str] = {
     Channel.atm: "Банкомат",
     Channel.mobile: "Мобильное приложение",
     Channel.web: "Интернет-банк",
-    Channel.exchange: "Криптобиржа",
-    Channel.pos: "POS-терминал",
 }
 
 ALL_CHANNELS: tuple[str, ...] = tuple(channel.value for channel in Channel)

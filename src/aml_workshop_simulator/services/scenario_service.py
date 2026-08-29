@@ -40,7 +40,7 @@ from src.aml_workshop_simulator.domain.round_policy import (
 )
 from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
 
-CONTEXT_KEYS = ("country_risk", "recipient_type", "time_of_day", "velocity", "has_documents")
+CONTEXT_KEYS = ("recipient_type", "time_of_day", "velocity", "has_documents")
 
 
 async def load_round_card_specs(
@@ -181,7 +181,6 @@ def canonical_steps(
                 "amount": f"{money(step.amount):.2f}",
                 "frequency": int(frequency),
                 "context": {
-                    "country_risk": context["country_risk"],
                     "recipient_type": context["recipient_type"],
                     "time_of_day": context["time_of_day"],
                     "velocity": context["velocity"],

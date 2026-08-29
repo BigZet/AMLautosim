@@ -44,37 +44,27 @@ from tests.ui.streamlit_driver import register as register_in_ui
 
 playwright_api = pytest.importorskip("playwright.sync_api")
 
-#: The six operations a default round enables, with the channels each offers.
+#: The four operations a default round enables, with the channels each offers.
 EXPECTED_CHANNEL_LABELS = {
     "Получить зарплату": ["Банковское зачисление", "Отделение банка", "Мобильное приложение"],
     "Внести наличные": ["Банкомат", "Отделение банка"],
     "Перевести по карте": ["Мобильное приложение", "Интернет-банк", "Отделение банка"],
-    "Международный перевод": ["Интернет-банк", "Отделение банка"],
     "Снять наличные": ["Банкомат", "Отделение банка"],
-    "Купить криптовалюту": ["Криптобиржа", "Интернет-банк"],
 }
 
 CODES = {
     "Получить зарплату": "salary",
     "Внести наличные": "cash_deposit",
     "Перевести по карте": "card_transfer",
-    "Международный перевод": "international",
     "Снять наличные": "cash_withdrawal",
-    "Купить криптовалюту": "crypto_exchange",
 }
-
-#: Still in the catalogue and still playable in a legacy draft, but not offered
-#: by a default round: the pair carries its own prerequisite mechanic.
-EXCLUDED_CARD_TITLES = ("Оплатить покупку", "Получить возврат")
 
 #: Exactly what each operation exposes: the channel plus one more parameter.
 EXPECTED_VISIBLE_PARAMS = {
     "salary": "channel,context.time_of_day",
     "cash_deposit": "channel,action.funds_source",
     "card_transfer": "channel,context.recipient_type",
-    "international": "channel,context.country_risk",
     "cash_withdrawal": "channel,context.time_of_day",
-    "crypto_exchange": "channel,action.wallet_owner",
 }
 
 ALL_CHANNEL_LABELS = {
@@ -83,8 +73,6 @@ ALL_CHANNEL_LABELS = {
     "Банкомат",
     "Мобильное приложение",
     "Интернет-банк",
-    "Криптобиржа",
-    "POS-терминал",
 }
 
 
@@ -230,7 +218,6 @@ def test_channel_selector_offers_exactly_the_allowed_channels(
     assert offered == expected, (card_label, offered)
     forbidden = ALL_CHANNEL_LABELS - set(expected)
     assert not (set(offered) & forbidden)
-    assert "POS-терминал" not in offered
 
 
 def test_every_allowed_channel_of_every_card_can_be_added_and_saved(
@@ -254,7 +241,7 @@ def test_every_allowed_channel_of_every_card_can_be_added_and_saved(
             )
             channels_stored = [step["context"]["channel"] for step in stored[0][0]]
             assert channels_stored[-1] in {
-                "bank", "branch", "atm", "mobile", "web", "exchange",
+                "bank", "branch", "atm", "mobile", "web",
             }
             logout(page)
 
@@ -262,7 +249,7 @@ def test_every_allowed_channel_of_every_card_can_be_added_and_saved(
 def test_the_builder_offers_exactly_the_operations_of_the_round(
     reset_state: Stack, page: Any
 ) -> None:
-    """Six operations, and the excluded pair is nowhere to be chosen."""
+    """Exactly four operations are available to the participant."""
     stack = reset_state
     player = register(stack, "Каталог раунда")
     participant_login(page, stack, player["email"])
@@ -270,8 +257,6 @@ def test_the_builder_offers_exactly_the_operations_of_the_round(
     offered = select_options(page, "builder_card")
     titles = [label.split(" · ")[0] for label in offered]
     assert sorted(titles) == sorted(EXPECTED_CHANNEL_LABELS), offered
-    for excluded in EXCLUDED_CARD_TITLES:
-        assert excluded not in titles
 
 
 @pytest.mark.parametrize("card_label", sorted(EXPECTED_CHANNEL_LABELS))
@@ -499,11 +484,11 @@ def test_fixing_a_violation_enables_submit_and_completes_the_round(
     player = register(stack, "Исправление")
     participant_login(page, stack, player["email"])
 
-    # A chain that is structurally fine but breaks the crypto quota.
+    # A chain that is structurally fine but breaks the cash quota.
     add_step(page, "Получить зарплату", "Банковское зачисление", 150000, None, "salary")
-    add_step(page, "Купить криптовалюту", "Криптобиржа", 100000, None, "crypto_exchange")
-    add_step(page, "Перевести по карте", "Мобильное приложение", 60000, 1, "card_transfer")
-    add_step(page, "Купить криптовалюту", "Криптобиржа", 50000, None, "crypto_exchange")
+    add_step(page, "Внести наличные", "Банкомат", 100000, 1, "cash_deposit")
+    add_step(page, "Перевести по карте", "Мобильное приложение", 100000, 1, "card_transfer")
+    add_step(page, "Снять наличные", "Банкомат", 60000, 1, "cash_withdrawal")
     click_button(page, "save_draft")
     expect_marker(page, "resources-valid", "false")
     page.locator('[data-testid="violation-category_limit_exceeded"]').first.wait_for(

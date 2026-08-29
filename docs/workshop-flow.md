@@ -143,14 +143,14 @@ sequenceDiagram
     S-->>U: Обновленная цепочка и ограничения
 ```
 
-Поля зависят от карточки. Например, crypto показывает площадку/кошелек/asset profile,
-refund — причину и связь с purchase, transfer — назначение и связь с recipient.
+Поля зависят от карточки. Например, внесение наличных показывает источник средств,
+перевод — тип получателя, а снятие наличных — время операции.
 
 **Допустимые действия:** add, edit, delete, reorder, duplicate при сохранении нового
 `step_id` и повторной валидации.
 
 **Ошибки:** неизвестное поле, недопустимая option, amount/frequency limit, недостаток
-balance/energy/time/trust, category quota, missing prerequisite. UI привязывает violation
+balance/energy/time/trust и category quota. UI привязывает violation
 к step/widget по `step_id + field`.
 
 ## 8. UC-P4: синхронизация и конфликт

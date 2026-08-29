@@ -212,12 +212,7 @@ def cards(client: Any, active_round: dict[str, Any]) -> dict[str, dict[str, Any]
 
 @pytest.fixture()
 def full_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
-    """A round configured the *legacy* way: all eight cards, nothing hidden.
-
-    Rounds created before the parameter surface was reduced look like this, and
-    their drafts must keep working. It is also the configuration that lets the
-    channel/parameter matrix be exercised across the whole catalog.
-    """
+    """A round with all four cards and every declared parameter visible."""
     from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
 
     catalog = client.get("/api/v1/admin/action-cards", headers=admin_headers).json()

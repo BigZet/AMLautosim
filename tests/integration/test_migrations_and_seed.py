@@ -62,13 +62,13 @@ def test_clean_database_reaches_alembic_head_and_seeds_idempotently() -> None:
                 timeout=300,
             )
             assert completed.returncode == 0, (attempt, completed.stdout, completed.stderr)
-            assert "cards=8" in completed.stdout
+            assert "cards=4" in completed.stdout
 
         connection = psycopg2.connect(sync_dsn(scratch))
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT count(*) FROM action_cards")
-                assert cursor.fetchone()[0] == 8
+                assert cursor.fetchone()[0] == 4
                 cursor.execute("SELECT count(*) FROM users WHERE role = 'admin'")
                 assert cursor.fetchone()[0] == 1
                 cursor.execute("SELECT count(*) FROM rounds")
@@ -199,3 +199,45 @@ def test_seeded_card_contract_matches_the_catalog(clean_database, db_dsn) -> Non
         assert schema == build_parameter_schema(entry)
         assert Decimal(low) == entry["min_amount"]
         assert Decimal(high) == entry["max_amount"]
+
+
+def test_seed_removes_an_obsolete_operation(clean_database, db_dsn) -> None:
+    """Re-running the seed converges an existing database to the four-card catalog."""
+    connection = psycopg2.connect(db_dsn)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO action_cards (code, version, title, category, flow, "
+                "risk_weight, energy_cost, time_cost, trust_cost, fee_rate, min_amount, "
+                "max_amount, max_frequency, requires_card_code, parameter_schema, "
+                "is_active, created_at) "
+                "SELECT 'obsolete_operation', version, 'Старая операция', category, flow, "
+                "risk_weight, energy_cost, time_cost, trust_cost, fee_rate, min_amount, "
+                "max_amount, max_frequency, requires_card_code, parameter_schema, "
+                "is_active, created_at FROM action_cards WHERE code = 'salary'"
+            )
+        connection.commit()
+    finally:
+        connection.close()
+
+    environment = dict(os.environ)
+    environment["DATABASE_URL"] = TEST_DATABASE_URL
+    completed = subprocess.run(
+        [sys.executable, "-m", "scripts.seed_database"],
+        cwd=str(ROOT),
+        env=environment,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=300,
+    )
+    assert completed.returncode == 0, (completed.stdout, completed.stderr)
+
+    connection = psycopg2.connect(db_dsn)
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT code FROM action_cards ORDER BY code")
+            codes = [row[0] for row in cursor.fetchall()]
+    finally:
+        connection.close()
+    assert codes == ["card_transfer", "cash_deposit", "cash_withdrawal", "salary"]

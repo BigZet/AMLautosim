@@ -330,7 +330,7 @@ def test_backup_and_restore_round_trip(reset_state: Stack) -> None:
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT count(*) FROM action_cards")
-                assert cursor.fetchone()[0] == 8
+                assert cursor.fetchone()[0] == 4
                 cursor.execute(
                     "SELECT jsonb_array_length(steps) FROM scenarios"
                 )

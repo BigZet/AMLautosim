@@ -1,8 +1,8 @@
 """Golden ruleset tests for `game-rules-v2`.
 
 Covers the equivalence classes and boundaries from
-docs/chain-validation-matrix.md: amounts, frequencies, quotas, sequence
-dependencies, resource exhaustion and the structural/business split.
+docs/chain-validation-matrix.md: amounts, frequencies, quotas, sequence rules,
+resource exhaustion and the structural/business split.
 """
 
 from __future__ import annotations
@@ -58,14 +58,14 @@ def test_credit_and_debit_flows_use_decimal_with_banker_rounding(
 
 def test_fee_is_charged_on_gross_amount_times_frequency(spec_by_code, specs, game_config) -> None:
     salary = spec_by_code["salary"]
-    crypto = spec_by_code["crypto_exchange"]
+    transfer = spec_by_code["card_transfer"]
     steps = [
         make_step(salary, Decimal("100000.00")),
-        make_step(crypto, Decimal("10000.00"), frequency=3),
+        make_step(transfer, Decimal("10000.00"), frequency=3),
     ]
     snapshot = evaluate_scenario(steps, specs, game_config)
     assert snapshot["totals"]["gross_outflow"] == "30000.00"
-    assert snapshot["totals"]["fees"] == "450.00"  # 30000 * 0.015
+    assert snapshot["totals"]["fees"] == "150.00"  # 30000 * 0.005
 
 
 # --------------------------------------------------------------------------
@@ -73,7 +73,9 @@ def test_fee_is_charged_on_gross_amount_times_frequency(spec_by_code, specs, gam
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("code", ["salary", "cash_deposit", "card_transfer", "crypto_exchange"])
+@pytest.mark.parametrize(
+    "code", ["salary", "cash_deposit", "card_transfer", "cash_withdrawal"]
+)
 def test_amount_boundaries(spec_by_code, specs, game_config, code) -> None:
     spec = spec_by_code[code]
     below = evaluate_scenario(
@@ -133,7 +135,7 @@ def test_round_frequency_limit_boundaries(spec_by_code, specs, game_config) -> N
     """card_transfer: 5 per step, 7 per round."""
     spec = spec_by_code["card_transfer"]
     salary = spec_by_code["salary"]
-    other = spec_by_code["online_purchase"]
+    other = spec_by_code["cash_withdrawal"]
 
     def chain(total: int) -> list[dict]:
         first = min(total, spec.max_frequency)
@@ -143,7 +145,7 @@ def test_round_frequency_limit_boundaries(spec_by_code, specs, game_config) -> N
             make_step(spec, Decimal("1000.00"), frequency=first),
         ]
         if rest:
-            steps.append(make_step(other, Decimal("1000.00")))
+            steps.append(make_step(other, Decimal("5000.00")))
             steps.append(make_step(spec, Decimal("1000.00"), frequency=rest))
         return steps
 
@@ -194,28 +196,28 @@ def test_duplicate_step_id_is_structural(spec_by_code, specs, game_config) -> No
 def test_unknown_and_missing_action_parameters_are_structural(
     spec_by_code, specs, game_config
 ) -> None:
-    spec = spec_by_code["crypto_exchange"]
+    spec = spec_by_code["cash_deposit"]
     unknown = make_step(spec, spec.min_amount, action_details={"nonexistent": "x"})
     with pytest.raises(StructuralError) as raised:
         evaluate_scenario([unknown], specs, game_config)
     assert "unknown_action_parameter" in structural_reasons(raised.value)
 
     missing = make_step(spec, spec.min_amount)
-    missing["action_details"].pop("wallet_owner")
+    missing["action_details"].pop("funds_source")
     with pytest.raises(StructuralError) as raised:
         evaluate_scenario([missing], specs, game_config)
     assert "missing_action_parameter" in structural_reasons(raised.value)
 
 
 def test_invalid_action_option_is_structural(spec_by_code, specs, game_config) -> None:
-    spec = spec_by_code["crypto_exchange"]
-    step = make_step(spec, spec.min_amount, action_details={"wallet_owner": "nope"})
+    spec = spec_by_code["cash_deposit"]
+    step = make_step(spec, spec.min_amount, action_details={"funds_source": "nope"})
     with pytest.raises(StructuralError) as raised:
         evaluate_scenario([step], specs, game_config)
     violation = next(
         item for item in raised.value.violations if item.reason == "invalid_action_parameter"
     )
-    assert violation.field == "action_details.wallet_owner"
+    assert violation.field == "action_details.funds_source"
     assert violation.current == "nope"
 
 
@@ -224,34 +226,31 @@ def test_context_field_the_card_does_not_declare_must_stay_default(
 ) -> None:
     """cash_withdrawal declares only time_of_day and velocity."""
     spec = spec_by_code["cash_withdrawal"]
-    step = make_step(spec, spec.min_amount, context={"country_risk": "high"})
+    step = make_step(spec, spec.min_amount, context={"recipient_type": "new_counterparty"})
     with pytest.raises(StructuralError) as raised:
         evaluate_scenario([step], specs, game_config)
     assert "context_field_not_applicable" in structural_reasons(raised.value)
 
 
-@pytest.mark.parametrize("code", ["salary", "cash_deposit", "card_transfer", "international",
-                                 "cash_withdrawal", "crypto_exchange", "online_purchase", "refund"])
+@pytest.mark.parametrize(
+    "code", ["salary", "cash_deposit", "card_transfer", "cash_withdrawal"]
+)
 def test_every_declared_option_of_every_field_is_accepted(
     spec_by_code, specs, game_config, code
 ) -> None:
     spec = spec_by_code[code]
-    prefix: list[dict] = []
-    if spec.requires_card_code:
-        prerequisite = spec_by_code[spec.requires_card_code]
-        prefix.append(make_step(prerequisite, prerequisite.max_amount))
     for field in spec.fields:
         for option in field["options"]:
             step = make_step(
                 spec, spec.min_amount, action_details={field["key"]: option["value"]}
             )
-            structural = validate_structure([*prefix, step], specs)
+            structural = validate_structure([step], specs)
             assert structural == [], (code, field["key"], option["value"], structural)
     for field in spec.context_fields:
         options = field.get("options") or [{"value": True}, {"value": False}]
         for option in options:
             step = make_step(spec, spec.min_amount, context={field["key"]: option["value"]})
-            structural = validate_structure([*prefix, step], specs)
+            structural = validate_structure([step], specs)
             assert structural == [], (code, field["key"], option["value"], structural)
 
 
@@ -260,111 +259,30 @@ def test_every_declared_option_of_every_field_is_accepted(
 # --------------------------------------------------------------------------
 
 
-def test_refund_without_purchase(spec_by_code, specs, game_config) -> None:
-    refund = spec_by_code["refund"]
-    snapshot = evaluate_scenario([make_step(refund, Decimal("5000.00"))], specs, game_config)
-    assert "missing_prerequisite" in reasons(snapshot)
-
-
-def test_refund_after_purchase_is_allowed(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
-    refund = spec_by_code["refund"]
-    snapshot = evaluate_scenario(
-        [
-            make_step(purchase, Decimal("20000.00")),
-            make_step(refund, Decimal("20000.00")),
-        ],
-        specs,
-        game_config,
-    )
-    assert "missing_prerequisite" not in reasons(snapshot)
-    assert "refund_exceeds_purchases" not in reasons(snapshot)
-
-
-def test_refund_before_purchase_is_rejected(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
-    refund = spec_by_code["refund"]
-    snapshot = evaluate_scenario(
-        [
-            make_step(refund, Decimal("20000.00")),
-            make_step(purchase, Decimal("20000.00")),
-        ],
-        specs,
-        game_config,
-    )
-    assert "missing_prerequisite" in reasons(snapshot)
-
-
-def test_refund_larger_than_purchases(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
-    refund = spec_by_code["refund"]
-    snapshot = evaluate_scenario(
-        [
-            make_step(purchase, Decimal("10000.00")),
-            make_step(refund, Decimal("20000.00")),
-        ],
-        specs,
-        game_config,
-    )
-    assert "refund_exceeds_purchases" in reasons(snapshot)
-
-
-def test_multiple_purchases_and_refunds(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
-    refund = spec_by_code["refund"]
-    transfer = spec_by_code["card_transfer"]
-    steps = [
-        make_step(purchase, Decimal("40000.00")),
-        make_step(refund, Decimal("30000.00")),
-        make_step(purchase, Decimal("20000.00")),
-        make_step(refund, Decimal("25000.00")),
-        make_step(transfer, Decimal("1000.00")),
-    ]
-    snapshot = evaluate_scenario(steps, specs, game_config)
-    # 40000 - 30000 = 10000 remaining, plus 20000 = 30000 available; 25000 fits.
-    assert "refund_exceeds_purchases" not in reasons(snapshot)
-
-    steps[3] = make_step(refund, Decimal("31000.00"))
-    snapshot = evaluate_scenario(steps, specs, game_config)
-    assert "refund_exceeds_purchases" in reasons(snapshot)
 
 
 def test_identical_streak_boundaries(spec_by_code, specs, game_config) -> None:
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
-    at_limit = [make_step(purchase, Decimal("1000.00")) for _ in range(2)]
+    withdrawal = spec_by_code["cash_withdrawal"]
+    at_limit = [make_step(withdrawal, Decimal("5000.00")) for _ in range(2)]
     assert "identical_streak_exceeded" not in reasons(
         evaluate_scenario(at_limit, specs, game_config)
     )
-    above = [make_step(purchase, Decimal("1000.00")) for _ in range(3)]
+    above = [make_step(withdrawal, Decimal("5000.00")) for _ in range(3)]
     assert "identical_streak_exceeded" in reasons(
         evaluate_scenario(above, specs, game_config)
     )
     separated = [
-        make_step(purchase, Decimal("1000.00")),
-        make_step(purchase, Decimal("1000.00")),
+        make_step(withdrawal, Decimal("5000.00")),
+        make_step(withdrawal, Decimal("5000.00")),
         make_step(salary, Decimal("10000.00")),
-        make_step(purchase, Decimal("1000.00")),
+        make_step(withdrawal, Decimal("5000.00")),
     ]
     assert "identical_streak_exceeded" not in reasons(
         evaluate_scenario(separated, specs, game_config)
     )
 
 
-def test_reordering_a_purchase_after_its_refund_breaks_the_dependency(
-    spec_by_code, specs, game_config
-) -> None:
-    purchase = spec_by_code["online_purchase"]
-    refund = spec_by_code["refund"]
-    steps = [
-        make_step(purchase, Decimal("20000.00")),
-        make_step(refund, Decimal("20000.00")),
-    ]
-    assert "missing_prerequisite" not in reasons(evaluate_scenario(steps, specs, game_config))
-    reordered = [steps[1], steps[0]]
-    assert "missing_prerequisite" in reasons(
-        evaluate_scenario(reordered, specs, game_config)
-    )
 
 
 # --------------------------------------------------------------------------
@@ -373,30 +291,30 @@ def test_reordering_a_purchase_after_its_refund_breaks_the_dependency(
 
 
 def test_max_actions_boundaries(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
+    transfer = spec_by_code["card_transfer"]
     salary = spec_by_code["salary"]
-    codes = [purchase, salary] * 4
+    codes = [transfer, salary] * 4
     exact = [make_step(codes[index], Decimal("1000.00") if index % 2 == 0 else Decimal("10000.00"))
              for index in range(8)]
     assert "max_actions_exceeded" not in reasons(evaluate_scenario(exact, specs, game_config))
-    too_many = [*exact, make_step(purchase, Decimal("1000.00"))]
+    too_many = [*exact, make_step(transfer, Decimal("1000.00"))]
     assert "max_actions_exceeded" in reasons(
         evaluate_scenario(too_many, specs, game_config)
     )
 
 
 def test_night_operation_boundaries(spec_by_code, specs, game_config) -> None:
-    purchase = spec_by_code["online_purchase"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     salary = spec_by_code["salary"]
     night = {"time_of_day": "night"}
     two = [
-        make_step(purchase, Decimal("1000.00"), context=night),
+        make_step(withdrawal, Decimal("5000.00"), context=night),
         make_step(salary, Decimal("10000.00"), context=night),
     ]
     assert "night_operations_exceeded" not in reasons(
         evaluate_scenario(two, specs, game_config)
     )
-    three = [*two, make_step(purchase, Decimal("1000.00"), context=night)]
+    three = [*two, make_step(withdrawal, Decimal("5000.00"), context=night)]
     assert "night_operations_exceeded" in reasons(
         evaluate_scenario(three, specs, game_config)
     )
@@ -420,22 +338,11 @@ def test_anonymous_recipient_count_and_amount_quotas(spec_by_code, specs, game_c
     assert "category_limit_exceeded" in reasons(snapshot)
 
 
-def test_cash_crypto_international_and_high_risk_quota_boundaries(
+def test_cash_quota_boundary(
     spec_by_code, specs, game_config
 ) -> None:
-    salary = spec_by_code["salary"]
-    crypto = spec_by_code["crypto_exchange"]
     deposit = spec_by_code["cash_deposit"]
     withdrawal = spec_by_code["cash_withdrawal"]
-    international = spec_by_code["international"]
-
-    exact_crypto = [
-        make_step(salary, Decimal("150000.00")),
-        make_step(crypto, Decimal("100000.00")),
-    ]
-    assert "category_limit_exceeded" not in reasons(
-        evaluate_scenario(exact_crypto, specs, game_config)
-    )
 
     over_cash = [
         make_step(deposit, Decimal("100000.00")),
@@ -445,24 +352,6 @@ def test_cash_crypto_international_and_high_risk_quota_boundaries(
         evaluate_scenario(over_cash, specs, game_config)
     )
 
-    over_high_risk = [
-        make_step(salary, Decimal("150000.00")),
-        make_step(international, Decimal("120000.00"), context={"country_risk": "high"}),
-    ]
-    assert "category_limit_exceeded" in reasons(
-        evaluate_scenario(over_high_risk, specs, game_config)
-    )
-
-    over_international = [
-        make_step(salary, Decimal("150000.00")),
-        make_step(salary, Decimal("150000.00")),
-        make_step(international, Decimal("100000.00")),
-        make_step(salary, Decimal("10000.00")),
-        make_step(international, Decimal("90000.00")),
-    ]
-    assert "category_limit_exceeded" in reasons(
-        evaluate_scenario(over_international, specs, game_config)
-    )
 
 
 def test_resource_exhaustion_reports_the_right_field(spec_by_code, specs, game_config) -> None:
@@ -472,13 +361,13 @@ def test_resource_exhaustion_reports_the_right_field(spec_by_code, specs, game_c
     )
     assert "insufficient_balance" in reasons(snapshot)
 
-    crypto = spec_by_code["crypto_exchange"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     salary = spec_by_code["salary"]
     heavy = [
         make_step(salary, Decimal("150000.00")),
-        make_step(crypto, Decimal("10000.00"), frequency=3),
+        make_step(withdrawal, Decimal("10000.00"), frequency=4),
         make_step(salary, Decimal("10000.00")),
-        make_step(crypto, Decimal("10000.00"), frequency=3),
+        make_step(withdrawal, Decimal("10000.00"), frequency=4),
     ]
     snapshot = evaluate_scenario(heavy, specs, game_config)
     assert "insufficient_trust" in reasons(snapshot) or "insufficient_energy" in reasons(snapshot)
@@ -486,10 +375,10 @@ def test_resource_exhaustion_reports_the_right_field(spec_by_code, specs, game_c
 
 def test_target_outflow_below_exact_and_above(spec_by_code, specs, game_config) -> None:
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
+    transfer = spec_by_code["card_transfer"]
 
     below = evaluate_scenario(
-        [make_step(salary, Decimal("150000.00")), make_step(purchase, Decimal("149999.99"))],
+        [make_step(salary, Decimal("150000.00")), make_step(transfer, Decimal("149999.99"))],
         specs,
         game_config,
     )
@@ -499,7 +388,7 @@ def test_target_outflow_below_exact_and_above(spec_by_code, specs, game_config) 
     )
 
     exact = evaluate_scenario(
-        [make_step(salary, Decimal("150000.00")), make_step(purchase, Decimal("150000.00"))],
+        [make_step(salary, Decimal("150000.00")), make_step(transfer, Decimal("150000.00"))],
         specs,
         game_config,
     )
@@ -508,7 +397,7 @@ def test_target_outflow_below_exact_and_above(spec_by_code, specs, game_config) 
     assert submit_blockers(exact) == []
 
     above = evaluate_scenario(
-        [make_step(salary, Decimal("150000.00")), make_step(purchase, Decimal("160000.00"))],
+        [make_step(salary, Decimal("150000.00")), make_step(transfer, Decimal("160000.00"))],
         specs,
         game_config,
     )
@@ -526,16 +415,16 @@ def test_empty_chain_is_valid_but_not_submittable(specs, game_config) -> None:
 def test_several_simultaneous_violations_are_all_reported(
     spec_by_code, specs, game_config
 ) -> None:
-    crypto = spec_by_code["crypto_exchange"]
-    refund = spec_by_code["refund"]
+    withdrawal = spec_by_code["cash_withdrawal"]
+    salary = spec_by_code["salary"]
     steps = [
-        make_step(crypto, Decimal("200000.00"), frequency=9, context={"time_of_day": "night"}),
-        make_step(refund, Decimal("100000.00"), context={"time_of_day": "night"}),
-        make_step(refund, Decimal("100000.00"), context={"time_of_day": "night"}),
+        make_step(withdrawal, Decimal("200000.00"), frequency=9, context={"time_of_day": "night"}),
+        make_step(salary, Decimal("100000.00"), context={"time_of_day": "night"}),
+        make_step(withdrawal, Decimal("100000.00"), context={"time_of_day": "night"}),
     ]
     snapshot = evaluate_scenario(steps, specs, game_config)
     found = set(reasons(snapshot))
-    assert {"amount_out_of_range", "frequency_out_of_range", "missing_prerequisite"} <= found
+    assert {"amount_out_of_range", "frequency_out_of_range"} <= found
     assert "night_operations_exceeded" in found
     assert snapshot["valid"] is False
 
@@ -544,11 +433,11 @@ def test_reordering_independent_steps_keeps_resource_totals(
     spec_by_code, specs, game_config
 ) -> None:
     salary = spec_by_code["salary"]
-    purchase = spec_by_code["online_purchase"]
+    withdrawal = spec_by_code["cash_withdrawal"]
     transfer = spec_by_code["card_transfer"]
     steps = [
         make_step(salary, Decimal("150000.00")),
-        make_step(purchase, Decimal("100000.00")),
+        make_step(withdrawal, Decimal("100000.00")),
         make_step(transfer, Decimal("50000.00")),
     ]
     first = evaluate_scenario(steps, specs, game_config)

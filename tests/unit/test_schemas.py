@@ -94,7 +94,7 @@ def test_optional_context_fields_default_to_not_sent() -> None:
     assert ScenarioStepIn.model_validate(payload).frequency is None
 
 
-@pytest.mark.parametrize("channel", ["bank", "branch", "atm", "mobile", "web", "exchange", "pos"])
+@pytest.mark.parametrize("channel", ["bank", "branch", "atm", "mobile", "web"])
 def test_every_known_channel_passes_the_schema(channel: str) -> None:
     step = ScenarioStepIn.model_validate(valid_step_payload(context={"channel": channel}))
     assert step.context.channel == channel

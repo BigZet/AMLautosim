@@ -244,7 +244,7 @@ Block и password reset в одной транзакции меняют user sta
 | `fee_rate` | `NUMERIC(8,6)` | Доля комиссии от 0 до 1 |
 | `min_amount`, `max_amount` | `NUMERIC(14,2)` | Сумма одного повтора |
 | `max_frequency` | `INTEGER` | Лимит повторов шага |
-| `requires_card_code` | nullable code | Предшествующее действие, например покупка для возврата |
+| `requires_card_code` | nullable code | Зарезервировано; в текущем каталоге всегда `null` |
 | `parameter_schema` | `JSONB` | Декларативные специфичные поля для UI и schema validation |
 | `is_active` | `BOOLEAN` | Можно ли выбирать версию для нового draft-round |
 | `created_at` | `TIMESTAMPTZ` | Audit timestamp |
@@ -358,13 +358,12 @@ stateDiagram-v2
     "max_anonymous_operations": 1,
     "category_limits": {
       "cash": "120000.00",
-      "crypto": "100000.00",
-      "high_risk_country": "75000.00"
+      "anonymous": "75000.00"
     }
   },
   "card_versions": [
     {"id": 11, "code": "salary", "version": 1},
-    {"id": 18, "code": "crypto_exchange", "version": 2}
+    {"id": 12, "code": "cash_deposit", "version": 1}
   ],
   "ruleset_version": "game-rules-v2",
   "scoring": {
@@ -419,7 +418,7 @@ class CardRef(BaseModel):
     version: int = Field(ge=1)
 
 class OperationContext(BaseModel):
-    country_risk: Literal["low", "medium", "high"] = "low"
+    recipient_type: Literal["known_counterparty", "new_counterparty", "anonymous_wallet"]
     time_of_day: Literal["day", "evening", "night"] = "day"
     velocity: Literal["spaced", "normal", "rapid"] = "normal"
     channel: Literal["mobile", "web", "branch", "atm"]
@@ -443,20 +442,19 @@ class ScenarioStep(BaseModel):
 ```json
 {
   "step_id": "4fe2d542-a810-4fd0-b63f-a43ad7ea7853",
-  "card": {"id": 18, "code": "crypto_exchange", "version": 2},
+  "card": {"id": 12, "code": "cash_deposit", "version": 1},
   "amount": "50000.00",
   "frequency": 2,
   "context": {
-    "country_risk": "medium",
+    "recipient_type": "known_counterparty",
     "time_of_day": "evening",
     "velocity": "rapid",
-    "channel": "web",
+    "channel": "atm",
     "has_documents": true
   },
   "action_details": {
-    "exchange_type": "regulated",
-    "wallet_owner": "self",
-    "asset_profile": "stablecoin"
+    "funds_source": "documented_savings",
+    "deposit_pattern": "single_location"
   }
 }
 ```
@@ -497,8 +495,7 @@ class ScenarioStep(BaseModel):
   },
   "limit_usage": {
     "cash": "0.00",
-    "crypto": "100000.00",
-    "high_risk_country": "0.00",
+    "anonymous": "0.00",
     "night_operations": 0
   },
   "violations": [],

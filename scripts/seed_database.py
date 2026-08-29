@@ -17,7 +17,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select, text
+from sqlalchemy import delete, select, text, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,9 +74,15 @@ def run_migrations() -> None:
 
 
 async def seed_cards(db: AsyncSession) -> list[ActionCard]:
-    """Insert or refresh every catalog version; published rows keep their id."""
+    """Insert or refresh the catalog and remove obsolete card versions."""
     now = datetime.now(UTC)
     result: list[ActionCard] = []
+    catalog_keys = [(entry["code"], entry["version"]) for entry in CARD_CATALOG]
+    await db.execute(
+        delete(ActionCard).where(
+            tuple_(ActionCard.code, ActionCard.version).not_in(catalog_keys)
+        )
+    )
     for entry in CARD_CATALOG:
         card = (
             await db.execute(

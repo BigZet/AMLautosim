@@ -8,19 +8,19 @@ This directory contains the feature extraction pipeline and ready-to-train sampl
 
 ## Extracted Features
 
-### Numerical Features (37 features)
+### Numerical Features (28 features)
 - Financial aggregates: `total_turnover`, `total_inflow`, `total_outflow`, `net_turnover`, `outflow_to_inflow_ratio`, `fees_total`, `fees_ratio`
-- Channel/Channel category breakdowns: `cash_inflow_sum`, `cash_outflow_sum`, `cash_turnover_ratio`, `crypto_outflow_sum`, `crypto_turnover_ratio`, `international_outflow_sum`, `international_turnover_ratio`
-- Risk & Behavioral signals: `high_risk_country_turnover`, `high_risk_country_ratio`, `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`, `without_docs_large_sum`, `without_docs_ratio`
+- Cash breakdowns: `cash_inflow_sum`, `cash_outflow_sum`, `cash_turnover_ratio`
+- Risk & Behavioral signals: `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`, `without_docs_large_sum`, `without_docs_ratio`
 - Statistical amounts: `avg_step_amount`, `max_step_amount`, `std_step_amount`, `max_frequency_single_step`
-- Sequential patterns: `repeated_amount_count`, `rapid_credit_to_debit_count`, `cash_to_crypto_seq_flag`
-- Indicator flags: `has_crypto`, `has_cash`, `has_international`, `num_steps`, `unique_channels_count`, `unique_cards_count`
+- Sequential patterns: `repeated_amount_count`, `rapid_credit_to_debit_count`
+- Indicator flags: `has_cash`, `num_steps`, `unique_channels_count`, `unique_cards_count`
 
 ### Categorical Features
 `['primary_channel', 'primary_category', 'most_frequent_card']`:
-- `primary_channel` (e.g., 'mobile', 'web', 'atm', 'branch', 'exchange')
-- `primary_category` (e.g., 'salary', 'cash', 'crypto', 'international', 'transfer', 'purchase')
-- `most_frequent_card` (e.g., 'crypto_exchange', 'cash_deposit', 'salary', ...)
+- `primary_channel` (e.g., 'mobile', 'web', 'atm', 'branch')
+- `primary_category` (`salary`, `cash`, `transfer`)
+- `most_frequent_card` (`salary`, `cash_deposit`, `card_transfer`, `cash_withdrawal`)
 
 ### Target Variables
 - `target_risk_score`: Continuous risk score (0.0 to 100.0) -> for `CatBoostRegressor(loss_function='RMSE')`

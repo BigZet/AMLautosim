@@ -41,8 +41,7 @@ numeric rounding.
 - energy/time/trust consumption;
 - min/max amount и max frequency;
 - max actions/identical/night/anonymous constraints;
-- cash/crypto/high-risk category quotas;
-- prerequisite и purchase-refund relation;
+- cash и anonymous category quotas;
 - card-specific parameter schema и effects;
 - objective reached/not reached;
 - stable per-step resource snapshots.

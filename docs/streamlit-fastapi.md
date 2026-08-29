@@ -238,25 +238,18 @@ conflict.
 
 ```json
 {
-  "code": "crypto_exchange",
-  "version": 2,
+  "code": "cash_deposit",
+  "version": 1,
   "fields": [
     {
-      "key": "exchange_type",
-      "label": "Тип площадки",
+      "key": "funds_source",
+      "label": "Источник наличных",
       "kind": "select",
       "required": true,
       "options": [
-        {"value": "regulated", "label": "Регулируемая"},
-        {"value": "p2p", "label": "P2P"}
+        {"value": "documented_savings", "label": "Подтвержденные накопления"},
+        {"value": "unexplained", "label": "Источник не указан"}
       ]
-    },
-    {
-      "key": "wallet_owner",
-      "label": "Владелец кошелька",
-      "kind": "select",
-      "required": true,
-      "options": []
     }
   ]
 }

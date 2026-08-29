@@ -30,7 +30,6 @@ HUNDRED = Decimal("100")
 
 DISCLAIMER = "Учебная модель; результат не является AML-решением"
 
-COUNTRY_RISK_POINTS = {"low": Decimal("0"), "medium": Decimal("10"), "high": Decimal("24")}
 RECIPIENT_POINTS = {
     "known_counterparty": Decimal("0"),
     "new_counterparty": Decimal("12"),
@@ -44,8 +43,6 @@ CHANNEL_POINTS = {
     "mobile": Decimal("0"),
     "web": Decimal("2"),
     "atm": Decimal("3"),
-    "exchange": Decimal("6"),
-    "pos": Decimal("1"),
 }
 
 CREDIT_FLOW = "credit"
@@ -132,15 +129,6 @@ def score_scenario(
                 "Повторы могут быть похожи на дробление операции",
                 step_id,
                 {"frequency": frequency},
-            )
-        )
-        factors.append(
-            _factor(
-                f"country_risk:{context['country_risk']}",
-                "context",
-                COUNTRY_RISK_POINTS.get(context["country_risk"], ZERO),
-                "Юрисдикция учитывается как учебный сигнал риска",
-                step_id,
             )
         )
         factors.append(
@@ -304,21 +292,6 @@ def _sequence_factors(
                 )
             )
 
-    for index, step in enumerate(steps):
-        if spec_of(step).code != "cash_deposit":
-            continue
-        for follower in steps[index + 1 : index + 3]:
-            if spec_of(follower).code in {"crypto_exchange", "international"}:
-                factors.append(
-                    _factor(
-                        "sequence:cash_to_high_risk",
-                        "sequence",
-                        Decimal("12"),
-                        "Наличные вскоре переводятся в высокорисковый канал",
-                        str(follower["step_id"]),
-                    )
-                )
-                break
     return factors
 
 

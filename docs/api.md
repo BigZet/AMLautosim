@@ -307,13 +307,13 @@ browser. Он не возвращает users, scenarios, results или admin m
 ```json
 [
   {
-    "id": 18,
-    "code": "crypto_exchange",
-    "version": 2,
-    "title": "Обменять на криптовалюту",
-    "description": "Покупка цифрового актива",
-    "category": "Криптовалюта",
-    "flow": "debit",
+    "id": 12,
+    "code": "cash_deposit",
+    "version": 1,
+    "title": "Внести наличные",
+    "description": "Пополнение счета через банкомат или кассу",
+    "category": "Наличные",
+    "flow": "credit",
     "risk_weight": "12.00",
     "costs": {"energy": 1, "time": 2, "trust": 4},
     "fee_rate": "0.010000",
@@ -323,13 +323,13 @@ browser. Он не возвращает users, scenarios, results или admin m
     "requires_card_code": null,
     "fields": [
       {
-        "key": "exchange_type",
-        "label": "Тип площадки",
+        "key": "funds_source",
+        "label": "Источник наличных",
         "kind": "select",
         "required": true,
         "options": [
-          {"value": "regulated", "label": "Регулируемая"},
-          {"value": "p2p", "label": "P2P"}
+          {"value": "documented_savings", "label": "Подтвержденные накопления"},
+          {"value": "unexplained", "label": "Источник не указан"}
         ]
       }
     ]
@@ -367,9 +367,8 @@ HTTP `ETag` строится из round config version. Streamlit cache key об
 Если клиент присылает скрытый параметр со значением, отличным от закрепленного, ответ —
 `422` с `parameter_not_editable`; операция, которой нет в раунде, — `422` с
 `card_not_in_round`; частота при `show_frequency=false` — `422` с
-`frequency_not_editable`. Конфигурация без блока `operations` считается legacy: в ней
-доступны все восемь карточек и все параметры, поэтому старые черновики продолжают
-открываться и считаться.
+`frequency_not_editable`. Конфигурация без блока `operations` открывает все четыре
+карточки и все их параметры.
 
 ## 8. Participant scenario API
 
@@ -390,20 +389,19 @@ no-store`.
   "steps": [
     {
       "step_id": "4fe2d542-a810-4fd0-b63f-a43ad7ea7853",
-      "card": {"id": 18, "code": "crypto_exchange", "version": 2},
+      "card": {"id": 12, "code": "cash_deposit", "version": 1},
       "amount": "50000.00",
       "frequency": 2,
       "context": {
-        "country_risk": "medium",
+        "recipient_type": "known_counterparty",
         "time_of_day": "evening",
         "velocity": "rapid",
-        "channel": "web",
+        "channel": "atm",
         "has_documents": true
       },
       "action_details": {
-        "exchange_type": "regulated",
-        "wallet_owner": "self",
-        "asset_profile": "stablecoin"
+        "funds_source": "documented_savings",
+        "deposit_pattern": "single_location"
       }
     }
   ]
@@ -685,7 +683,7 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
     },
     "objectives": {"target_outflow": "150000.00", "max_actions": 8},
     "constraints": {},
-    "card_versions": [{"id": 18, "code": "crypto_exchange", "version": 2}],
+    "card_versions": [{"id": 12, "code": "cash_deposit", "version": 1}],
     "ruleset_version": "game-rules-v2",
     "scoring": {"version": "risk-rules-v2"},
     "leaderboard": {"version": "leaderboard-v1"}

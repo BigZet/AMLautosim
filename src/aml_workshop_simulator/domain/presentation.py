@@ -26,7 +26,6 @@ from src.aml_workshop_simulator.domain.round_policy import (
 from src.aml_workshop_simulator.domain.rules import CardSpec, money
 
 CONTEXT_ORDER = (
-    "country_risk",
     "recipient_type",
     "time_of_day",
     "velocity",

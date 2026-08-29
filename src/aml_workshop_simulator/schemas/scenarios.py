@@ -46,7 +46,6 @@ class OperationContext(BaseModel):
 
     model_config = STRICT
 
-    country_risk: Literal["low", "medium", "high"] | None = None
     recipient_type: (
         Literal["known_counterparty", "new_counterparty", "anonymous_wallet"] | None
     ) = None

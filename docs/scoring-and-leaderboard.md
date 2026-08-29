@@ -87,7 +87,7 @@ flowchart TB
     step["Scenario step"] --> common["Common limits"]
     step --> context["Context limits"]
     step --> action["Action-specific limits"]
-    step --> sequence["Sequence dependencies"]
+    step --> sequence["Sequence rules"]
 
     common --> balance["Balance and fee"]
     common --> energy["Energy"]
@@ -95,10 +95,8 @@ flowchart TB
     common --> trust["Trust"]
     common --> frequency["Amount and frequency"]
     context --> night["Night-operation quota"]
-    context --> country["Country-risk quota"]
     context --> anonymous["Anonymous counterparty quota"]
-    action --> cash["Cash/crypto/category limits"]
-    sequence --> refund["Refund requires prior purchase"]
+    action --> cash["Cash/category limits"]
     sequence --> streak["Identical-step limit"]
 ```
 
@@ -107,11 +105,10 @@ flowchart TB
 - отрицательный баланс с учетом комиссии;
 - исчерпание energy/time/trust;
 - `max_actions`, `min/max_amount`, `max_frequency`;
-- квоты на наличные, crypto, high-risk geography и анонимные операции;
+- квоты на наличные и анонимные операции;
 - количество ночных операций;
 - максимальная серия одинаковых шагов;
-- обязательная предшествующая карточка;
-- card-specific dependencies из versioned ruleset;
+- card-specific limits из versioned ruleset;
 - достижение objective при submit.
 
 Структурно корректный draft может сохраняться и при business violations: server snapshot
@@ -124,12 +121,9 @@ hard-valid chain без violations и достигнутую цель.
 
 | Действие | Примеры специфичных параметров |
 | --- | --- |
+| Получение зарплаты | Плательщик, основание дохода |
 | Пополнение наличными | Источник средств, способ внесения, дробление |
 | Перевод | Назначение, связь с получателем, тип получателя |
-| Международный перевод | Страна, банк-корреспондент, основание платежа |
-| Криптовалюта | Тип площадки, владелец кошелька, профиль актива |
-| Покупка | Категория продавца, канал, тип товара |
-| Возврат | Причина, маршрут возврата, связь с исходной покупкой |
 | Снятие наличных | Тип устройства, география, серия снятий |
 
 Action details могут влиять на риск, энергию, время, доверие, комиссию и constraints.
@@ -169,11 +163,11 @@ risk_score = clamp(raw_risk, 0, 100)
 - сумма и доля round objective;
 - частота, скорость и дробление;
 - новый/анонимный контрагент;
-- риск страны и время суток;
+- время суток;
 - отсутствие документов;
-- тип площадки/кошелька/канала;
-- цепочки cash-to-crypto, rapid-in-rapid-out, purchase-refund;
-- защитные признаки regulated channel, own wallet, known counterparty, documents.
+- канал операции;
+- цепочки rapid-in-rapid-out и повторяющиеся суммы;
+- защитные признаки known counterparty и documents.
 
 ### Метка
 

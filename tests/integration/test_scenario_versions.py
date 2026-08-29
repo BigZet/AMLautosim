@@ -512,7 +512,6 @@ def test_the_admin_version_detail_shows_every_parameter_of_every_step(
     assert parameters["action.income_basis"]["value"] == "payroll_registry"
     assert set(parameters) >= {
         "channel",
-        "context.country_risk",
         "context.recipient_type",
         "context.time_of_day",
         "context.velocity",

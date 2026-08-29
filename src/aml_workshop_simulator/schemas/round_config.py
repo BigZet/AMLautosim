@@ -28,7 +28,7 @@ STRICT = ConfigDict(extra="forbid")
 CONFIG_SCHEMA_VERSION = 3
 
 #: Quota buckets an organiser can cap. They match `domain.rules.QUOTA_LABELS`.
-QUOTA_CODES = ("cash", "international", "crypto", "anonymous", "high_risk_country")
+QUOTA_CODES = ("cash", "anonymous")
 
 RESOURCE_WEIGHT_KEYS = ("balance", "energy", "time", "trust", "fees", "slots")
 

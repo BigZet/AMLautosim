@@ -1,9 +1,8 @@
 """The reduced parameter surface, as a round decides it.
 
-Covers the promise of the simplification: six operations by default, at most
-two editable parameters per operation on top of amount and frequency, stable
-server defaults for everything else, and full backward compatibility with the
-rounds and drafts written before the reduction.
+Covers the four-operation contract: at most two editable parameters per
+operation on top of amount and frequency, with stable server defaults for
+everything else.
 """
 
 from __future__ import annotations
@@ -49,25 +48,17 @@ def policy_of(config, specs) -> RoundPolicy:
 # --------------------------------------------------------------------------
 
 
-def test_a_new_round_offers_exactly_six_operations() -> None:
-    assert len(DEFAULT_OPERATION_CODES) == 6
-    assert len(reference_operations()) == 6
+def test_a_new_round_offers_exactly_four_operations() -> None:
+    assert len(DEFAULT_OPERATION_CODES) == 4
+    assert len(reference_operations()) == 4
 
 
-def test_the_excluded_pair_is_the_prerequisite_mechanic() -> None:
-    """`online_purchase` + `refund` are the pair dropped from the default set."""
-    excluded = {entry["code"] for entry in CARD_CATALOG} - set(DEFAULT_OPERATION_CODES)
-    assert excluded == {"online_purchase", "refund"}
+def test_the_catalog_contains_only_the_default_operations() -> None:
+    assert len(CARD_CATALOG) == 4
+    assert {entry["code"] for entry in CARD_CATALOG} == set(DEFAULT_OPERATION_CODES)
 
 
-def test_every_catalog_card_still_exists_for_old_rounds() -> None:
-    """Dropping them from the default set must not remove them from the catalog."""
-    assert len(CARD_CATALOG) == 8
-    for code in ("online_purchase", "refund"):
-        assert any(entry["code"] == code for entry in CARD_CATALOG)
-
-
-def test_the_round_goal_is_reachable_without_the_excluded_pair(
+def test_the_round_goal_is_reachable_with_the_four_operations(
     spec_by_code, specs, restricted_game_config
 ) -> None:
     """A single transfer already clears the 150 000 target from the start balance."""
@@ -91,7 +82,7 @@ def test_the_round_goal_is_reachable_without_the_excluded_pair(
         ),
     ],
 )
-def test_every_round_limit_stays_reachable_with_the_default_six(
+def test_every_round_limit_stays_reachable_with_the_default_four(
     spec_by_code, specs, restricted_game_config, quota_reason, code, context
 ) -> None:
     """Each round-level counter still has an operation that can trigger it."""
@@ -105,17 +96,6 @@ def test_every_round_limit_stays_reachable_with_the_default_six(
     ]
     snapshot = evaluate_scenario(steps, specs, restricted_game_config)
     assert quota_reason in reasons(snapshot)
-
-
-def test_high_risk_country_quota_is_reachable(
-    spec_by_code, specs, restricted_game_config
-) -> None:
-    international = spec_by_code["international"]
-    steps = [
-        make_step(international, Decimal("120000.00"), context={"country_risk": "high"}),
-    ]
-    snapshot = evaluate_scenario(steps, specs, restricted_game_config)
-    assert snapshot["limit_usage"]["high_risk_country"] == "120000.00"
 
 
 # --------------------------------------------------------------------------
@@ -188,11 +168,16 @@ def test_a_legacy_config_hides_nothing(specs, game_config) -> None:
         assert operation.pinned == {}
 
 
-def test_disabled_operations_are_rejected_with_an_actionable_message(
+def test_an_operation_disabled_for_a_round_is_rejected(
     spec_by_code, specs, restricted_game_config
 ) -> None:
-    steps = [make_step(spec_by_code["refund"], Decimal("5000.00"))]
-    policy = policy_of(restricted_game_config, specs)
+    config = dict(restricted_game_config)
+    config["operations"] = [
+        item for item in restricted_game_config["operations"]
+        if item["code"] != "cash_withdrawal"
+    ]
+    steps = [make_step(spec_by_code["cash_withdrawal"], Decimal("5000.00"))]
+    policy = policy_of(config, specs)
     violations = validate_structure(steps, specs, policy)
     assert [item.reason for item in violations] == ["card_not_in_round"]
     message = violations[0].message

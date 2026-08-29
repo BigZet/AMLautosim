@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from src.aml_workshop_simulator.domain.catalog import CARD_CODES
+
 
 def _get_card_code(step: dict[str, Any]) -> str:
     card = step.get("card")
@@ -33,12 +35,6 @@ def extract_catboost_features(
             "cash_inflow_sum": 0.0,
             "cash_outflow_sum": 0.0,
             "cash_turnover_ratio": 0.0,
-            "crypto_outflow_sum": 0.0,
-            "crypto_turnover_ratio": 0.0,
-            "international_outflow_sum": 0.0,
-            "international_turnover_ratio": 0.0,
-            "high_risk_country_turnover": 0.0,
-            "high_risk_country_ratio": 0.0,
             "anonymous_recipient_turnover": 0.0,
             "anonymous_recipient_ratio": 0.0,
             "night_operations_count": 0,
@@ -53,16 +49,13 @@ def extract_catboost_features(
             "max_frequency_single_step": 0,
             "repeated_amount_count": 0,
             "rapid_credit_to_debit_count": 0,
-            "cash_to_crypto_seq_flag": 0,
             "unique_channels_count": 0,
             "unique_cards_count": 0,
             # Categoricals
             "primary_channel": "none",
             "primary_category": "none",
             "most_frequent_card": "none",
-            "has_crypto": 0,
             "has_cash": 0,
-            "has_international": 0,
         }
 
     total_inflow = 0.0
@@ -70,9 +63,6 @@ def extract_catboost_features(
     fees_total = 0.0
     cash_inflow = 0.0
     cash_outflow = 0.0
-    crypto_outflow = 0.0
-    intl_outflow = 0.0
-    high_risk_country_sum = 0.0
     anon_recipient_sum = 0.0
     night_ops = 0
     rapid_velocity_ops = 0
@@ -83,16 +73,13 @@ def extract_catboost_features(
     channel_counts: dict[str, int] = {}
     category_counts: dict[str, int] = {}
 
-    credit_codes = {"salary", "cash_deposit", "refund"}
-    debit_codes = {
-        "card_transfer",
-        "international",
-        "cash_withdrawal",
-        "crypto_exchange",
-        "online_purchase"}
+    credit_codes = {"salary", "cash_deposit"}
+    debit_codes = {"card_transfer", "cash_withdrawal"}
 
     for step in steps:
         card_code = _get_card_code(step)
+        if card_code not in CARD_CODES:
+            raise ValueError(f"unsupported operation code: {card_code}")
 
         amount = float(step.get("amount", 0.0))
         freq = int(step.get("frequency", 1))
@@ -105,15 +92,13 @@ def extract_catboost_features(
         ctx = step.get("context", {})
         if not ctx:
             ctx = {
-                "country_risk": step.get(
-                    "country_risk", "low"), "recipient_type": step.get(
+                "recipient_type": step.get(
                     "recipient_type", "known_counterparty"), "time_of_day": step.get(
                     "time_of_day", "day"), "velocity": step.get(
                     "velocity", "normal"), "channel": step.get(
                         "channel", "bank"), "has_documents": step.get(
                             "has_documents", True), }
 
-        country_risk = ctx.get("country_risk", "low")
         recipient_type = ctx.get("recipient_type", "known_counterparty")
         time_of_day = ctx.get("time_of_day", "day")
         velocity = ctx.get("velocity", "normal")
@@ -131,31 +116,15 @@ def extract_catboost_features(
             elif card_code == "salary":
                 category_counts["salary"] = category_counts.get(
                     "salary", 0) + 1
-            elif card_code == "refund":
-                category_counts["refund"] = category_counts.get(
-                    "refund", 0) + 1
-        else:
+        elif card_code in debit_codes:
             total_outflow += gross
             if card_code == "cash_withdrawal":
                 cash_outflow += gross
                 category_counts["cash"] = category_counts.get("cash", 0) + 1
-            elif card_code == "crypto_exchange":
-                crypto_outflow += gross
-                category_counts["crypto"] = category_counts.get(
-                    "crypto", 0) + 1
-            elif card_code == "international":
-                intl_outflow += gross
-                category_counts["international"] = category_counts.get(
-                    "international", 0) + 1
             elif card_code == "card_transfer":
                 category_counts["transfer"] = category_counts.get(
                     "transfer", 0) + 1
-            elif card_code == "online_purchase":
-                category_counts["purchase"] = category_counts.get(
-                    "purchase", 0) + 1
 
-        if country_risk == "high":
-            high_risk_country_sum += gross
         if recipient_type == "anonymous_wallet":
             anon_recipient_sum += gross
         if time_of_day == "night":
@@ -197,17 +166,6 @@ def extract_catboost_features(
             if prev_gross > 0 and curr_gross >= prev_gross * 0.7:
                 rapid_credit_to_debit += 1
 
-    cash_to_crypto_flag = 0
-    for idx, step in enumerate(steps):
-        code = _get_card_code(step)
-        if code == "cash_deposit":
-            following = steps[idx + 1: idx + 3]
-            for f_step in following:
-                f_code = _get_card_code(f_step)
-                if f_code in {"crypto_exchange", "international"}:
-                    cash_to_crypto_flag = 1
-                    break
-
     # Categorical dominant values
     primary_channel = max(channel_counts.items(), key=lambda x: x[1])[
         0] if channel_counts else "none"
@@ -228,12 +186,6 @@ def extract_catboost_features(
         "cash_inflow_sum": round(cash_inflow, 2),
         "cash_outflow_sum": round(cash_outflow, 2),
         "cash_turnover_ratio": round((cash_inflow + cash_outflow) / max(1.0, total_turnover), 4),
-        "crypto_outflow_sum": round(crypto_outflow, 2),
-        "crypto_turnover_ratio": round(crypto_outflow / max(1.0, total_turnover), 4),
-        "international_outflow_sum": round(intl_outflow, 2),
-        "international_turnover_ratio": round(intl_outflow / max(1.0, total_turnover), 4),
-        "high_risk_country_turnover": round(high_risk_country_sum, 2),
-        "high_risk_country_ratio": round(high_risk_country_sum / max(1.0, total_turnover), 4),
         "anonymous_recipient_turnover": round(anon_recipient_sum, 2),
         "anonymous_recipient_ratio": round(anon_recipient_sum / max(1.0, total_turnover), 4),
         "night_operations_count": night_ops,
@@ -248,16 +200,13 @@ def extract_catboost_features(
         "max_frequency_single_step": max((int(s.get("frequency", 1)) for s in steps), default=0),
         "repeated_amount_count": repeated_amounts_count,
         "rapid_credit_to_debit_count": rapid_credit_to_debit,
-        "cash_to_crypto_seq_flag": cash_to_crypto_flag,
         "unique_channels_count": len(channel_counts),
         "unique_cards_count": len(card_counts),
         # Categoricals (CatBoost handles these natively with cat_features)
         "primary_channel": primary_channel,
         "primary_category": primary_category,
         "most_frequent_card": most_frequent_card,
-        "has_crypto": 1 if crypto_outflow > 0 else 0,
         "has_cash": 1 if (cash_inflow + cash_outflow) > 0 else 0,
-        "has_international": 1 if intl_outflow > 0 else 0,
     }
 
 
