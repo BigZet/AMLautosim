@@ -1,5 +1,6 @@
 [theme]
-base = "light"
+# Dark is the starting look; the in-app switch flips to light per browser.
+base = "dark"
 font = "sans-serif"
 headingFontSizes = ["34px", "24px", "18px", "16px", "14px", "13px"]
 baseRadius = "small"
@@ -37,3 +38,7 @@ toolbarMode = "viewer"
 
 [server]
 headless = true
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

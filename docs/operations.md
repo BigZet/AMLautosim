@@ -60,20 +60,38 @@ stateDiagram-v2
 - Тестовый round прошел create -> activate -> draft -> submit -> score -> result.
 - Admin видит participant chain, block/unblock и adjustment audit.
 - Public leaderboard не раскрывает PII.
-- Log scan не обнаруживает email/JWT/password/steps.
+- Log scan не обнаруживает email/session ID/session hash/password/steps.
 
 ## 5. Проверка за 30 минут
 
 1. Сверить системное время и свободный disk.
 2. Проверить `docker compose ps`, health и image tags.
 3. Проверить certificate expiry и WebSocket с устройства площадки.
-4. Войти в admin UI; открыть production draft/active round.
+4. Войти в admin UI; открыть или создать production draft round (можно из пресета) и
+   проверить каждый параметр в структурном редакторе. Раунд остается в `draft`: до
+   команды «Начать раунд» участники видят экран ожидания.
 5. Зарегистрировать одного test participant, сохранить и submit scenario.
 6. На отдельном test round или rehearsal environment проверить score/result/leaderboard.
 7. Удалить test data либо не смешивать его с production ranking.
 8. Сделать pre-event backup по policy.
 9. Открыть logs/metrics dashboard на операторском экране.
 10. Зафиксировать «change freeze» до завершения мастер-класса.
+
+## 5.1. Управление раундом во время мероприятия
+
+| Команда | Когда | Что происходит |
+| --- | --- | --- |
+| «Начать раунд» | Все на месте, конфигурация проверена | `draft -> active`, конструктор открывается участникам |
+| «Остановить раунд» | Перерыв, инцидент, конец игры | `active -> stopped`; сервер отклоняет записи, ничего не удаляется |
+| «Перезапустить раунд» | Нужен чистый прогон с теми же настройками | Создается новый раунд `draft` со ссылкой на прежний; история остается |
+| «Запустить скоринг» | Все отправили сценарии | Показывает число отправленных и исключенных черновиков, требует подтверждения |
+
+Остановка и перезапуск требуют явного подтверждения в интерфейсе; повторное нажатие не
+создает второй раунд. Все команды попадают в audit trail, поэтому после мероприятия
+видно, кто и когда останавливал игру.
+
+Если участник сообщает, что «конструктор не открывается», сначала смотрят статус раунда:
+`draft` и `stopped` — это ожидаемое поведение, а не сбой.
 
 ## 6. Dashboard мероприятия
 
@@ -139,7 +157,7 @@ Events:
 - readiness transition;
 - backup/restore start/result in operator log.
 
-Не логируются email, display name, password/hash, JWT/cookie/Authorization, request body,
+Не логируются email, display name, password/hash, raw session ID/cookie/session hash/`X-Session-ID`, request body,
 full scenario, action details, explanation, DSN и raw idempotency key.
 
 ## 8. Request correlation
@@ -291,10 +309,10 @@ flowchart TD
 4. PostgreSQL rollback должен вернуть round active.
 5. Перезапустить API только если process не восстановился.
 
-## 18. Runbook: всплеск auth errors
+## 18. Runbook: всплеск auth/session errors
 
 1. Сравнить 401, 429 и WebSocket reconnect rate.
-2. Проверить clock synchronization и JWT key/version.
+2. Проверить clock synchronization, session expiry/revoke distribution и lookup latency.
 3. Проверить, не попала ли аудитория под слишком жесткий common-NAT limit.
 4. Не отключать password/security controls полностью.
 5. Изменять proxy burst только по утвержденному диапазону и записать время.
@@ -307,7 +325,7 @@ flowchart TD
 1. Открыть participant detail и audit event.
 2. Проверить actor/reason/request ID.
 3. Выполнить unblock через UI; прямой SQL запрещен.
-4. Participant входит повторно из-за token version change.
+4. Participant входит повторно после revoke/expiry; проверить причину в sanitized session metrics.
 
 ### Leaderboard adjustment
 
@@ -330,6 +348,14 @@ flowchart TD
 6. несохраненные local drafts и незавершенный round не объявляются результатами.
 
 Резервные материалы не содержат production email или chains участников.
+
+### Очистка server-side sessions
+
+- Ежедневно считать expired/revoked rows старше `SESSION_RETENTION_DAYS` в dry-run.
+- Удалять батчами с bounded transaction и наблюдать lock/latency.
+- Никогда не выводить `session_id_hash` или raw ID в отчет cleanup.
+- Перед мероприятием убедиться, что число active sessions согласуется с ожидаемой
+  аудиторией и отсутствуют сессии прошлых мероприятий.
 
 ## 21. После мероприятия
 

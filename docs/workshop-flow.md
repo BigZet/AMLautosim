@@ -13,24 +13,40 @@
 
 ```mermaid
 stateDiagram-v2
-    [*] --> draft: создать
+    [*] --> draft: создать или взять из пресета
     draft --> draft: изменить config revision
-    draft --> active: validate and activate
+    draft --> active: «Начать раунд»
+    active --> stopped: «Остановить раунд» + подтверждение
     active --> scoring: score command and row lock
+    stopped --> scoring: score command and row lock
     scoring --> completed: atomic publish
     scoring --> active: transaction rollback
     completed --> [*]
+    active --> draft: «Перезапустить раунд» создает новый раунд
+    stopped --> draft: «Перезапустить раунд» создает новый раунд
 ```
 
 | Статус | Разрешено | Запрещено |
 | --- | --- | --- |
 | `draft` | Редактировать config/card versions | Participant gameplay, score |
 | `active` | GET/PUT/submit scenario, stats, block | Изменять round config |
+| `stopped` | Read, stats, scoring, restart | Любая запись участника |
 | `scoring` | Только read/ожидание | Draft/submit/config/второй score |
 | `completed` | Result, leaderboard, admin detail/adjustment | Scenario/config mutation, rescore |
 
+Раунд не начинается сам: пока организатор не нажал «Начать раунд», зарегистрированный
+участник видит экран ожидания, а сервер отвечает `409 round_locked` на любую попытку
+сохранить или отправить сценарий. Это одно и то же правило в двух местах, а не только
+скрытая кнопка в интерфейсе.
+
 Активация нового round не завершает существующий active автоматически. При конфликте
-администратор получает `409 active_round_exists`.
+администратор получает `409 active_round_exists`; инвариант «не более одного идущего
+раунда» гарантирует частичный уникальный индекс в PostgreSQL.
+
+Остановка и перезапуск требуют явного подтверждения в интерфейсе и `confirm: true` в
+запросе. Перезапуск ничего не удаляет: он создает **новый** раунд с той же
+конфигурацией и ссылкой на предыдущий, прежний раунд переводит в `stopped`, а повторное
+нажатие возвращает уже созданную замену. Все три команды попадают в audit trail.
 
 ## 3. Жизненный цикл сценария
 
@@ -47,6 +63,12 @@ stateDiagram-v2
 
 `revision` относится к содержимому steps. Повторная отправка до scoring разрешена, но
 после любого изменения пользователь обязан submit новую revision.
+
+Каждое явное сохранение добавляет строку в `scenario_versions`: участник видит список
+своих версий (номер, название, время, число шагов, ресурсы) и может открыть любую
+старую. «Продолжить с этой версии» создает новую версию с содержимым выбранной, а более
+поздние версии остаются в истории. Отправка фиксирует ровно одну версию, и именно её
+читает скоринг.
 
 ## 4. Сквозной поток мероприятия
 
@@ -80,7 +102,7 @@ journey
 2. Streamlit отправляет `POST /auth/register` без сохранения пароля.
 3. FastAPI нормализует email, создает participant и возвращает user DTO.
 4. Участник выполняет login.
-5. Streamlit сохраняет JWT в `st.session_state` и вызывает `GET /auth/me`.
+5. FastAPI создает server-side session; Streamlit устанавливает route-scoped session cookie и вызывает `GET /auth/session`.
 6. UI открывает active round либо экран ожидания.
 
 **Альтернативы:** существующий participant сразу входит; после restart Streamlit
@@ -91,7 +113,7 @@ unavailable. UI не создает локальную учетную запис
 
 ## 6. UC-P2: открыть конструктор
 
-**Предусловия:** JWT валиден, существует active round.
+**Предусловия:** server-side session активна, существует active round.
 
 1. Streamlit загружает active round, card snapshot и собственный scenario.
 2. Для отсутствующего scenario создается пустая local draft с server revision 0.
@@ -205,7 +227,46 @@ sequenceDiagram
     end
 ```
 
-После activate любое изменение config возвращает `409 round_config_locked`.
+После activate любое изменение config возвращает `409 round_config_locked`: снимок
+конфигурации становится неизменяемым. Чтобы играть с другими настройками, организатор
+либо создает новый draft-раунд, либо перезапускает текущий и правит конфигурацию новой
+копии до старта.
+
+### Остановка и перезапуск
+
+```mermaid
+sequenceDiagram
+    actor A as Администратор
+    participant S as Admin Streamlit
+    participant F as FastAPI
+    participant D as PostgreSQL
+
+    A->>S: Отмечает «Подтверждаю остановку»
+    S->>F: POST stop {confirm: true}
+    F->>D: SELECT ... FOR UPDATE на раунде
+    F->>D: status=stopped, stopped_at, audit event
+    F-->>S: RoundAdminOut stopped
+    A->>S: Отмечает «Подтверждаю перезапуск»
+    S->>F: POST restart {confirm: true}
+    F->>D: Найти существующую замену по restarted_from_round_id
+    alt замена уже есть
+        F-->>S: 200 с ранее созданным раундом
+    else замены нет
+        F->>D: INSERT нового раунда draft + audit event
+        F-->>S: 201 RoundAdminOut draft
+    end
+```
+
+Данные прошлого раунда — сценарии, все версии черновиков, результаты и журнал — остаются
+на месте; новый раунд стартует отдельной командой.
+
+### Пресеты настроек
+
+Организатор готовит наборы параметров заранее: создать, назвать, сохранить, загрузить в
+редактор, обновить или сохранить как новый, удалить с подтверждением, создать раунд из
+пресета. Загрузка пресета **не** запускает игру: она создает черновик раунда, который
+организатор проверяет и запускает отдельно. Раунд хранит собственный снимок, поэтому
+поздние правки пресета не меняют уже созданные раунды.
 
 ## 13. UC-A3: контролировать готовность
 
@@ -241,11 +302,11 @@ participant, что сохраняет интерфейс и API масштаб�
 
 1. UI показывает confirmation и текущее access state.
 2. Admin подтверждает desired state.
-3. API сравнивает token version, меняет state, увеличивает version и пишет audit event.
-4. Уже выпущенный participant JWT перестает работать на следующем запросе.
+3. API сравнивает access revision, меняет state, отзывает active sessions и пишет audit event.
+4. Все уже выданные participant session ID перестают работать на следующем запросе.
 5. Scenario/result сохраняются; public leaderboard исключает blocked player.
 
-**Ошибки:** self-block, stale token version, participant not found, reason too short.
+**Ошибки:** self-block, stale access revision, participant not found, reason too short.
 
 ## 16. UC-A6: запустить скоринг
 
@@ -323,7 +384,7 @@ Email и технические security fields не выводятся на о�
 | Ситуация | UX | Каноническое состояние |
 | --- | --- | --- |
 | Нет active round | Экран ожидания, редкий refresh | Без изменений |
-| JWT истек | Login; draft восстановится | Scenario в PG |
+| Server-side session истекла | Cookie удаляется, login; draft восстановится | Scenario в PG |
 | User blocked | Отдельный access screen | Scenario/result сохранены |
 | API временно недоступен | Local dirty copy + retry action | Success не заявляется |
 | DB недоступна | Service unavailable | Нет LocalStore fallback |

@@ -1,0 +1,7 @@
+-r requirements.txt
+pytest>=8.4
+anyio>=4.4
+selenium>=4.20
+webdriver-manager>=4.0
+playwright>=1.44
+ruff>=0.6

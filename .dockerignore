@@ -1,0 +1,61 @@
+# Only the files COPYed by deploy/Dockerfile need to reach the build context:
+# alembic.ini, migrations/, scripts/, src/ and .streamlit/.
+
+# Version control and local tooling
+.git/
+.gitignore
+.github/
+.claude/
+
+# Virtual environments (a local .venv alone is ~600 MB of context)
+.venv/
+venv/
+env/
+
+# Python bytecode and build output
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Not part of the runtime image
+tests/
+docs/
+resources/
+README.md
+requirements-dev.txt
+
+# Secrets and local configuration must never enter an image layer
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Local databases and data volumes
+*.db
+*.sqlite
+*.sqlite3
+postgres_data/
+pgdata/
+
+# Browser automation artifacts
+test-results/
+playwright-report/
+tests/artifacts/
+*.webm
+*.zip.trace
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

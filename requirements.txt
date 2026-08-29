@@ -1,0 +1,14 @@
+fastapi>=0.116
+uvicorn[standard]>=0.35
+sqlalchemy>=2.0
+asyncpg>=0.30
+psycopg2-binary>=2.9
+alembic>=1.13
+passlib[bcrypt]>=1.7
+bcrypt==3.2.2
+pydantic[email]>=2.9
+pydantic-settings>=2.5
+httpx>=0.28
+streamlit>=1.46
+streamlit-cookies-controller>=0.0.4
+pandas>=2.0

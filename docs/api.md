@@ -22,7 +22,7 @@ OpenAPI является исполняемой спецификацией DTO, 
 | Encoding | JSON UTF-8 |
 | Money/Decimal | Строка с фиксированной точностью, например `"250000.00"` |
 | Time | ISO 8601 UTC, например `2026-10-05T08:17:02Z` |
-| Authentication | `Authorization: Bearer <JWT>` |
+| Authentication | `X-Session-ID: <opaque-session-id>` от Streamlit к внутреннему API |
 | Request correlation | `X-Request-ID`; API генерирует ULID/UUID, если заголовка нет |
 | Command identity | `Idempotency-Key` для activate/score и других указанных POST |
 | Pagination | `limit` + opaque `cursor`; offset не используется на растущих списках |
@@ -56,7 +56,7 @@ internal config secrets и stack traces в JSON не сериализуются.
 | HTTP | Категория | Примеры code |
 | ---: | --- | --- |
 | `400` | Валидный JSON, но команда бессмысленна | `scenario_validation_failed`, `no_submissions` |
-| `401` | Нет/просрочен/revoked JWT | `not_authenticated`, `token_expired`, `token_revoked` |
+| `401` | Нет/невалидна/истекла/отозвана сессия | `session_missing`, `session_invalid`, `session_expired`, `session_revoked` |
 | `403` | Роль, ownership или block | `forbidden`, `account_blocked` |
 | `404` | Объект не найден в доступной области | `round_not_found`, `scenario_not_found` |
 | `409` | State/revision/unique/lock conflict | `round_locked`, `scenario_revision_conflict` |
@@ -69,34 +69,25 @@ internal config secrets и stack traces в JSON не сериализуются.
 Для `422` middleware преобразует стандартный FastAPI payload в тот же envelope.
 `message` предназначен пользователю, `code/details` — стабильной логике Streamlit.
 
-## 4. JWT и RBAC
+## 4. Server-side sessions и RBAC
 
-JWT содержит:
+Cookie содержит только непрозрачный `session_id`; FastAPI хранит его SHA-256 hash и
+metadata в PostgreSQL. Streamlit передает raw ID в `X-Session-ID` на каждом защищенном
+внутреннем запросе. Подробная модель: [Browser cookie и серверные сессии](sessions-and-cookies.md).
 
-```json
-{
-  "sub": "57",
-  "role": "participant",
-  "token_version": 3,
-  "iat": 1780646400,
-  "exp": 1780660800,
-  "jti": "b2b8c2c4-3f2b-4a34-b0d7-5bbef72c278f"
-}
-```
-
-FastAPI на каждом защищенном запросе загружает пользователя и проверяет текущие
-`role`, `is_blocked` и `token_version`. Claim ускоряет первичную проверку, но не
-заменяет состояние БД.
+FastAPI загружает `sessions` вместе с `users` и проверяет `expires_at`, `revoked_at`,
+`role`, `is_blocked` и `sessions.audience`. Роль и participant identity никогда не берутся из входного DTO.
 
 | Scope | Разрешение |
 | --- | --- |
 | Public | register/login, live health |
-| Internal catalog read | Active round и immutable cards без JWT, только из Docker app network |
+| Internal catalog read | Active round и immutable cards без session ID, только из Docker app network |
 | Participant | Только собственный scenario/result и обезличенный leaderboard |
 | Admin | `/api/v1/admin/*`, включая PII detail и команды управления |
 | Operator | Нет отдельной API-роли v1; health/VM доступ вне прикладного API |
 
-Participant endpoints не принимают `participant_id`; он всегда берется из JWT user.
+Participant endpoints не принимают `participant_id`; он всегда берется из server-side
+сессии. Raw ID, cookie и `X-Session-ID` запрещены в логах и audit events.
 
 ## 5. DTO-каталог
 
@@ -104,8 +95,8 @@ Participant endpoints не принимают `participant_id`; он всегд�
 | --- | --- | --- |
 | `RegisterIn` | Регистрация | `email`, `display_name`, `password` |
 | `UserRegisteredOut` | Подтверждение регистрации | `id`, `email`, `display_name`, `role`, `created_at` |
-| `LoginIn` | Вход | `email`, `password` |
-| `TokenOut` | JWT | `access_token`, `expires_in`, `user` |
+| `LoginIn` | Вход | `email`, `password`, `audience=play|admin` |
+| `SessionCreatedOut` | Результат login | `session_id`, `expires_at`, `user` |
 | `UserSessionOut` | Текущий user | `id`, `display_name`, `role` |
 | `RoundPublicOut` | Активный round для participant | `id`, `title`, `status`, public game config |
 | `RoundSummaryOut` | История раундов participant | ID, status, scenario/result availability |
@@ -120,7 +111,7 @@ Participant endpoints не принимают `participant_id`; он всегд�
 | `RoundStatsOut` | Admin counters | registered/blocked/draft/submitted/scored |
 | `PlayerSummaryOut` | Admin player list | ID, display name, access/status/score summary |
 | `PlayerDetailOut` | Полный admin view | Account, scenario chain, base/effective result, activity |
-| `AccessUpdateIn` | Block/unblock | `blocked`, `reason`, `expected_token_version` |
+| `AccessUpdateIn` | Block/unblock | `blocked`, `reason`, `expected_access_revision` |
 | `LeaderboardAdjustmentIn` | Manual overlay | overrides, `reason`, `expected_revision` |
 | `AuditPageOut` | Admin audit | Sanitized events + cursor |
 
@@ -161,16 +152,16 @@ Request:
 ### `POST /api/v1/auth/login`
 
 ```json
-{"email": "student@example.com", "password": "correct-horse-42"}
+{"email": "student@example.com", "password": "correct-horse-42", "audience": "play"}
 ```
 
-`200 OK`:
+`200 OK` с `SessionCreatedOut`:
 
 ```json
 {
-  "access_token": "<jwt>",
-  "token_type": "bearer",
-  "expires_in": 14400,
+  "session_id": "<32-random-bytes-base64url>",
+  "expires_at": "2026-10-05T12:05:00Z",
+  "audience": "play",
   "user": {
     "id": 57,
     "display_name": "Финансовый детектив",
@@ -179,14 +170,27 @@ Request:
 }
 ```
 
+Raw `session_id` возвращается только при создании сессии. FastAPI сохраняет его
+SHA-256 hash. Streamlit устанавливает route-scoped cookie через
+`streamlit-cookies-controller` как `aml_play_session_id`/`aml_admin_session_id` с route-specific Path, `Secure`, `SameSite=Strict`, host-only scope и expiry
+не позже `expires_at`.
+
+`audience=admin` разрешен только DB-role `admin`; несовпадение role/audience дает generic
+`403 forbidden` после успешной проверки credentials и не создает session row.
+
 Ответ на неверный email и пароль одинаков. После policy threshold endpoint возвращает
 `429 login_temporarily_locked` без раскрытия наличия email.
 
-### `GET /api/v1/auth/me`
+### `GET /api/v1/auth/session`
 
-Возвращает `UserSessionOut`. Используется после восстановления Streamlit session и для
-проверки role/access state. Email возвращается только владельцу или admin detail, но не
-нужен participant navigation и может быть исключен из этого DTO.
+Возвращает `UserSessionOut` для `X-Session-ID`. Используется после cookie bootstrap и
+перезапуска Streamlit. Email возвращается только владельцу или admin detail.
+
+### `DELETE /api/v1/auth/session`
+
+Отзывает текущую сессию, ставит `revoked_at`/`revoke_reason=logout` и возвращает `204`.
+После подтвержденного ответа Streamlit удаляет cookie с теми же scope-параметрами.
+Повторный DELETE идемпотентен.
 
 ```mermaid
 sequenceDiagram
@@ -197,11 +201,11 @@ sequenceDiagram
 
     U->>S: Login form submit
     S->>A: POST /api/v1/auth/login
-    A->>D: Load user and auth state
-    A->>A: Verify password, sign JWT
-    A-->>S: TokenOut
-    S->>S: JWT only in session_state
-    S->>A: GET /api/v1/auth/me
+    A->>D: Verify user and insert sessions hash
+    A-->>S: SessionCreatedOut
+    S->>S: Set route-scoped session cookie
+    S->>A: GET /api/v1/auth/session + X-Session-ID
+    A->>D: Validate session and user state
     A-->>S: Current role and access
 ```
 
@@ -211,9 +215,9 @@ sequenceDiagram
 
 `200 OK` с `RoundPublicOut` или JSON `null`, если раунд не открыт.
 
-Endpoint не требует JWT, потому что содержит только несекретную конфигурацию учебной
+Endpoint не требует session ID, потому что содержит только несекретную конфигурацию учебной
 игры и доступен исключительно внутри Docker app network. Это позволяет безопасный общий
-Streamlit cache без token в аргументах. Participant UI все равно не открывает gameplay
+Streamlit cache без session ID в аргументах. Participant UI все равно не открывает gameplay
 до login. Все user-specific endpoints остаются авторизованными.
 
 ```json
@@ -243,6 +247,32 @@ Streamlit cache без token в аргументах. Participant UI все ра
 Internal card IDs и scoring thresholds можно не раскрывать здесь. `Cache-Control:
 private, max-age=0`; Streamlit применяет собственный TTL до 5 секунд.
 
+### `GET /api/v1/rounds/current`
+
+Отвечает на вопрос «что сейчас происходит с раундом», а не «во что можно играть».
+Возвращает раунд в любом статусе, включая `draft`, поэтому participant UI показывает
+экран ожидания до того, как организатор нажал «Начать раунд», и открывает конструктор
+сразу после запуска. `GET /rounds/active` остается прежним: он отдает `null`, пока
+раунд не запущен.
+
+```json
+{
+  "id": 12,
+  "title": "Мастер-класс AML",
+  "status": "draft",
+  "config_version": "round-config-v3:sha256:8f4c...",
+  "activated_at": null,
+  "stopped_at": null,
+  "completed_at": null,
+  "game_config": {"...": "снимок конфигурации"}
+}
+```
+
+Статусы: `draft` (настраивается, участники ждут), `active` (идет игра), `stopped`
+(записи запрещены, данные сохранены), `scoring`, `completed`. Писать сценарий можно
+только в `active`; во всех остальных статусах сервер отвечает `409 round_locked` с
+текстом, объясняющим участнику причину.
+
 ### `GET /api/v1/rounds/mine?limit=10&cursor=...`
 
 Возвращает active round и раунды, в которых current participant имеет scenario. Endpoint
@@ -271,7 +301,7 @@ response отсутствуют. `Cache-Control: no-store`.
 ### `GET /api/v1/rounds/{round_id}/cards`
 
 Возвращает только card versions из round snapshot. Ответ immutable после activate.
-Как и active-round read, endpoint token-free внутри app network и не проксируется
+Как и active-round read, endpoint auth-free внутри app network и не проксируется
 browser. Он не возвращает users, scenarios, results или admin metadata.
 
 ```json
@@ -309,6 +339,37 @@ browser. Он не возвращает users, scenarios, results или admin m
 
 HTTP `ETag` строится из round config version. Streamlit cache key обязан включать
 `round_id` и `config_version`.
+
+Кроме описания карточки ответ содержит **политику раунда** — то, что участник реально
+видит и может менять:
+
+```json
+{
+  "code": "salary",
+  "visible_params": [
+    {"param": "channel", "key": "channel", "namespace": "context",
+     "label": "Канал", "kind": "select", "default": "bank", "options": []},
+    {"param": "context.time_of_day", "key": "time_of_day", "namespace": "context",
+     "label": "Время операции", "kind": "select", "default": "day", "options": []}
+  ],
+  "show_frequency": false,
+  "pinned_defaults": {"context.has_documents": true,
+                      "action.employer_profile": "verified_employer",
+                      "action.income_basis": "payroll_registry"}
+}
+```
+
+- `visible_params` — не более двух параметров на операцию, включая канал;
+- `show_frequency` — показывать ли поле «Повторов»; если `false`, сервер фиксирует `1`;
+- `pinned_defaults` — значения, которые сервер подставляет сам, чтобы скоринг оставался
+  детерминированным.
+
+Если клиент присылает скрытый параметр со значением, отличным от закрепленного, ответ —
+`422` с `parameter_not_editable`; операция, которой нет в раунде, — `422` с
+`card_not_in_round`; частота при `show_frequency=false` — `422` с
+`frequency_not_editable`. Конфигурация без блока `operations` считается legacy: в ней
+доступны все восемь карточек и все параметры, поэтому старые черновики продолжают
+открываться и считаться.
 
 ## 8. Participant scenario API
 
@@ -396,6 +457,70 @@ no-store`.
   `details.current_revision/current_updated_at`;
 - тот же mutation ID + тот же payload возвращает прежний success;
 - тот же mutation ID + другой payload — `409 mutation_id_reused`.
+
+### `POST /api/v1/rounds/{round_id}/scenario/preview`
+
+Считает ресурсы для произвольной цепочки, **ничего не сохраняя**. Это тот же код, что
+и при сохранении, поэтому число в интерфейсе и число в снимке совпадают по построению,
+а не по договоренности.
+
+```json
+{"steps": [{"step_id": "...", "card": {"code": "salary", "version": 1}, "...": "..."}]}
+```
+
+```json
+{
+  "resources": {
+    "valid": true,
+    "resources_after": {"balance": "370000.00", "energy": 13, "time": 17, "trust": 100,
+                        "slots": 7},
+    "per_step": [{"step_id": "...", "card_title": "Получить зарплату",
+                  "resources_before": {"...": "..."},
+                  "resources_after": {"...": "..."}}],
+    "limits": [{"key": "cash", "label": "Наличные", "kind": "money",
+                "used": "0.00", "limit": "150000.00", "remaining": "150000.00"}],
+    "violations": [],
+    "objective": {"target_outflow": "150000.00", "reached": false}
+  },
+  "blockers": []
+}
+```
+
+`blockers` содержит структурные нарушения (`card_not_in_round`,
+`parameter_not_editable`, ...), из-за которых шаг вообще нельзя добавить;
+`resources.violations` — бизнес-нарушения, с которыми цепочку сохранить можно, но
+отправить нельзя. Endpoint не меняет ни одной строки в базе и не создает версий.
+
+### `GET /api/v1/rounds/{round_id}/scenario/versions`
+
+История собственных сохранений участника, append-only:
+
+```json
+{
+  "rows": [
+    {"id": 91, "revision": 3, "label": "Без крипты", "step_count": 4,
+     "created_at": "2026-10-05T08:21:03Z", "created_by_user_id": 42,
+     "restored_from_revision": 1, "is_current": true, "is_submitted": false,
+     "valid": true, "goal_reached": true, "balance_after": "120000.00",
+     "energy_after": 8, "time_after": 9, "trust_after": 88}
+  ]
+}
+```
+
+### `GET /api/v1/rounds/{round_id}/scenario/versions/{revision}`
+
+Та же строка плюс `steps` и полный `resources` снимок этой версии.
+
+### `POST /api/v1/rounds/{round_id}/scenario/versions/{revision}/restore`
+
+```json
+{"expected_revision": 3, "client_mutation_id": "uuid", "label": "Возврат к версии 1"}
+```
+
+Восстановление — это **новая** версия с содержимым старой, а не откат: `revision`
+увеличивается, `restored_from_revision` указывает на источник, и ни одна более поздняя
+версия не удаляется. Ответ — `ScenarioOut` новой текущей версии. Конфликт по
+`expected_revision` — `409 revision_conflict`, как и у обычного сохранения.
 
 ### `POST /api/v1/rounds/{round_id}/scenario/submit`
 
@@ -490,12 +615,18 @@ sequenceDiagram
 Доступен после completed. Blocked users исключаются из публичного ranking. Порядок:
 `effective_game_score DESC`, затем `base.risk_score ASC`, `scenario_id ASC`.
 
+По умолчанию ники **не покидают сервер**: в ответе стоит нейтральное «Игрок #N», и
+настоящего имени нет ни в одном поле. Раскрытие — явный запрос
+`?reveal=true`, который participant UI отправляет только после нажатия кнопки
+«Показать все ники».
+
 ```json
 {
   "rows": [
     {
       "rank": 1,
-      "display_name": "Финансовый детектив",
+      "display_name": "Игрок #1",
+      "masked": true,
       "game_score": "91.20",
       "stealth_score": "94.00",
       "resource_score": "87.00",
@@ -505,9 +636,15 @@ sequenceDiagram
     }
   ],
   "next_cursor": null,
-  "generated_at": "2026-10-05T08:33:10Z"
+  "generated_at": "2026-10-05T08:33:10Z",
+  "revealed": false
 }
 ```
+
+`is_current_user` позволяет участнику найти свою строку, не раскрывая ник; порядок,
+баллы и метки риска в обоих режимах одинаковы. Admin-борд
+(`GET /api/v1/admin/rounds/{round_id}/leaderboard`) и поиск участников по-прежнему
+показывают настоящие данные: требование касается публичных списков.
 
 Email, user ID, scenario ID, chain и factors в public leaderboard отсутствуют.
 
@@ -521,9 +658,18 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
 | `GET /api/v1/admin/rounds/{round_id}` | — | `RoundAdminOut` | Full config |
 | `PUT /api/v1/admin/rounds/{round_id}` | `RoundUpdateIn` | `RoundAdminOut` | Только draft + expected config revision |
 | `POST /api/v1/admin/rounds/{round_id}/activate` | empty | `RoundAdminOut` | Snapshot и active |
+| `POST /api/v1/admin/rounds/{round_id}/start` | empty | `RoundAdminOut` | «Начать раунд», алиас activate |
+| `POST /api/v1/admin/rounds/{round_id}/stop` | `RoundLifecycleIn` | `RoundAdminOut` | «Остановить раунд» |
+| `POST /api/v1/admin/rounds/{round_id}/restart` | `RoundRestartIn` | `201 RoundAdminOut` | «Перезапустить раунд» |
+| `GET /api/v1/admin/rounds/{round_id}/scoring-plan` | — | `ScoringPlanOut` | Что попадет в подсчет |
 | `POST /api/v1/admin/rounds/{round_id}/score` | empty | `ScoringSummaryOut` | Синхронный пакет |
 | `GET /api/v1/admin/rounds/{round_id}/stats` | — | `RoundStatsOut` | Live counters |
 | `GET /api/v1/admin/rounds/{round_id}/leaderboard` | sort/filter/cursor | Admin page | Base/effective board |
+| `GET /api/v1/admin/round-presets` | — | `RoundPresetOut[]` | Сохраненные наборы настроек |
+| `POST /api/v1/admin/round-presets` | `RoundPresetIn` | `201 RoundPresetOut` | Создать пресет |
+| `GET /api/v1/admin/round-presets/{preset_id}` | — | `RoundPresetOut` | Открыть пресет |
+| `PUT /api/v1/admin/round-presets/{preset_id}` | `RoundPresetUpdateIn` | `RoundPresetOut` | Обновить, optimistic |
+| `DELETE /api/v1/admin/round-presets/{preset_id}` | `?confirm=true` | `204` | Удалить с подтверждением |
 
 ### Создание/обновление draft
 
@@ -550,14 +696,73 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
 Update дополнительно принимает `expected_config_revision`. После activate:
 `409 round_config_locked`.
 
-### Активация
+### Жизненный цикл
 
-`POST /api/v1/admin/rounds/{round_id}/activate` требует `Idempotency-Key`.
+```
+draft ──start──> active ──stop──> stopped ──score──> scoring ──> completed
+                   │                  │
+                   └────── score ─────┘
+                          restart -> новый раунд в статусе draft
+```
+
+`POST /api/v1/admin/rounds/{round_id}/start` (и его исторический алиас `/activate`)
+требует `Idempotency-Key`.
 
 - draft + валидный snapshot -> active;
 - тот же round уже active -> вернуть current `200`;
 - другой active/scoring -> `409 active_round_exists`;
 - unknown ruleset/card version -> `409 round_configuration_invalid`.
+
+Инвариант «не более одного идущего раунда» держит сама база: частичный уникальный
+индекс `uq_rounds_single_active` по `status IN ('active','scoring')`. Endpoint
+дополнительно берет `SELECT ... FOR UPDATE` на строку раунда, поэтому два
+администратора, нажавшие кнопку одновременно, выстраиваются в очередь, а не гоняются.
+
+`POST /rounds/{round_id}/stop` принимает `{"confirm": true, "reason": "..."}`.
+Без `confirm` — `400 confirmation_required`. Остановка ничего не удаляет: сценарии,
+версии черновиков, результаты и журнал остаются, но любая запись участника получает
+`409 round_locked`. Повторный вызов на уже остановленном раунде возвращает `200`.
+
+`POST /rounds/{round_id}/restart` принимает `{"confirm": true, "title": "...",
+"reason": "...", "activate": false}` и создает **новый** раунд:
+
+- прежний раунд переводится в `stopped` (если был активен) и остается со всеми данными;
+- новый раунд получает копию конфигурации, `restarted_from_round_id` и статус `draft`,
+  так что организатор запускает его отдельной командой;
+- повторный запрос (двойной клик, retry) возвращает уже созданный раунд, а не создает
+  второй: связь `restarted_from_round_id` проверяется под тем же блокирующим чтением;
+- перезапуск раунда в статусе `scoring` — `409 round_locked`.
+
+Все три команды пишут в audit trail (`round_activated`, `round_stopped`,
+`round_restarted`) с `Idempotency-Key` hash и `request_id`.
+
+### План подсчета
+
+`GET /api/v1/admin/rounds/{round_id}/scoring-plan` отвечает на вопрос «что произойдет,
+если нажать кнопку»:
+
+```json
+{
+  "round_id": 12,
+  "round_status": "active",
+  "submitted_count": 18,
+  "excluded_draft_count": 3,
+  "already_scored_count": 0,
+  "can_score": true,
+  "blocker": null
+}
+```
+
+Admin UI показывает эти числа рядом с чекбоксом подтверждения и блокирует кнопку, пока
+`can_score` не станет `true`.
+
+### Пресеты настроек
+
+Пресет — именованный `game_config`, подготовленный заранее. Он **не запускает игру**:
+`POST /api/v1/admin/rounds` с `preset_id` создает раунд в статусе `draft`, копируя
+конфигурацию в собственный неизменяемый снимок раунда. Поэтому более поздние правки
+пресета не меняют уже созданные раунды. `PUT` требует `expected_revision`, `DELETE` —
+`?confirm=true`; при удалении пресета `rounds.preset_id` обнуляется, а раунды остаются.
 
 ### Скоринг
 
@@ -633,7 +838,7 @@ Response summary не включает steps/explanation, чтобы списо�
     "email": "student@example.com",
     "display_name": "Финансовый детектив",
     "is_blocked": false,
-    "token_version": 3,
+    "access_revision": 3,
     "created_at": "2026-10-05T08:00:00Z",
     "last_login_at": "2026-10-05T08:05:00Z"
   },
@@ -658,6 +863,48 @@ Response summary не включает steps/explanation, чтобы списо�
 `Cache-Control: no-store`; доступ и чтение PII логируются как безопасный audit event,
 если этого требует политика организатора.
 
+### Версии черновиков и технические данные входа
+
+`GET /api/v1/admin/rounds/{round_id}/participants/{participant_id}` дополнительно
+возвращает:
+
+- `versions[]` — все сохранения участника (`revision`, `label`, `step_count`,
+  `created_at`, `is_current`, `is_submitted`, `balance_after`), чтобы организатор видел
+  историю, а не только текущую цепочку;
+- `sessions[]` — `SessionInfoOut`: `audience`, `created_at`, `last_seen_at`,
+  `expires_at`, `revoked_at`, `revoke_reason`, `is_active`, `ip_address` (IPv4/IPv6),
+  `user_agent`, `accept_language`;
+- `user` — `created_at`, `first_login_at`, `last_login_at`, `active_session_count`,
+  `total_session_count`, `last_ip_address`, `last_user_agent`.
+
+`GET .../participants/{participant_id}/scenario-versions/{revision}` отдает одну версию
+целиком: `steps` без потерь плюс `described_steps` — та же цепочка, разобранная для
+показа. Каждый шаг содержит `card` (id, code, version, title, `requires_card_code`,
+`quota_category`), `step_id`, `amount`, `frequency`, `parameters[]` и ресурсы:
+
+```json
+{
+  "index": 1,
+  "step_id": "0f1c...",
+  "card": {"id": 3, "code": "salary", "version": 1, "title": "Получить зарплату"},
+  "amount": "120000.00",
+  "frequency": 1,
+  "parameters": [
+    {"param": "channel", "label": "Канал", "value": "bank",
+     "display": "Банковское зачисление", "source": "context", "editable": true},
+    {"param": "context.has_documents", "label": "Есть подтверждающие документы",
+     "value": true, "display": "Да", "source": "context", "editable": false}
+  ],
+  "costs": {"energy": 1, "time": 1, "trust": 0, "money_delta": "120000.00"},
+  "resources_before": {"balance": "250000.00", "energy": 14, "time": 18, "trust": 100},
+  "resources_after": {"balance": "370000.00", "energy": 13, "time": 17, "trust": 100}
+}
+```
+
+`parameters` включает **все** параметры шага, а не только видимые в раунде: значения
+`false`, `0` и совпадающие с default остаются в ответе, иначе организатор не смог бы
+разобрать, что именно сделал участник.
+
 ### Блокировка/разблокировка
 
 `PUT /api/v1/admin/rounds/{round_id}/participants/{participant_id}/access`
@@ -666,15 +913,15 @@ Response summary не включает steps/explanation, чтобы списо�
 {
   "blocked": true,
   "reason": "Проверка учетной записи по запросу организатора",
-  "expected_token_version": 3
+  "expected_access_revision": 3
 }
 ```
 
 Успех возвращает обновленный user summary. API в одной транзакции:
 
 1. проверяет admin role и запрещает self-block;
-2. сравнивает token version;
-3. меняет access state и увеличивает token version;
+2. сравнивает access revision;
+3. меняет access state, увеличивает access revision и отзывает активные sessions;
 4. создает audit event;
 5. commit.
 
@@ -729,8 +976,27 @@ sequenceDiagram
 
 `GET /api/v1/admin/rounds/{round_id}/audit-events?event_type=...&limit=50&cursor=...`
 
-Возвращает sanitized append-only events. Полные scenario steps, password/JWT/email и
-Authorization headers отсутствуют. Доступен только admin.
+Возвращает sanitized append-only events. Полные scenario steps, password/raw session ID/email и
+`X-Session-ID` headers отсутствуют. Доступен только admin.
+
+Записываемые типы событий:
+
+| Событие | Когда |
+| --- | --- |
+| `round_created`, `round_updated` | Создание и правка черновика раунда |
+| `round_activated` | «Начать раунд» |
+| `round_stopped` | «Остановить раунд» |
+| `round_restarted` | «Перезапустить раунд»; в metadata — исходный раунд |
+| `round_scored` | Пакетный подсчет результатов |
+| `round_preset_created`, `round_preset_updated`, `round_preset_deleted` | Работа с пресетами |
+| `scenario_version_restored` | Участник вернулся к старой версии черновика |
+| `scenario_submitted` | Участник отправил конкретную версию на скоринг |
+| `participant_blocked` | Блокировка и разблокировка доступа |
+| `leaderboard_adjusted`, `leaderboard_adjustment_cleared` | Ручная корректировка |
+
+События участника пишутся в той же транзакции, что и само изменение: журнал не может
+разойтись с данными. В metadata попадают номера ревизий и счетчики, но не содержимое
+цепочки.
 
 ## 14. Stats
 
@@ -762,7 +1028,7 @@ Stats — моментальный серверный snapshot. Admin Streamlit 
 | PUT round draft | config revision + desired full config | Да при идентичном desired state |
 | POST activate | row lock + current state + `Idempotency-Key` | После GET round |
 | POST score | row lock NOWAIT + completed summary + `Idempotency-Key` | Только после GET round/stats |
-| PUT access | token version + desired state | Да при идентичном desired state |
+| PUT access | access revision + desired state | Да при идентичном desired state |
 | PUT adjustment | adjustment revision + desired overlay | Да при идентичном desired state |
 | DELETE adjustment | expected revision + absent state | Да; absent returns `204` |
 
@@ -807,7 +1073,7 @@ API устанавливает statement/lock timeouts ниже общего inf
 
 | Use case | Endpoints |
 | --- | --- |
-| Регистрация/вход | `POST auth/register`, `POST auth/login`, `GET auth/me` |
+| Регистрация/вход | `POST auth/register`, `POST auth/login`, `GET/DELETE auth/session` |
 | Открытие игры | `GET rounds/active`, `GET rounds/mine`, `GET rounds/{round_id}/cards`, `GET rounds/{round_id}/scenario` |
 | Редактирование | `PUT rounds/{round_id}/scenario` |
 | Финальная отправка | `POST rounds/{round_id}/scenario/submit` |
@@ -828,13 +1094,19 @@ API устанавливает statement/lock timeouts ниже общего inf
 | Method/path | Input model | Output model | Role |
 | --- | --- | --- | --- |
 | `POST /api/v1/auth/register` | `RegisterIn` | `UserRegisteredOut` | Public |
-| `POST /api/v1/auth/login` | `LoginIn` | `TokenOut` | Public |
-| `GET /api/v1/auth/me` | — | `UserSessionOut` | Any authenticated |
+| `POST /api/v1/auth/login` | `LoginIn` | `SessionCreatedOut` | Public |
+| `GET /api/v1/auth/session` | — | `UserSessionOut` | Any authenticated |
+| `DELETE /api/v1/auth/session` | — | `204` | Any authenticated |
 | `GET /api/v1/rounds/active` | — | `Optional[RoundPublicOut]` | Internal UI read |
+| `GET /api/v1/rounds/current` | — | `Optional[RoundPublicOut]` | Internal UI read |
 | `GET /api/v1/rounds/mine` | `RoundHistoryQuery` | `RoundSummaryPageOut` | Participant |
 | `GET /api/v1/rounds/{round_id}/cards` | `RoundPath` | `list[ActionCardOut]` | Internal UI read |
 | `GET /api/v1/rounds/{round_id}/scenario` | `RoundPath` | `Optional[ScenarioOut]` | Participant |
 | `PUT /api/v1/rounds/{round_id}/scenario` | `ScenarioPutIn` | `ScenarioOut` | Participant |
+| `POST /api/v1/rounds/{round_id}/scenario/preview` | `ScenarioPreviewIn` | `ScenarioPreviewOut` | Participant |
+| `GET /api/v1/rounds/{round_id}/scenario/versions` | `RoundPath` | `ScenarioVersionPageOut` | Participant |
+| `GET /api/v1/rounds/{round_id}/scenario/versions/{revision}` | `VersionPath` | `ScenarioVersionOut` | Participant |
+| `POST /api/v1/rounds/{round_id}/scenario/versions/{revision}/restore` | `ScenarioRestoreIn` | `ScenarioOut` | Participant |
 | `POST /api/v1/rounds/{round_id}/scenario/submit` | `ScenarioSubmitIn` | `ScenarioOut` | Participant |
 | `GET /api/v1/rounds/{round_id}/result` | `RoundPath` | `Optional[ResultOut]` | Participant |
 | `GET /api/v1/rounds/{round_id}/leaderboard` | `LeaderboardQuery` | `LeaderboardPageOut` | Participant |
@@ -844,11 +1116,21 @@ API устанавливает statement/lock timeouts ниже общего inf
 | `GET /api/v1/admin/rounds/{round_id}` | `RoundPath` | `RoundAdminOut` | Admin |
 | `PUT /api/v1/admin/rounds/{round_id}` | `RoundUpdateIn` | `RoundAdminOut` | Admin |
 | `POST /api/v1/admin/rounds/{round_id}/activate` | — | `RoundAdminOut` | Admin |
+| `POST /api/v1/admin/rounds/{round_id}/start` | — | `RoundAdminOut` | Admin |
+| `POST /api/v1/admin/rounds/{round_id}/stop` | `RoundLifecycleIn` | `RoundAdminOut` | Admin |
+| `POST /api/v1/admin/rounds/{round_id}/restart` | `RoundRestartIn` | `RoundAdminOut` | Admin |
+| `GET /api/v1/admin/rounds/{round_id}/scoring-plan` | `RoundPath` | `ScoringPlanOut` | Admin |
 | `POST /api/v1/admin/rounds/{round_id}/score` | — | `ScoringSummaryOut` | Admin |
+| `GET /api/v1/admin/round-presets` | — | `list[RoundPresetOut]` | Admin |
+| `POST /api/v1/admin/round-presets` | `RoundPresetIn` | `RoundPresetOut` | Admin |
+| `GET /api/v1/admin/round-presets/{preset_id}` | `PresetPath` | `RoundPresetOut` | Admin |
+| `PUT /api/v1/admin/round-presets/{preset_id}` | `RoundPresetUpdateIn` | `RoundPresetOut` | Admin |
+| `DELETE /api/v1/admin/round-presets/{preset_id}` | `PresetDeleteQuery` | `204 No Content` | Admin |
 | `GET /api/v1/admin/rounds/{round_id}/stats` | `RoundPath` | `RoundStatsOut` | Admin |
 | `GET /api/v1/admin/rounds/{round_id}/leaderboard` | `AdminLeaderboardQuery` | `AdminLeaderboardPageOut` | Admin |
 | `GET /api/v1/admin/rounds/{round_id}/participants` | `ParticipantListQuery` | `PlayerSummaryPageOut` | Admin |
 | `GET /api/v1/admin/rounds/{round_id}/participants/{participant_id}` | `PlayerPath` | `PlayerDetailOut` | Admin |
+| `GET /api/v1/admin/rounds/{round_id}/participants/{participant_id}/scenario-versions/{revision}` | `VersionPath` | `ScenarioVersionAdminOut` | Admin |
 | `PUT /api/v1/admin/rounds/{round_id}/participants/{participant_id}/access` | `AccessUpdateIn` | `PlayerSummaryOut` | Admin |
 | `PUT /api/v1/admin/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment` | `LeaderboardAdjustmentIn` | `LeaderboardAdjustmentOut` | Admin |
 | `DELETE /api/v1/admin/rounds/{round_id}/participants/{participant_id}/leaderboard-adjustment` | `AdjustmentDeleteQuery` | `204 No Content` | Admin |

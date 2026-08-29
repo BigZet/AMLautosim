@@ -116,14 +116,14 @@ restore, а не фиктивным downgrade.
 
 ### Auth/RBAC
 
-- register/login/me happy path;
+- register/login/session/logout happy path;
 - duplicate normalized email;
 - password policy и generic invalid credentials;
 - account lockout;
-- token expiry/version revoke;
+- session expiry/revoke;
 - participant получает `403` на каждый admin endpoint;
 - participant A не читает scenario/result B;
-- blocked token запрещен на следующем request.
+- blocked user: все sessions отозваны, следующий request запрещен.
 
 ### Round lifecycle
 
@@ -149,7 +149,7 @@ restore, а не фиктивным downgrade.
 
 - pagination/filter participant list;
 - detail contains full selected chain only;
-- block/unblock + token revoke + audit in one transaction;
+- block/unblock + revoke active sessions + audit in one transaction;
 - adjustment create/update/conflict/clear;
 - base result immutable;
 - public/admin leaderboard privacy projections.
@@ -206,7 +206,7 @@ sequenceDiagram
 ApiClient тестируется независимо от Streamlit:
 
 - URL/prefix и headers;
-- JWT передается per request, не остается в shared transport;
+- session ID передается per request в `X-Session-ID`, не остается в shared transport;
 - request ID сохраняется на retry;
 - timeout profile по method;
 - error envelope mapping;
@@ -221,6 +221,19 @@ backward-compatible; удаление/переименование требуе�
 
 ## 10. Streamlit UI tests
 
+### Cookie/server-side session
+
+- `CookieController` возвращает pending/ready без ложного logout на первом render;
+- set/get/remove используют одинаковые path/domain/secure/same-site параметры;
+- production cookie имеет `Secure=true`, `SameSite=Strict`, host-only scope;
+- login создает новый случайный ID и хранит в БД только SHA-256;
+- session fixation и повторное использование revoked/expired ID отклоняются;
+- logout отзывает только current session; «выйти везде», block и password reset отзывают все;
+- два браузера одного пользователя остаются независимыми до global revoke;
+- `last_seen_at` write throttled и не выполняется на каждый GET;
+- XSS-focused test подтверждает escaping user values, поскольку `HttpOnly` недоступен;
+- версия `streamlit-cookies-controller` закреплена и browser component проходит smoke.
+
 ### Session/rerun
 
 - initial state создается один раз;
@@ -229,17 +242,41 @@ backward-compatible; удаление/переименование требуе�
 - successful response заменяет local draft и revision;
 - timeout сохраняет dirty draft;
 - conflict не перезаписывает server state молча;
-- logout очищает JWT/widget-sensitive state;
+- logout отзывает session row, удаляет cookie и очищает widget-sensitive state;
 - blocked response открывает access screen.
+
+### Draft history and lifecycle
+
+- участник до старта раунда видит экран ожидания, а сервер отвечает `409` на запись;
+- ресурсы, квоты и прогресс цели пересчитываются на добавление, удаление, правку и
+  перестановку шага — до ручного сохранения;
+- каждое сохранение добавляет версию; восстановление старой версии создает новую и не
+  удаляет более поздние;
+- отправка фиксирует одну версию, и именно она уходит в скоринг;
+- остановка раунда блокирует запись на сервере, перезапуск создает новый раунд и
+  сохраняет историю прошлого;
+- организатор видит все версии всех участников и полный набор параметров каждого шага.
 
 ### Dynamic forms
 
+- в раунде доступны ровно те операции, которые включены его конфигурацией;
+- у операции не больше двух настраиваемых параметров, включая канал; поле частоты
+  показывается только там, где это предусмотрено;
+- скрытые параметры не имеют виджетов, но приходят в снимке со стабильными значениями;
+- черновик со старым, полным payload открывается и сохраняется без потери полей;
 - разные card codes отображают разные fields;
 - widget keys стабильны по `step_id` при reorder;
 - option labels не подменяют machine values;
 - field errors привязаны к нужному step;
 - длинные labels/values помещаются на mobile/desktop;
 - light/dark theme сохраняет контраст и видимость focus/error states.
+
+### Appearance
+
+- тёмная тема — стартовая, светлая включается кнопкой в обеих панелях;
+- выбор переживает навигацию между страницами и перезагрузку вкладки;
+- на каждой контрольной ширине нет горизонтального скролла и обрезанного текста в обеих
+  темах.
 
 ### Admin UI
 
@@ -318,11 +355,11 @@ Load generator должен моделировать Streamlit/API pattern. Пр
 - наружу доступны только 80/443 и UI paths;
 - `/api`, `/docs`, `/redoc`, `/openapi.json`, 8000 и 5432 закрыты;
 - IDOR на round/participant/scenario IDs;
-- JWT tamper/expiry/revocation;
+- session ID format/randomness/hash lookup/expiry/revocation;
 - auth body/rate limits;
 - SQL/XSS strings остаются данными;
 - admin self-protection и required reason;
-- log scan на email, JWT, Authorization, password, steps;
+- log scan на email, raw session ID, session hash, `X-Session-ID`, password, steps;
 - public leaderboard не содержит IDs/email/chain;
 - backup encrypted и удаляется по retention;
 - participant deletion/anonymization verification.
