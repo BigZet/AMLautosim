@@ -109,6 +109,15 @@ def _number(label: str, value: Any, **kwargs: Any) -> float:
     return float(st.number_input(label, value=float(value), **kwargs))
 
 
+def _integer(label: str, value: Any, **kwargs: Any) -> int:
+    """A whole-number setting.
+
+    Streamlit picks the widget from the types it is handed, so passing floats
+    for a count of operations rendered it as «14,00».
+    """
+    return int(st.number_input(label, value=int(value), **kwargs))
+
+
 def param_label(card: dict[str, Any], param: str) -> str:
     """Human name of one declarable parameter of a card version."""
     if param == "channel":
@@ -186,26 +195,22 @@ def render_editor(
             key=f"{key_prefix}_balance",
         )
     with columns[1]:
-        initial_energy = int(
-            _number(
-                "Энергия",
-                resources["initial_energy"],
-                min_value=1.0,
-                max_value=float(LIMITS["max_resource"]),
-                step=1.0,
-                key=f"{key_prefix}_energy",
-            )
+        initial_energy = _integer(
+            "Энергия",
+            resources["initial_energy"],
+            min_value=1,
+            max_value=int(LIMITS["max_resource"]),
+            step=1,
+            key=f"{key_prefix}_energy",
         )
     with columns[2]:
-        initial_time = int(
-            _number(
-                "Время",
-                resources["initial_time"],
-                min_value=1.0,
-                max_value=float(LIMITS["max_resource"]),
-                step=1.0,
-                key=f"{key_prefix}_time",
-            )
+        initial_time = _integer(
+            "Время",
+            resources["initial_time"],
+            min_value=1,
+            max_value=int(LIMITS["max_resource"]),
+            step=1,
+            key=f"{key_prefix}_time",
         )
     st.markdown("#### Цель и ограничения раунда")
     columns = st.columns(4)
@@ -219,47 +224,39 @@ def render_editor(
             key=f"{key_prefix}_target",
         )
     with columns[1]:
-        max_actions = int(
-            _number(
-                "Максимум операций",
-                objectives["max_actions"],
-                min_value=1.0,
-                max_value=float(LIMITS["max_actions"]),
-                step=1.0,
-                key=f"{key_prefix}_max_actions",
-            )
+        max_actions = _integer(
+            "Максимум операций",
+            objectives["max_actions"],
+            min_value=1,
+            max_value=int(LIMITS["max_actions"]),
+            step=1,
+            key=f"{key_prefix}_max_actions",
         )
     with columns[2]:
-        max_identical = int(
-            _number(
-                "Одинаковых подряд",
-                constraints["max_identical_steps"],
-                min_value=1.0,
-                max_value=float(LIMITS["max_actions"]),
-                step=1.0,
-                key=f"{key_prefix}_identical",
-            )
+        max_identical = _integer(
+            "Одинаковых подряд",
+            constraints["max_identical_steps"],
+            min_value=1,
+            max_value=int(LIMITS["max_actions"]),
+            step=1,
+            key=f"{key_prefix}_identical",
         )
     with columns[3]:
-        max_night = int(
-            _number(
-                "Ночных операций",
-                constraints["max_night_operations"],
-                min_value=0.0,
-                max_value=float(LIMITS["max_actions"]),
-                step=1.0,
-                key=f"{key_prefix}_night",
-            )
+        max_night = _integer(
+            "Ночных операций",
+            constraints["max_night_operations"],
+            min_value=0,
+            max_value=int(LIMITS["max_actions"]),
+            step=1,
+            key=f"{key_prefix}_night",
         )
-    max_anonymous = int(
-        _number(
-            "Операций на анонимного получателя",
-            constraints["max_anonymous_operations"],
-            min_value=0.0,
-            max_value=float(LIMITS["max_actions"]),
-            step=1.0,
-            key=f"{key_prefix}_anonymous",
-        )
+    max_anonymous = _integer(
+        "Операций на анонимного получателя",
+        constraints["max_anonymous_operations"],
+        min_value=0,
+        max_value=int(LIMITS["max_actions"]),
+        step=1,
+        key=f"{key_prefix}_anonymous",
     )
 
     st.markdown("#### Квоты по категориям, ₽")

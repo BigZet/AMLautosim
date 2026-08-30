@@ -25,6 +25,7 @@ from src.aml_workshop_simulator.ui.admin.config_editor import (  # noqa: E402
     render_editor,
 )
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
+from src.aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     ADMIN_COOKIE,
     apply_pending_cookie_command,
@@ -46,20 +47,27 @@ st.set_page_config(
 
 STYLES = """
 <style>
-:root, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
-    --aml-line: var(--border-color);
-    --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
-}
 .block-container { max-width: 1400px; padding-top: 1.2rem; }
 .aml-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase;
-    color: var(--primary-color); }
+    color: var(--aml-primary); }
 .aml-title { font-size: 28px; font-weight: 800; margin: .2rem 0 .3rem; }
 .aml-subtitle { color: var(--aml-muted); margin-bottom: 1rem; }
 table.aml-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.aml-table th, table.aml-table td {
     border-bottom: 1px solid var(--aml-line); padding: .45rem .5rem; text-align: left;
 }
-.aml-scroll { overflow-x: auto; }
+.aml-scroll {
+    overflow-x: auto;
+    /* A shadow at the edge that fades out once the table is scrolled to the
+       end: on a phone the last column is simply invisible otherwise, with
+       nothing to suggest a swipe. */
+    background:
+        linear-gradient(to right, var(--aml-surface) 30%, transparent) left / 24px 100% no-repeat,
+        linear-gradient(to left, var(--aml-surface) 30%, transparent) right / 24px 100% no-repeat,
+        radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.16), transparent) left / 12px 100% no-repeat,
+        radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.16), transparent) right / 12px 100% no-repeat;
+    background-attachment: local, local, scroll, scroll;
+}
 .aml-param-grid {
     display: grid; grid-template-columns: minmax(160px, 1fr) minmax(160px, 1.4fr);
     gap: .15rem .8rem; font-size: 14px; margin: .3rem 0 .6rem;
@@ -323,6 +331,24 @@ def page_round_setup() -> None:
             )
         )
 
+        def start_round_button() -> None:
+            if st.button(
+                "Начать раунд", key="start_round", type="primary",
+                use_container_width=True,
+                disabled=bool(st.session_state.get("pending_command")),
+            ):
+                st.session_state["pending_command"] = "start"
+                try:
+                    client.admin_start_round(
+                        round_id, session_id, idempotency_key=str(uuid.uuid4())
+                    )
+                    set_flash("success", "Раунд запущен: участники могут играть.")
+                except APIClientError as error:
+                    set_flash("error", error.message, error.request_id)
+                finally:
+                    st.session_state["pending_command"] = None
+                st.rerun()
+
         if round_obj["status"] == "draft":
             st.caption(
                 "Конфигурацию можно менять, пока раунд не запущен. После запуска она "
@@ -350,23 +376,19 @@ def page_round_setup() -> None:
                         set_flash("error", error.message, error.request_id)
                     st.rerun()
             with edit_columns[1]:
-                if st.button(
-                    "Начать раунд", key="start_round", type="primary",
-                    use_container_width=True,
-                    disabled=bool(st.session_state.get("pending_command")),
-                ):
-                    st.session_state["pending_command"] = "start"
-                    try:
-                        client.admin_start_round(
-                            round_id, session_id, idempotency_key=str(uuid.uuid4())
-                        )
-                        set_flash("success", "Раунд запущен: участники могут играть.")
-                    except APIClientError as error:
-                        set_flash("error", error.message, error.request_id)
-                    finally:
-                        st.session_state["pending_command"] = None
-                    st.rerun()
+                start_round_button()
         else:
+            if round_obj["status"] == "stopped":
+                # The API accepts starting a stopped round; without the button
+                # the only way back was «Перезапустить», which creates a new
+                # round and leaves every participant without their chain.
+                st.caption(
+                    "Раунд остановлен: записи запрещены, цепочки участников сохранены. "
+                    "«Начать раунд» возобновит тот же раунд с теми же настройками."
+                )
+                resume_column, _ = st.columns(2)
+                with resume_column:
+                    start_round_button()
             with st.expander("Снимок конфигурации раунда", expanded=False):
                 st.json(round_obj["game_config"])
 
@@ -1141,6 +1163,7 @@ def main() -> None:
     client = get_api_client()
     controller = get_cookie_controller("aml_admin_cookies")
     apply_pending_cookie_command(controller, ADMIN_COOKIE)
+    st.markdown(palette_css(), unsafe_allow_html=True)
     st.markdown(STYLES, unsafe_allow_html=True)
 
     session = resolve_session(controller, ADMIN_COOKIE, client)

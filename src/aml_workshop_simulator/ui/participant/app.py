@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
 import streamlit as st  # noqa: E402
 
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
+from src.aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     PLAY_COOKIE,
     apply_pending_cookie_command,
@@ -47,14 +48,6 @@ st.set_page_config(
 
 STYLES = """
 <style>
-:root, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
-    --aml-primary: #13836f;
-    --aml-line: rgba(127, 127, 127, .28);
-    --aml-surface: rgba(127, 127, 127, .08);
-    --aml-muted: color-mix(in srgb, currentColor 62%, transparent);
-    --aml-danger: #d63b3b;
-    --aml-ok: var(--aml-primary);
-}
 .block-container { max-width: 1240px; padding-top: 1.2rem; padding-bottom: 3rem; }
 [data-testid="stMetric"] {
     padding: .7rem .8rem;
@@ -79,8 +72,8 @@ STYLES = """
 }
 .aml-operation-icon {
     width: 32px; height: 32px; display: grid; place-items: center;
-    border-radius: 50%; color: #fff; background: #13836f;
-    box-shadow: 0 0 0 1px color-mix(in srgb, #13836f 72%, #fff);
+    border-radius: 50%; color: #fff; background: var(--aml-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--aml-primary) 72%, #fff);
     position: relative; left: 8px; top: -8px;
 }
 .aml-operation-icon svg { width: 18px; height: 18px; }
@@ -112,7 +105,18 @@ table.aml-board, table.aml-table { width: 100%; border-collapse: collapse; font-
 table.aml-board th, table.aml-board td, table.aml-table th, table.aml-table td {
     border-bottom: 1px solid var(--aml-line); padding: .45rem .5rem; text-align: left;
 }
-.aml-scroll { overflow-x: auto; }
+.aml-scroll {
+    overflow-x: auto;
+    /* A shadow at the edge that fades out once the table is scrolled to the
+       end: on a phone the last column is simply invisible otherwise, with
+       nothing to suggest a swipe. */
+    background:
+        linear-gradient(to right, var(--aml-surface) 30%, transparent) left / 24px 100% no-repeat,
+        linear-gradient(to left, var(--aml-surface) 30%, transparent) right / 24px 100% no-repeat,
+        radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.16), transparent) left / 12px 100% no-repeat,
+        radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.16), transparent) right / 12px 100% no-repeat;
+    background-attachment: local, local, scroll, scroll;
+}
 [data-testid="stMetricValue"] {
     font-size: clamp(1rem, 2.1vw, 1.6rem) !important;
     line-height: 1.25;
@@ -124,6 +128,25 @@ table.aml-board th, table.aml-board td, table.aml-table th, table.aml-table td {
 [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-form-label) {
     padding: .25rem 0 .55rem;
     border-bottom: 1px solid var(--aml-line);
+}
+/* Button labels are single words («Дублировать»); breaking them mid-word is
+   never the right answer, so they stay whole and the row wraps instead. */
+[data-testid="stHorizontalBlock"] [data-testid="stButton"] button p,
+[data-testid="stHorizontalBlock"] [data-testid="stBaseButton-secondary"] p,
+[data-testid="stHorizontalBlock"] [data-testid="stBaseButton-primary"] p {
+    white-space: nowrap;
+}
+/* Between 1100px and the 1240px container the four step controls are narrower
+   than their labels. Two by two fits every laptop width down to the tablet
+   rules below. */
+@media (min-width: 1101px) and (max-width: 1500px) {
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] [data-testid="stButton"]) {
+        flex-wrap: wrap;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] [data-testid="stButton"]) > [data-testid="stColumn"] {
+        flex: 1 1 46%;
+        min-width: 46%;
+    }
 }
 @media (max-width: 1100px) {
     [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
@@ -311,6 +334,12 @@ def load_scenario(client: Any, round_id: int, session_id: str) -> None:
 # --------------------------------------------------------------------------
 
 
+#: How many payloads the per-session preview cache keeps. A chain is at most a
+#: dozen steps and each edit produces one new payload, so this holds a working
+#: session comfortably while bounding what one participant can pin in memory.
+PREVIEW_CACHE_LIMIT = 32
+
+
 def preview(
     client: Any, round_id: int, session_id: str, steps: list[dict[str, Any]]
 ) -> dict[str, Any]:
@@ -339,7 +368,7 @@ def preview(
     # The snapshot of a given payload is deterministic for a given round, so it
     # is safe to remember; the cache is bounded because only the current chain
     # and the candidate step are ever read back.
-    if len(cache) >= 32:
+    if len(cache) >= PREVIEW_CACHE_LIMIT:
         cache.clear()
     cache[key] = result
     return result
@@ -855,14 +884,26 @@ def render_builder(
         ",".join(param["param"] for param in card.get("visible_params", [])),
     )
 
+    # The step being composed keeps one id until it is actually added. It does
+    # two jobs: a fresh uuid on every rerun made the preview cache key different
+    # every time, so the candidate preview could never hit the cache; and it
+    # keys the form, so adding a step produces genuinely new widgets instead of
+    # ones that keep whatever the participant last typed.
+    candidate_id = st.session_state.get("candidate_step_id")
+    if not candidate_id:
+        candidate_id = str(uuid.uuid4())
+        st.session_state["candidate_step_id"] = candidate_id
+
     draft_key = f"builder_step_{selected}"
     if draft_key not in st.session_state:
         st.session_state[draft_key] = default_step(card)
-    step = render_step_form(card, st.session_state[draft_key], f"builder_{selected}")
+    step = render_step_form(
+        card, st.session_state[draft_key], f"builder_{selected}_{candidate_id}"
+    )
     st.session_state[draft_key] = step
 
     steps: list[dict[str, Any]] = st.session_state["draft_steps"]
-    candidate = {**step, "step_id": str(uuid.uuid4())}
+    candidate = {**step, "step_id": candidate_id}
     candidate_preview = preview(client, round_id, session_id, [*steps, candidate])
     candidate_resources = candidate_preview.get("resources") or {}
     candidate_blockers = [
@@ -893,6 +934,13 @@ def render_builder(
         disabled=blocked,
     ):
         steps.append(candidate)
+        # A new step gets a new id, which retires the widgets of the old one and
+        # leaves the form on its defaults. Clearing the keys instead does not
+        # work: a widget that is rendered again is re-registered from the value
+        # the frontend still holds.
+        st.session_state["candidate_step_id"] = None
+        for key in [k for k in st.session_state if k.startswith(f"builder_{selected}_")]:
+            del st.session_state[key]
         st.session_state[draft_key] = default_step(card)
         st.rerun(scope="fragment")
 
@@ -1416,19 +1464,32 @@ def page_result() -> None:
     )
 
     explanation = result.get("explanation") or {}
+    # Two steps can produce the same wording with different weights, which reads
+    # as a duplicate unless the step is named next to it.
+    # The scored snapshot already names every step, so no extra call is needed.
+    steps_by_id = {
+        str(item.get("step_id")): item
+        for item in (result.get("resources") or {}).get("per_step", [])
+    }
+
+    def factor_line(factor: dict[str, Any], sign: str) -> str:
+        step = steps_by_id.get(str(factor.get("step_id")))
+        source = ""
+        if step:
+            title = escape(str(step.get("card_title") or ""))
+            source = (
+                f' <span class="aml-step-meta">шаг {step.get("step_index")}'
+                f'{": " + title if title else ""}</span>'
+            )
+        return f"**{sign}{factor['points']}** · {escape(factor['description'])}{source}"
+
     risk_tab, protective_tab = st.tabs(["Факторы риска", "Защитные факторы"])
     with risk_tab:
         for factor in explanation.get("top_risk_factors", []):
-            st.markdown(
-                f"**+{factor['points']}** · {escape(factor['description'])}",
-                unsafe_allow_html=True,
-            )
+            st.markdown(factor_line(factor, "+"), unsafe_allow_html=True)
     with protective_tab:
         for factor in explanation.get("protective_factors", []):
-            st.markdown(
-                f"**{factor['points']}** · {escape(factor['description'])}",
-                unsafe_allow_html=True,
-            )
+            st.markdown(factor_line(factor, ""), unsafe_allow_html=True)
     st.caption(explanation.get("disclaimer", ""))
 
 
@@ -1489,6 +1550,7 @@ def main() -> None:
     client = get_api_client()
     controller = get_cookie_controller("aml_play_cookies")
     apply_pending_cookie_command(controller, PLAY_COOKIE)
+    st.markdown(palette_css(), unsafe_allow_html=True)
     st.markdown(STYLES, unsafe_allow_html=True)
 
     session = resolve_session(controller, PLAY_COOKIE, client)
