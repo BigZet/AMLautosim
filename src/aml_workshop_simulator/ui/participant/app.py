@@ -206,7 +206,6 @@ def init_state() -> None:
         "editing_step_id": None,
         "pending_command": None,
         "preview_cache": {},
-        "reveal_names": False,
         "selected_version": None,
     }
     for key, value in defaults.items():
@@ -1432,8 +1431,8 @@ def page_leaderboard() -> None:
     header(
         "Лидерборд",
         "Итоги раунда",
-        "Ники скрыты по умолчанию: сервер отдаёт обезличенные места, пока их не "
-        "раскроют явно.",
+        "Ники скрыты: сервер отдаёт обезличенные места. Своя строка помечена "
+        "«· вы». Раскрыть имена может только ведущий.",
     )
 
     rounds = client.get_my_rounds(session_id).get("rows", [])
@@ -1443,22 +1442,12 @@ def page_leaderboard() -> None:
     options = {f"#{row['id']} · {row['title']}": row for row in rounds}
     chosen = st.selectbox("Раунд", list(options), key="board_round")
 
-    reveal = bool(st.session_state.get("reveal_names"))
-    marker("names-revealed", "true" if reveal else "false")
-    control_column, _ = st.columns([1, 3])
-    with control_column:
-        if reveal:
-            if st.button("Скрыть ники", key="hide_names", use_container_width=True):
-                st.session_state["reveal_names"] = False
-                st.rerun()
-        else:
-            if st.button(
-                "Показать все ники", key="reveal_names", use_container_width=True
-            ):
-                st.session_state["reveal_names"] = True
-                st.rerun()
+    # Revealing nicknames is the organiser's command, made from the admin app.
+    # Here the board stays anonymous: `is_current_user` is how a participant
+    # finds their own row.
+    marker("names-revealed", "false")
 
-    board = client.get_leaderboard(options[chosen]["id"], session_id, reveal=reveal)
+    board = client.get_leaderboard(options[chosen]["id"], session_id)
     rows = board.get("rows", [])
     marker("leaderboard-rows", len(rows))
     if not rows:

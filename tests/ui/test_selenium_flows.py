@@ -450,10 +450,20 @@ def test_a_submitted_version_is_the_one_that_gets_scored(
         "the nickname reached the browser before it was revealed"
     )
     assert "Игрок #1" in text_of(driver, '[data-testid="leaderboard-table"]')
+    # The participant has no way to reveal: the control belongs to the
+    # organiser, and asking the API directly is refused.
+    assert not page_contains(driver, "Показать все ники")
 
-    click(driver, "reveal_names")
+    logout(driver)
+    ui_login(driver, stack.admin_url, ADMIN_EMAIL, ADMIN_PASSWORD, admin=True)
+    open_page(driver, "Лидерборд")
+    open_tab(driver, "Экран для зала")
+    expect_marker(driver, "names-revealed", "false")
+    assert PROVOCATIVE_NICKNAME not in driver.page_source
+
+    click(driver, "show_names")
     expect_marker(driver, "names-revealed", "true")
-    assert PROVOCATIVE_NICKNAME in text_of(driver, '[data-testid="leaderboard-table"]')
+    assert PROVOCATIVE_NICKNAME in text_of(driver, '[data-testid="public-board-table"]')
 
     click(driver, "hide_names")
     expect_marker(driver, "names-revealed", "false")

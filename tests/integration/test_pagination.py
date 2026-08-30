@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 import psycopg2
 import pytest
 
+from tests.conftest import register_participant
 from tests.helpers import put_scenario, valid_chain
 
 ROSTER_SIZE = 130
@@ -208,3 +209,27 @@ def test_the_masked_board_keeps_counting_across_pages(client, completed_round):
     paged = _walk(client, url, None, {"limit": 1})
     assert [row["display_name"] for row in paged] == ["Игрок #1", "Игрок #2"]
     assert [row["rank"] for row in paged] == [row["rank"] for row in whole]
+
+
+def test_a_finished_round_stays_reachable_without_a_saved_chain(
+    client, admin_headers, completed_round
+):
+    """Somebody who joined too late to save anything still gets the results.
+
+    Both participant pages — «Результат» and «Лидерборд» — build their round
+    picker from /rounds/mine. Listing only rounds with a chain of one's own left
+    a latecomer looking at «Раундов пока нет» while the board was full.
+    """
+    latecomer = register_participant(client, display_name="Опоздавший")
+
+    mine = client.get("/api/v1/rounds/mine", headers=latecomer["headers"])
+    assert mine.status_code == 200, mine.text
+    rows = mine.json()["rows"]
+    assert [row["id"] for row in rows] == [completed_round]
+    # Visible, but nothing of anyone else's is offered along with it.
+    assert rows[0]["scenario_status"] is None
+    assert rows[0]["result_available"] is False
+
+    board = client.get(f"/api/v1/rounds/{completed_round}/leaderboard")
+    assert board.status_code == 200, board.text
+    assert board.json()["rows"], "the board the latecomer came for is not empty"

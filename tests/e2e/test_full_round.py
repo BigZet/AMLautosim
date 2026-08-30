@@ -151,8 +151,12 @@ def test_full_round_from_registration_to_leaderboard(reset_state: Stack) -> None
     for player in players[:2]:
         assert player["display_name"] not in str(board)
 
+    # Revealing is the organiser's command: the participants' own sessions and
+    # an anonymous caller are both refused.
     revealed = stack.request(
-        "GET", f"/api/v1/rounds/{round_id}/leaderboard?reveal=true"
+        "GET",
+        f"/api/v1/rounds/{round_id}/leaderboard?reveal=true",
+        session_id=admin_session,
     )
     assert revealed["revealed"] is True
     assert {row["display_name"] for row in revealed["rows"]} == {

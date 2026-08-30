@@ -996,18 +996,9 @@ def page_participants() -> None:
                         st.rerun()
 
 
-def page_leaderboard() -> None:
-    client = get_api_client()
-    session_id = st.session_state["session_id"]
-    header(
-        "Лидерборд",
-        "Базовые и эффективные значения",
-        "Административный вид: настоящие имена и заблокированные участники видны здесь.",
-    )
-    round_obj = select_round(client, session_id)
-    if not round_obj:
-        return
-    board = client.admin_get_leaderboard(round_obj["id"], session_id)
+def _admin_board(client, round_id: int, session_id: str) -> None:
+    """Real identities, base and effective values, blocked participants."""
+    board = client.admin_get_leaderboard(round_id, session_id)
     rows = board.get("rows", [])
     marker("admin-board-rows", len(rows))
     if not rows:
@@ -1032,6 +1023,76 @@ def page_leaderboard() -> None:
         f"<tbody>{body}</tbody></table></div>",
         unsafe_allow_html=True,
     )
+
+
+def _projector_board(client, round_id: int, session_id: str) -> None:
+    """The board as the room sees it, and the only place names are revealed.
+
+    Participants get places without names. Revealing is the organiser's command
+    because this is what goes on the projector: the risk being managed is a
+    provocative nickname in front of the room.
+    """
+    reveal = bool(st.session_state.get("reveal_names"))
+    marker("names-revealed", "true" if reveal else "false")
+    control_column, _ = st.columns([1, 3])
+    with control_column:
+        if reveal:
+            if st.button("Скрыть ники", key="hide_names", use_container_width=True):
+                st.session_state["reveal_names"] = False
+                st.rerun()
+        elif st.button(
+            "Показать все ники", key="show_names", use_container_width=True
+        ):
+            st.session_state["reveal_names"] = True
+            st.rerun()
+
+    board = client.get_leaderboard(round_id, session_id, reveal=reveal)
+    rows = board.get("rows", [])
+    marker("public-board-rows", len(rows))
+    if not rows:
+        st.info("Лидерборд появится после завершения раунда.")
+        return
+    st.caption(
+        "Настоящие имена на экране."
+        if reveal
+        else "Ники скрыты: участники видят ровно это."
+    )
+    body = "".join(
+        "<tr>"
+        f"<td>{row['rank']}</td>"
+        f"<td>{escape(row['display_name'])}</td>"
+        f"<td>{row['game_score']}</td>"
+        f"<td>{row['stealth_score']}</td>"
+        f"<td>{row['resource_score']}</td>"
+        "</tr>"
+        for row in rows
+    )
+    st.markdown(
+        '<div class="aml-scroll"><table class="aml-table" data-testid="public-board-table">'
+        "<thead><tr><th>Место</th><th>Участник</th><th>Балл</th>"
+        f"<th>Незаметность</th><th>Ресурсы</th></tr></thead>"
+        f"<tbody>{body}</tbody></table></div>",
+        unsafe_allow_html=True,
+    )
+
+
+def page_leaderboard() -> None:
+    client = get_api_client()
+    session_id = st.session_state["session_id"]
+    header(
+        "Лидерборд",
+        "Базовые и эффективные значения",
+        "Административный вид показывает настоящие имена всегда; экран для зала — "
+        "только по вашей команде.",
+    )
+    round_obj = select_round(client, session_id)
+    if not round_obj:
+        return
+    admin_tab, projector_tab = st.tabs(["Административный вид", "Экран для зала"])
+    with admin_tab:
+        _admin_board(client, round_obj["id"], session_id)
+    with projector_tab:
+        _projector_board(client, round_obj["id"], session_id)
 
 
 def page_audit() -> None:

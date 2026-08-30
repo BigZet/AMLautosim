@@ -20,6 +20,8 @@ from src.aml_workshop_simulator.api.pagination import (
 )
 from src.aml_workshop_simulator.api.errors import (
     Conflict,
+    Forbidden,
+    NotAuthenticated,
     NotFound,
     ScenarioValidationFailed,
     ValidationFailed,
@@ -286,8 +288,9 @@ async def get_my_rounds(
     """Rounds this participant can open, newest first.
 
     That is every round they saved a chain in, plus the round currently on
-    screen — the latter even without a chain, so somebody who joined late still
-    reaches the round they are sitting in.
+    screen and the last one to finish — those two even without a chain, so
+    somebody who joined late still reaches the round they are sitting in and
+    the results of the one just played.
     """
     after = decode_cursor(cursor, 1)
     current_id = (
@@ -298,6 +301,19 @@ async def get_my_rounds(
             .limit(1)
         )
     ).scalars().first()
+    # A round that has finished is still the round on screen. Somebody who
+    # joined too late to save a chain would otherwise be told «Раундов пока
+    # нет» and lose the leaderboard along with it, because both participant
+    # pages build their round picker from this list.
+    latest_completed = (
+        await db.execute(
+            select(Round.id)
+            .where(Round.status == "completed")
+            .order_by(Round.id.desc())
+            .limit(1)
+        )
+    ).scalars().first()
+    visible_ids = {value for value in (current_id, latest_completed) if value}
 
     # One ordered query over both sources: prepending the current round to a
     # separately limited list made the page longer than `limit` and left no
@@ -310,7 +326,7 @@ async def get_my_rounds(
             & (Scenario.participant_id == principal.user_id),
         )
         .outerjoin(ScoringResult, ScoringResult.scenario_id == Scenario.id)
-        .where(or_(Scenario.id.is_not(None), Round.id == current_id))
+        .where(or_(Scenario.id.is_not(None), Round.id.in_(visible_ids or [0])))
         .order_by(Round.id.desc())
         .limit(limit + 1)
     )
@@ -855,8 +871,9 @@ async def get_public_leaderboard(
     reveal: bool = Query(
         default=False,
         description=(
-            "Explicitly ask for the real nicknames. The default projection "
-            "carries masked placeholders only."
+            "The organiser's explicit command to show the real nicknames. "
+            "Requires an administrator session; the default projection carries "
+            "masked placeholders only."
         ),
     ),
     principal: CurrentPrincipal | None = Depends(get_principal_optional),
@@ -866,10 +883,23 @@ async def get_public_leaderboard(
 
     Nicknames are hidden by default: the response literally contains
     `Игрок #1`, `Игрок #2`, … and no participant name at all, so a nickname
-    cannot leak through the page source before the organiser or the player asks
-    for it. Passing `reveal=true` is the explicit request that returns the real
-    display names.
+    cannot leak through the page source before the organiser asks for it.
+
+    `reveal=true` is that request, and it belongs to the organiser alone. The
+    board goes on a projector, where the risk is a provocative nickname in front
+    of the room; a participant revealing the names on their own phone, or an
+    outsider who merely knows the round id doing it over HTTP, is exactly the
+    disclosure the masking exists to prevent.
     """
+    if reveal:
+        if principal is None:
+            raise NotAuthenticated(
+                "Раскрытие ников доступно только ведущему.", code="session_missing"
+            )
+        if principal.role != "admin" or principal.audience != "admin":
+            raise Forbidden(
+                "Раскрытие ников доступно только ведущему.", code="forbidden"
+            )
     round_obj = await _get_round(db, round_id)
     generated_at = datetime.now(UTC)
     if round_obj.status != "completed":

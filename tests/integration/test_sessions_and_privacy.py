@@ -289,18 +289,33 @@ def test_the_public_board_hides_the_nickname_by_default(
     assert row["masked"] is True
 
 
-def test_the_nickname_is_only_returned_on_an_explicit_request(
-    client, completed_round
+def test_only_the_organiser_can_ask_for_the_nickname(
+    client, admin_headers, completed_round
 ) -> None:
-    round_id = completed_round["round_id"]
-    page = client.get(f"/api/v1/rounds/{round_id}/leaderboard?reveal=true").json()
+    """The board goes on a projector, so revealing it is the host's command.
+
+    A participant revealing the room's nicknames on their own phone, or an
+    outsider who merely knows the round id doing it over HTTP, is exactly the
+    disclosure the masking exists to prevent.
+    """
+    url = f"/api/v1/rounds/{completed_round['round_id']}/leaderboard?reveal=true"
+
+    anonymous = client.get(url)
+    assert anonymous.status_code == 401, anonymous.text
+    assert PROVOCATIVE_NICKNAME not in anonymous.text
+
+    as_participant = client.get(url, headers=completed_round["player"]["headers"])
+    assert as_participant.status_code == 403, as_participant.text
+    assert PROVOCATIVE_NICKNAME not in as_participant.text
+
+    page = client.get(url, headers=admin_headers).json()
     assert page["revealed"] is True
     assert page["rows"][0]["display_name"] == PROVOCATIVE_NICKNAME
     assert page["rows"][0]["masked"] is False
 
 
 def test_masking_keeps_the_placement_and_the_own_row_marker(
-    client, completed_round
+    client, admin_headers, completed_round
 ) -> None:
     round_id = completed_round["round_id"]
     player = completed_round["player"]
@@ -308,7 +323,7 @@ def test_masking_keeps_the_placement_and_the_own_row_marker(
         f"/api/v1/rounds/{round_id}/leaderboard", headers=player["headers"]
     ).json()
     revealed = client.get(
-        f"/api/v1/rounds/{round_id}/leaderboard?reveal=true", headers=player["headers"]
+        f"/api/v1/rounds/{round_id}/leaderboard?reveal=true", headers=admin_headers
     ).json()
 
     assert [row["rank"] for row in masked["rows"]] == [
