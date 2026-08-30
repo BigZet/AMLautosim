@@ -181,3 +181,55 @@ def test_legacy_round_is_frozen_before_catalog_refresh(
     monkeypatch.setattr(seed_database, "CARD_CATALOG", changed)
     asyncio.run(seed_database.seed())
     assert client.get(f"/api/v1/rounds/{draft['id']}/cards").json() == before
+
+
+def test_a_round_naming_a_deleted_card_no_longer_stops_the_seed(
+    client, admin_headers, db_dsn, monkeypatch
+):
+    """The upgrade path of an installation that lost a card version.
+
+    Reducing the catalog deleted the card rows before rounds carried their own
+    `card_snapshots`. From then on every API start re-ran the seed, the freeze
+    refused a round it could not resolve, the seed exited non-zero and — because
+    the container runs the seed before uvicorn — the service never came back.
+
+    The seed now drops the dead reference, exactly as `RoundPolicy` already does
+    at play time, and keeps everything else about the round.
+    """
+    draft = client.get("/api/v1/admin/rounds", headers=admin_headers).json()[0]
+    round_id = draft["id"]
+    doomed = draft["game_config"]["operations"][-1]["code"]
+    survivors = {
+        op["code"] for op in draft["game_config"]["operations"] if op["code"] != doomed
+    }
+
+    with psycopg2.connect(db_dsn) as connection:
+        with connection.cursor() as cursor:
+            # The round predates frozen snapshots...
+            cursor.execute(
+                "UPDATE rounds SET game_config = game_config - 'card_snapshots' "
+                "WHERE id = %s",
+                (round_id,),
+            )
+            # ...and an earlier seed already removed the card it names.
+            cursor.execute("DELETE FROM action_cards WHERE code = %s", (doomed,))
+
+    reduced = [entry for entry in deepcopy(seed_database.CARD_CATALOG)
+               if entry["code"] != doomed]
+    monkeypatch.setattr(seed_database, "CARD_CATALOG", reduced)
+    asyncio.run(seed_database.seed())
+
+    after = client.get(
+        f"/api/v1/admin/rounds/{round_id}", headers=admin_headers
+    ).json()
+    config = after["game_config"]
+    assert {op["code"] for op in config["operations"]} == survivors
+    assert len(config["card_snapshots"]) == len(survivors)
+    # Everything that is not the dead reference survives untouched.
+    assert after["title"] == draft["title"]
+    assert after["status"] == draft["status"]
+    assert config["resources"] == draft["game_config"]["resources"]
+    assert config["objectives"] == draft["game_config"]["objectives"]
+    # The round is playable: the surviving cards are the ones it now offers.
+    cards = client.get(f"/api/v1/rounds/{round_id}/cards").json()
+    assert {card["code"] for card in cards} == survivors

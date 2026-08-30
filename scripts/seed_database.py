@@ -87,7 +87,28 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
     old_cards = list((await db.execute(select(ActionCard))).scalars().all())
     rounds = list((await db.execute(select(Round).with_for_update())).scalars().all())
     for round_obj in rounds:
-        config = freeze_game_config(round_obj.game_config, old_cards)
+        # An installation upgraded across a catalog reduction carries rounds
+        # that name card versions this build no longer ships. Refusing to
+        # freeze them would abort the seed and, because the API container runs
+        # the seed before uvicorn, the service would never start again. Drop the
+        # dead references instead -- `RoundPolicy` already skips them at play
+        # time -- and say out loud what was dropped.
+        dropped: list[tuple[str, int]] = []
+        config = freeze_game_config(
+            round_obj.game_config, old_cards, strict=False, dropped=dropped
+        )
+        if dropped:
+            print(
+                f"seed: round {round_obj.id}: dropped card versions no longer in "
+                f"the catalog: {', '.join(f'{code} v{version}' for code, version in dropped)}",
+                file=sys.stderr,
+            )
+        if not config.get("card_snapshots"):
+            print(
+                f"seed: round {round_obj.id}: left unfrozen, none of its card "
+                "versions still exist in the catalog",
+                file=sys.stderr,
+            )
         if "config_version" in config:
             from src.aml_workshop_simulator.api.routers.admin.common import (
                 config_version,
