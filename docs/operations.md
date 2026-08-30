@@ -160,6 +160,17 @@ Events:
 Не логируются email, display name, password/hash, raw session ID/cookie/session hash/`X-Session-ID`, request body,
 full scenario, action details, explanation, DSN и raw idempotency key.
 
+Гарантия обеспечивается allowlist'ом полей в `core/logging.py`, а не дисциплиной вызывающих:
+поле вне списка отбрасывается, и в строку попадает только его *имя*, в `dropped_fields`.
+`route` — шаблон пути (`/api/v1/rounds/{round_id}/scenario`), не полный URL: query string
+может нести значения, которых в логе быть не должно. `/health/live` и `/health/ready`
+не логируются — их опрашивает healthcheck каждые десять секунд; логируются только
+переходы готовности (`readiness_changed`).
+
+Обычный поток одного запроса: `request_started` → доменное событие → `request_completed`.
+Отказ, принятый сервисом осознанно (409, 403, 422), — это `request_refused` с `reason_code`;
+необработанное исключение — `request_failed` с traceback.
+
 ## 8. Request correlation
 
 ```mermaid

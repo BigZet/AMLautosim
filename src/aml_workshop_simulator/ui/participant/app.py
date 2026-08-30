@@ -249,12 +249,19 @@ def show_flash() -> None:
         kind, st.info
     )
     container(message)
+    request_id = st.session_state.pop("flash_request_id", None)
+    if request_id:
+        # `docs/operations.md` §8: the operator searches the API log by this id,
+        # so the person in front of the screen has to be able to read it out.
+        st.caption(f"Код обращения: {request_id}")
+        marker("flash-request-id", request_id)
     marker(f"flash-{kind}", message)
     st.session_state["flash"] = None
 
 
-def set_flash(kind: str, message: str) -> None:
+def set_flash(kind: str, message: str, request_id: str | None = None) -> None:
     st.session_state["flash"] = (kind, message)
+    st.session_state["flash_request_id"] = request_id
 
 
 def apply_error(error: APIClientError) -> None:
@@ -270,7 +277,7 @@ def apply_error(error: APIClientError) -> None:
         chain.append(violation)
     st.session_state["field_errors"] = field_errors
     st.session_state["chain_violations"] = chain
-    set_flash("error", error.message)
+    set_flash("error", error.message, error.request_id)
 
 
 def store_scenario(scenario: dict[str, Any]) -> None:

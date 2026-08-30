@@ -1,16 +1,36 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.aml_workshop_simulator.core.logging import log_event
 from src.aml_workshop_simulator.db.session import get_db
 from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
 from src.aml_workshop_simulator.domain.scoring import LEADERBOARD_VERSION, SCORING_VERSION
 
 router = APIRouter()
+
+#: Last readiness answer, so only the *transitions* are logged. Polled every ten
+#: seconds by the container healthcheck, this endpoint would otherwise be the
+#: only thing in the log.
+_last_readiness: str | None = None
+
+
+def _report(status_value: str, checks: dict[str, object]) -> dict[str, object]:
+    global _last_readiness
+    if status_value != _last_readiness:
+        log_event(
+            "readiness_changed",
+            level=logging.INFO if status_value == "ready" else logging.ERROR,
+            outcome=status_value,
+            reason_code=str(checks.get("migrations") or checks.get("database") or "ok"),
+        )
+        _last_readiness = status_value
+    return {"status": status_value, "checks": checks}
 
 MIGRATIONS_DIR = Path(__file__).resolve().parents[4] / "migrations" / "versions"
 
@@ -57,7 +77,7 @@ async def health_ready(
         checks["database"] = "connected"
     except Exception:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-        return {"status": "not_ready", "checks": {"database": "unavailable"}}
+        return _report("not_ready", {"database": "unavailable"})
 
     try:
         applied = {
@@ -67,13 +87,13 @@ async def health_ready(
     except Exception:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         checks["migrations"] = "alembic_version missing"
-        return {"status": "not_ready", "checks": checks}
+        return _report("not_ready", checks)
 
     expected = _expected_heads()
     if expected and applied != expected:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         checks["migrations"] = "behind head"
-        return {"status": "not_ready", "checks": checks}
+        return _report("not_ready", checks)
 
     checks["migrations"] = "head"
-    return {"status": "ready", "checks": checks}
+    return _report("ready", checks)

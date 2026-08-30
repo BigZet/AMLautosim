@@ -28,6 +28,7 @@ from src.aml_workshop_simulator.api.errors import (
     first_message,
     violations_payload,
 )
+from src.aml_workshop_simulator.core.logging import log_event
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
     LeaderboardAdjustment,
@@ -556,6 +557,13 @@ async def put_scenario(
         await db.commit()
 
     await db.refresh(scenario)
+    log_event(
+        "scenario_saved",
+        round_id=round_id,
+        scenario_id=scenario.id,
+        user_id=principal.user_id,
+        revision=scenario.revision,
+    )
     return await scenario_out(db, scenario)
 
 

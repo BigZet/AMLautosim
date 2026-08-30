@@ -137,12 +137,19 @@ def show_flash() -> None:
     {"success": st.success, "error": st.error, "warning": st.warning}.get(kind, st.info)(
         message
     )
+    request_id = st.session_state.pop("flash_request_id", None)
+    if request_id:
+        # `docs/operations.md` §8: the operator searches the API log by this id,
+        # so the person in front of the screen has to be able to read it out.
+        st.caption(f"Код обращения: {request_id}")
+        marker("flash-request-id", request_id)
     marker(f"flash-{kind}", message)
     st.session_state["flash"] = None
 
 
-def set_flash(kind: str, message: str) -> None:
+def set_flash(kind: str, message: str, request_id: str | None = None) -> None:
     st.session_state["flash"] = (kind, message)
+    st.session_state["flash_request_id"] = request_id
 
 
 def money(value: Any) -> str:
@@ -274,7 +281,7 @@ def page_round_setup() -> None:
                     "чтобы открыть его участникам.",
                 )
             except APIClientError as error:
-                set_flash("error", error.message)
+                set_flash("error", error.message, error.request_id)
             finally:
                 st.session_state["pending_command"] = None
             st.rerun()
@@ -297,7 +304,7 @@ def page_round_setup() -> None:
                     )
                     set_flash("success", f"Пресет «{preset_name}» сохранен.")
                 except APIClientError as error:
-                    set_flash("error", error.message)
+                    set_flash("error", error.message, error.request_id)
                 st.rerun()
 
     with manage_tab:
@@ -340,7 +347,7 @@ def page_round_setup() -> None:
                         )
                         set_flash("success", "Конфигурация раунда сохранена.")
                     except APIClientError as error:
-                        set_flash("error", error.message)
+                        set_flash("error", error.message, error.request_id)
                     st.rerun()
             with edit_columns[1]:
                 if st.button(
@@ -355,7 +362,7 @@ def page_round_setup() -> None:
                         )
                         set_flash("success", "Раунд запущен: участники могут играть.")
                     except APIClientError as error:
-                        set_flash("error", error.message)
+                        set_flash("error", error.message, error.request_id)
                     finally:
                         st.session_state["pending_command"] = None
                     st.rerun()
@@ -393,7 +400,7 @@ def page_round_setup() -> None:
                         "все данные сохранены.",
                     )
                 except APIClientError as error:
-                    set_flash("error", error.message)
+                    set_flash("error", error.message, error.request_id)
                 finally:
                     st.session_state["pending_command"] = None
                 st.rerun()
@@ -428,7 +435,7 @@ def page_round_setup() -> None:
                         f"раунд #{round_id} остановлен и сохранён.",
                     )
                 except APIClientError as error:
-                    set_flash("error", error.message)
+                    set_flash("error", error.message, error.request_id)
                 finally:
                     st.session_state["pending_command"] = None
                 st.rerun()
@@ -500,7 +507,7 @@ def page_presets() -> None:
                 )
                 set_flash("success", "Пресет обновлен.")
             except APIClientError as error:
-                set_flash("error", error.message)
+                set_flash("error", error.message, error.request_id)
             st.rerun()
     with columns[1]:
         if st.button(
@@ -515,7 +522,7 @@ def page_presets() -> None:
                 )
                 set_flash("success", "Пресет сохранен как новый.")
             except APIClientError as error:
-                set_flash("error", error.message)
+                set_flash("error", error.message, error.request_id)
             st.rerun()
     with columns[2]:
         round_title = st.text_input(
@@ -534,7 +541,7 @@ def page_presets() -> None:
                     "Запуск выполняется отдельной командой.",
                 )
             except APIClientError as error:
-                set_flash("error", error.message)
+                set_flash("error", error.message, error.request_id)
             st.rerun()
     with columns[3]:
         delete_confirmed = st.checkbox("Подтверждаю удаление", key="confirm_delete_preset")
@@ -548,7 +555,7 @@ def page_presets() -> None:
                 client.admin_delete_preset(preset["id"], session_id)
                 set_flash("success", "Пресет удален.")
             except APIClientError as error:
-                set_flash("error", error.message)
+                set_flash("error", error.message, error.request_id)
             st.rerun()
 
 
@@ -622,7 +629,7 @@ def page_monitoring() -> None:
                 f"за {summary['duration_ms']} мс.",
             )
         except APIClientError as error:
-            set_flash("error", error.message)
+            set_flash("error", error.message, error.request_id)
         finally:
             st.session_state["pending_command"] = None
         st.rerun()
@@ -945,7 +952,7 @@ def page_participants() -> None:
                     )
                     set_flash("success", "Состояние доступа обновлено.")
                 except APIClientError as error:
-                    set_flash("error", error.message)
+                    set_flash("error", error.message, error.request_id)
                 st.rerun()
 
         with adjust_column:
@@ -978,7 +985,7 @@ def page_participants() -> None:
                         )
                         set_flash("success", "Корректировка сохранена.")
                     except APIClientError as error:
-                        set_flash("error", error.message)
+                        set_flash("error", error.message, error.request_id)
                     st.rerun()
                 if current_revision:
                     if st.button(
@@ -992,7 +999,7 @@ def page_participants() -> None:
                             )
                             set_flash("success", "Корректировка снята.")
                         except APIClientError as error:
-                            set_flash("error", error.message)
+                            set_flash("error", error.message, error.request_id)
                         st.rerun()
 
 

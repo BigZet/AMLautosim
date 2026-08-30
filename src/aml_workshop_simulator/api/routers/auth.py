@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
@@ -21,6 +22,7 @@ from src.aml_workshop_simulator.api.errors import (
     RateLimited,
 )
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.logging import log_event
 from src.aml_workshop_simulator.core.request_meta import request_meta
 from src.aml_workshop_simulator.core.security import (
     get_password_hash,
@@ -115,12 +117,24 @@ async def login(
             )
 
     if user is None or not verify_password(payload.password, user.hashed_password):
+        locked = False
         if user is not None:
             user.failed_login_count = int(user.failed_login_count or 0) + 1
             if user.failed_login_count >= settings.LOGIN_MAX_FAILED_ATTEMPTS:
                 user.locked_until = now + timedelta(minutes=settings.LOGIN_LOCKOUT_MINUTES)
                 user.failed_login_count = 0
+                locked = True
             await db.commit()
+        # `docs/operations.md` §7: an authentication failure is logged without
+        # the email. An unknown address carries no user_id either, which is also
+        # what keeps the log from confirming whether an account exists.
+        log_event(
+            "login_failed",
+            level=logging.WARNING,
+            audience=payload.audience,
+            user_id=user.id if user is not None else None,
+            outcome="account_locked" if locked else "invalid_credentials",
+        )
         raise NotAuthenticated(INVALID_CREDENTIALS, code="invalid_credentials")
 
     if user.is_blocked:
@@ -159,6 +173,12 @@ async def login(
     user.last_login_at = now
     await db.commit()
 
+    log_event(
+        "login_succeeded",
+        user_id=user.id,
+        role=user.role,
+        audience=payload.audience,
+    )
     return SessionCreatedOut(
         session_id=raw_session_id,
         expires_at=expires_at,

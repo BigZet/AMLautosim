@@ -177,6 +177,7 @@ def reset_user_state() -> None:
         "field_errors",
         "chain_violations",
         "flash",
+        "flash_request_id",
         "editing_step_id",
         "pending_command",
         "last_saved_hash",

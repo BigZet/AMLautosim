@@ -37,12 +37,16 @@ class APIClientError(Exception):
         status_code: int = 500,
         code: str = "error",
         details: Any = None,
+        request_id: str | None = None,
     ):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
         self.code = code
         self.details = details
+        #: Correlation id of the failed call. `docs/operations.md` §8 asks the
+        #: UI to show it, because it is what an operator searches the API log by.
+        self.request_id = request_id
 
 
 class SimulatorAPIClient:
@@ -96,6 +100,8 @@ class SimulatorAPIClient:
                 status_code=response.status_code,
                 code=code,
                 details=details,
+                request_id=data.get("request_id")
+                or response.headers.get("X-Request-ID"),
             )
         return data
 

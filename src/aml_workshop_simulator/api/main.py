@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import time
 import uuid
 from typing import Any
 
@@ -11,11 +13,18 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from src.aml_workshop_simulator.api.errors import ApiError
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.logging import (
+    REQUEST_ID,
+    configure_logging,
+    log_event,
+    log_exception,
+)
 from src.aml_workshop_simulator.schemas.catalog_config import (
     validate_configuration_files,
 )
 
 validate_configuration_files()
+configure_logging("api")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -28,15 +37,62 @@ app = FastAPI(
 #: Request/response headers that must never reach logs or audit events.
 SENSITIVE_HEADERS = {"x-session-id", "authorization", "cookie"}
 
+#: Endpoints an orchestrator polls every few seconds. Logging them would bury
+#: the events an operator is actually looking for.
+UNLOGGED_ROUTES = {"/health/live", "/health/ready"}
+
 
 @app.middleware("http")
 async def correlation_middleware(request: Request, call_next: Any) -> Any:
+    """Correlate and time one request, and log both ends of it.
+
+    The id travels back in `X-Request-ID` and is what an operator searches by;
+    `REQUEST_ID` carries it to every log call made while serving the request, so
+    handlers do not have to thread it through themselves.
+    """
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
     request.state.request_id = request_id
-    response = await call_next(request)
-    response.headers["X-Request-ID"] = request_id
-    response.headers.setdefault("Cache-Control", "no-store")
-    return response
+    token = REQUEST_ID.set(request_id)
+    started = time.perf_counter()
+    quiet = request.url.path in UNLOGGED_ROUTES
+    try:
+        if not quiet:
+            log_event("request_started", route=_route(request), method=request.method)
+        response = await call_next(request)
+        if not quiet:
+            log_event(
+                "request_completed",
+                route=_route(request),
+                method=request.method,
+                status_code=response.status_code,
+                latency_ms=round((time.perf_counter() - started) * 1000, 1),
+            )
+        response.headers["X-Request-ID"] = request_id
+        response.headers.setdefault("Cache-Control", "no-store")
+        return response
+    finally:
+        REQUEST_ID.reset(token)
+
+
+def _route(request: Request) -> str:
+    """The path to log: templated once routing has resolved it.
+
+    `/rounds/12` and `/rounds/13` then aggregate as one route. At
+    `request_started` the router has not run yet, so that event carries the
+    concrete path; both events share a `request_id`, which is what an operator
+    searches by. Never the full URL — a query string can carry values the
+    allowlist exists to keep out.
+    """
+    params = {str(value): name for name, value in (request.path_params or {}).items()}
+    if not params:
+        return request.url.path
+    # Rebuilt from the matched parameters rather than read off the route: an
+    # included router carries only its own relative path (`/{round_id}/scenario`),
+    # which two routers could share.
+    return "/".join(
+        f"{{{params[segment]}}}" if segment in params else segment
+        for segment in request.url.path.split("/")
+    )
 
 
 def _envelope(
@@ -62,6 +118,18 @@ def _envelope(
 
 @app.exception_handler(ApiError)
 async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
+    # One place covers every refusal the API makes deliberately, including the
+    # scenario conflicts §7 asks for by name (`scenario_revision_conflict`,
+    # `mutation_id_reused`). The *message* is never logged: several of them
+    # quote values the allowlist keeps out.
+    log_event(
+        "request_refused",
+        level=logging.WARNING if exc.status_code >= 400 else logging.INFO,
+        route=_route(request),
+        method=request.method,
+        status_code=exc.status_code,
+        reason_code=exc.code,
+    )
     return _envelope(
         request, exc.status_code, exc.code, exc.message, exc.details, exc.headers
     )
@@ -136,6 +204,21 @@ async def validation_exception_handler(
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    # The envelope tells the caller nothing about the cause, by design. If the
+    # traceback is not written here it exists nowhere, and a 500 seen at the
+    # workshop can never be explained afterwards.
+    # Starlette runs this handler outside the correlation middleware, so the
+    # context variable has already been reset; the id survives on the request.
+    token = REQUEST_ID.set(getattr(request.state, "request_id", None))
+    try:
+        log_exception(
+            "request_failed",
+            route=_route(request),
+            method=request.method,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    finally:
+        REQUEST_ID.reset(token)
     return _envelope(
         request,
         status.HTTP_500_INTERNAL_SERVER_ERROR,

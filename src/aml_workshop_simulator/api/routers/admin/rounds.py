@@ -37,6 +37,7 @@ from src.aml_workshop_simulator.api.routers.admin.common import (
     validate_game_config,
 )
 from src.aml_workshop_simulator.api.routers.rounds import card_out
+from src.aml_workshop_simulator.core.logging import log_event
 from src.aml_workshop_simulator.core.security import hash_idempotency_key
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.round_presets import RoundPreset
@@ -629,6 +630,13 @@ async def trigger_scoring(
 
     await db.commit()
     await db.refresh(locked)
+    log_event(
+        "round_scored",
+        round_id=locked.id,
+        count=summary["scored_count"],
+        duration_ms=summary["duration_ms"],
+        round_status=locked.status,
+    )
     return ScoringSummaryOut(
         round_id=locked.id,
         status=locked.status,
