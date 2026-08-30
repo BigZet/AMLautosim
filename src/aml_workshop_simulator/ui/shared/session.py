@@ -182,6 +182,7 @@ def reset_user_state() -> None:
         "last_saved_hash",
         "loaded_for",
         "preview_cache",
+        "participants_page",
         "reveal_names",
         "selected_version",
         "auth_error",

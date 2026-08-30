@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
 from src.aml_workshop_simulator.api.errors import Conflict, Forbidden, NotFound
+from src.aml_workshop_simulator.api.pagination import decode_cursor, take_page
 from src.aml_workshop_simulator.api.routers.admin.common import audit, get_round
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
 from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
@@ -63,20 +64,20 @@ async def list_participants(
     scenario_status: str | None = Query(
         default=None, pattern="^(none|draft|submitted|scored)$"
     ),
-    limit: int = Query(default=100, ge=1, le=100),
+    limit: int = Query(default=100, ge=1, le=500),
+    cursor: str | None = Query(default=None),
     _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> PlayerSummaryPageOut:
+    """One page of the roster, ordered by registration.
+
+    A workshop runs for up to 500 participants, so the roster is paged by
+    `User.id` rather than truncated: an organiser who cannot see a participant
+    cannot unblock them either.
+    """
     await get_round(db, round_id)
-    version_counts = dict(
-        (
-            await db.execute(
-                select(
-                    ScenarioVersion.scenario_id, func.count(ScenarioVersion.id)
-                ).group_by(ScenarioVersion.scenario_id)
-            )
-        ).all()
-    )
+    after = decode_cursor(cursor, 1)
+
     stmt = (
         select(User, Scenario, ScoringResult)
         .outerjoin(
@@ -86,7 +87,10 @@ async def list_participants(
         .outerjoin(ScoringResult, ScoringResult.scenario_id == Scenario.id)
         .where(User.role == "participant")
         .order_by(User.id)
+        .limit(limit + 1)
     )
+    if after is not None:
+        stmt = stmt.where(User.id > int(after[0]))
     if access == "active":
         stmt = stmt.where(User.is_blocked.is_(False))
     elif access == "blocked":
@@ -99,31 +103,50 @@ async def list_participants(
                 func.lower(User.display_name).like(pattern),
             )
         )
+    # Filtering in SQL and not after the fetch: a page dropped rows in Python
+    # returns fewer than `limit` while further matches still exist, which reads
+    # as "no more participants".
+    if scenario_status == "none":
+        stmt = stmt.where(Scenario.id.is_(None))
+    elif scenario_status:
+        stmt = stmt.where(Scenario.status == scenario_status)
 
-    rows: list[PlayerSummaryOut] = []
-    for user, scenario, result in (await db.execute(stmt)).all():
-        status_value = scenario.status if scenario else "none"
-        if scenario_status and status_value != scenario_status:
-            continue
-        rows.append(
-            PlayerSummaryOut(
-                id=user.id,
-                email=user.email,
-                display_name=user.display_name or user.email,
-                is_blocked=bool(user.is_blocked),
-                access_revision=int(user.access_revision or 1),
-                scenario_status=status_value,
-                scenario_revision=scenario.revision if scenario else None,
-                version_count=version_counts.get(scenario.id, 0) if scenario else 0,
-                game_score=str(result.game_score) if result else None,
-                risk_label=result.risk_label if result else None,
-                registered_at=user.created_at,
-                last_login_at=user.last_login_at,
-            )
+    fetched = (await db.execute(stmt)).all()
+    page, next_cursor = take_page(fetched, limit, lambda row: [row[0].id])
+
+    # Draft counts for this page only. Counting every version in the database
+    # cost thousands of rows per request for a list of at most 500.
+    scenario_ids = [scenario.id for _, scenario, _ in page if scenario is not None]
+    version_counts: dict[int, int] = {}
+    if scenario_ids:
+        version_counts = dict(
+            (
+                await db.execute(
+                    select(ScenarioVersion.scenario_id, func.count(ScenarioVersion.id))
+                    .where(ScenarioVersion.scenario_id.in_(scenario_ids))
+                    .group_by(ScenarioVersion.scenario_id)
+                )
+            ).all()
         )
-        if len(rows) >= limit:
-            break
-    return PlayerSummaryPageOut(rows=rows, next_cursor=None)
+
+    rows = [
+        PlayerSummaryOut(
+            id=user.id,
+            email=user.email,
+            display_name=user.display_name or user.email,
+            is_blocked=bool(user.is_blocked),
+            access_revision=int(user.access_revision or 1),
+            scenario_status=scenario.status if scenario else "none",
+            scenario_revision=scenario.revision if scenario else None,
+            version_count=version_counts.get(scenario.id, 0) if scenario else 0,
+            game_score=str(result.game_score) if result else None,
+            risk_label=result.risk_label if result else None,
+            registered_at=user.created_at,
+            last_login_at=user.last_login_at,
+        )
+        for user, scenario, result in page
+    ]
+    return PlayerSummaryPageOut(rows=rows, next_cursor=next_cursor)
 
 
 def _session_out(row: Session, now: datetime) -> SessionInfoOut:

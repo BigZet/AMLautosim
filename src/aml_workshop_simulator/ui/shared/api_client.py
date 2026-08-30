@@ -148,9 +148,14 @@ class SimulatorAPIClient:
         """The round to display, including one that has not been started yet."""
         return self._send("GET", self._url("/rounds/current"), headers=self._headers())
 
-    def get_my_rounds(self, session_id: str) -> dict[str, Any]:
+    def get_my_rounds(
+        self, session_id: str, cursor: str | None = None
+    ) -> dict[str, Any]:
         return self._send(
-            "GET", self._url("/rounds/mine"), headers=self._headers(session_id)
+            "GET",
+            self._url("/rounds/mine"),
+            params={"cursor": cursor} if cursor else None,
+            headers=self._headers(session_id),
         )
 
     def get_round_cards(self, round_id: int) -> list[dict[str, Any]]:
@@ -265,13 +270,22 @@ class SimulatorAPIClient:
         )
 
     def get_leaderboard(
-        self, round_id: int, session_id: str | None = None, reveal: bool = False
+        self,
+        round_id: int,
+        session_id: str | None = None,
+        reveal: bool = False,
+        cursor: str | None = None,
     ) -> dict[str, Any]:
         """Masked by default; `reveal` is the explicit request for nicknames."""
+        params: dict[str, str] = {}
+        if reveal:
+            params["reveal"] = "true"
+        if cursor:
+            params["cursor"] = cursor
         return self._send(
             "GET",
             self._url(f"/rounds/{round_id}/leaderboard"),
-            params={"reveal": "true"} if reveal else None,
+            params=params or None,
             headers=self._headers(session_id),
         )
 
@@ -490,12 +504,16 @@ class SimulatorAPIClient:
         access: str,
         status: str | None,
         session_id: str,
+        cursor: str | None = None,
+        limit: int = 100,
     ) -> dict[str, Any]:
-        params: dict[str, str] = {"access": access}
+        params: dict[str, str] = {"access": access, "limit": str(limit)}
         if query:
             params["query"] = query
         if status and status != "all":
             params["scenario_status"] = status
+        if cursor:
+            params["cursor"] = cursor
         return self._send(
             "GET",
             self._url(f"/admin/rounds/{round_id}/participants"),
@@ -593,16 +611,22 @@ class SimulatorAPIClient:
             timeout=TIMEOUTS["WRITE"],
         )
 
-    def admin_get_leaderboard(self, round_id: int, session_id: str) -> dict[str, Any]:
+    def admin_get_leaderboard(
+        self, round_id: int, session_id: str, cursor: str | None = None
+    ) -> dict[str, Any]:
         return self._send(
             "GET",
             self._url(f"/admin/rounds/{round_id}/leaderboard"),
+            params={"cursor": cursor} if cursor else None,
             headers=self._headers(session_id),
         )
 
-    def admin_get_audit_events(self, round_id: int, session_id: str) -> dict[str, Any]:
+    def admin_get_audit_events(
+        self, round_id: int, session_id: str, cursor: str | None = None
+    ) -> dict[str, Any]:
         return self._send(
             "GET",
             self._url(f"/admin/rounds/{round_id}/audit-events"),
+            params={"cursor": cursor} if cursor else None,
             headers=self._headers(session_id),
         )

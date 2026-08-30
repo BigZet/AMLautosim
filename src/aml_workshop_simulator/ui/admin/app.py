@@ -724,10 +724,22 @@ def page_participants() -> None:
             key="participant_status",
         )
 
-    page = client.admin_list_participants(
-        round_id, query or None, access, status_filter, session_id
-    )
-    rows = page.get("rows", [])
+    # Pages accumulate: an organiser scanning a room of 500 needs the whole
+    # roster on one screen, and changing a filter starts the scan over.
+    filters = (round_id, query or "", access, status_filter)
+    state = st.session_state.get("participants_page")
+    if not state or state["filters"] != filters:
+        first = client.admin_list_participants(
+            round_id, query or None, access, status_filter, session_id
+        )
+        state = {
+            "filters": filters,
+            "rows": first.get("rows", []),
+            "cursor": first.get("next_cursor"),
+        }
+        st.session_state["participants_page"] = state
+
+    rows = state["rows"]
     marker("participant-count", len(rows))
     if not rows:
         st.info("Участники не найдены.")
@@ -752,6 +764,24 @@ def page_participants() -> None:
         f"<tbody>{body}</tbody></table></div>",
         unsafe_allow_html=True,
     )
+
+    if state["cursor"]:
+        if st.button(
+            f"Показать ещё · загружено {len(rows)}",
+            key="participants_more",
+            use_container_width=True,
+        ):
+            more = client.admin_list_participants(
+                round_id,
+                query or None,
+                access,
+                status_filter,
+                session_id,
+                cursor=state["cursor"],
+            )
+            state["rows"] = [*rows, *more.get("rows", [])]
+            state["cursor"] = more.get("next_cursor")
+            st.rerun()
 
     st.divider()
     options = {f"#{row['id']} · {row['display_name']}": row for row in rows}

@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
 from src.aml_workshop_simulator.api.errors import Conflict, NotFound, ValidationFailed
+from src.aml_workshop_simulator.api.pagination import decode_cursor, encode_cursor
 from src.aml_workshop_simulator.api.routers.admin.common import audit as _audit
 from src.aml_workshop_simulator.api.routers.admin.common import get_round as _get_round
 from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
@@ -256,11 +257,21 @@ async def clear_adjustment(
 )
 async def admin_leaderboard(
     round_id: int,
+    limit: int = Query(default=100, ge=1, le=500),
+    cursor: str | None = Query(default=None),
     _: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ) -> AdminLeaderboardPageOut:
     await _get_round(db, round_id)
-    rows = await build_admin_leaderboard(db, round_id)
+    board = await build_admin_leaderboard(db, round_id)
+    # A ranking is only meaningful as a whole, so it is built whole and the
+    # cursor is a position in it, as on the public board.
+    after = decode_cursor(cursor, 1)
+    start = int(after[0]) if after is not None else 0
+    rows = board[start : start + limit]
+    next_cursor = (
+        encode_cursor([start + limit]) if len(board) > start + limit else None
+    )
     return AdminLeaderboardPageOut(
         rows=[
             AdminLeaderboardRowOut(
@@ -283,6 +294,6 @@ async def admin_leaderboard(
             )
             for row in rows
         ],
-        next_cursor=None,
+        next_cursor=next_cursor,
         generated_at=datetime.now(UTC),
     )

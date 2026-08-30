@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Query, Response
-from sqlalchemy import desc, select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,11 @@ from src.aml_workshop_simulator.api.deps import (
     CurrentPrincipal,
     get_current_participant,
     get_principal_optional,
+)
+from src.aml_workshop_simulator.api.pagination import (
+    decode_cursor,
+    encode_cursor,
+    take_page,
 )
 from src.aml_workshop_simulator.api.errors import (
     Conflict,
@@ -274,71 +279,59 @@ async def get_current_round(
 @router.get("/mine", response_model=RoundSummaryPageOut, operation_id="rounds_mine")
 async def get_my_rounds(
     limit: int = Query(default=20, ge=1, le=100),
+    cursor: str | None = Query(default=None),
     principal: CurrentPrincipal = Depends(get_current_participant),
     db: AsyncSession = Depends(get_db),
 ) -> RoundSummaryPageOut:
-    active_round = (
+    """Rounds this participant can open, newest first.
+
+    That is every round they saved a chain in, plus the round currently on
+    screen — the latter even without a chain, so somebody who joined late still
+    reaches the round they are sitting in.
+    """
+    after = decode_cursor(cursor, 1)
+    current_id = (
         await db.execute(
-            select(Round)
+            select(Round.id)
             .where(Round.status.in_(["active", "stopped", "scoring"]))
             .order_by(Round.id.desc())
             .limit(1)
         )
     ).scalars().first()
 
-    rows = (
-        await db.execute(
-            select(Scenario, Round)
-            .join(Round, Scenario.round_id == Round.id)
-            .where(Scenario.participant_id == principal.user_id)
-            .order_by(desc(Round.id))
-            .limit(limit)
+    # One ordered query over both sources: prepending the current round to a
+    # separately limited list made the page longer than `limit` and left no
+    # ordering a cursor could follow.
+    stmt = (
+        select(Round, Scenario, ScoringResult)
+        .outerjoin(
+            Scenario,
+            (Scenario.round_id == Round.id)
+            & (Scenario.participant_id == principal.user_id),
         )
-    ).all()
+        .outerjoin(ScoringResult, ScoringResult.scenario_id == Scenario.id)
+        .where(or_(Scenario.id.is_not(None), Round.id == current_id))
+        .order_by(Round.id.desc())
+        .limit(limit + 1)
+    )
+    if after is not None:
+        stmt = stmt.where(Round.id < int(after[0]))
 
-    result_ids = {
-        scenario_id
-        for (scenario_id,) in (
-            await db.execute(
-                select(ScoringResult.scenario_id).where(
-                    ScoringResult.scenario_id.in_([s.id for s, _ in rows] or [0])
-                )
-            )
-        ).all()
-    }
+    fetched = (await db.execute(stmt)).all()
+    page, next_cursor = take_page(fetched, limit, lambda row: [row[0].id])
 
-    summaries: list[RoundSummaryOut] = []
-    seen: set[int] = set()
-
-    if active_round is not None:
-        seen.add(active_round.id)
-        own = next((s for s, r in rows if r.id == active_round.id), None)
-        summaries.append(
-            RoundSummaryOut(
-                id=active_round.id,
-                title=active_round.title,
-                status=active_round.status,
-                scenario_status=own.status if own else None,
-                result_available=False,
-                completed_at=None,
-            )
+    summaries = [
+        RoundSummaryOut(
+            id=round_obj.id,
+            title=round_obj.title,
+            status=round_obj.status,
+            scenario_status=scenario.status if scenario else None,
+            result_available=result is not None and round_obj.id != current_id,
+            completed_at=None if round_obj.id == current_id else round_obj.completed_at,
         )
-
-    for scenario, round_obj in rows:
-        if round_obj.id in seen:
-            continue
-        seen.add(round_obj.id)
-        summaries.append(
-            RoundSummaryOut(
-                id=round_obj.id,
-                title=round_obj.title,
-                status=round_obj.status,
-                scenario_status=scenario.status,
-                result_available=scenario.id in result_ids,
-                completed_at=round_obj.completed_at,
-            )
-        )
-    return RoundSummaryPageOut(rows=summaries, next_cursor=None)
+        for round_obj, scenario, result in page
+    ]
+    return RoundSummaryPageOut(rows=summaries, next_cursor=next_cursor)
 
 
 @router.get(
@@ -858,6 +851,7 @@ async def get_my_result(
 async def get_public_leaderboard(
     round_id: int,
     limit: int = Query(default=50, ge=1, le=200),
+    cursor: str | None = Query(default=None),
     reveal: bool = Query(
         default=False,
         description=(
@@ -886,11 +880,20 @@ async def get_public_leaderboard(
     board = await build_public_leaderboard(
         db, round_id, current_user_id=principal.user_id if principal else None
     )
+    # The board of a completed round is a frozen ranking, so a page is a window
+    # into it and the cursor is a position. `generated_at` tells the caller
+    # which ranking their pages belong to.
+    after = decode_cursor(cursor, 1)
+    start = int(after[0]) if after is not None else 0
+    selected = board[start : start + limit]
+    next_cursor = (
+        encode_cursor([start + limit]) if len(board) > start + limit else None
+    )
     rows = [
         LeaderboardRowOut(
             rank=row["rank"],
             display_name=(
-                row["display_name"] if reveal else f"Игрок #{position}"
+                row["display_name"] if reveal else f"Игрок #{start + position}"
             ),
             masked=not reveal,
             game_score=row["game_score"],
@@ -900,8 +903,8 @@ async def get_public_leaderboard(
             is_adjusted=row["is_adjusted"],
             is_current_user=row["is_current_user"],
         )
-        for position, row in enumerate(board[:limit], start=1)
+        for position, row in enumerate(selected, start=1)
     ]
     return LeaderboardPageOut(
-        rows=rows, next_cursor=None, generated_at=generated_at, revealed=reveal
+        rows=rows, next_cursor=next_cursor, generated_at=generated_at, revealed=reveal
     )

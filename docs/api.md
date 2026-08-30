@@ -25,7 +25,7 @@ OpenAPI является исполняемой спецификацией DTO, 
 | Authentication | `X-Session-ID: <opaque-session-id>` от Streamlit к внутреннему API |
 | Request correlation | `X-Request-ID`; API генерирует ULID/UUID, если заголовка нет |
 | Command identity | `Idempotency-Key` для activate/score и других указанных POST |
-| Pagination | `limit` + opaque `cursor`; offset не используется на растущих списках |
+| Pagination | `limit` + opaque `cursor`; offset не используется на растущих списках. `cursor` берется только из `next_cursor` предыдущей страницы: формат непрозрачен и может измениться. Испорченный курсор — `422 invalid_cursor`, а не молчаливый возврат к первой странице |
 | Input strictness | Pydantic `extra="forbid"` |
 | Unknown enum | `422 validation_error` |
 | Server headers | `X-Request-ID`, `Cache-Control`; `Retry-After` для `429/503` при наличии |
@@ -274,9 +274,11 @@ private, max-age=0`; Streamlit применяет собственный TTL д�
 
 ### `GET /api/v1/rounds/mine?limit=10&cursor=...`
 
-Возвращает active round и раунды, в которых current participant имеет scenario. Endpoint
-нужен после потери Streamlit session: completed round больше не является active, но
-участник должен снова найти свой result.
+Возвращает текущий раунд и раунды, в которых current participant имеет scenario.
+Endpoint нужен после потери Streamlit session: completed round больше не является active,
+но участник должен снова найти свой result.
+
+Страница упорядочена по `id` раунда убыванию; `limit` — 1–100, по умолчанию 20.
 
 ```json
 {
@@ -650,7 +652,7 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
 | --- | --- | --- | --- |
 | `GET /api/v1/admin/action-cards` | filters | `ActionCardOut[]` | Catalog для draft config |
 | `POST /api/v1/admin/rounds` | `RoundCreateIn` | `201 RoundAdminOut` | Создать draft |
-| `GET /api/v1/admin/rounds` | status/cursor | Page | Список раундов |
+| `GET /api/v1/admin/rounds` | — | `RoundAdminOut[]` | Все раунды, новые сверху; их единицы за мастер-класс, поэтому список не постраничный |
 | `GET /api/v1/admin/rounds/{round_id}` | — | `RoundAdminOut` | Full config |
 | `PUT /api/v1/admin/rounds/{round_id}` | `RoundUpdateIn` | `RoundAdminOut` | Только draft + expected config revision |
 | `POST /api/v1/admin/rounds/{round_id}/activate` | empty | `RoundAdminOut` | Snapshot и active |
@@ -660,7 +662,7 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
 | `GET /api/v1/admin/rounds/{round_id}/scoring-plan` | — | `ScoringPlanOut` | Что попадет в подсчет |
 | `POST /api/v1/admin/rounds/{round_id}/score` | empty | `ScoringSummaryOut` | Синхронный пакет |
 | `GET /api/v1/admin/rounds/{round_id}/stats` | — | `RoundStatsOut` | Live counters |
-| `GET /api/v1/admin/rounds/{round_id}/leaderboard` | sort/filter/cursor | Admin page | Base/effective board |
+| `GET /api/v1/admin/rounds/{round_id}/leaderboard` | `limit` 1–500, `cursor` | Admin page | Base/effective board |
 | `GET /api/v1/admin/round-presets` | — | `RoundPresetOut[]` | Сохраненные наборы настроек |
 | `POST /api/v1/admin/round-presets` | `RoundPresetIn` | `201 RoundPresetOut` | Создать пресет |
 | `GET /api/v1/admin/round-presets/{preset_id}` | — | `RoundPresetOut` | Открыть пресет |
@@ -817,8 +819,12 @@ Query:
 - `query`: display name or exact normalized email search;
 - `access`: `all|active|blocked`;
 - `scenario_status`: `none|draft|submitted|scored`;
-- `limit`: 1–100;
-- `cursor`: opaque.
+- `limit`: 1–500, по умолчанию 100 — мастер-класс рассчитан на аудиторию до 500 человек,
+  и организатор должен видеть каждого;
+- `cursor`: opaque, keyset по `id` участника.
+
+`query`, `access` и `scenario_status` применяются в SQL, поэтому полная страница означает,
+что дальше есть еще строки, а не что фильтр их отбросил.
 
 Response summary не включает steps/explanation, чтобы список оставался компактным.
 
