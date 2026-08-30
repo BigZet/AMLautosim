@@ -160,8 +160,8 @@ def visible_param_out(spec: CardSpec, param: str) -> VisibleParamOut | None:
     )
 
 
-def card_out(row: ActionCard, operation: OperationPolicy | None = None) -> ActionCardOut:
-    spec = card_spec_from_row(row)
+def card_out(row: ActionCard | CardSpec, operation: OperationPolicy | None = None) -> ActionCardOut:
+    spec = row if isinstance(row, CardSpec) else card_spec_from_row(row)
     if operation is not None:
         spec = spec.with_overrides(operation.overrides)
         params = operation.visible_params
@@ -354,14 +354,12 @@ async def get_round_cards(
     round_obj = await _get_round(db, round_id)
     specs = await load_round_card_specs(db, round_obj)
     policy = round_policy(round_obj, specs)
-    rows = (await db.execute(select(ActionCard).order_by(ActionCard.id))).scalars().all()
     response.headers["ETag"] = str(
         (round_obj.game_config or {}).get("config_version", f"round-{round_obj.id}")
     )
     return [
-        card_out(row, policy.for_card((row.code, row.version)))
-        for row in rows
-        if (row.code, row.version) in specs
+        card_out(spec, policy.for_card(spec.key))
+        for spec in sorted(specs.values(), key=lambda item: item.id)
     ]
 
 

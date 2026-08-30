@@ -134,7 +134,20 @@ def validate_game_config(db_cards: list[ActionCard], game_config: dict[str, Any]
     if not weights_sum_to_one(game_config):
         raise _config_error("Веса лидерборда должны в сумме давать 1.")
 
-    available = {(card.code, card.version): card for card in db_cards if card.is_active}
+    from pydantic import ValidationError
+
+    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from src.aml_workshop_simulator.services.configuration import snapshot_specs
+
+    try:
+        GameConfigIn.model_validate(game_config)
+    except ValidationError as error:
+        raise _config_error(str(error)) from error
+    available = (
+        snapshot_specs(game_config)
+        if game_config.get("card_snapshots")
+        else {(card.code, card.version): card_spec_from_row(card) for card in db_cards if card.is_active}
+    )
     operations = game_config.get("operations") or []
     refs = game_config.get("card_versions") or []
     if not operations and not refs:
@@ -159,7 +172,7 @@ def validate_game_config(db_cards: list[ActionCard], game_config: dict[str, Any]
             raise _config_error(
                 f"Операция «{key[0]}» версии {key[1]} не найдена или неактивна."
             )
-        spec = card_spec_from_row(card)
+        spec = card
         allowed = set(declared_params(spec))
         visible = list(entry.get("visible_params") or [])
         if len(visible) > MAX_VISIBLE_PARAMS:
@@ -179,6 +192,11 @@ def validate_game_config(db_cards: list[ActionCard], game_config: dict[str, Any]
                     f"Операция «{spec.title}»: значение по умолчанию задано для "
                     f"неизвестного параметра «{param}»."
                 )
+            if param in visible:
+                raise _config_error(f"Операция «{spec.title}»: закрепить можно только скрытый параметр «{param}».")
+            field = spec.field_spec(param)
+            if field and field.get("kind") == "toggle" and not isinstance(value, bool):
+                raise _config_error(f"Операция «{spec.title}»: «{param}» должен быть true или false.")
             options = _param_options(spec, param)
             if options and value not in options:
                 raise _config_error(
@@ -198,15 +216,15 @@ def _param_options(spec: Any, param: str) -> list[Any]:
 def _validate_overrides(spec: Any, entry: dict[str, Any]) -> None:
     from decimal import Decimal
 
-    minimum = entry.get("min_amount")
-    maximum = entry.get("max_amount")
+    minimum = entry.get("min_amount", spec.min_amount)
+    maximum = entry.get("max_amount", spec.max_amount)
     if minimum is not None and maximum is not None:
         if Decimal(str(minimum)) > Decimal(str(maximum)):
             raise _config_error(
                 f"Операция «{spec.title}»: минимальная сумма больше максимальной."
             )
-    frequency = entry.get("max_frequency")
-    round_limit = entry.get("round_frequency_limit")
+    frequency = entry.get("max_frequency", spec.max_frequency)
+    round_limit = entry.get("round_frequency_limit", spec.round_frequency_limit)
     if frequency is not None and round_limit is not None:
         if int(round_limit) < int(frequency):
             raise _config_error(

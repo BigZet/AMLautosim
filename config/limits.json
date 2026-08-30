@@ -1,0 +1,9 @@
+{
+  "max_visible_params": 2,
+  "max_balance": "100000000",
+  "max_resource": 200,
+  "max_actions": 64,
+  "max_frequency": 20,
+  "max_operation_cost": 50,
+  "max_operations": 64
+}

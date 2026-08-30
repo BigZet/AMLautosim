@@ -24,6 +24,7 @@ import psycopg2
 import pytest
 from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -33,8 +34,9 @@ ADMIN_DSN = os.environ.get(
     "TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres"
 )
 E2E_DB_NAME = os.environ.get("E2E_DATABASE_NAME", "aml_simulator_e2e")
-E2E_DATABASE_URL = f"postgresql+asyncpg://aml:aml@localhost:5432/{E2E_DB_NAME}"
-E2E_SYNC_DSN = f"postgresql://aml:aml@localhost:5432/{E2E_DB_NAME}"
+_e2e_url = make_url(ADMIN_DSN).set(database=E2E_DB_NAME)
+E2E_DATABASE_URL = _e2e_url.set(drivername="postgresql+asyncpg").render_as_string(hide_password=False)
+E2E_SYNC_DSN = _e2e_url.set(drivername="postgresql").render_as_string(hide_password=False)
 
 ADMIN_EMAIL = "admin@example.com"
 ADMIN_PASSWORD = "admin12345"

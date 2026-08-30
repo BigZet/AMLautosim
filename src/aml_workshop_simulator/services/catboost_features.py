@@ -3,7 +3,11 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from src.aml_workshop_simulator.domain.catalog import CARD_CODES
+from src.aml_workshop_simulator.core.game_config import base_game_config, load_config
+from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
+from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog, money
+from src.aml_workshop_simulator.services.configuration import snapshot_specs
 
 
 def _get_card_code(step: dict[str, Any]) -> str:
@@ -14,7 +18,8 @@ def _get_card_code(step: dict[str, Any]) -> str:
 
 
 def extract_catboost_features(
-        steps: list[dict[str, Any]], round_config: dict[str, Any] | None = None) -> dict[str, Any]:
+    steps: list[dict[str, Any]], round_config: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """
     Transforms a sequence of AML scenario steps into a structured tabular feature dictionary
     formatted specifically for training and inference with CatBoostClassifier / CatBoostRegressor.
@@ -58,6 +63,30 @@ def extract_catboost_features(
             "has_cash": 0,
         }
 
+    config = round_config or base_game_config()
+    risk_rules = (config.get("scoring") or {}).get("rules") or base_game_config()[
+        "scoring"
+    ]["rules"]
+    specs = snapshot_specs(config) or {
+        (entry["code"], entry["version"]): card_spec_from_catalog(entry, index)
+        for index, entry in enumerate(CARD_CATALOG, start=1)
+    }
+    policy = RoundPolicy.from_config(config, specs)
+
+    def spec_for(step):
+        code = _get_card_code(step)
+        version = (step.get("card") or {}).get("version")
+        candidates = [
+            spec
+            for key, spec in specs.items()
+            if key[0] == code and (version is None or key[1] == version)
+        ]
+        if not candidates:
+            raise ValueError(f"unsupported operation code/version: {code} v{version}")
+        spec = max(candidates, key=lambda item: item.version)
+        operation = policy.for_card(spec.key)
+        return spec.with_overrides(operation.overrides if operation else None)
+
     total_inflow = 0.0
     total_outflow = 0.0
     fees_total = 0.0
@@ -73,13 +102,9 @@ def extract_catboost_features(
     channel_counts: dict[str, int] = {}
     category_counts: dict[str, int] = {}
 
-    credit_codes = {"salary", "cash_deposit"}
-    debit_codes = {"card_transfer", "cash_withdrawal"}
-
     for step in steps:
         card_code = _get_card_code(step)
-        if card_code not in CARD_CODES:
-            raise ValueError(f"unsupported operation code: {card_code}")
+        spec = spec_for(step)
 
         amount = float(step.get("amount", 0.0))
         freq = int(step.get("frequency", 1))
@@ -88,42 +113,30 @@ def extract_catboost_features(
         amounts.append(amount)
         card_counts[card_code] = card_counts.get(card_code, 0) + freq
 
-        # Context handling
-        ctx = step.get("context", {})
-        if not ctx:
-            ctx = {
-                "recipient_type": step.get(
-                    "recipient_type", "known_counterparty"), "time_of_day": step.get(
-                    "time_of_day", "day"), "velocity": step.get(
-                    "velocity", "normal"), "channel": step.get(
-                        "channel", "bank"), "has_documents": step.get(
-                            "has_documents", True), }
-
-        recipient_type = ctx.get("recipient_type", "known_counterparty")
-        time_of_day = ctx.get("time_of_day", "day")
-        velocity = ctx.get("velocity", "normal")
-        channel = ctx.get("channel", "bank")
-        has_docs = bool(ctx.get("has_documents", True))
-
+        # Resolve omitted context from the same card contract used by the game.
+        ctx = {**spec.context_defaults, "channel": spec.channels[0]}
+        ctx.update({key: step[key] for key in ctx if key in step})
+        ctx.update(step.get("context") or {})
+        recipient_type = ctx["recipient_type"]
+        time_of_day = ctx["time_of_day"]
+        velocity = ctx["velocity"]
+        channel = ctx["channel"]
+        has_docs = bool(ctx["has_documents"])
         channel_counts[channel] = channel_counts.get(channel, 0) + 1
+        fees_total += float(money(money(amount) * freq * spec.fee_rate))
 
-        # Categories and Inflow/Outflow
-        if card_code in credit_codes:
+        if spec.flow == "credit":
             total_inflow += gross
-            if card_code == "cash_deposit":
+            if spec.quota_category == "cash":
                 cash_inflow += gross
-                category_counts["cash"] = category_counts.get("cash", 0) + 1
-            elif card_code == "salary":
-                category_counts["salary"] = category_counts.get(
-                    "salary", 0) + 1
-        elif card_code in debit_codes:
+        elif spec.flow == "debit":
             total_outflow += gross
-            if card_code == "cash_withdrawal":
+            if spec.quota_category == "cash":
                 cash_outflow += gross
-                category_counts["cash"] = category_counts.get("cash", 0) + 1
-            elif card_code == "card_transfer":
-                category_counts["transfer"] = category_counts.get(
-                    "transfer", 0) + 1
+        category = load_config("synthetic_data.json")["feature_categories"].get(
+            spec.code, spec.quota_category or spec.category
+        )
+        category_counts[category] = category_counts.get(category, 0) + 1
 
         if recipient_type == "anonymous_wallet":
             anon_recipient_sum += gross
@@ -131,7 +144,7 @@ def extract_catboost_features(
             night_ops += 1
         if velocity == "rapid":
             rapid_velocity_ops += 1
-        if not has_docs and gross >= 75_000:
+        if not has_docs and gross >= float(risk_rules["documents"]["minimum_gross"]):
             without_docs_large_sum += gross
 
     total_turnover = total_inflow + total_outflow
@@ -140,15 +153,14 @@ def extract_catboost_features(
     # Statistical measures on step amounts
     avg_amount = sum(amounts) / max(1, num_steps)
     max_amount = max(amounts) if amounts else 0.0
-    var_amount = sum((x - avg_amount) ** 2 for x in amounts) / \
-        max(1, num_steps)
+    var_amount = sum((x - avg_amount) ** 2 for x in amounts) / max(1, num_steps)
     std_amount = math.sqrt(var_amount)
 
     # Sequence analysis
     repeated_amounts_count = 0
     amt_counts: dict[float, int] = {}
     for a in amounts:
-        if a >= 10_000:
+        if a >= float(risk_rules["sequence"]["repeated_min_amount"]):
             amt_counts[a] = amt_counts.get(a, 0) + 1
     repeated_amounts_count = sum(1 for c in amt_counts.values() if c > 1)
 
@@ -156,23 +168,30 @@ def extract_catboost_features(
     for idx in range(1, num_steps):
         prev_step = steps[idx - 1]
         curr_step = steps[idx]
-        prev_code = _get_card_code(prev_step)
-        curr_code = _get_card_code(curr_step)
-        prev_gross = float(prev_step.get("amount", 0)) * \
-            int(prev_step.get("frequency", 1))
-        curr_gross = float(curr_step.get("amount", 0)) * \
-            int(curr_step.get("frequency", 1))
-        if prev_code in credit_codes and curr_code in debit_codes:
-            if prev_gross > 0 and curr_gross >= prev_gross * 0.7:
+        prev_gross = float(prev_step.get("amount", 0)) * int(
+            prev_step.get("frequency", 1)
+        )
+        curr_gross = float(curr_step.get("amount", 0)) * int(
+            curr_step.get("frequency", 1)
+        )
+        if spec_for(prev_step).flow == "credit" and spec_for(curr_step).flow == "debit":
+            if prev_gross > 0 and curr_gross >= prev_gross * float(
+                risk_rules["sequence"]["turnover_ratio"]
+            ):
                 rapid_credit_to_debit += 1
 
     # Categorical dominant values
-    primary_channel = max(channel_counts.items(), key=lambda x: x[1])[
-        0] if channel_counts else "none"
-    primary_category = max(category_counts.items(), key=lambda x: x[1])[
-        0] if category_counts else "none"
-    most_frequent_card = max(card_counts.items(), key=lambda x: x[1])[
-        0] if card_counts else "none"
+    primary_channel = (
+        max(channel_counts.items(), key=lambda x: x[1])[0] if channel_counts else "none"
+    )
+    primary_category = (
+        max(category_counts.items(), key=lambda x: x[1])[0]
+        if category_counts
+        else "none"
+    )
+    most_frequent_card = (
+        max(card_counts.items(), key=lambda x: x[1])[0] if card_counts else "none"
+    )
 
     return {
         "num_steps": num_steps,
@@ -185,19 +204,27 @@ def extract_catboost_features(
         "fees_ratio": round(fees_total / max(1.0, total_turnover), 4),
         "cash_inflow_sum": round(cash_inflow, 2),
         "cash_outflow_sum": round(cash_outflow, 2),
-        "cash_turnover_ratio": round((cash_inflow + cash_outflow) / max(1.0, total_turnover), 4),
+        "cash_turnover_ratio": round(
+            (cash_inflow + cash_outflow) / max(1.0, total_turnover), 4
+        ),
         "anonymous_recipient_turnover": round(anon_recipient_sum, 2),
-        "anonymous_recipient_ratio": round(anon_recipient_sum / max(1.0, total_turnover), 4),
+        "anonymous_recipient_ratio": round(
+            anon_recipient_sum / max(1.0, total_turnover), 4
+        ),
         "night_operations_count": night_ops,
         "night_operations_ratio": round(night_ops / max(1, num_steps), 4),
         "rapid_velocity_count": rapid_velocity_ops,
         "rapid_velocity_ratio": round(rapid_velocity_ops / max(1, num_steps), 4),
         "without_docs_large_sum": round(without_docs_large_sum, 2),
-        "without_docs_ratio": round(without_docs_large_sum / max(1.0, total_turnover), 4),
+        "without_docs_ratio": round(
+            without_docs_large_sum / max(1.0, total_turnover), 4
+        ),
         "avg_step_amount": round(avg_amount, 2),
         "max_step_amount": round(max_amount, 2),
         "std_step_amount": round(std_amount, 2),
-        "max_frequency_single_step": max((int(s.get("frequency", 1)) for s in steps), default=0),
+        "max_frequency_single_step": max(
+            (int(s.get("frequency", 1)) for s in steps), default=0
+        ),
         "repeated_amount_count": repeated_amounts_count,
         "rapid_credit_to_debit_count": rapid_credit_to_debit,
         "unique_channels_count": len(channel_counts),

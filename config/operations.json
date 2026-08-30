@@ -1,0 +1,115 @@
+{
+  "schema_version": 2,
+  "cards": [
+    {
+      "code": "salary",
+      "version": 1,
+      "title": "Получить зарплату",
+      "description": "Регулярное поступление от известного работодателя.",
+      "category": "Поступление",
+      "flow": "credit",
+      "risk_weight": "0.00",
+      "energy_cost": 1,
+      "time_cost": 1,
+      "fee_rate": "0.000000",
+      "min_amount": "10000.00",
+      "max_amount": "150000.00",
+      "max_frequency": 2,
+      "round_frequency_limit": 2,
+      "requires_card_code": null,
+      "quota_category": null,
+      "channels": [
+        "bank",
+        "branch",
+        "mobile"
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.time_of_day"
+      ],
+      "default_show_frequency": false
+    },
+    {
+      "code": "cash_deposit",
+      "version": 1,
+      "title": "Внести наличные",
+      "description": "Пополнение счета через банкомат или кассу.",
+      "category": "Наличные",
+      "flow": "credit",
+      "risk_weight": "12.00",
+      "energy_cost": 2,
+      "time_cost": 2,
+      "fee_rate": "0.000000",
+      "min_amount": "5000.00",
+      "max_amount": "150000.00",
+      "max_frequency": 3,
+      "round_frequency_limit": 3,
+      "requires_card_code": null,
+      "quota_category": "cash",
+      "channels": [
+        "atm",
+        "branch"
+      ],
+      "default_visible_params": [
+        "channel",
+        "action.funds_source"
+      ],
+      "default_show_frequency": true
+    },
+    {
+      "code": "card_transfer",
+      "version": 1,
+      "title": "Перевести по карте",
+      "description": "Перевод другому клиенту банка.",
+      "category": "Перевод",
+      "flow": "debit",
+      "risk_weight": "5.00",
+      "energy_cost": 1,
+      "time_cost": 1,
+      "fee_rate": "0.005000",
+      "min_amount": "1000.00",
+      "max_amount": "500000.00",
+      "max_frequency": 5,
+      "round_frequency_limit": 7,
+      "requires_card_code": null,
+      "quota_category": null,
+      "channels": [
+        "mobile",
+        "web",
+        "branch"
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.recipient_type"
+      ],
+      "default_show_frequency": true
+    },
+    {
+      "code": "cash_withdrawal",
+      "version": 1,
+      "title": "Снять наличные",
+      "description": "Получение наличных вскоре после поступления.",
+      "category": "Наличные",
+      "flow": "debit",
+      "risk_weight": "14.00",
+      "energy_cost": 2,
+      "time_cost": 2,
+      "fee_rate": "0.010000",
+      "min_amount": "5000.00",
+      "max_amount": "120000.00",
+      "max_frequency": 4,
+      "round_frequency_limit": 4,
+      "requires_card_code": null,
+      "quota_category": "cash",
+      "channels": [
+        "atm",
+        "branch"
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.time_of_day"
+      ],
+      "default_show_frequency": true
+    }
+  ]
+}

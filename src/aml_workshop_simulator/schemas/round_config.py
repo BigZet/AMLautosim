@@ -17,11 +17,13 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from src.aml_workshop_simulator.core.game_config import LIMITS, load_config
 from src.aml_workshop_simulator.domain.round_policy import (
     CARD_OVERRIDE_KEYS,
     MAX_VISIBLE_PARAMS,
     split_param,
 )
+from src.aml_workshop_simulator.schemas.game_rules import ResourceRulesIn, RiskRulesIn
 
 STRICT = ConfigDict(extra="forbid")
 
@@ -40,9 +42,11 @@ def _money(value: Decimal) -> str:
 class ResourcesIn(BaseModel):
     model_config = STRICT
 
-    initial_balance: Decimal = Field(gt=0, le=Decimal("100000000"), decimal_places=2)
-    initial_energy: int = Field(ge=1, le=200)
-    initial_time: int = Field(ge=1, le=200)
+    initial_balance: Decimal = Field(
+        gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
+    )
+    initial_energy: int = Field(ge=1, le=LIMITS["max_resource"])
+    initial_time: int = Field(ge=1, le=LIMITS["max_resource"])
 
     def dump(self) -> dict[str, Any]:
         return {
@@ -55,8 +59,10 @@ class ResourcesIn(BaseModel):
 class ObjectivesIn(BaseModel):
     model_config = STRICT
 
-    target_outflow: Decimal = Field(gt=0, le=Decimal("100000000"), decimal_places=2)
-    max_actions: int = Field(ge=1, le=64)
+    target_outflow: Decimal = Field(
+        gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
+    )
+    max_actions: int = Field(ge=1, le=LIMITS["max_actions"])
 
     def dump(self) -> dict[str, Any]:
         return {
@@ -68,9 +74,9 @@ class ObjectivesIn(BaseModel):
 class ConstraintsIn(BaseModel):
     model_config = STRICT
 
-    max_identical_steps: int = Field(ge=1, le=64)
-    max_night_operations: int = Field(ge=0, le=64)
-    max_anonymous_operations: int = Field(ge=0, le=64)
+    max_identical_steps: int = Field(ge=1, le=LIMITS["max_actions"])
+    max_night_operations: int = Field(ge=0, le=LIMITS["max_actions"])
+    max_anonymous_operations: int = Field(ge=0, le=LIMITS["max_actions"])
     category_limits: dict[str, Decimal] = Field(default_factory=dict)
 
     @field_validator("category_limits")
@@ -86,8 +92,10 @@ class ConstraintsIn(BaseModel):
                 + "."
             )
         for code, limit in value.items():
-            if limit < 0:
-                raise ValueError(f"Лимит квоты «{code}» не может быть отрицательным.")
+            if not limit.is_finite() or limit < 0 or limit.as_tuple().exponent < -2:
+                raise ValueError(
+                    f"Лимит квоты «{code}»: ожидается неотрицательная конечная сумма с точностью до копейки."
+                )
         return value
 
     def dump(self) -> dict[str, Any]:
@@ -96,7 +104,8 @@ class ConstraintsIn(BaseModel):
             "max_night_operations": self.max_night_operations,
             "max_anonymous_operations": self.max_anonymous_operations,
             "category_limits": {
-                code: _money(limit) for code, limit in sorted(self.category_limits.items())
+                code: _money(limit)
+                for code, limit in sorted(self.category_limits.items())
             },
         }
 
@@ -112,13 +121,21 @@ class OperationIn(BaseModel):
     show_frequency: bool = True
     defaults: dict[str, Any] = Field(default_factory=dict)
 
-    min_amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
-    max_amount: Decimal | None = Field(default=None, gt=0, decimal_places=2)
-    max_frequency: int | None = Field(default=None, ge=1, le=20)
-    round_frequency_limit: int | None = Field(default=None, ge=1, le=64)
-    energy_cost: int | None = Field(default=None, ge=0, le=50)
-    time_cost: int | None = Field(default=None, ge=0, le=50)
+    min_amount: Decimal | None = Field(
+        default=None, gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
+    )
+    max_amount: Decimal | None = Field(
+        default=None, gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
+    )
+    max_frequency: int | None = Field(default=None, ge=1, le=LIMITS["max_frequency"])
+    round_frequency_limit: int | None = Field(
+        default=None, ge=1, le=LIMITS["max_actions"]
+    )
+    energy_cost: int | None = Field(default=None, ge=0, le=LIMITS["max_operation_cost"])
+    time_cost: int | None = Field(default=None, ge=0, le=LIMITS["max_operation_cost"])
     fee_rate: Decimal | None = Field(default=None, ge=0, le=1, decimal_places=6)
+
+    risk_weight: Decimal | None = Field(default=None, ge=0, le=100, decimal_places=2)
 
     @field_validator("visible_params")
     @classmethod
@@ -186,6 +203,11 @@ class ScoringIn(BaseModel):
     model_config = STRICT
 
     version: str = Field(min_length=1, max_length=64)
+    rules: RiskRulesIn = Field(
+        default_factory=lambda: RiskRulesIn.model_validate(
+            load_config("risk_rules.json")
+        )
+    )
     review_threshold: Decimal = Field(ge=0, le=100, decimal_places=2)
     suspicious_threshold: Decimal = Field(ge=0, le=100, decimal_places=2)
 
@@ -200,6 +222,7 @@ class ScoringIn(BaseModel):
     def dump(self) -> dict[str, Any]:
         return {
             "version": self.version,
+            "rules": self.rules.model_dump(mode="json"),
             "review_threshold": _money(self.review_threshold),
             "suspicious_threshold": _money(self.suspicious_threshold),
         }
@@ -217,6 +240,11 @@ class LeaderboardIn(BaseModel):
     def _board_weights(cls, value: dict[str, Decimal]) -> dict[str, Decimal]:
         if set(value) != {"stealth", "resources"}:
             raise ValueError("Веса лидерборда: ожидаются ключи stealth и resources.")
+        if any(
+            not weight.is_finite() or weight < 0 or weight > 1
+            for weight in value.values()
+        ):
+            raise ValueError("Каждый вес должен быть конечным числом от 0 до 1.")
         if sum(value.values()) != Decimal("1"):
             raise ValueError("Веса лидерборда должны в сумме давать 1.")
         return value
@@ -226,8 +254,15 @@ class LeaderboardIn(BaseModel):
     def _resource_weights(cls, value: dict[str, Decimal]) -> dict[str, Decimal]:
         if set(value) != set(RESOURCE_WEIGHT_KEYS):
             raise ValueError(
-                "Веса ресурсов: ожидаются ключи " + ", ".join(RESOURCE_WEIGHT_KEYS) + "."
+                "Веса ресурсов: ожидаются ключи "
+                + ", ".join(RESOURCE_WEIGHT_KEYS)
+                + "."
             )
+        if any(
+            not weight.is_finite() or weight < 0 or weight > 1
+            for weight in value.values()
+        ):
+            raise ValueError("Каждый вес должен быть конечным числом от 0 до 1.")
         if sum(value.values()) != Decimal("1"):
             raise ValueError("Веса ресурсов должны в сумме давать 1.")
         return value
@@ -235,9 +270,9 @@ class LeaderboardIn(BaseModel):
     def dump(self) -> dict[str, Any]:
         return {
             "version": self.version,
-            "weights": {key: f"{value:.2f}" for key, value in sorted(self.weights.items())},
+            "weights": {key: str(value) for key, value in sorted(self.weights.items())},
             "resource_weights": {
-                key: f"{value:.2f}" for key, value in sorted(self.resource_weights.items())
+                key: str(value) for key, value in sorted(self.resource_weights.items())
             },
         }
 
@@ -251,7 +286,14 @@ class GameConfigIn(BaseModel):
     resources: ResourcesIn
     objectives: ObjectivesIn
     constraints: ConstraintsIn
-    operations: list[OperationIn] = Field(default_factory=list, max_length=64)
+    operations: list[OperationIn] = Field(
+        default_factory=list, max_length=LIMITS["max_operations"]
+    )
+    resource_rules: ResourceRulesIn = Field(
+        default_factory=lambda: ResourceRulesIn.model_validate(
+            load_config("resource_rules.json")
+        )
+    )
     ruleset_version: str = Field(min_length=1, max_length=64)
     scoring: ScoringIn
     leaderboard: LeaderboardIn
@@ -260,13 +302,13 @@ class GameConfigIn(BaseModel):
     #: Derived by the server on activation; accepted so a stored snapshot can be
     #: round-tripped through the editor without being rejected.
     config_version: str | None = None
+    # Server-owned catalog snapshot; never trust a client-supplied replacement.
+    card_snapshots: list[dict[str, Any]] | None = None
 
     @model_validator(mode="after")
     def _has_operations(self) -> GameConfigIn:
         if not self.operations and not self.card_versions:
-            raise ValueError(
-                "Раунд должен содержать хотя бы одну операцию."
-            )
+            raise ValueError("Раунд должен содержать хотя бы одну операцию.")
         codes = [(item.code, item.version) for item in self.operations]
         if len(set(codes)) != len(codes):
             raise ValueError("Операция указана в конфигурации несколько раз.")
@@ -277,6 +319,7 @@ class GameConfigIn(BaseModel):
         payload: dict[str, Any] = {
             "schema_version": self.schema_version,
             "operations": [item.dump() for item in self.operations],
+            "resource_rules": self.resource_rules.model_dump(mode="json"),
             "resources": self.resources.dump(),
             "objectives": self.objectives.dump(),
             "constraints": self.constraints.dump(),

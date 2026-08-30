@@ -15,24 +15,11 @@ from __future__ import annotations
 
 from enum import StrEnum
 
+from src.aml_workshop_simulator.core.game_config import load_config
 
-class Channel(StrEnum):
-    """Every channel value the platform recognises."""
+CHANNEL_LABELS: dict[str, str] = load_config("channels.json")
+Channel = StrEnum("Channel", {code: code for code in CHANNEL_LABELS})
 
-    bank = "bank"
-    branch = "branch"
-    atm = "atm"
-    mobile = "mobile"
-    web = "web"
-
-
-CHANNEL_LABELS: dict[str, str] = {
-    Channel.bank: "Банковское зачисление",
-    Channel.branch: "Отделение банка",
-    Channel.atm: "Банкомат",
-    Channel.mobile: "Мобильное приложение",
-    Channel.web: "Интернет-банк",
-}
 
 ALL_CHANNELS: tuple[str, ...] = tuple(channel.value for channel in Channel)
 

@@ -21,7 +21,9 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
-from src.aml_workshop_simulator.ui.admin.config_editor import render_editor  # noqa: E402
+from src.aml_workshop_simulator.ui.admin.config_editor import (  # noqa: E402
+    render_editor,
+)
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     ADMIN_COOKIE,
@@ -213,12 +215,7 @@ def select_round(client: Any, session_id: str, key: str = "admin_round_select"):
 
 def _reference_config(catalog: list[dict[str, Any]]) -> dict[str, Any]:
     """Starting point for the very first round of a fresh installation."""
-    from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
-
-    config = {
-        key: value for key, value in REFERENCE_GAME_CONFIG.items() if key != "card_versions"
-    }
-    return config
+    return get_api_client().admin_default_game_config(st.session_state["session_id"])
 
 
 def page_round_setup() -> None:
@@ -253,7 +250,7 @@ def page_round_setup() -> None:
         marker("selected-preset", source["id"] if source else "")
 
         title = st.text_input(
-            "Название раунда", value="Мастер-класс AML", key="new_round_title"
+            "Название раунда", value="Новый раунд", key="new_round_title"
         )
         config = render_editor(base_config, catalog, key_prefix="new")
         with st.expander("JSON конфигурации (только для диагностики)", expanded=False):

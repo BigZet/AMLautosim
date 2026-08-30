@@ -46,7 +46,10 @@ from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.domain.scoring import LEADERBOARD_VERSION, SCORING_VERSION
+from src.aml_workshop_simulator.domain.scoring import (
+    LEADERBOARD_VERSION,
+    SCORING_VERSION,
+)
 from src.aml_workshop_simulator.schemas.admin import (
     RoundAdminOut,
     RoundCreateIn,
@@ -58,7 +61,11 @@ from src.aml_workshop_simulator.schemas.admin import (
     ScoringSummaryOut,
 )
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
-from src.aml_workshop_simulator.services.scoring_service import NoSubmissions, score_round
+from src.aml_workshop_simulator.services.configuration import freeze_game_config
+from src.aml_workshop_simulator.services.scoring_service import (
+    NoSubmissions,
+    score_round,
+)
 
 router = APIRouter()
 
@@ -66,6 +73,15 @@ router = APIRouter()
 # --------------------------------------------------------------------------
 # Catalog
 # --------------------------------------------------------------------------
+
+
+@router.get("/game-config/default", operation_id="admin_default_game_config")
+async def default_game_config(
+    _: CurrentPrincipal = Depends(get_current_admin),
+) -> dict[str, Any]:
+    from src.aml_workshop_simulator.core.game_config import base_game_config
+    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    return GameConfigIn.model_validate(base_game_config()).dump()
 
 
 @router.get(
@@ -129,6 +145,7 @@ async def create_round(
 
     cards = (await db.execute(select(ActionCard))).scalars().all()
     validate_game_config(list(cards), game_config)
+    game_config = freeze_game_config(game_config, list(cards))
 
     now = datetime.now(UTC)
     round_obj = Round(
@@ -211,6 +228,12 @@ async def update_round(
     if payload.game_config is not None:
         game_config = payload.game_config.dump()
         cards = (await db.execute(select(ActionCard))).scalars().all()
+        try:
+            game_config = freeze_game_config(
+                game_config, [card for card in cards if card.is_active], round_obj.game_config
+            )
+        except ValueError as error:
+            raise Conflict(str(error), code="round_configuration_invalid") from error
         validate_game_config(list(cards), game_config)
         round_obj.game_config = game_config
     round_obj.config_revision += 1
@@ -274,6 +297,7 @@ async def _start(
     cards = (await db.execute(select(ActionCard))).scalars().all()
     game_config = dict(round_obj.game_config or {})
     validate_game_config(list(cards), game_config)
+    game_config = freeze_game_config(game_config, list(cards))
     game_config["config_version"] = config_version(game_config)
 
     now = datetime.now(UTC)
@@ -435,6 +459,7 @@ async def restart_round(
     }
     cards = (await db.execute(select(ActionCard))).scalars().all()
     validate_game_config(list(cards), game_config)
+    game_config = freeze_game_config(game_config, list(cards))
 
     now = datetime.now(UTC)
     replacement = Round(

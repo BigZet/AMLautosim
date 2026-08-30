@@ -1,5 +1,5 @@
 # Only the files COPYed by deploy/Dockerfile need to reach the build context:
-# alembic.ini, migrations/, scripts/, src/ and .streamlit/.
+# alembic.ini, migrations/, scripts/, src/, config/ and .streamlit/.
 
 # Version control and local tooling
 .git/

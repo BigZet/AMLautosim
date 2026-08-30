@@ -25,13 +25,15 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Protocol
 
+from src.aml_workshop_simulator.core.game_config import LIMITS
+
 PARAM_CHANNEL = "channel"
 CONTEXT_PREFIX = "context."
 ACTION_PREFIX = "action."
 
 #: Amount and frequency are always their own controls; on top of them a round
 #: may expose at most this many parameters per operation.
-MAX_VISIBLE_PARAMS = 2
+MAX_VISIBLE_PARAMS = LIMITS["max_visible_params"]
 
 #: Numeric card attributes a round is allowed to re-tune for its own snapshot.
 CARD_OVERRIDE_KEYS: tuple[str, ...] = (
@@ -42,9 +44,10 @@ CARD_OVERRIDE_KEYS: tuple[str, ...] = (
     "energy_cost",
     "time_cost",
     "fee_rate",
+    "risk_weight",
 )
 
-DECIMAL_OVERRIDE_KEYS = frozenset({"min_amount", "max_amount", "fee_rate"})
+DECIMAL_OVERRIDE_KEYS = frozenset({"min_amount", "max_amount", "fee_rate", "risk_weight"})
 
 
 class CardContract(Protocol):

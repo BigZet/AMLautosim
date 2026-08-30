@@ -32,6 +32,7 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 COPY scripts ./scripts
 COPY src ./src
+COPY config ./config
 COPY .streamlit ./.streamlit
 
 # The application only reads its own code; it never writes into /app.

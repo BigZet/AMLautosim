@@ -11,6 +11,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from src.aml_workshop_simulator.api.errors import ApiError
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.schemas.catalog_config import (
+    validate_configuration_files,
+)
+
+validate_configuration_files()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

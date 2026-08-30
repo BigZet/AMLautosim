@@ -27,6 +27,7 @@ from dataclasses import asdict, dataclass, field, replace
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
+from src.aml_workshop_simulator.core.game_config import base_game_config, load_config
 from src.aml_workshop_simulator.domain.action_parameters import (
     CONTEXT_FIELDS,
     option_label,
@@ -120,6 +121,7 @@ class CardSpec:
     fields: tuple[dict[str, Any], ...] = ()
     default_visible_params: tuple[str, ...] = ()
     default_show_frequency: bool = True
+    context_defaults: dict[str, Any] = field(default_factory=lambda: {key: item["default"] for key, item in CONTEXT_FIELDS.items()})
 
     @property
     def key(self) -> tuple[str, int]:
@@ -226,7 +228,7 @@ QUOTA_LABELS = {
 }
 
 #: Channels that add extra handling time because a person is involved.
-CHANNEL_TIME_MODIFIER: dict[str, int] = {"branch": 2}
+CHANNEL_TIME_MODIFIER: dict[str, int] = load_config("resource_rules.json")["channel_time"]
 
 
 @dataclass(frozen=True)
@@ -245,81 +247,31 @@ class RoundRules:
 
     @classmethod
     def from_config(cls, config: dict[str, Any] | None) -> RoundRules:
+        defaults = base_game_config()
         config = config or {}
-        resources = config.get("resources", {})
-        objectives = config.get("objectives", {})
-        constraints = config.get("constraints", {})
+        resources = {**defaults["resources"], **config.get("resources", {})}
+        objectives = {**defaults["objectives"], **config.get("objectives", {})}
+        constraints = {**defaults["constraints"], **config.get("constraints", {})}
         raw_limits = constraints.get("category_limits", {}) or {}
         return cls(
-            initial_balance=money(resources.get("initial_balance", "250000.00")),
-            initial_energy=int(resources.get("initial_energy", 14)),
-            initial_time=int(resources.get("initial_time", 18)),
-            target_outflow=money(objectives.get("target_outflow", "150000.00")),
-            max_actions=int(objectives.get("max_actions", 8)),
-            max_identical_steps=int(constraints.get("max_identical_steps", 2)),
-            max_night_operations=int(constraints.get("max_night_operations", 2)),
-            max_anonymous_operations=int(constraints.get("max_anonymous_operations", 2)),
+            initial_balance=money(resources["initial_balance"]),
+            initial_energy=int(resources["initial_energy"]),
+            initial_time=int(resources["initial_time"]),
+            target_outflow=money(objectives["target_outflow"]),
+            max_actions=int(objectives["max_actions"]),
+            max_identical_steps=int(constraints["max_identical_steps"]),
+            max_night_operations=int(constraints["max_night_operations"]),
+            max_anonymous_operations=int(constraints["max_anonymous_operations"]),
             category_limits={key: money(value) for key, value in raw_limits.items()},
         )
 
 
 def reference_operations() -> list[dict[str, Any]]:
-    """Default `operations` block: four operations with two visible params."""
-    from src.aml_workshop_simulator.domain.catalog import (
-        CARD_CATALOG,
-        DEFAULT_OPERATION_CODES,
-        default_show_frequency,
-        default_visible_params,
-    )
-
-    return [
-        {
-            "code": entry["code"],
-            "version": entry["version"],
-            "visible_params": list(default_visible_params(entry["code"])),
-            "show_frequency": default_show_frequency(entry["code"]),
-        }
-        for entry in CARD_CATALOG
-        if entry["code"] in DEFAULT_OPERATION_CODES
-    ]
+    """Default operations from the base round file."""
+    return load_config("base_round.json")["operations"]
 
 
-REFERENCE_GAME_CONFIG: dict[str, Any] = {
-    "schema_version": 4,
-    "operations": reference_operations(),
-    "resources": {
-        "initial_balance": "250000.00",
-        "initial_energy": 14,
-        "initial_time": 18,
-    },
-    "objectives": {"target_outflow": "150000.00", "max_actions": 8},
-    "constraints": {
-        "max_identical_steps": 2,
-        "max_night_operations": 2,
-        "max_anonymous_operations": 2,
-        "category_limits": {
-            "cash": "150000.00",
-            "anonymous": "75000.00",
-        },
-    },
-    "ruleset_version": RULESET_VERSION,
-    "scoring": {
-        "version": "risk-rules-v2",
-        "review_threshold": "35.00",
-        "suspicious_threshold": "65.00",
-    },
-    "leaderboard": {
-        "version": "leaderboard-v2",
-        "weights": {"stealth": "0.60", "resources": "0.40"},
-        "resource_weights": {
-            "balance": "0.27",
-            "energy": "0.20",
-            "time": "0.20",
-            "fees": "0.20",
-            "available_steps": "0.13",
-        },
-    },
-}
+REFERENCE_GAME_CONFIG: dict[str, Any] = base_game_config()
 
 
 # --------------------------------------------------------------------------
@@ -565,7 +517,7 @@ def _validate_context_fields(
     """Every context field the participant may not edit must hold its value."""
     declared = {item["key"] for item in spec.context_fields}
     violations: list[Violation] = []
-    for key, default in CONTEXT_DEFAULTS.items():
+    for key, default in spec.context_defaults.items():
         label = CONTEXT_FIELDS[key]["label"]
         param = context_param(key)
         if key not in declared:
@@ -776,6 +728,7 @@ def evaluate_scenario(
         raise StructuralError(structural)
 
     rules = RoundRules.from_config(game_config)
+    costs = (game_config or {}).get("resource_rules") or load_config("resource_rules.json")
     violations: list[Violation] = []
 
     balance = rules.initial_balance
@@ -868,6 +821,13 @@ def evaluate_scenario(
                 )
             )
 
+        if spec.requires_card_code and not card_frequencies.get(spec.requires_card_code):
+            violations.append(Violation(
+                reason="required_operation_missing", step_id=step_id, step_index=index,
+                field="card", allowed=spec.requires_card_code,
+                message=f"{_step_label(index, spec)}: сначала выполните операцию «{spec.requires_card_code}».",
+            ))
+
         card_frequencies[spec.code] = card_frequencies.get(spec.code, 0) + frequency
         if card_frequencies[spec.code] > spec.round_frequency_limit:
             violations.append(
@@ -951,15 +911,19 @@ def evaluate_scenario(
 
         # ---- resource costs -------------------------------------------------
         energy_cost = spec.energy_cost * frequency + effects["energy_cost"]
-        velocity_time = {
-            "spaced": frequency,
-            "normal": 0,
-            "rapid": -max(0, frequency - 1),
-        }.get(velocity, 0)
-        document_time = 1 if has_documents and gross >= Decimal("75000") else 0
-        channel_time = CHANNEL_TIME_MODIFIER.get(channel, 0)
+        velocity_rule = costs["velocity_time"][velocity]
+        velocity_time = (
+            velocity_rule["per_repeat"] * frequency
+            + velocity_rule["per_extra_repeat"] * max(0, frequency - 1)
+        )
+        document_time = (
+            costs["documents"]["time_cost"]
+            if has_documents and gross >= Decimal(str(costs["documents"]["minimum_gross"]))
+            else 0
+        )
+        channel_time = costs["channel_time"][channel]
         time_cost = max(
-            1,
+            costs["minimum_time_cost"],
             spec.time_cost * frequency
             + velocity_time
             + document_time

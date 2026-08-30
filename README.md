@@ -10,6 +10,7 @@ Browser -> Streamlit (participant / admin) -> FastAPI -> PostgreSQL 16
 
 ## Структура
 
+- [`config/`](config/README.md) — игровые цены, лимиты, базовый раунд и коэффициенты расчёта;
 - [`src/`](src/) — production-код модульного монолита (API, домен, сервисы, БД, оба UI);
 - [`migrations/`](migrations/) — Alembic-миграции;
 - [`tests/`](tests/) — unit, contract, integration, UI и E2E проверки;

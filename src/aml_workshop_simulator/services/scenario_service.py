@@ -24,19 +24,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.domain.rules import (
-    CONTEXT_DEFAULTS,
-    CardSpec,
-    card_spec_from_row,
-    evaluate_scenario,
-    money,
-)
 from src.aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
     RoundPolicy,
     action_param,
     context_param,
+)
+from src.aml_workshop_simulator.domain.rules import (
+    CONTEXT_DEFAULTS,
+    CardSpec,
+    card_spec_from_row,
+    evaluate_scenario,
+    money,
 )
 from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
 
@@ -54,6 +54,9 @@ async def load_round_card_specs(
     administrator can preview the round.
     """
     config = round_obj.game_config or {}
+    if config.get("card_snapshots"):
+        from src.aml_workshop_simulator.services.configuration import snapshot_specs
+        return snapshot_specs(config)
     operations = config.get("operations") or []
     refs = config.get("card_versions") or []
     pairs: set[tuple[str, int]] = set()
@@ -96,7 +99,7 @@ def _context_value(
     param = context_param(key)
     declared = next((item for item in spec.context_fields if item["key"] == key), None)
     if declared is None:
-        return CONTEXT_DEFAULTS[key]
+        return spec.context_defaults[key]
     if operation is not None and not operation.is_visible(param):
         pinned = operation.default_for(param)
         return declared["default"] if pinned is None else pinned

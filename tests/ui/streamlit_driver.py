@@ -344,7 +344,7 @@ def streamlit_theme_options(page: Page) -> list[str]:
     page.locator('[data-testid="stMainMenuButton"]').click()
     options = ["System", "Light", "Dark"]
     for option in options:
-        page.get_by_text(option, exact=True).wait_for(
+        page.get_by_test_id(f"stMainMenuItem-theme-{option}").wait_for(
             state="visible", timeout=DEFAULT_TIMEOUT
         )
     page.keyboard.press("Escape")

@@ -1,0 +1,42 @@
+{
+  "recipient_points": {
+    "known_counterparty": "0",
+    "new_counterparty": "12",
+    "anonymous_wallet": "25"
+  },
+  "time_of_day_points": {
+    "day": "0",
+    "evening": "3",
+    "night": "9"
+  },
+  "velocity_points": {
+    "spaced": "-4",
+    "normal": "0",
+    "rapid": "12"
+  },
+  "channel_points": {
+    "bank": "-2",
+    "branch": "-3",
+    "mobile": "0",
+    "web": "2",
+    "atm": "3"
+  },
+  "amount_divisor": "20000",
+  "amount_max_points": "20",
+  "extra_repeat_points": "3",
+  "documents": {
+    "minimum_gross": "75000.00",
+    "present_large": "-4",
+    "present_small": "-1",
+    "absent_large": "7",
+    "absent_small": "0"
+  },
+  "sequence": {
+    "repeated_min_amount": "10000.00",
+    "repeated_points": "8",
+    "repeated_max_points": "16",
+    "turnover_ratio": "0.7",
+    "turnover_points": "10"
+  },
+  "explanation_factor_limit": 5
+}

@@ -37,10 +37,16 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-aml_simulator}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-240}
+      LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
+      SESSION_LAST_SEEN_THROTTLE_SECONDS: ${SESSION_LAST_SEEN_THROTTLE_SECONDS:-300}
       # Empty by default: only the socket address is believed.
       TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?set BOOTSTRAP_ADMIN_EMAIL in .env}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?set BOOTSTRAP_ADMIN_PASSWORD in .env, 10-128 characters}
+    volumes:
+      - ./config:/app/config:ro
     command: >-
       sh -c "python -m scripts.seed_database --wait-for-db --migrate
       && uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
@@ -66,6 +72,8 @@ services:
     environment:
       API_URL: http://api:8000
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - ./config:/app/config:ro
     command: >-
       streamlit run src/aml_workshop_simulator/ui/participant/app.py
       --server.port 8501 --server.address 0.0.0.0 --server.headless true
@@ -88,6 +96,8 @@ services:
     environment:
       API_URL: http://api:8000
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - ./config:/app/config:ro
     command: >-
       streamlit run src/aml_workshop_simulator/ui/admin/app.py
       --server.port 8502 --server.address 0.0.0.0 --server.headless true

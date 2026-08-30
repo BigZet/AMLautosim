@@ -1,0 +1,345 @@
+{
+  "context_fields": {
+    "recipient_type": {
+      "key": "recipient_type",
+      "label": "Получатель",
+      "kind": "select",
+      "default": "known_counterparty",
+      "help": "Насколько хорошо клиенту известна принимающая сторона.",
+      "options": [
+        {
+          "value": "known_counterparty",
+          "label": "Знакомый контрагент"
+        },
+        {
+          "value": "new_counterparty",
+          "label": "Новый контрагент"
+        },
+        {
+          "value": "anonymous_wallet",
+          "label": "Анонимный кошелек"
+        }
+      ]
+    },
+    "time_of_day": {
+      "key": "time_of_day",
+      "label": "Время операции",
+      "kind": "select",
+      "default": "day",
+      "help": "Нетипичное время может усилить сигнал модели.",
+      "options": [
+        {
+          "value": "day",
+          "label": "День"
+        },
+        {
+          "value": "evening",
+          "label": "Вечер"
+        },
+        {
+          "value": "night",
+          "label": "Ночь"
+        }
+      ]
+    },
+    "velocity": {
+      "key": "velocity",
+      "label": "Темп повторов",
+      "kind": "select",
+      "default": "normal",
+      "help": "Интервал между повторами внутри одного шага.",
+      "options": [
+        {
+          "value": "spaced",
+          "label": "С интервалами"
+        },
+        {
+          "value": "normal",
+          "label": "Обычный темп"
+        },
+        {
+          "value": "rapid",
+          "label": "Быстро подряд"
+        }
+      ]
+    },
+    "has_documents": {
+      "key": "has_documents",
+      "label": "Есть подтверждающие документы",
+      "kind": "toggle",
+      "default": true,
+      "help": "Документы требуют времени, но снижают неопределенность модели."
+    }
+  },
+  "action_context_fields": {
+    "salary": [
+      "time_of_day",
+      "has_documents"
+    ],
+    "cash_deposit": [
+      "time_of_day",
+      "velocity",
+      "has_documents"
+    ],
+    "card_transfer": [
+      "recipient_type",
+      "time_of_day",
+      "velocity",
+      "has_documents"
+    ],
+    "cash_withdrawal": [
+      "time_of_day",
+      "velocity"
+    ]
+  },
+  "action_fields": {
+    "salary": [
+      {
+        "key": "employer_profile",
+        "label": "Плательщик",
+        "kind": "select",
+        "default": "verified_employer",
+        "help": "Профиль отправителя регулярного дохода.",
+        "options": [
+          {
+            "value": "verified_employer",
+            "label": "Проверенный работодатель",
+            "risk_points": -5,
+            "description": "Известный работодатель снижает неопределенность дохода"
+          },
+          {
+            "value": "small_business",
+            "label": "Малый бизнес",
+            "risk_points": 1,
+            "description": "Небольшой работодатель дает модели меньше истории"
+          },
+          {
+            "value": "private_person",
+            "label": "Физическое лицо",
+            "risk_points": 8,
+            "energy_cost": 1,
+            "description": "Перевод от физлица слабее похож на зарплатную выплату"
+          }
+        ]
+      },
+      {
+        "key": "income_basis",
+        "label": "Основание дохода",
+        "kind": "select",
+        "default": "payroll_registry",
+        "options": [
+          {
+            "value": "payroll_registry",
+            "label": "Зарплатный реестр",
+            "risk_points": -3,
+            "time_cost": 1,
+            "description": "Назначение и реестр подтверждают регулярность выплаты"
+          },
+          {
+            "value": "service_contract",
+            "label": "Договор услуг",
+            "risk_points": 2,
+            "description": "Нерегулярный договор требует дополнительного контекста"
+          },
+          {
+            "value": "no_reference",
+            "label": "Без назначения",
+            "risk_points": 8,
+            "description": "Отсутствие назначения затрудняет проверку источника дохода"
+          }
+        ]
+      }
+    ],
+    "cash_deposit": [
+      {
+        "key": "funds_source",
+        "label": "Источник наличных",
+        "kind": "select",
+        "default": "documented_savings",
+        "options": [
+          {
+            "value": "documented_savings",
+            "label": "Подтвержденные накопления",
+            "risk_points": -2,
+            "time_cost": 1,
+            "description": "Понятный источник средств снижает неопределенность"
+          },
+          {
+            "value": "asset_sale",
+            "label": "Продажа имущества",
+            "risk_points": 2,
+            "time_cost": 1,
+            "description": "Разовое поступление требует подтверждения сделки"
+          },
+          {
+            "value": "borrowed_cash",
+            "label": "Заемные средства",
+            "risk_points": 5,
+            "description": "Заемные наличные сложнее связать с финансовым профилем"
+          },
+          {
+            "value": "unexplained",
+            "label": "Источник не указан",
+            "risk_points": 12,
+            "energy_cost": 1,
+            "description": "Необъясненные наличные дают сильный сигнал риска"
+          }
+        ]
+      },
+      {
+        "key": "deposit_pattern",
+        "label": "Способ внесения",
+        "kind": "select",
+        "default": "single_location",
+        "options": [
+          {
+            "value": "single_location",
+            "label": "Одно место",
+            "risk_points": -1,
+            "description": "Обычное внесение в одном месте выглядит последовательнее"
+          },
+          {
+            "value": "several_atms",
+            "label": "Несколько банкоматов",
+            "risk_points": 6,
+            "energy_cost": 1,
+            "description": "Разные точки внесения похожи на распределенную схему"
+          },
+          {
+            "value": "third_party",
+            "label": "Через третье лицо",
+            "risk_points": 10,
+            "description": "Внесение третьим лицом усложняет установление источника"
+          }
+        ]
+      }
+    ],
+    "card_transfer": [
+      {
+        "key": "transfer_purpose",
+        "label": "Назначение перевода",
+        "kind": "select",
+        "default": "family_support",
+        "options": [
+          {
+            "value": "family_support",
+            "label": "Помощь семье",
+            "risk_points": -2,
+            "description": "Понятное бытовое назначение соответствует профилю клиента"
+          },
+          {
+            "value": "goods_payment",
+            "label": "Оплата товара",
+            "risk_points": 1,
+            "description": "Перевод вместо эквайринга требует контекста сделки"
+          },
+          {
+            "value": "loan_repayment",
+            "label": "Возврат долга",
+            "risk_points": 2,
+            "description": "Возврат долга труднее подтвердить автоматически"
+          },
+          {
+            "value": "no_purpose",
+            "label": "Без назначения",
+            "risk_points": 6,
+            "description": "Пустое назначение повышает неопределенность перевода"
+          }
+        ]
+      },
+      {
+        "key": "recipient_relationship",
+        "label": "Связь с получателем",
+        "kind": "select",
+        "default": "family",
+        "options": [
+          {
+            "value": "own_account",
+            "label": "Собственный счет",
+            "risk_points": -4,
+            "description": "Перевод между собственными счетами хорошо объясним"
+          },
+          {
+            "value": "family",
+            "label": "Родственник",
+            "risk_points": -2,
+            "description": "Устойчивая связь с получателем снижает неопределенность"
+          },
+          {
+            "value": "acquaintance",
+            "label": "Знакомый",
+            "risk_points": 2,
+            "description": "Неформальная связь требует больше контекста"
+          },
+          {
+            "value": "unknown",
+            "label": "Связь не указана",
+            "risk_points": 8,
+            "description": "Неясная связь с получателем усиливает риск"
+          }
+        ]
+      }
+    ],
+    "cash_withdrawal": [
+      {
+        "key": "cash_purpose",
+        "label": "Назначение наличных",
+        "kind": "select",
+        "default": "daily_expenses",
+        "options": [
+          {
+            "value": "daily_expenses",
+            "label": "Повседневные расходы",
+            "risk_points": -2,
+            "description": "Обычное назначение соответствует розничному профилю"
+          },
+          {
+            "value": "major_purchase",
+            "label": "Крупная покупка",
+            "risk_points": 1,
+            "description": "Крупная покупка наличными требует объяснения"
+          },
+          {
+            "value": "business_expenses",
+            "label": "Расходы бизнеса",
+            "risk_points": 3,
+            "description": "Бизнес-расходы не всегда соответствуют личному профилю"
+          },
+          {
+            "value": "unspecified",
+            "label": "Не указано",
+            "risk_points": 7,
+            "description": "Неясная цель снятия усиливает риск вывода средств"
+          }
+        ]
+      },
+      {
+        "key": "withdrawal_location",
+        "label": "Место снятия",
+        "kind": "select",
+        "default": "home_region",
+        "options": [
+          {
+            "value": "home_region",
+            "label": "Домашний регион",
+            "risk_points": -2,
+            "description": "Привычная география соответствует профилю клиента"
+          },
+          {
+            "value": "other_region",
+            "label": "Другой регион",
+            "risk_points": 3,
+            "description": "Новая география требует дополнительного контекста"
+          },
+          {
+            "value": "abroad",
+            "label": "За границей",
+            "risk_points": 7,
+            "energy_cost": 1,
+            "description": "Снятие за границей заметно отличается от обычного поведения"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "minimum_time_cost": 1,
+  "channel_time": {
+    "bank": 0,
+    "branch": 2,
+    "mobile": 0,
+    "web": 0,
+    "atm": 0
+  },
+  "velocity_time": {
+    "spaced": {
+      "per_repeat": 1,
+      "per_extra_repeat": 0
+    },
+    "normal": {
+      "per_repeat": 0,
+      "per_extra_repeat": 0
+    },
+    "rapid": {
+      "per_repeat": 0,
+      "per_extra_repeat": -1
+    }
+  },
+  "documents": {
+    "minimum_gross": "75000.00",
+    "time_cost": 1
+  }
+}

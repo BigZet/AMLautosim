@@ -9,14 +9,22 @@ diagnostic.
 
 from __future__ import annotations
 
+import hashlib
+import json
+from copy import deepcopy
+from decimal import Decimal
 from typing import Any
 
 import streamlit as st
 
-QUOTA_LABELS = {
-    "cash": "Наличные операции",
-    "anonymous": "Анонимные получатели",
-}
+from src.aml_workshop_simulator.core.game_config import (
+    LIMITS,
+    base_game_config,
+    load_config,
+)
+from src.aml_workshop_simulator.domain.round_policy import MAX_VISIBLE_PARAMS
+from src.aml_workshop_simulator.domain.rules import QUOTA_LABELS
+from src.aml_workshop_simulator.schemas.round_config import CONFIG_SCHEMA_VERSION
 
 RESOURCE_WEIGHT_LABELS = {
     "balance": "Баланс",
@@ -26,17 +34,75 @@ RESOURCE_WEIGHT_LABELS = {
     "available_steps": "Доступные шаги",
 }
 
-#: Card attributes a round may re-tune, with the widget bounds for each.
 OVERRIDES = (
-    ("min_amount", "Мин. сумма", 0.0, 100_000_000.0, 1000.0),
-    ("max_amount", "Макс. сумма", 0.0, 100_000_000.0, 1000.0),
-    ("max_frequency", "Повторов в шаге", 1.0, 20.0, 1.0),
-    ("round_frequency_limit", "Повторов за раунд", 1.0, 64.0, 1.0),
-    ("energy_cost", "Энергия", 0.0, 50.0, 1.0),
-    ("time_cost", "Время", 0.0, 50.0, 1.0),
+    ("min_amount", "Мин. сумма", 0.01, float(LIMITS["max_balance"]), 1000.0),
+    ("max_amount", "Макс. сумма", 0.01, float(LIMITS["max_balance"]), 1000.0),
+    ("max_frequency", "Повторов в шаге", 1.0, float(LIMITS["max_frequency"]), 1.0),
+    (
+        "round_frequency_limit",
+        "Повторов за раунд",
+        1.0,
+        float(LIMITS["max_actions"]),
+        1.0,
+    ),
+    ("energy_cost", "Энергия", 0.0, float(LIMITS["max_operation_cost"]), 1.0),
+    ("time_cost", "Время", 0.0, float(LIMITS["max_operation_cost"]), 1.0),
+    ("fee_rate", "Комиссия (доля, 0.01 = 1%)", 0.0, 1.0, 0.000001),
+    ("risk_weight", "Базовый риск", 0.0, 100.0, 0.01),
 )
 
-MAX_VISIBLE_PARAMS = 2
+
+def _numeric_tree(values: dict[str, Any], prefix: str) -> dict[str, Any]:
+    """Edit all engine coefficients without duplicating their defaults."""
+    edited = {}
+    labels = load_config("editor_labels.json")
+    for key, value in values.items():
+        label = labels.get(key, key)
+        if isinstance(value, dict):
+            with st.expander(label, expanded=False):
+                edited[key] = _numeric_tree(value, f"{prefix}_{key}")
+        elif isinstance(value, int):
+            edited[key] = st.number_input(
+                label, value=value, step=1, key=f"{prefix}_{key}"
+            )
+        else:
+            # Decimal text avoids silently rounding a coefficient to widget precision.
+            edited[key] = st.text_input(label, value=str(value), key=f"{prefix}_{key}")
+    return edited
+
+
+def _pinned_defaults(card: dict, stored: dict, visible: list[str], prefix: str) -> dict:
+    defaults = {}
+    fields = {
+        "channel": {
+            "kind": "select",
+            "default": card["channels"][0],
+            "options": [
+                {"value": c, "label": card.get("channel_labels", {}).get(c, c)}
+                for c in card["channels"]
+            ],
+        }
+    }
+    fields.update({f"context.{f['key']}": f for f in card.get("context_fields", [])})
+    fields.update({f"action.{f['key']}": f for f in card.get("fields", [])})
+    for param, field in fields.items():
+        if param in visible:
+            continue
+        value = stored.get("defaults", {}).get(param, field["default"])
+        label = param_label(card, param)
+        if field["kind"] == "toggle":
+            defaults[param] = st.checkbox(label, value=value, key=f"{prefix}_{param}")
+        else:
+            options = [o["value"] for o in field["options"]]
+            labels = {o["value"]: o["label"] for o in field["options"]}
+            defaults[param] = st.selectbox(
+                label,
+                options,
+                index=options.index(value),
+                format_func=labels.get,
+                key=f"{prefix}_{param}",
+            )
+    return defaults
 
 
 def _number(label: str, value: Any, **kwargs: Any) -> float:
@@ -69,11 +135,37 @@ def render_editor(
     key_prefix: str = "cfg",
 ) -> dict[str, Any]:
     """Draw the whole configuration and return the edited version."""
-    resources = dict(config.get("resources") or {})
-    objectives = dict(config.get("objectives") or {})
-    constraints = dict(config.get("constraints") or {})
-    scoring = dict(config.get("scoring") or {})
-    leaderboard = dict(config.get("leaderboard") or {})
+    config = deepcopy(config)
+    if config.get("card_snapshots"):
+        # Show the same frozen catalog the server uses for this existing round.
+        from src.aml_workshop_simulator.api.routers.rounds import card_out
+        from src.aml_workshop_simulator.services.configuration import snapshot_specs
+
+        frozen = {
+            key: card_out(spec).model_dump()
+            for key, spec in snapshot_specs(config).items()
+        }
+        catalog = [frozen.pop((c["code"], c["version"]), c) for c in catalog] + list(
+            frozen.values()
+        )
+    base = base_game_config()
+    # Streamlit retains widget values by key. Clear only this editor's controls
+    # when the source preset/revision changes, preserving stable UI selectors.
+    digest = hashlib.sha256(
+        json.dumps(config, sort_keys=True, default=str).encode()
+    ).hexdigest()
+    digest_key, owned_key = f"_cfg_digest_{key_prefix}", f"_cfg_owned_{key_prefix}"
+    owned = set(st.session_state.get(owned_key, []))
+    if st.session_state.get(digest_key) != digest:
+        for key in owned:
+            st.session_state.pop(key, None)
+        st.session_state[digest_key] = digest
+    existing_keys = set(st.session_state)
+    resources = {**base["resources"], **config.get("resources", {})}
+    objectives = {**base["objectives"], **config.get("objectives", {})}
+    constraints = {**base["constraints"], **config.get("constraints", {})}
+    scoring = {**base["scoring"], **config.get("scoring", {})}
+    leaderboard = {**base["leaderboard"], **config.get("leaderboard", {})}
     weights = dict(leaderboard.get("weights") or {})
     resource_weights = dict(leaderboard.get("resource_weights") or {})
     limits = dict(constraints.get("category_limits") or {})
@@ -87,8 +179,9 @@ def render_editor(
     with columns[0]:
         initial_balance = _number(
             "Стартовый баланс, ₽",
-            resources.get("initial_balance", 250000),
-            min_value=1.0,
+            resources["initial_balance"],
+            min_value=0.01,
+            max_value=float(LIMITS["max_balance"]),
             step=10000.0,
             key=f"{key_prefix}_balance",
         )
@@ -96,9 +189,9 @@ def render_editor(
         initial_energy = int(
             _number(
                 "Энергия",
-                resources.get("initial_energy", 14),
+                resources["initial_energy"],
                 min_value=1.0,
-                max_value=200.0,
+                max_value=float(LIMITS["max_resource"]),
                 step=1.0,
                 key=f"{key_prefix}_energy",
             )
@@ -107,9 +200,9 @@ def render_editor(
         initial_time = int(
             _number(
                 "Время",
-                resources.get("initial_time", 18),
+                resources["initial_time"],
                 min_value=1.0,
-                max_value=200.0,
+                max_value=float(LIMITS["max_resource"]),
                 step=1.0,
                 key=f"{key_prefix}_time",
             )
@@ -119,8 +212,9 @@ def render_editor(
     with columns[0]:
         target_outflow = _number(
             "Цель: расходный оборот, ₽",
-            objectives.get("target_outflow", 150000),
-            min_value=1.0,
+            objectives["target_outflow"],
+            min_value=0.01,
+            max_value=float(LIMITS["max_balance"]),
             step=10000.0,
             key=f"{key_prefix}_target",
         )
@@ -128,9 +222,9 @@ def render_editor(
         max_actions = int(
             _number(
                 "Максимум операций",
-                objectives.get("max_actions", 8),
+                objectives["max_actions"],
                 min_value=1.0,
-                max_value=64.0,
+                max_value=float(LIMITS["max_actions"]),
                 step=1.0,
                 key=f"{key_prefix}_max_actions",
             )
@@ -139,9 +233,9 @@ def render_editor(
         max_identical = int(
             _number(
                 "Одинаковых подряд",
-                constraints.get("max_identical_steps", 2),
+                constraints["max_identical_steps"],
                 min_value=1.0,
-                max_value=64.0,
+                max_value=float(LIMITS["max_actions"]),
                 step=1.0,
                 key=f"{key_prefix}_identical",
             )
@@ -150,9 +244,9 @@ def render_editor(
         max_night = int(
             _number(
                 "Ночных операций",
-                constraints.get("max_night_operations", 2),
+                constraints["max_night_operations"],
                 min_value=0.0,
-                max_value=64.0,
+                max_value=float(LIMITS["max_actions"]),
                 step=1.0,
                 key=f"{key_prefix}_night",
             )
@@ -160,9 +254,9 @@ def render_editor(
     max_anonymous = int(
         _number(
             "Операций на анонимного получателя",
-            constraints.get("max_anonymous_operations", 2),
+            constraints["max_anonymous_operations"],
             min_value=0.0,
-            max_value=64.0,
+            max_value=float(LIMITS["max_actions"]),
             step=1.0,
             key=f"{key_prefix}_anonymous",
         )
@@ -173,6 +267,13 @@ def render_editor(
     category_limits: dict[str, str] = {}
     for column, (code, label) in zip(quota_columns, QUOTA_LABELS.items(), strict=False):
         with column:
+            enabled = st.checkbox(
+                f"Ограничить: {label}",
+                value=code in limits,
+                key=f"{key_prefix}_quota_enabled_{code}",
+            )
+            if not enabled:
+                continue
             value = _number(
                 label,
                 limits.get(code, 0),
@@ -189,16 +290,22 @@ def render_editor(
         "параметры получают серверные значения по умолчанию."
     )
     enabled_operations: list[dict[str, Any]] = []
-    for card in catalog:
+    legacy = not operations and bool(config.get("card_versions"))
+    if legacy:
+        st.info(
+            "Сохранён старый режим: все параметры карточек доступны. Список карточек не изменяется."
+        )
+    for card in [] if legacy else catalog:
         key = (card["code"], card["version"])
         stored = operations.get(key)
+        operation_prefix = f"{key_prefix}_{card['code']}_v{card['version']}"
         with st.container(border=True):
             head, freq = st.columns([3, 1])
             with head:
                 enabled = st.checkbox(
                     f"{card['title']} · {card['category']}",
                     value=stored is not None,
-                    key=f"{key_prefix}_op_{card['code']}",
+                    key=f"{operation_prefix}_enabled",
                 )
             if not enabled:
                 continue
@@ -210,7 +317,7 @@ def render_editor(
                         if stored
                         else card.get("show_frequency", True)
                     ),
-                    key=f"{key_prefix}_freq_{card['code']}",
+                    key=f"{operation_prefix}_frequency",
                 )
             available = declarable_params(card)
             default_visible = (
@@ -223,7 +330,7 @@ def render_editor(
                 available,
                 default=[item for item in default_visible if item in available],
                 format_func=lambda item, current=card: param_label(current, item),
-                key=f"{key_prefix}_params_{card['code']}",
+                key=f"{operation_prefix}_params",
                 max_selections=MAX_VISIBLE_PARAMS,
             )
             entry: dict[str, Any] = {
@@ -250,13 +357,18 @@ def render_editor(
                             min_value=low,
                             max_value=high,
                             step=step,
-                            key=f"{key_prefix}_{card['code']}_{field}",
+                            format="%.6f" if field == "fee_rate" else None,
+                            key=f"{operation_prefix}_{field}",
                         )
                         entry[field] = (
                             f"{value:.2f}"
-                            if field in {"min_amount", "max_amount"}
-                            else int(value)
+                            if field in {"min_amount", "max_amount", "risk_weight"}
+                            else (f"{value:.6f}" if field == "fee_rate" else int(value))
                         )
+            with st.expander("Значения скрытых параметров", expanded=False):
+                entry["defaults"] = _pinned_defaults(
+                    card, stored or {}, visible, operation_prefix
+                )
             enabled_operations.append(entry)
 
     st.markdown("#### Скоринг и лидерборд")
@@ -264,7 +376,7 @@ def render_editor(
     with columns[0]:
         review_threshold = _number(
             "Порог «проверить»",
-            scoring.get("review_threshold", 35),
+            scoring["review_threshold"],
             min_value=0.0,
             max_value=100.0,
             step=1.0,
@@ -273,7 +385,7 @@ def render_editor(
     with columns[1]:
         suspicious_threshold = _number(
             "Порог «подозрительно»",
-            scoring.get("suspicious_threshold", 65),
+            scoring["suspicious_threshold"],
             min_value=0.0,
             max_value=100.0,
             step=1.0,
@@ -282,14 +394,14 @@ def render_editor(
     with columns[2]:
         stealth_weight = _number(
             "Вес незаметности",
-            weights.get("stealth", 0.60),
+            weights["stealth"],
             min_value=0.0,
             max_value=1.0,
             step=0.05,
             key=f"{key_prefix}_w_stealth",
         )
     with columns[3]:
-        st.metric("Вес ресурсов", f"{1 - stealth_weight:.2f}")
+        st.metric("Вес ресурсов", str(Decimal("1") - Decimal(str(stealth_weight))))
 
     st.caption("Веса ресурсов (в сумме 1.00)")
     weight_columns = st.columns(len(RESOURCE_WEIGHT_LABELS))
@@ -313,8 +425,25 @@ def render_editor(
             "сервер примет конфигурацию только при сумме 1.00."
         )
 
+    with st.expander("Надбавки к стоимости операций", expanded=False):
+        resource_rules = _numeric_tree(
+            config.get("resource_rules", base["resource_rules"]), f"{key_prefix}_costs"
+        )
+    with st.expander("Коэффициенты модели риска", expanded=False):
+        risk_rules = _numeric_tree(scoring["rules"], f"{key_prefix}_risk")
+
+    st.session_state[owned_key] = sorted(
+        owned
+        | {
+            key
+            for key in st.session_state
+            if key.startswith(f"{key_prefix}_") and key not in existing_keys
+        }
+    )
     return {
-        "schema_version": 4,
+        **({"card_versions": config["card_versions"]} if legacy else {}),
+        "schema_version": CONFIG_SCHEMA_VERSION,
+        "resource_rules": resource_rules,
         "operations": enabled_operations,
         "resources": {
             "initial_balance": f"{initial_balance:.2f}",
@@ -331,20 +460,21 @@ def render_editor(
             "max_anonymous_operations": max_anonymous,
             "category_limits": category_limits,
         },
-        "ruleset_version": config.get("ruleset_version", "game-rules-v3"),
+        "ruleset_version": config.get("ruleset_version", base["ruleset_version"]),
         "scoring": {
-            "version": scoring.get("version", "risk-rules-v2"),
+            "version": scoring["version"],
+            "rules": risk_rules,
             "review_threshold": f"{review_threshold:.2f}",
             "suspicious_threshold": f"{suspicious_threshold:.2f}",
         },
         "leaderboard": {
-            "version": leaderboard.get("version", "leaderboard-v2"),
+            "version": leaderboard["version"],
             "weights": {
-                "stealth": f"{stealth_weight:.2f}",
-                "resources": f"{1 - stealth_weight:.2f}",
+                "stealth": str(Decimal(str(stealth_weight))),
+                "resources": str(Decimal("1") - Decimal(str(stealth_weight))),
             },
             "resource_weights": {
-                code: f"{value:.2f}" for code, value in raw_resource_weights.items()
+                code: str(value) for code, value in raw_resource_weights.items()
             },
         },
     }

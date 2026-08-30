@@ -276,6 +276,9 @@ class SimulatorAPIClient:
         )
 
     # ---------------- Admin: catalog and rounds ----------------
+    def admin_default_game_config(self, session_id: str) -> dict[str, Any]:
+        return self._send("GET", self._url("/admin/game-config/default"), headers=self._headers(session_id))
+
     def admin_get_action_cards(self, session_id: str) -> list[dict[str, Any]]:
         return self._send(
             "GET", self._url("/admin/action-cards"), headers=self._headers(session_id)

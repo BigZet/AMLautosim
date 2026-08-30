@@ -12,6 +12,8 @@ from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
 from src.aml_workshop_simulator.core.enums import RiskLabel
+from src.aml_workshop_simulator.core.game_config import base_game_config
+from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
 from src.aml_workshop_simulator.domain.rules import (
     CardSpec,
     RoundRules,
@@ -29,21 +31,6 @@ ONE = Decimal("1")
 HUNDRED = Decimal("100")
 
 DISCLAIMER = "Учебная модель; результат не является AML-решением"
-
-RECIPIENT_POINTS = {
-    "known_counterparty": Decimal("0"),
-    "new_counterparty": Decimal("12"),
-    "anonymous_wallet": Decimal("25"),
-}
-TIME_OF_DAY_POINTS = {"day": Decimal("0"), "evening": Decimal("3"), "night": Decimal("9")}
-VELOCITY_POINTS = {"spaced": Decimal("-4"), "normal": Decimal("0"), "rapid": Decimal("12")}
-CHANNEL_POINTS = {
-    "bank": Decimal("-2"),
-    "branch": Decimal("-3"),
-    "mobile": Decimal("0"),
-    "web": Decimal("2"),
-    "atm": Decimal("3"),
-}
 
 CREDIT_FLOW = "credit"
 DEBIT_FLOW = "debit"
@@ -86,15 +73,19 @@ def score_scenario(
 ) -> dict[str, Any]:
     """Risk score, label and explanation for one canonical chain."""
     config = game_config or {}
-    scoring_cfg = config.get("scoring", {})
-    review_threshold = Decimal(str(scoring_cfg.get("review_threshold", "35.00")))
-    suspicious_threshold = Decimal(str(scoring_cfg.get("suspicious_threshold", "65.00")))
+    scoring_cfg = {**base_game_config()["scoring"], **config.get("scoring", {})}
+    rules = scoring_cfg["rules"]
+    review_threshold = Decimal(str(scoring_cfg["review_threshold"]))
+    suspicious_threshold = Decimal(str(scoring_cfg["suspicious_threshold"]))
+    policy = RoundPolicy.from_config(game_config, card_specs)
 
     factors: list[dict[str, Any]] = []
 
     for step in steps:
         step_id = str(step["step_id"])
         spec = card_specs[(step["card"]["code"], int(step["card"]["version"]))]
+        operation = policy.for_card(spec.key)
+        spec = spec.with_overrides(operation.overrides if operation else None)
         amount = money(step["amount"])
         frequency = int(step["frequency"])
         gross = money(amount * frequency)
@@ -115,7 +106,11 @@ def score_scenario(
             _factor(
                 "amount:absolute",
                 "amount",
-                _clamp(amount / Decimal("20000"), ZERO, Decimal("20")),
+                _clamp(
+                    amount / Decimal(str(rules["amount_divisor"])),
+                    ZERO,
+                    Decimal(str(rules["amount_max_points"])),
+                ),
                 "Крупные суммы повышают приоритет проверки",
                 step_id,
                 {"amount": str(amount)},
@@ -125,7 +120,8 @@ def score_scenario(
             _factor(
                 "frequency:repeats",
                 "frequency",
-                Decimal(max(0, frequency - 1)) * Decimal("3"),
+                Decimal(max(0, frequency - 1))
+                * Decimal(str(rules["extra_repeat_points"])),
                 "Повторы могут быть похожи на дробление операции",
                 step_id,
                 {"frequency": frequency},
@@ -135,7 +131,7 @@ def score_scenario(
             _factor(
                 f"recipient:{context['recipient_type']}",
                 "context",
-                RECIPIENT_POINTS.get(context["recipient_type"], ZERO),
+                Decimal(rules["recipient_points"][context["recipient_type"]]),
                 "Неизвестный или анонимный получатель повышает неопределенность",
                 step_id,
             )
@@ -144,7 +140,7 @@ def score_scenario(
             _factor(
                 f"time_of_day:{context['time_of_day']}",
                 "context",
-                TIME_OF_DAY_POINTS.get(context["time_of_day"], ZERO),
+                Decimal(rules["time_of_day_points"][context["time_of_day"]]),
                 "Нетипичное время операции может потребовать проверки",
                 step_id,
             )
@@ -153,7 +149,7 @@ def score_scenario(
             _factor(
                 f"velocity:{context['velocity']}",
                 "context",
-                VELOCITY_POINTS.get(context["velocity"], ZERO),
+                Decimal(rules["velocity_points"][context["velocity"]]),
                 "Темп повторов влияет на сходство с автоматизированной цепочкой",
                 step_id,
             )
@@ -162,7 +158,7 @@ def score_scenario(
             _factor(
                 f"channel:{context['channel']}",
                 "context",
-                CHANNEL_POINTS.get(context["channel"], ZERO),
+                Decimal(rules["channel_points"][context["channel"]]),
                 "Канал операции влияет на доступность подтверждающего контекста",
                 step_id,
             )
@@ -171,7 +167,9 @@ def score_scenario(
             _factor(
                 "documents:present" if context["has_documents"] else "documents:absent",
                 "context",
-                _document_points(gross, bool(context["has_documents"])),
+                _document_points(
+                    gross, bool(context["has_documents"]), rules["documents"]
+                ),
                 (
                     "Подтверждающие документы снижают неопределенность операции"
                     if context["has_documents"]
@@ -187,12 +185,13 @@ def score_scenario(
                     f"detail:{spec.code}:{detail['field_key']}:{detail['value']}",
                     "action_detail",
                     detail["risk_points"],
-                    detail["description"] or f"{detail['field_label']}: {detail['value_label']}",
+                    detail["description"]
+                    or f"{detail['field_label']}: {detail['value_label']}",
                     step_id,
                 )
             )
 
-    sequence_factors = _sequence_factors(steps, card_specs)
+    sequence_factors = _sequence_factors(steps, card_specs, rules["sequence"])
     factors.extend(sequence_factors)
 
     raw = sum((_points(item) for item in factors), ZERO)
@@ -218,8 +217,8 @@ def score_scenario(
     explanation = {
         "schema_version": EXPLANATION_SCHEMA_VERSION,
         "scoring_version": SCORING_VERSION,
-        "top_risk_factors": risk_factors[:5],
-        "protective_factors": protective_factors[:5],
+        "top_risk_factors": risk_factors[: rules["explanation_factor_limit"]],
+        "protective_factors": protective_factors[: rules["explanation_factor_limit"]],
         "sequence_factors": sequence_factors,
         "all_factors": factors,
         "raw_score": str(_score(raw)),
@@ -238,22 +237,25 @@ def score_scenario(
     }
 
 
-def _document_points(gross: Decimal, has_documents: bool) -> Decimal:
-    if has_documents:
-        return Decimal("-4") if gross >= Decimal("75000") else Decimal("-1")
-    return Decimal("7") if gross >= Decimal("75000") else ZERO
+def _document_points(
+    gross: Decimal, has_documents: bool, rules: dict[str, Any]
+) -> Decimal:
+    size = "large" if gross >= Decimal(str(rules["minimum_gross"])) else "small"
+    presence = "present" if has_documents else "absent"
+    return Decimal(rules[f"{presence}_{size}"])
 
 
 def _sequence_factors(
     steps: Sequence[dict[str, Any]],
     card_specs: dict[tuple[str, int], CardSpec],
+    rules: dict[str, Any],
 ) -> list[dict[str, Any]]:
     factors: list[dict[str, Any]] = []
 
     amounts: dict[Decimal, int] = {}
     for step in steps:
         amount = money(step["amount"])
-        if amount >= Decimal("10000"):
+        if amount >= Decimal(str(rules["repeated_min_amount"])):
             amounts[amount] = amounts.get(amount, 0) + 1
     repeated = sum(1 for count in amounts.values() if count > 1)
     if repeated:
@@ -261,7 +263,10 @@ def _sequence_factors(
             _factor(
                 "sequence:repeated_amounts",
                 "sequence",
-                min(Decimal("16"), Decimal(repeated) * Decimal("8")),
+                min(
+                    Decimal(str(rules["repeated_max_points"])),
+                    Decimal(repeated) * Decimal(str(rules["repeated_points"])),
+                ),
                 "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
                 None,
                 {"repeated_amount_groups": repeated},
@@ -280,13 +285,13 @@ def _sequence_factors(
             previous_spec.flow == CREDIT_FLOW
             and current_spec.flow == DEBIT_FLOW
             and previous_gross > ZERO
-            and current_gross >= previous_gross * Decimal("0.7")
+            and current_gross >= previous_gross * Decimal(str(rules["turnover_ratio"]))
         ):
             factors.append(
                 _factor(
                     "sequence:rapid_turnover",
                     "sequence",
-                    Decimal("10"),
+                    Decimal(str(rules["turnover_points"])),
                     "Большая часть поступления быстро уходит следующим действием",
                     str(current["step_id"]),
                 )
@@ -300,18 +305,16 @@ def _sequence_factors(
 # --------------------------------------------------------------------------
 
 
-def resource_score(snapshot: dict[str, Any], game_config: dict[str, Any] | None) -> Decimal:
+def resource_score(
+    snapshot: dict[str, Any], game_config: dict[str, Any] | None
+) -> Decimal:
     """Normalised resource efficiency in `0..100`."""
     config = game_config or {}
     rules = RoundRules.from_config(config)
-    weights_cfg = (config.get("leaderboard") or {}).get("resource_weights") or {}
-    weights = {
-        "balance": Decimal(str(weights_cfg.get("balance", "0.27"))),
-        "energy": Decimal(str(weights_cfg.get("energy", "0.20"))),
-        "time": Decimal(str(weights_cfg.get("time", "0.20"))),
-        "fees": Decimal(str(weights_cfg.get("fees", "0.20"))),
-        "available_steps": Decimal(str(weights_cfg.get("available_steps", "0.13"))),
-    }
+    weights_cfg = (config.get("leaderboard") or {}).get("resource_weights")
+    if weights_cfg is None:
+        weights_cfg = base_game_config()["leaderboard"]["resource_weights"]
+    weights = {key: Decimal(str(value)) for key, value in weights_cfg.items()}
 
     after = snapshot.get("resources_after", {})
     totals = snapshot.get("totals", {})
@@ -327,7 +330,9 @@ def resource_score(snapshot: dict[str, Any], game_config: dict[str, Any] | None)
 
     components = {
         "balance": ratio(money(after.get("balance", "0")), rules.initial_balance),
-        "energy": ratio(Decimal(int(after.get("energy", 0))), Decimal(rules.initial_energy)),
+        "energy": ratio(
+            Decimal(int(after.get("energy", 0))), Decimal(rules.initial_energy)
+        ),
         "time": ratio(Decimal(int(after.get("time", 0))), Decimal(rules.initial_time)),
         "fees": fee_ratio,
         "available_steps": ratio(
@@ -345,9 +350,9 @@ def leaderboard_scores(
 ) -> dict[str, Decimal]:
     """Stealth and composite game score from the round's leaderboard weights."""
     config = (game_config or {}).get("leaderboard", {}) or {}
-    weights = config.get("weights", {}) or {}
-    stealth_weight = Decimal(str(weights.get("stealth", "0.60")))
-    resource_weight = Decimal(str(weights.get("resources", "0.40")))
+    weights = config.get("weights") or base_game_config()["leaderboard"]["weights"]
+    stealth_weight = Decimal(str(weights["stealth"]))
+    resource_weight = Decimal(str(weights["resources"]))
     stealth = _score(_clamp(HUNDRED - risk, ZERO, HUNDRED))
     game = _score(
         _clamp(stealth * stealth_weight + resources * resource_weight, ZERO, HUNDRED)
@@ -356,9 +361,11 @@ def leaderboard_scores(
 
 
 def weights_sum_to_one(game_config: dict[str, Any]) -> bool:
-    board = (game_config.get("leaderboard") or {})
+    board = game_config.get("leaderboard") or {}
     weights = board.get("weights") or {}
     total = sum((Decimal(str(value)) for value in weights.values()), ZERO)
     resource_weights = board.get("resource_weights") or {}
-    resource_total = sum((Decimal(str(value)) for value in resource_weights.values()), ZERO)
+    resource_total = sum(
+        (Decimal(str(value)) for value in resource_weights.values()), ZERO
+    )
     return total == ONE and resource_total == ONE

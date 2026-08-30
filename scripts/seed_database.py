@@ -25,19 +25,26 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.aml_workshop_simulator.core.config import settings  # noqa: E402
+from src.aml_workshop_simulator.core.game_config import load_config  # noqa: E402
 from src.aml_workshop_simulator.core.security import get_password_hash  # noqa: E402
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent  # noqa: E402
 from src.aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
 from src.aml_workshop_simulator.db.models.users import User  # noqa: E402
-from src.aml_workshop_simulator.db.session import AsyncSessionLocal, async_engine  # noqa: E402
+from src.aml_workshop_simulator.db.session import (  # noqa: E402
+    AsyncSessionLocal,
+    async_engine,
+)
 from src.aml_workshop_simulator.domain.catalog import (  # noqa: E402
     CARD_CATALOG,
     build_parameter_schema,
 )
 from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG  # noqa: E402
+from src.aml_workshop_simulator.services.configuration import (  # noqa: E402
+    freeze_game_config,
+)
 
-DEMO_ROUND_TITLE = "Мастер-класс AML"
+DEMO_ROUND_TITLE = load_config("bootstrap.json")["demo_round_title"]
 
 
 async def wait_for_db(timeout_seconds: int = 60) -> None:
@@ -75,6 +82,19 @@ def run_migrations() -> None:
 
 async def seed_cards(db: AsyncSession) -> list[ActionCard]:
     """Insert or refresh the catalog and remove obsolete card versions."""
+    # Freeze existing rounds before catalog refresh (including the first upgrade
+    # from versions that stored only card references). Never rewrite their rules.
+    old_cards = list((await db.execute(select(ActionCard))).scalars().all())
+    rounds = list((await db.execute(select(Round).with_for_update())).scalars().all())
+    for round_obj in rounds:
+        config = freeze_game_config(round_obj.game_config, old_cards)
+        if "config_version" in config:
+            from src.aml_workshop_simulator.api.routers.admin.common import (
+                config_version,
+            )
+            config["config_version"] = config_version(config)
+        if config != round_obj.game_config:
+            round_obj.game_config = config
     now = datetime.now(UTC)
     result: list[ActionCard] = []
     catalog_keys = [(entry["code"], entry["version"]) for entry in CARD_CATALOG]
@@ -159,7 +179,8 @@ def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
     `operations` decides what is playable; `card_versions` repeats the same set
     so a snapshot written by this seed stays readable by the older loader.
     """
-    config = {key: value for key, value in REFERENCE_GAME_CONFIG.items()}
+    from copy import deepcopy
+    config = deepcopy(REFERENCE_GAME_CONFIG)
     enabled = {
         (str(item["code"]), int(item.get("version", 1)))
         for item in config.get("operations", [])
@@ -169,7 +190,7 @@ def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
         for card in cards
         if (card.code, card.version) in enabled
     ]
-    return config
+    return freeze_game_config(config, cards)
 
 
 async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]) -> Round:
@@ -177,8 +198,6 @@ async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]
         await db.execute(select(Round).where(Round.title == DEMO_ROUND_TITLE))
     ).scalars().first()
     if round_obj is not None:
-        if round_obj.status == "draft":
-            round_obj.game_config = reference_game_config(cards)
         return round_obj
     now = datetime.now(UTC)
     round_obj = Round(
@@ -209,6 +228,10 @@ async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]
 
 
 async def seed(activate_round: bool = False) -> dict[str, Any]:
+    from src.aml_workshop_simulator.schemas.catalog_config import (
+        validate_configuration_files,
+    )
+    validate_configuration_files()
     async with AsyncSessionLocal() as db:
         cards = await seed_cards(db)
         admin = await seed_admin(db)
@@ -221,7 +244,9 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
             ).scalars().first()
             if other is None:
                 config = dict(round_obj.game_config)
-                from src.aml_workshop_simulator.api.routers.admin.common import config_version
+                from src.aml_workshop_simulator.api.routers.admin.common import (
+                    config_version,
+                )
 
                 config["config_version"] = config_version(config)
                 activated_at = datetime.now(UTC)

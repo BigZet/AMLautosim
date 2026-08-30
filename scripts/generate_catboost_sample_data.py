@@ -2,6 +2,7 @@
 Script to generate sample training/validation datasets for CatBoost from AML scenarios.
 This outputs both a CSV dataset and JSON dataset with full features and ground truth labels.
 """
+
 from __future__ import annotations
 
 import csv
@@ -9,11 +10,13 @@ import json
 import random
 import sys
 import uuid
+from copy import deepcopy
 from pathlib import Path
 
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.aml_workshop_simulator.core.game_config import load_config
 from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
 from src.aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
@@ -27,6 +30,8 @@ from src.aml_workshop_simulator.services.catboost_features import (
     get_catboost_feature_names,
 )
 
+GENERATOR_CONFIG = load_config("synthetic_data.json")
+
 CARD_SPECS = specs_by_key(
     card_spec_from_catalog(entry, index)
     for index, entry in enumerate(CARD_CATALOG, start=1)
@@ -37,20 +42,17 @@ CARD_IDS = {spec.code: spec.id for spec in CARD_SPECS.values()}
 def canonical(step: dict) -> dict:
     """Convert a generator step into the canonical scenario step format."""
     code = step["card_code"]
+    spec = next(spec for spec in CARD_SPECS.values() if spec.code == code)
     context = {
-        "recipient_type": "known_counterparty",
-        "time_of_day": "day",
-        "velocity": "normal",
-        "channel": "bank",
-        "has_documents": True,
+        **spec.context_defaults,
+        "channel": spec.channels[0],
         **step.get("context", {}),
     }
-    spec = next(spec for spec in CARD_SPECS.values() if spec.code == code)
     details = {field["key"]: field["default"] for field in spec.fields}
     details.update(step.get("details", {}))
     return {
         "step_id": str(uuid.uuid4()),
-        "card": {"id": CARD_IDS[code], "code": code, "version": 1},
+        "card": {"id": CARD_IDS[code], "code": code, "version": spec.version},
         "amount": f"{float(step['amount']):.2f}",
         "frequency": int(step["frequency"]),
         "context": context,
@@ -58,80 +60,32 @@ def canonical(step: dict) -> dict:
     }
 
 
-def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
+def generate_synthetic_scenarios(n_samples: int | None = None) -> list[dict]:
     """Generates realistic AML simulation scenarios for training data."""
     samples = []
+    n_samples = GENERATOR_CONFIG["samples"] if n_samples is None else n_samples
+
+    def choose(value):
+        if not isinstance(value, dict):
+            return value
+        if "choices" in value:
+            return random.choice(value["choices"])
+        return random.randint(value["min"], value["max"])
 
     for i in range(n_samples):
-        archetype = random.choice(
-            ["retail", "smurfing", "rapid_cash_out", "transfer_burst"]
+        archetype = random.choice(list(GENERATOR_CONFIG["archetypes"]))
+        template = GENERATOR_CONFIG["archetypes"][archetype]
+        n_steps = random.randint(
+            GENERATOR_CONFIG["minimum_steps"],
+            REFERENCE_GAME_CONFIG["objectives"]["max_actions"],
         )
-        n_steps = random.randint(2, 8)
-        steps = []
-        
-        if archetype == "retail":
-            steps.append({
-                "card_code": "salary",
-                "amount": random.choice([50000, 80000, 120000]),
-                "frequency": 1,
-                "context": {"channel": "bank", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "spaced", "has_documents": True},
-                "details": {"employer_profile": "verified_employer", "income_basis": "payroll_registry"}
-            })
-            for _ in range(n_steps - 1):
-                code = random.choice(["card_transfer", "cash_withdrawal"])
-                steps.append({
-                    "card_code": code,
-                    "amount": random.randint(5000, 40000),
-                    "frequency": random.randint(1, 2),
-                    "context": {"channel": "mobile" if code == "card_transfer" else "atm", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
-                    "details": {}
-                })
-        elif archetype == "smurfing":
-            steps.append({
-                "card_code": "cash_deposit",
-                "amount": 30000,
-                "frequency": 3,
-                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
-                "details": {"funds_source": "unexplained", "deposit_pattern": "several_atms"}
-            })
-            for _ in range(n_steps - 1):
-                steps.append({
-                    "card_code": "card_transfer",
-                    "amount": 29000,
-                    "frequency": 1,
-                    "context": {"channel": "mobile", "recipient_type": "new_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
-                    "details": {"transfer_purpose": "no_purpose", "recipient_relationship": "unknown"}
-                })
-        elif archetype == "rapid_cash_out":
-            steps.append({
-                "card_code": "cash_deposit",
-                "amount": 100000,
-                "frequency": 1,
-                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
-                "details": {"funds_source": "borrowed_cash", "deposit_pattern": "third_party"}
-            })
-            steps.append({
-                "card_code": "cash_withdrawal",
-                "amount": 95000,
-                "frequency": 1,
-                "context": {"channel": "atm", "recipient_type": "known_counterparty", "time_of_day": "night", "velocity": "rapid", "has_documents": False},
-                "details": {"cash_purpose": "unspecified", "withdrawal_location": "other_region"}
-            })
-        else:  # transfer_burst
-            steps.append({
-                "card_code": "salary",
-                "amount": 150000,
-                "frequency": 1,
-                "context": {"channel": "bank", "recipient_type": "known_counterparty", "time_of_day": "day", "velocity": "normal", "has_documents": True},
-                "details": {"employer_profile": "small_business", "income_basis": "service_contract"}
-            })
-            steps.append({
-                "card_code": "card_transfer",
-                "amount": 140000,
-                "frequency": 1,
-                "context": {"channel": "web", "recipient_type": "anonymous_wallet", "time_of_day": "evening", "velocity": "rapid", "has_documents": False},
-                "details": {"transfer_purpose": "no_purpose", "recipient_relationship": "unknown"}
-            })
+        steps = deepcopy(template["initial"])
+        if template["repeat"]:
+            while len(steps) < n_steps:
+                steps.append(deepcopy(random.choice(template["repeat"])))
+        for step in steps:
+            step["amount"] = choose(step["amount"])
+            step["frequency"] = choose(step["frequency"])
 
         # Ground truth from the versioned ruleset
         steps = [canonical(step) for step in steps]
@@ -139,39 +93,43 @@ def generate_synthetic_scenarios(n_samples: int = 250) -> list[dict]:
         risk_score = float(scored["risk_score"])
         risk_label = scored["risk_label"]
 
-        features = extract_catboost_features(steps)
+        features = extract_catboost_features(steps, REFERENCE_GAME_CONFIG)
         features["target_risk_score"] = risk_score
         features["target_risk_label"] = risk_label.value
-        features["target_is_suspicious"] = 1 if risk_score >= 50.0 else 0
+        features["target_is_suspicious"] = int(risk_label.value == "suspicious")
         features["scenario_archetype"] = archetype
-        
-        samples.append({
-            "scenario_id": f"scen_{i+1:04d}",
-            "archetype": archetype,
-            "steps": steps,
-            "features": features,
-        })
-        
+
+        samples.append(
+            {
+                "scenario_id": f"scen_{i + 1:04d}",
+                "archetype": archetype,
+                "steps": steps,
+                "features": features,
+            }
+        )
+
     return samples
 
 
 def main() -> None:
-    output_dir = Path(__file__).resolve().parent.parent / "resources" / "catboost_sample_data"
+    output_dir = (
+        Path(__file__).resolve().parent.parent / "resources" / "catboost_sample_data"
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    random.seed(42)
-    samples = generate_synthetic_scenarios(300)
-    
+
+    random.seed(GENERATOR_CONFIG["seed"])
+    samples = generate_synthetic_scenarios()
+
     # 1. Save JSON with full steps and features
     json_path = output_dir / "catboost_training_dataset.json"
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(samples, f, ensure_ascii=False, indent=2)
     print(f"[OK] Saved JSON dataset: {json_path}")
-    
+
     # 2. Save Tabular CSV for direct CatBoost training
     csv_path = output_dir / "catboost_features_dataset.csv"
     feature_keys = list(samples[0]["features"].keys())
-    
+
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
             f,
@@ -183,7 +141,7 @@ def main() -> None:
             row = {"scenario_id": s["scenario_id"], **s["features"]}
             writer.writerow(row)
     print(f"[OK] Saved CSV features dataset: {csv_path}")
-    
+
     # 3. Create a README explaining CatBoost training on these features
     readme_path = output_dir / "README.md"
     readme_content = f"""# CatBoost Dataset and Integration Spec for AML Simulator

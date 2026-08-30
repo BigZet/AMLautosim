@@ -16,11 +16,13 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Literal
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from src.aml_workshop_simulator.core.game_config import LIMITS
+from src.aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
 from src.aml_workshop_simulator.domain.channels import Channel
 
 StrictValue = str | bool | int | Decimal
@@ -46,13 +48,19 @@ class OperationContext(BaseModel):
 
     model_config = STRICT
 
-    recipient_type: (
-        Literal["known_counterparty", "new_counterparty", "anonymous_wallet"] | None
-    ) = None
-    time_of_day: Literal["day", "evening", "night"] | None = None
-    velocity: Literal["spaced", "normal", "rapid"] | None = None
+    recipient_type: str | None = None
+    time_of_day: str | None = None
+    velocity: str | None = None
     channel: Channel | None = None
     has_documents: bool | None = None
+
+    @field_validator("recipient_type", "time_of_day", "velocity")
+    @classmethod
+    def declared_value(cls, value, info):
+        options = {option["value"] for option in CONTEXT_FIELDS[info.field_name]["options"]}
+        if value is not None and value not in options:
+            raise ValueError("Допустимые значения: " + ", ".join(sorted(options)))
+        return value
 
 
 class ScenarioStepIn(BaseModel):
@@ -63,7 +71,7 @@ class ScenarioStepIn(BaseModel):
     step_id: UUID
     card: CardRef
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
-    frequency: int | None = Field(default=None, ge=1, le=20)
+    frequency: int | None = Field(default=None, ge=1, le=LIMITS["max_frequency"])
     context: OperationContext = Field(default_factory=OperationContext)
     action_details: dict[str, StrictValue] = Field(default_factory=dict)
 
@@ -87,7 +95,7 @@ class ScenarioPutIn(BaseModel):
 
     expected_revision: int = Field(ge=0)
     client_mutation_id: UUID
-    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=64)
+    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=LIMITS["max_actions"])
     label: str | None = Field(default=None, max_length=120)
 
 
@@ -96,7 +104,7 @@ class ScenarioPreviewIn(BaseModel):
 
     model_config = STRICT
 
-    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=64)
+    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=LIMITS["max_actions"])
 
 
 class ScenarioSubmitIn(BaseModel):
