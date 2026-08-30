@@ -25,7 +25,6 @@ from src.aml_workshop_simulator.ui.admin.config_editor import (  # noqa: E402
     render_editor,
 )
 from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
-from src.aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
 from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     ADMIN_COOKIE,
     apply_pending_cookie_command,
@@ -37,6 +36,7 @@ from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     reset_user_state,
     resolve_session,
 )
+from src.aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
 
 st.set_page_config(
     page_title="AML Workshop Control",

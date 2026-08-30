@@ -32,4 +32,4 @@ router.include_router(participants.router)
 router.include_router(leaderboard.router)
 router.include_router(audit.router)
 
-__all__ = ["router", "config_version", "round_out", "validate_game_config"]
+__all__ = ["config_version", "round_out", "router", "validate_game_config"]

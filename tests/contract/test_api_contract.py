@@ -86,7 +86,7 @@ def test_every_documented_endpoint_exists(client) -> None:
         for path, operations in spec["paths"].items()
         for method in operations
     }
-    assert DOCUMENTED_OPERATIONS <= published, DOCUMENTED_OPERATIONS - published
+    assert published >= DOCUMENTED_OPERATIONS, DOCUMENTED_OPERATIONS - published
 
 
 def test_no_unversioned_application_endpoints_remain(client) -> None:

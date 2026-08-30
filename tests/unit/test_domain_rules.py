@@ -8,11 +8,10 @@ resource exhaustion and the structural/business split.
 from __future__ import annotations
 
 import uuid
+from dataclasses import replace
 from decimal import Decimal
 
 import pytest
-
-from dataclasses import replace
 
 from src.aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,

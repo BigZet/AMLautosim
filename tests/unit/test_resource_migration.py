@@ -56,7 +56,7 @@ def test_custom_weights_are_preserved_proportionally() -> None:
         "balance": "0.67", "energy": "0.00", "time": "0.00",
         "fees": "0.00", "available_steps": "0.33",
     }
-    assert sum(map(Decimal, weights.values())) == Decimal("1")
+    assert sum(map(Decimal, weights.values())) == Decimal(1)
 
 
 @pytest.mark.parametrize("keep_balance_violation", [False, True])

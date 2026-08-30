@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
-from decimal import Decimal
+from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
 import streamlit as st
@@ -107,6 +107,17 @@ def _pinned_defaults(card: dict, stored: dict, visible: list[str], prefix: str) 
 
 def _number(label: str, value: Any, **kwargs: Any) -> float:
     return float(st.number_input(label, value=float(value), **kwargs))
+
+
+def _weight(value: Any) -> Decimal:
+    """A weight as the server compares it: two places, no float residue.
+
+    The widgets are floats stepped by 0.05, so a value can reach here as
+    0.25000000000000006. This editor tolerated 1e-9 while the API compares the
+    sum with exact Decimal equality, so a configuration assembled with the
+    steppers could be refused for a discrepancy invisible on screen.
+    """
+    return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
 def _integer(label: str, value: Any, **kwargs: Any) -> int:
@@ -398,27 +409,30 @@ def render_editor(
             key=f"{key_prefix}_w_stealth",
         )
     with columns[3]:
-        st.metric("Вес ресурсов", str(Decimal("1") - Decimal(str(stealth_weight))))
+        st.metric("Вес ресурсов", str(Decimal(1) - Decimal(str(stealth_weight))))
 
     st.caption("Веса ресурсов (в сумме 1.00)")
     weight_columns = st.columns(len(RESOURCE_WEIGHT_LABELS))
-    raw_resource_weights: dict[str, float] = {}
+    raw_resource_weights: dict[str, Decimal] = {}
     for column, (code, label) in zip(
         weight_columns, RESOURCE_WEIGHT_LABELS.items(), strict=False
     ):
         with column:
-            raw_resource_weights[code] = _number(
-                label,
-                resource_weights.get(code, 0.0),
-                min_value=0.0,
-                max_value=1.0,
-                step=0.05,
-                key=f"{key_prefix}_rw_{code}",
+            raw_resource_weights[code] = _weight(
+                _number(
+                    label,
+                    resource_weights.get(code, 0.0),
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.05,
+                    key=f"{key_prefix}_rw_{code}",
+                )
             )
-    total_resource_weight = sum(raw_resource_weights.values())
-    if abs(total_resource_weight - 1.0) > 1e-9:
+    # Exactly what the server will check, on exactly the values it will receive.
+    total_resource_weight = sum(raw_resource_weights.values(), Decimal(0))
+    if total_resource_weight != Decimal(1):
         st.warning(
-            f"Сумма весов ресурсов сейчас {total_resource_weight:.2f}; "
+            f"Сумма весов ресурсов сейчас {total_resource_weight}; "
             "сервер примет конфигурацию только при сумме 1.00."
         )
 
@@ -468,7 +482,7 @@ def render_editor(
             "version": leaderboard["version"],
             "weights": {
                 "stealth": str(Decimal(str(stealth_weight))),
-                "resources": str(Decimal("1") - Decimal(str(stealth_weight))),
+                "resources": str(Decimal(1) - Decimal(str(stealth_weight))),
             },
             "resource_weights": {
                 code: str(value) for code, value in raw_resource_weights.items()

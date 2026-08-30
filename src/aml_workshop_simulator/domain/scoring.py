@@ -26,9 +26,9 @@ LEADERBOARD_VERSION = "leaderboard-v2"
 EXPLANATION_SCHEMA_VERSION = 2
 
 SCORE = Decimal("0.01")
-ZERO = Decimal("0")
-ONE = Decimal("1")
-HUNDRED = Decimal("100")
+ZERO = Decimal(0)
+ONE = Decimal(1)
+HUNDRED = Decimal(100)
 
 DISCLAIMER = "Учебная модель; результат не является AML-решением"
 

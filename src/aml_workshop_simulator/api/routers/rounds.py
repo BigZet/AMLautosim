@@ -13,11 +13,6 @@ from src.aml_workshop_simulator.api.deps import (
     get_current_participant,
     get_principal_optional,
 )
-from src.aml_workshop_simulator.api.pagination import (
-    decode_cursor,
-    encode_cursor,
-    take_page,
-)
 from src.aml_workshop_simulator.api.errors import (
     Conflict,
     Forbidden,
@@ -27,6 +22,11 @@ from src.aml_workshop_simulator.api.errors import (
     ValidationFailed,
     first_message,
     violations_payload,
+)
+from src.aml_workshop_simulator.api.pagination import (
+    decode_cursor,
+    encode_cursor,
+    take_page,
 )
 from src.aml_workshop_simulator.core.logging import log_event
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard

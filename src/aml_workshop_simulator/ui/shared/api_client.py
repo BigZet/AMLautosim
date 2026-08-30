@@ -56,8 +56,14 @@ class SimulatorAPIClient:
         ).rstrip("/")
         self.api_prefix = "/api/v1"
         # The shared transport carries no session id: every protected call
-        # passes X-Session-ID explicitly.
-        self._client = httpx.Client(base_url=self.base_url, timeout=TIMEOUTS["GET"])
+        # passes X-Session-ID explicitly. The pool is bounded explicitly because
+        # one Streamlit process serves the whole room: without a ceiling a burst
+        # of reruns opens as many sockets as it likes against the API.
+        self._client = httpx.Client(
+            base_url=self.base_url,
+            timeout=TIMEOUTS["GET"],
+            limits=httpx.Limits(max_connections=64, max_keepalive_connections=16),
+        )
 
     # ---------------- plumbing ----------------
     def _url(self, path: str) -> str:

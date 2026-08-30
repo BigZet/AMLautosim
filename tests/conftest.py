@@ -40,12 +40,17 @@ ADMIN_EMAIL = os.environ["BOOTSTRAP_ADMIN_EMAIL"]
 ADMIN_PASSWORD = os.environ["BOOTSTRAP_ADMIN_PASSWORD"]
 PARTICIPANT_PASSWORD = "correct-horse-42"
 
+#: Truncated before every test. `scenario_versions` and `round_presets` were
+#: missing and survived only by cascade from `users` — an implicit dependency
+#: that a foreign-key change would have broken silently.
 TABLES = (
     "audit_events",
     "leaderboard_adjustments",
     "scoring_results",
+    "scenario_versions",
     "scenarios",
     "sessions",
+    "round_presets",
     "rounds",
     "users",
     "action_cards",

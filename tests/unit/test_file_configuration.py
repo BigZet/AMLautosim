@@ -63,7 +63,11 @@ step = make_step(spec, '10000.00', channel='mobile')
 config = base_game_config()
 snapshot = evaluate_scenario([step], {spec.key:spec}, config)
 risk = score_scenario([step], {spec.key:spec}, config)
-print(json.dumps({'after':snapshot['resources_after'], 'step':snapshot['per_step'][0], 'factors':risk['explanation']['all_factors']}))
+print(json.dumps({
+    'after': snapshot['resources_after'],
+    'step': snapshot['per_step'][0],
+    'factors': risk['explanation']['all_factors'],
+}))
 """,
         ],
         cwd=Path(__file__).resolve().parents[2],

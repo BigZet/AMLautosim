@@ -203,16 +203,15 @@ def test_a_round_naming_a_deleted_card_no_longer_stops_the_seed(
         op["code"] for op in draft["game_config"]["operations"] if op["code"] != doomed
     }
 
-    with psycopg2.connect(db_dsn) as connection:
-        with connection.cursor() as cursor:
-            # The round predates frozen snapshots...
-            cursor.execute(
-                "UPDATE rounds SET game_config = game_config - 'card_snapshots' "
-                "WHERE id = %s",
-                (round_id,),
-            )
-            # ...and an earlier seed already removed the card it names.
-            cursor.execute("DELETE FROM action_cards WHERE code = %s", (doomed,))
+    with psycopg2.connect(db_dsn) as connection, connection.cursor() as cursor:
+        # The round predates frozen snapshots...
+        cursor.execute(
+            "UPDATE rounds SET game_config = game_config - 'card_snapshots' "
+            "WHERE id = %s",
+            (round_id,),
+        )
+        # ...and an earlier seed already removed the card it names.
+        cursor.execute("DELETE FROM action_cards WHERE code = %s", (doomed,))
 
     reduced = [entry for entry in deepcopy(seed_database.CARD_CATALOG)
                if entry["code"] != doomed]

@@ -141,13 +141,12 @@ def test_only_one_active_round_at_the_database_level(client, admin_headers, acti
     connection = psycopg2.connect(db_dsn)
     connection.autocommit = True
     try:
-        with connection.cursor() as cursor:
-            with pytest.raises(psycopg2.errors.UniqueViolation):
-                cursor.execute(
-                    "INSERT INTO rounds (title, status, config_revision, game_config, "
-                    "created_by_user_id, created_at) VALUES "
-                    "('Дубль', 'active', 1, '{}'::jsonb, 1, now())"
-                )
+        with connection.cursor() as cursor, pytest.raises(psycopg2.errors.UniqueViolation):
+            cursor.execute(
+                "INSERT INTO rounds (title, status, config_revision, game_config, "
+                "created_by_user_id, created_at) VALUES "
+                "('Дубль', 'active', 1, '{}'::jsonb, 1, now())"
+            )
     finally:
         connection.close()
 

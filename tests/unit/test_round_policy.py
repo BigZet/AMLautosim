@@ -267,7 +267,7 @@ def test_a_visible_frequency_may_be_changed(
 
 
 def _config_with_override(base, code, **overrides):
-    config = {key: value for key, value in base.items()}
+    config = dict(base)
     config["operations"] = [
         {**entry, **overrides} if entry["code"] == code else entry
         for entry in base["operations"]

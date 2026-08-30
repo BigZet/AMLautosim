@@ -192,3 +192,55 @@ def test_access_update_requires_a_meaningful_reason() -> None:
         AccessUpdateIn.model_validate(
             {"blocked": True, "reason": "нет", "expected_access_revision": 1}
         )
+
+
+def test_resource_weights_must_sum_to_exactly_one() -> None:
+    """The server compares the sum with exact Decimal equality.
+
+    That is deliberate — a leaderboard whose weights nearly sum to one is a
+    silently mis-scored round — but it means the admin editor may not hand over
+    a float that has drifted. `config_editor._weight` quantises for that reason.
+    """
+    from src.aml_workshop_simulator.schemas.round_config import LeaderboardIn
+
+    exact = LeaderboardIn.model_validate(
+        {
+            "version": "leaderboard-v2",
+            "weights": {"stealth": "0.60", "resources": "0.40"},
+            "resource_weights": {
+                "balance": "0.27",
+                "energy": "0.20",
+                "time": "0.20",
+                "fees": "0.20",
+                "available_steps": "0.13",
+            },
+        }
+    )
+    assert exact.version == "leaderboard-v2"
+
+    drifted = str(0.1 + 0.2)  # 0.30000000000000004
+    with pytest.raises(ValidationError):
+        LeaderboardIn.model_validate(
+            {
+                "version": "leaderboard-v2",
+                "weights": {"stealth": "0.60", "resources": "0.40"},
+                "resource_weights": {
+                    "balance": drifted,
+                    "energy": "0.20",
+                    "time": "0.20",
+                    "fees": "0.17",
+                    "available_steps": "0.13",
+                },
+            }
+        )
+
+
+def test_the_editor_never_emits_a_drifted_weight() -> None:
+    """A stepper working in 0.05 increments produces float residue."""
+    from src.aml_workshop_simulator.ui.admin.config_editor import _weight
+
+    assert str(_weight(0.1 + 0.2)) == "0.30"
+    assert str(_weight(0.25000000000000006)) == "0.25"
+    assert sum(
+        (_weight(v) for v in (0.27, 0.2, 0.2, 0.2, 0.13)), Decimal(0)
+    ) == Decimal(1)

@@ -1,7 +1,7 @@
-from sqlalchemy import Integer, BigInteger, DateTime
+from sqlalchemy import BigInteger, DateTime, Integer
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.types import JSON
-from sqlalchemy.dialects.postgresql import JSONB
 
 # JSON type that falls back to SQLite JSON but uses JSONB on Postgres
 JSONVariant = JSON().with_variant(JSONB(), "postgresql")

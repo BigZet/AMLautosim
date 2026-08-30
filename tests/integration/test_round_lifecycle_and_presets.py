@@ -424,7 +424,12 @@ def test_creating_a_round_from_a_preset_copies_the_configuration(
     assert round_obj["status"] == "draft", "loading a preset must not start anything"
     assert round_obj["preset_id"] == preset["id"]
     # A round copies every preset value and additionally freezes its own catalog.
-    assert {key: value for key, value in round_obj["game_config"].items() if key != "card_snapshots"} == preset["game_config"]
+    stored = {
+        key: value
+        for key, value in round_obj["game_config"].items()
+        if key != "card_snapshots"
+    }
+    assert stored == preset["game_config"]
     assert round_obj["game_config"]["card_snapshots"]
 
     # Editing the preset afterwards leaves the round's own snapshot alone.

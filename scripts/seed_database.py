@@ -66,7 +66,7 @@ async def wait_for_db(timeout_seconds: int = 60) -> None:
                 async with async_engine.connect() as connection:
                     await connection.execute(text("SELECT 1"))
                 return
-            except Exception as exc:  # noqa: BLE001 - retried until the deadline
+            except Exception as exc:
                 last_error = exc
                 await asyncio.sleep(1.0)
         raise RuntimeError(f"database not reachable: {last_error}")

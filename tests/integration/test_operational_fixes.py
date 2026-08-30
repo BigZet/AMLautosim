@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 
 import psycopg2
-import pytest
 
 from scripts import seed_database
 from src.aml_workshop_simulator.api.routers import health

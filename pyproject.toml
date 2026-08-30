@@ -1,0 +1,59 @@
+[project]
+name = "aml-workshop-simulator"
+version = "1.0.0"
+description = "AML workshop simulator: FastAPI service and two Streamlit interfaces"
+requires-python = ">=3.13"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.4", "anyio>=4.4", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["aml_workshop_simulator"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+# 120 rather than 88: the codebase already conforms to it, and rewrapping
+# twenty-one unrelated lines to satisfy a narrower default is churn.
+line-length = 120
+target-version = "py313"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+# A curated set rather than the default: these catch real mistakes without
+# demanding a rewrite of code that is deliberate.
+# Rules that catch mistakes, not rules that express a taste. SIM/PIE/FURB/RUF
+# style rules are deliberately out: satisfying them would mean rewriting working
+# code, which is churn a linter should not be allowed to demand.
+select = ["E", "W", "F", "I", "UP", "B", "C4"]
+ignore = [
+    # FastAPI declares dependencies as `x = Depends(...)` defaults. That is the
+    # framework's documented idiom, not a mutable-default bug.
+    "B008",
+    # `except Exception` inside a retry or a health probe is intentional; the
+    # cases that matter log through core.logging.
+    "SIM105",
+    # `str, Enum` is what RiskLabel needs: its members compare equal to the
+    # strings the database and the API contract carry.
+    "UP042",
+    # PEP 695 generics would be a syntax change for no behavioural gain.
+    "UP047",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The Streamlit apps embed CSS as string literals: a selector cannot be wrapped
+# without changing what it selects.
+"src/aml_workshop_simulator/ui/participant/app.py" = ["E501"]
+"src/aml_workshop_simulator/ui/admin/app.py" = ["E501"]
+# Generated sample data is written one record per line on purpose.
+"scripts/generate_catboost_sample_data.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "aml_workshop_simulator", "tests", "scripts"]

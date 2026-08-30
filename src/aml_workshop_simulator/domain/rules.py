@@ -121,7 +121,11 @@ class CardSpec:
     fields: tuple[dict[str, Any], ...] = ()
     default_visible_params: tuple[str, ...] = ()
     default_show_frequency: bool = True
-    context_defaults: dict[str, Any] = field(default_factory=lambda: {key: item["default"] for key, item in CONTEXT_FIELDS.items()})
+    context_defaults: dict[str, Any] = field(
+        default_factory=lambda: {
+            key: item["default"] for key, item in CONTEXT_FIELDS.items()
+        }
+    )
 
     @property
     def key(self) -> tuple[str, int]:
@@ -742,7 +746,7 @@ def evaluate_scenario(
     previous_code: str | None = None
     identical_streak = 0
     card_frequencies: dict[str, int] = {}
-    quota_usage: dict[str, Decimal] = {key: ZERO for key in QUOTA_LABELS}
+    quota_usage: dict[str, Decimal] = dict.fromkeys(QUOTA_LABELS, ZERO)
     quota_reported: set[str] = set()
     per_step: list[dict[str, Any]] = []
 

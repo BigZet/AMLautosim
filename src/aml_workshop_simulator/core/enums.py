@@ -1,22 +1,11 @@
+"""Enumerations the domain actually branches on.
+
+Round, scenario and role statuses are plain strings everywhere in this codebase
+and are constrained by the database. Mirroring them here only invited the two
+copies to disagree, which they had: the round enum never listed `stopped`.
+"""
+
 from enum import Enum
-
-
-class UserRole(str, Enum):
-    participant = "participant"
-    admin = "admin"
-
-
-class RoundStatus(str, Enum):
-    draft = "draft"
-    active = "active"
-    scoring = "scoring"
-    completed = "completed"
-
-
-class ScenarioStatus(str, Enum):
-    draft = "draft"
-    submitted = "submitted"
-    scored = "scored"
 
 
 class RiskLabel(str, Enum):

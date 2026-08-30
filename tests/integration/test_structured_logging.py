@@ -89,7 +89,7 @@ def test_every_line_is_json_with_the_documented_fields(client, captured):
     lines = captured()
     assert lines, "the API logged nothing at all"
     for line in lines:
-        assert MANDATORY_KEYS <= set(line), line
+        assert set(line) >= MANDATORY_KEYS, line
         assert line["service"] == "api"
     events = [line["event"] for line in lines]
     assert "request_started" in events

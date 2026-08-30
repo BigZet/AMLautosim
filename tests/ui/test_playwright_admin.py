@@ -23,11 +23,11 @@ from tests.ui.conftest import (
 # the whole pytest session instead of skipping these two files.
 pytest.importorskip("playwright.sync_api")
 
-from tests.ui.streamlit_driver import (  # noqa: E402
+from tests.ui.streamlit_driver import (
     button_is_disabled,
     check,
-    clipped_elements,
     click_button,
+    clipped_elements,
     expect_flash,
     expect_marker,
     fill_number,

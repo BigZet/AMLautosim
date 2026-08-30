@@ -245,7 +245,7 @@ class LeaderboardIn(BaseModel):
             for weight in value.values()
         ):
             raise ValueError("Каждый вес должен быть конечным числом от 0 до 1.")
-        if sum(value.values()) != Decimal("1"):
+        if sum(value.values()) != Decimal(1):
             raise ValueError("Веса лидерборда должны в сумме давать 1.")
         return value
 
@@ -263,7 +263,7 @@ class LeaderboardIn(BaseModel):
             for weight in value.values()
         ):
             raise ValueError("Каждый вес должен быть конечным числом от 0 до 1.")
-        if sum(value.values()) != Decimal("1"):
+        if sum(value.values()) != Decimal(1):
             raise ValueError("Веса ресурсов должны в сумме давать 1.")
         return value
 

@@ -534,18 +534,18 @@ def capture(driver: Any, artifacts: Path, name: str) -> None:
     safe = "".join(character if character.isalnum() else "-" for character in name)[:120]
     try:
         driver.save_screenshot(str(artifacts / f"{safe}.png"))
-    except Exception:  # noqa: BLE001 - never mask the original failure
+    except Exception:
         pass
     try:
         (artifacts / f"{safe}.html").write_text(driver.page_source, encoding="utf-8")
-    except Exception:  # noqa: BLE001
+    except Exception:
         pass
     try:
         logs = driver.get_log("browser")
         (artifacts / f"{safe}.log.json").write_text(
             json.dumps(logs, ensure_ascii=False, indent=1), encoding="utf-8"
         )
-    except Exception:  # noqa: BLE001 - not every driver exposes logs
+    except Exception:
         pass
 
 

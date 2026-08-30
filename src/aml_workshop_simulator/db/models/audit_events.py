@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Any
-from sqlalchemy import String, ForeignKey
+
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import Base, BigIntVariant, TZDateTime, JSONVariant
+
+from .base import Base, BigIntVariant, JSONVariant, TZDateTime
 
 
 class AuditEvent(Base):

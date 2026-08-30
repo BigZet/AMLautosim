@@ -1,7 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import Integer, String, Numeric, ForeignKey, UniqueConstraint
+
+from sqlalchemy import ForeignKey, Integer, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
+
 from .base import Base, BigIntVariant, TZDateTime
 
 

@@ -1,0 +1,28 @@
+name: checks
+
+# The linter and the domain tests are what can run without a database. The
+# integration and browser levels need PostgreSQL 16 and a built stack; they run
+# from `docs/testing-strategy.md`, not here.
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  lint-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Unit tests
+        run: python -m pytest tests/unit -q
+        env:
+          BOOTSTRAP_ADMIN_EMAIL: admin@example.com
+          BOOTSTRAP_ADMIN_PASSWORD: admin12345

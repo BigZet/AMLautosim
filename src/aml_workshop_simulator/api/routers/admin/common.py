@@ -29,15 +29,6 @@ SUPPORTED_RULESETS = {RULESET_VERSION}
 SUPPORTED_SCORING = {SCORING_VERSION}
 SUPPORTED_LEADERBOARD = {LEADERBOARD_VERSION}
 
-#: Statuses a round can be in, and the transitions the API accepts.
-ROUND_TRANSITIONS: dict[str, set[str]] = {
-    "draft": {"active"},
-    "active": {"stopped", "scoring"},
-    "stopped": {"active", "scoring"},
-    "scoring": {"completed"},
-    "completed": set(),
-}
-
 ROUND_STATUS_LABELS = {
     "draft": "черновик",
     "active": "идет",

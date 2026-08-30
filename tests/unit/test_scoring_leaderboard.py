@@ -56,7 +56,7 @@ def test_scores_are_clamped_to_the_zero_hundred_range(spec_by_code, specs, game_
         )
     ]
     result = score_scenario(hostile, specs, game_config)
-    assert Decimal("0") <= result["risk_score"] <= Decimal("100")
+    assert Decimal(0) <= result["risk_score"] <= Decimal(100)
     assert result["risk_label"] == RiskLabel.suspicious
 
 
@@ -132,7 +132,7 @@ def test_reordering_independent_steps_only_changes_sequence_factors(
 def test_resource_score_components_and_weights(spec_by_code, specs, game_config) -> None:
     snapshot = evaluate_scenario(chain(spec_by_code), specs, game_config)
     score = resource_score(snapshot, game_config)
-    assert Decimal("0") <= score <= Decimal("100")
+    assert Decimal(0) <= score <= Decimal(100)
     assert weights_sum_to_one(game_config)
 
 
