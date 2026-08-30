@@ -941,12 +941,17 @@ def evaluate_scenario(
             money_delta = money(-fee)
 
         # ---- quotas ---------------------------------------------------------
+        # A step counts once against each quota it belongs to. Adding the card's
+        # own category and the recipient's separately double-counted a card
+        # declared with quota_category "anonymous" paid to an anonymous wallet —
+        # the schema allows that combination even though no shipped card uses it.
+        applicable = set()
         if spec.quota_category:
-            quota_usage[spec.quota_category] = money(
-                quota_usage[spec.quota_category] + gross
-            )
+            applicable.add(spec.quota_category)
         if recipient_type == "anonymous_wallet":
-            quota_usage["anonymous"] = money(quota_usage["anonymous"] + gross)
+            applicable.add("anonymous")
+        for quota in applicable:
+            quota_usage[quota] = money(quota_usage[quota] + gross)
         for quota_code, limit in rules.category_limits.items():
             if quota_code not in quota_usage:
                 continue

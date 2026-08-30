@@ -12,11 +12,14 @@ from decimal import Decimal
 
 import pytest
 
+from dataclasses import replace
+
 from src.aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
     StructuralError,
     evaluate_scenario,
     money,
+    specs_by_key,
     submit_blockers,
     validate_structure,
 )
@@ -530,3 +533,68 @@ def test_risky_context_does_not_create_an_extra_resource_blocker(
     snapshot = evaluate_scenario(steps, specs, config)
     assert snapshot["valid"] is True
     assert submit_blockers(snapshot) == []
+
+
+# --------------------------------------------------------------------------
+# Quotas
+# --------------------------------------------------------------------------
+
+
+def _with_anonymous_limit(config, limit="1000000.00"):
+    return {
+        **config,
+        "constraints": {**config["constraints"], "category_limits": {"anonymous": limit}},
+    }
+
+
+def test_a_step_counts_once_against_a_quota_it_reaches_two_ways(
+    spec_by_code, game_config
+) -> None:
+    """A card in the anonymous category, paid to an anonymous wallet.
+
+    The card's own category and the recipient's used to be added separately, so
+    the same turnover consumed the quota twice and the limit tripped at half the
+    amount an organiser configured. No shipped card declares
+    quota_category "anonymous", but `CardConfig` accepts it, so the editor can
+    produce one.
+    """
+    card = replace(spec_by_code["card_transfer"], quota_category="anonymous")
+    step = make_step(
+        card, Decimal("10000.00"), context={"recipient_type": "anonymous_wallet"}
+    )
+
+    snapshot = evaluate_scenario([step], specs_by_key([card]), _with_anonymous_limit(game_config))
+
+    assert snapshot["limit_usage"]["anonymous"] == "10000.00"
+
+
+def test_a_step_still_counts_against_both_quotas_it_belongs_to(
+    spec_by_code, game_config
+) -> None:
+    """Counting once per quota is not counting once overall."""
+    card = replace(spec_by_code["card_transfer"], quota_category="cash")
+    step = make_step(
+        card, Decimal("10000.00"), context={"recipient_type": "anonymous_wallet"}
+    )
+    config = _with_anonymous_limit(game_config)
+    config["constraints"]["category_limits"]["cash"] = "1000000.00"
+
+    snapshot = evaluate_scenario([step], specs_by_key([card]), config)
+
+    assert snapshot["limit_usage"]["anonymous"] == "10000.00"
+    assert snapshot["limit_usage"]["cash"] == "10000.00"
+
+
+def test_the_shipped_card_counts_the_recipient_quota_once(
+    spec_by_code, specs, game_config
+) -> None:
+    """Control: card_transfer declares no category of its own."""
+    step = make_step(
+        spec_by_code["card_transfer"],
+        Decimal("10000.00"),
+        context={"recipient_type": "anonymous_wallet"},
+    )
+
+    snapshot = evaluate_scenario([step], specs, _with_anonymous_limit(game_config))
+
+    assert snapshot["limit_usage"]["anonymous"] == "10000.00"
