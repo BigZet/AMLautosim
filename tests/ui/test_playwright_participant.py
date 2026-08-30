@@ -24,8 +24,8 @@ from tests.ui.streamlit_driver import (
     DEFAULT_TIMEOUT,
     button_is_disabled,
     choose_option,
-    clipped_elements,
     click_button,
+    clipped_elements,
     expect_marker,
     expect_marker_at_least,
     fill_number,
@@ -270,9 +270,12 @@ def test_an_operation_exposes_at_most_two_parameters(
     code = CODES[card_label]
 
     choose_option(page, "builder_card", card_label)
-    assert page.locator(
-        f'[data-testid="builder-operation-icon"][data-operation="{code}"] svg'
-    ).count() == 1
+    assert (
+        page.locator(
+            f'[data-testid="builder-operation-icon"][data-operation="{code}"] svg'
+        ).count()
+        == 1
+    )
     exposed = marker(page, "builder-params")
     assert exposed == EXPECTED_VISIBLE_PARAMS[code], card_label
     assert len(exposed.split(",")) <= 2
@@ -423,9 +426,25 @@ def test_build_save_and_restore_a_draft_across_logout(reset_state: Stack, page: 
     assert {"Баланс", "Энергия", "Время", "Доступных шагов"} <= set(labels)
     assert "Доверие" not in labels
     assert "Свободных слотов" not in labels
+    config = stack.request("GET", "/api/v1/rounds/current")["game_config"]
+    initial_energy = config["resources"]["initial_energy"]
+    initial_time = config["resources"]["initial_time"]
+    assert page.locator('[data-testid="stMetricValue"]').all_text_contents() == [
+        marker(page, "resource-balance"),
+        f"{initial_energy} из {initial_energy}",
+        f"{initial_time} из {initial_time}",
+        "8 из 8",
+    ]
+    assert page.locator('[data-testid="no-violations"]').count() == 0
 
     build_valid_chain(page)
     expect_marker(page, "resource-available-steps", "5")
+    assert page.locator('[data-testid="stMetricValue"]').all_text_contents() == [
+        marker(page, "resource-balance"),
+        f"{marker(page, 'resource-energy')} из {initial_energy}",
+        f"{marker(page, 'resource-time')} из {initial_time}",
+        "5 из 8",
+    ]
     assert marker(page, "scenario-status") == "none"
     click_button(page, "save_draft")
     expect_marker(page, "scenario-status", "draft")
@@ -445,7 +464,10 @@ def test_build_save_and_restore_a_draft_across_logout(reset_state: Stack, page: 
     expect_marker(page, "chain-length", "3")
     expect_marker(page, "scenario-revision", "1")
     expect_marker(page, "resource-available-steps", "5")
-    assert "доверие" not in (page.locator('[data-testid="stMain"]').text_content() or "").lower()
+    assert (
+        "доверие"
+        not in (page.locator('[data-testid="stMain"]').text_content() or "").lower()
+    )
 
 
 def test_draft_survives_a_page_refresh(reset_state: Stack, page: Any) -> None:
@@ -546,6 +568,7 @@ def test_business_violation_is_shown_per_step_and_blocks_submit(
     expect_marker(page, "resources-valid", "false")
     expect_marker_at_least(page, "violation-count", 1)
 
+    page.locator("summary").filter(has_text="Нарушения правил:").click()
     violation = page.locator('[data-testid="violation-insufficient_balance"]').first
     violation.wait_for(state="visible", timeout=30_000)
     text = violation.text_content() or ""
@@ -582,6 +605,7 @@ def test_fixing_a_violation_enables_submit_and_completes_the_round(
     add_step(page, "Снять наличные", "Банкомат", 60000, 1, "cash_withdrawal")
     click_button(page, "save_draft")
     expect_marker(page, "resources-valid", "false")
+    page.locator("summary").filter(has_text="Нарушения правил:").click()
     page.locator('[data-testid="violation-category_limit_exceeded"]').first.wait_for(
         state="visible", timeout=30_000
     )
@@ -608,6 +632,87 @@ def test_fixing_a_violation_enables_submit_and_completes_the_round(
         (player["email"],),
     )
     assert status == [("submitted",)]
+
+
+def test_live_warnings_and_step_edits_only_rerun_the_workspace(
+    reset_state: Stack, page: Any
+) -> None:
+    """Observe Streamlit's wire messages, not just an unchanged-looking page."""
+    from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+
+    runs: list[list[str]] = []
+
+    def record_run(payload: Any) -> None:
+        if not isinstance(payload, bytes):
+            return
+        message = ForwardMsg()
+        message.ParseFromString(payload)
+        if message.HasField("new_session"):
+            runs.append(list(message.new_session.fragment_ids_this_run))
+
+    page.on("websocket", lambda socket: socket.on("framereceived", record_run))
+    stack = reset_state
+    player = register(stack, "Локальные предупреждения")
+    participant_login(page, stack, player["email"])
+    # Wait for the whole initial render before measuring subsequent interactions.
+    page.get_by_text("История появится после первого сохранения черновика.").wait_for()
+    runs.clear()
+
+    choose_option(page, "builder_card", "Перевести по карте")
+    fill_number(page, "builder_card_transfer_amount", 400000)
+    warning = page.locator("summary").filter(has_text="Операция нарушит правила:")
+    warning.wait_for(state="visible")
+    assert warning.locator("..").get_attribute("open") is None
+    expect_marker(page, "chain-length", "0")
+    fill_number(page, "builder_card_transfer_amount", 100000)
+    warning.wait_for(state="detached")
+    click_button(page, "add_step")
+    expect_marker(page, "chain-length", "1")
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "1")
+    step_id = db_query(
+        "SELECT s.steps FROM scenarios s JOIN users u ON u.id = s.participant_id "
+        "WHERE u.email = %s",
+        (player["email"],),
+    )[0][0][0]["step_id"]
+
+    page.locator("summary").filter(has_text="Изменить шаг").click()
+    fill_number(page, f"edit_{step_id}_amount", 400000)
+    expect_marker(page, "resources-valid", "false")
+    expect_marker(page, "draft-synchronized", "false")
+    chain_warning = page.locator("summary").filter(has_text="Нарушения правил:")
+    chain_warning.wait_for(state="visible")
+    assert chain_warning.locator("..").get_attribute("open") is None
+    chain_warning.scroll_into_view_if_needed()
+    page.screenshot(path=str(ARTIFACTS / "participant-compact-warning.png"), full_page=True)
+    fill_number(page, f"edit_{step_id}_amount", 150000)
+    expect_marker(page, "resources-valid", "true")
+    chain_warning.wait_for(state="detached")
+    expect_marker(page, "objective-reached", "true")
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "2")
+    # A context edit must not also mutate the saved scenario's nested dicts.
+    choose_option(page, f"edit_{step_id}_channel", "Интернет-банк")
+    expect_marker(page, "draft-synchronized", "false")
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "3")
+    expect_marker(page, "submit-enabled", "true")
+    choose_option(page, "version_select", "Версия 1")
+    click_button(page, "restore_version")
+    expect_marker(page, "scenario-revision", "4")
+    expect_marker(page, "objective-reached", "false")
+    assert widget(page, f"edit_{step_id}_amount").locator("input").input_value() == "100000.00"
+    assert widget(page, f"edit_{step_id}_channel").locator("input").input_value() == "Мобильное приложение"
+    fill_number(page, f"edit_{step_id}_amount", 150000)
+    click_button(page, "save_draft")
+    expect_marker(page, "scenario-revision", "5")
+    page.locator('[data-testid="stMain"]').evaluate("element => element.scrollTop = 0")
+    page.screenshot(path=str(ARTIFACTS / "participant-resources.png"), full_page=True)
+    click_button(page, "submit_scenario")
+    expect_marker(page, "scenario-status", "submitted")
+    assert runs, "No Streamlit runs were observed"
+    assert all(runs), f"A full-app rerun occurred: {runs}"
+    assert page.locator('[data-testid="stException"]').count() == 0
 
 
 def test_submit_is_blocked_until_the_objective_is_reached(

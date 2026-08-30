@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import sys
 import uuid
+from functools import partial
 from html import escape
 from pathlib import Path
 from typing import Any
@@ -71,11 +72,6 @@ STYLES = """
     padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
 }
 .aml-violation strong { color: var(--aml-danger); }
-.aml-ok-box {
-    border-left: 4px solid var(--aml-ok);
-    background: color-mix(in srgb, var(--aml-ok) 12%, transparent);
-    padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
-}
 .aml-step-meta { color: var(--aml-muted); font-size: 13px; }
 [data-testid="stElementContainer"]:has(span[style*="display: none"][data-testid]),
 [data-testid="stElementContainer"]:has(span[style*="display:none"][data-testid]) {
@@ -283,6 +279,11 @@ def store_scenario(scenario: dict[str, Any]) -> None:
     st.session_state["server_revision"] = scenario.get("revision", 0)
     st.session_state["draft_steps"] = [dict(step) for step in scenario.get("steps", [])]
     st.session_state["selected_version"] = scenario.get("revision")
+    # Restored versions reuse step IDs; discard the previous version's widget
+    # values so the controls agree with the canonical scenario on the next run.
+    for key in list(st.session_state):
+        if key.startswith("edit_"):
+            del st.session_state[key]
 
 
 def load_scenario(client: Any, round_id: int, session_id: str) -> None:
@@ -615,6 +616,7 @@ def render_param(
     widget_key: str,
     *,
     label_visibility: str = "visible",
+    on_change: Any = None,
 ) -> Any:
     """One control for one exposed parameter."""
     if param.get("kind") == "toggle":
@@ -624,6 +626,7 @@ def render_param(
             key=widget_key,
             help=param.get("help"),
             label_visibility=label_visibility,
+            on_change=on_change,
         )
     options = [option["value"] for option in param.get("options", [])]
     labels = {option["value"]: option["label"] for option in param.get("options", [])}
@@ -639,16 +642,68 @@ def render_param(
         key=widget_key,
         help=param.get("help"),
         label_visibility=label_visibility,
+        on_change=on_change,
     )
 
 
+def update_step_from_widgets(card: dict[str, Any], step_id: str) -> None:
+    """Apply an edit before the fragment renders its previews and controls."""
+    steps = st.session_state["draft_steps"]
+    index = next(
+        (i for i, item in enumerate(steps) if item["step_id"] == step_id), None
+    )
+    if index is None:
+        return
+    original = steps[index]
+    step = {
+        **original,
+        "context": dict(original["context"]),
+        "action_details": dict(original["action_details"]),
+    }
+    prefix = f"edit_{step_id}"
+    step["amount"] = f"{float(st.session_state[f'{prefix}_amount']):.2f}"
+    if card.get("show_frequency", True):
+        step["frequency"] = int(st.session_state[f"{prefix}_frequency"])
+    for param in card.get("visible_params", []):
+        namespace, key = param["namespace"], param["key"]
+        if namespace == "channel":
+            step["context"]["channel"] = st.session_state[f"{prefix}_channel"]
+        elif namespace == "context":
+            step["context"][key] = st.session_state[f"{prefix}_ctx_{key}"]
+        else:
+            step["action_details"][key] = st.session_state[f"{prefix}_detail_{key}"]
+    steps[index] = step
+    st.session_state["editing_step_id"] = step_id
+    st.session_state["field_errors"] = {}
+
+
 def render_step_form(
-    card: dict[str, Any], step: dict[str, Any], key_prefix: str
+    card: dict[str, Any],
+    step: dict[str, Any],
+    key_prefix: str,
+    *,
+    on_change: Any = None,
 ) -> dict[str, Any]:
     """Render one bounded control per row for every exposed parameter."""
     context = dict(step.get("context") or {})
     details = dict(step.get("action_details") or {})
     show_frequency = bool(card.get("show_frequency", True))
+
+    # A widget with a stable key keeps its frontend value even when its default
+    # changes. Explicitly hydrate editor controls after loading a server version.
+    if on_change is not None and f"{key_prefix}_initialized" not in st.session_state:
+        st.session_state[f"{key_prefix}_amount"] = float(step["amount"])
+        if show_frequency:
+            st.session_state[f"{key_prefix}_frequency"] = int(step.get("frequency", 1))
+        for param in card.get("visible_params", []):
+            namespace, key = param["namespace"], param["key"]
+            if namespace == "channel":
+                st.session_state[f"{key_prefix}_channel"] = context["channel"]
+            elif namespace == "context":
+                st.session_state[f"{key_prefix}_ctx_{key}"] = context.get(key, param["default"])
+            else:
+                st.session_state[f"{key_prefix}_detail_{key}"] = details.get(key, param["default"])
+        st.session_state[f"{key_prefix}_initialized"] = True
 
     def field_columns(label: str) -> Any:
         label_column, control_column = st.columns(
@@ -674,6 +729,7 @@ def render_step_form(
             format="%.2f",
             key=f"{key_prefix}_amount",
             label_visibility="collapsed",
+            on_change=on_change,
         )
 
     frequency = int(step.get("frequency", 1))
@@ -689,6 +745,7 @@ def render_step_form(
                 step=1,
                 key=f"{key_prefix}_frequency",
                 label_visibility="collapsed",
+                on_change=on_change,
             )
     else:
         frequency = 1
@@ -701,6 +758,7 @@ def render_step_form(
                     context.get("channel"),
                     f"{key_prefix}_channel",
                     label_visibility="collapsed",
+                    on_change=on_change,
                 )
             elif param["namespace"] == "context":
                 context[param["key"]] = render_param(
@@ -708,6 +766,7 @@ def render_step_form(
                     context.get(param["key"]),
                     f"{key_prefix}_ctx_{param['key']}",
                     label_visibility="collapsed",
+                    on_change=on_change,
                 )
             else:
                 details[param["key"]] = render_param(
@@ -715,6 +774,7 @@ def render_step_form(
                     details.get(param["key"]),
                     f"{key_prefix}_detail_{param['key']}",
                     label_visibility="collapsed",
+                    on_change=on_change,
                 )
 
     return {
@@ -745,7 +805,7 @@ def _resource_deltas(before: dict[str, Any], after: dict[str, Any]) -> str:
             rendered = f"+{rendered}"
         parts.append(
             f'<div class="aml-impact-item {css}">{icon_svg(key)}'
-            f'<span>{escape(label)} <strong>{escape(rendered)}</strong></span></div>'
+            f"<span>{escape(label)} <strong>{escape(rendered)}</strong></span></div>"
         )
     return "".join(parts) or '<div class="aml-impact-item">Без изменений</div>'
 
@@ -828,7 +888,7 @@ def render_builder(
     ):
         steps.append(candidate)
         st.session_state[draft_key] = default_step(card)
-        st.rerun()
+        st.rerun(scope="fragment")
 
     if limit_reached:
         st.warning(
@@ -842,13 +902,18 @@ def render_builder(
             f"{escape(violation.get('message', ''))}</div>",
             unsafe_allow_html=True,
         )
-    for violation in candidate_blockers:
-        st.markdown(
-            f'<div class="aml-violation" data-testid="candidate-violation-'
-            f'{escape(violation.get("reason", ""))}">'
-            f"{escape(violation.get('message', ''))}</div>",
-            unsafe_allow_html=True,
-        )
+    if candidate_blockers:
+        with st.expander(
+            f"Операция нарушит правила: {len(candidate_blockers)} · подробности",
+            icon=":material/warning:",
+        ):
+            for violation in candidate_blockers:
+                st.markdown(
+                    f'<div class="aml-violation" data-testid="candidate-violation-'
+                    f'{escape(violation.get("reason", ""))}">'
+                    f"{escape(violation.get('message', ''))}</div>",
+                    unsafe_allow_html=True,
+                )
     if not blocked and not candidate_blockers:
         marker("add-blocked-reason", "")
 
@@ -890,8 +955,10 @@ def render_chain(
                 unsafe_allow_html=True,
             )
             impact = per_step.get(step_id, {})
-            channel_label = (card or {}).get("channel_labels", {}).get(
-                step["context"].get("channel"), step["context"].get("channel", "")
+            channel_label = (
+                (card or {})
+                .get("channel_labels", {})
+                .get(step["context"].get("channel"), step["context"].get("channel", ""))
             )
             frequency_text = (
                 f" × {step['frequency']}" if int(step.get("frequency", 1)) > 1 else ""
@@ -929,10 +996,12 @@ def render_chain(
                     "Изменить шаг",
                     expanded=st.session_state["editing_step_id"] == step_id,
                 ):
-                    updated = render_step_form(card, step, f"edit_{step_id}")
-                    if updated != step:
-                        steps[index] = updated
-                        st.rerun()
+                    render_step_form(
+                        card,
+                        step,
+                        f"edit_{step_id}",
+                        on_change=partial(update_step_from_widgets, card, step_id),
+                    )
                 col_up, col_down, col_copy, col_delete = st.columns(4)
                 with col_up:
                     if st.button(
@@ -964,7 +1033,7 @@ def render_chain(
     if move is not None:
         source, target = move
         steps[source], steps[target] = steps[target], steps[source]
-        st.rerun()
+        st.rerun(scope="fragment")
     if duplicate_index is not None:
         clone = {
             **steps[duplicate_index],
@@ -973,10 +1042,10 @@ def render_chain(
             "action_details": dict(steps[duplicate_index]["action_details"]),
         }
         steps.insert(duplicate_index + 1, clone)
-        st.rerun()
+        st.rerun(scope="fragment")
     if delete_index is not None:
         steps.pop(delete_index)
-        st.rerun()
+        st.rerun(scope="fragment")
 
 
 def render_resources(snapshot: dict[str, Any], game_config: dict[str, Any]) -> None:
@@ -997,18 +1066,29 @@ def render_resources(snapshot: dict[str, Any], game_config: dict[str, Any]) -> N
 
     columns = st.columns(4)
     values = (
-        ("Баланс", money(after.get("balance", 0)), "balance"),
-        ("Энергия", after.get("energy", 0), "energy"),
-        ("Время", after.get("time", 0), "time"),
+        ("Баланс", money(after.get("balance", 0)), "balance", None),
+        (
+            "Энергия",
+            after.get("energy", 0),
+            "energy",
+            config_resources.get("initial_energy", 0),
+        ),
+        (
+            "Время",
+            after.get("time", 0),
+            "time",
+            config_resources.get("initial_time", 0),
+        ),
         (
             "Доступных шагов",
             after.get("available_steps", 0),
             "available-steps",
+            config_objectives.get("max_actions", 0),
         ),
     )
-    for column, (label, value, testid) in zip(columns, values, strict=False):
+    for column, (label, value, testid, initial) in zip(columns, values, strict=False):
         with column:
-            st.metric(label, value)
+            st.metric(label, f"{value} из {initial}" if initial is not None else value)
             marker(f"resource-{testid}", value)
 
     reached = bool(objective.get("reached"))
@@ -1052,19 +1132,17 @@ def render_violations(snapshot: dict[str, Any]) -> None:
     violations = snapshot.get("violations") or []
     marker("violation-count", len(violations))
     if not violations:
-        st.markdown(
-            '<div class="aml-ok-box" data-testid="no-violations">'
-            "Нарушений правил раунда нет.</div>",
-            unsafe_allow_html=True,
-        )
         return
-    st.markdown("**Нарушения правил раунда**")
-    for violation in violations:
-        st.markdown(
-            f'<div class="aml-violation" data-testid="violation-{escape(violation.get("reason", ""))}">'
-            f"{escape(violation.get('message', ''))}</div>",
-            unsafe_allow_html=True,
-        )
+    with st.expander(
+        f"Нарушения правил: {len(violations)} · отправка недоступна",
+        icon=":material/warning:",
+    ):
+        for violation in violations:
+            st.markdown(
+                f'<div class="aml-violation" data-testid="violation-{escape(violation.get("reason", ""))}">'
+                f"{escape(violation.get('message', ''))}</div>",
+                unsafe_allow_html=True,
+            )
 
 
 def render_versions(client: Any, round_id: int, session_id: str) -> None:
@@ -1132,7 +1210,7 @@ def render_versions(client: Any, round_id: int, session_id: str) -> None:
             )
         except APIClientError as error:
             apply_error(error)
-            st.rerun()
+            st.rerun(scope="fragment")
             return
         finally:
             st.session_state["pending_command"] = None
@@ -1142,7 +1220,7 @@ def render_versions(client: Any, round_id: int, session_id: str) -> None:
             f"Восстановлена версия {row['revision']}: она сохранена как новая "
             f"версия {scenario['revision']}, прежние версии остались в истории.",
         )
-        st.rerun()
+        st.rerun(scope="fragment")
 
 
 def waiting_screen(round_obj: dict[str, Any] | None) -> None:
@@ -1164,7 +1242,9 @@ def waiting_screen(round_obj: dict[str, Any] | None) -> None:
         st.info("Раунд ещё не создан организатором.")
 
 
-def page_scenario() -> None:
+@st.fragment
+def scenario_workspace() -> None:
+    """Keep form changes, validation and draft commands within the workspace."""
     client = get_api_client()
     session_id = st.session_state["session_id"]
     try:
@@ -1194,11 +1274,6 @@ def page_scenario() -> None:
     status = (scenario or {}).get("status", "none")
     editable = status in {"draft", "none"} and editable_round
 
-    header(
-        f"Раунд #{round_id}",
-        "Конструктор сценария",
-        "Соберите цепочку операций, сохраните черновик и отправьте её на скоринг.",
-    )
     marker("scenario-status", status)
     marker("scenario-revision", (scenario or {}).get("revision", 0))
     marker("round-status", current_round["status"])
@@ -1214,10 +1289,10 @@ def page_scenario() -> None:
     snapshot = chain_snapshot(client, round_id, session_id)
     render_resources(snapshot, game_config)
     render_limits(snapshot)
-    render_violations(snapshot)
     st.divider()
 
     if not editable:
+        render_violations(snapshot)
         st.info(
             "Сценарий зафиксирован сервером. Изменение доступно, только пока раунд "
             "идет и сценарий находится в черновике."
@@ -1234,7 +1309,10 @@ def page_scenario() -> None:
         render_chain(client, round_id, session_id, cards_by_key, editable=True)
 
         st.divider()
-        synchronized = st.session_state["draft_steps"] == (scenario or {}).get("steps", [])
+        render_violations(snapshot)
+        synchronized = st.session_state["draft_steps"] == (scenario or {}).get(
+            "steps", []
+        )
         can_submit = (
             bool(scenario)
             and synchronized
@@ -1256,7 +1334,7 @@ def page_scenario() -> None:
                 disabled=bool(st.session_state.get("pending_command")),
             ):
                 save_draft(client, round_id, session_id, label=label)
-                st.rerun()
+                st.rerun(scope="fragment")
         with submit_column:
             if st.button(
                 "Отправить сценарий",
@@ -1266,7 +1344,7 @@ def page_scenario() -> None:
                 disabled=not can_submit or bool(st.session_state.get("pending_command")),
             ):
                 submit_scenario(client, round_id, session_id)
-                st.rerun()
+                st.rerun(scope="fragment")
         if not can_submit:
             st.caption(
                 "Отправка доступна, когда сохранённая на сервере цепочка не содержит "
@@ -1276,6 +1354,15 @@ def page_scenario() -> None:
     st.divider()
     st.subheader("История сохранённых черновиков")
     render_versions(client, round_id, session_id)
+
+
+def page_scenario() -> None:
+    header(
+        "Сценарий",
+        "Конструктор сценария",
+        "Соберите цепочку операций, сохраните черновик и отправьте её на скоринг.",
+    )
+    scenario_workspace()
 
 
 def page_result() -> None:
