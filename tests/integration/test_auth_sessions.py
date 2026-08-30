@@ -88,6 +88,23 @@ def test_wrong_password_and_unknown_email_are_indistinguishable(client) -> None:
     assert wrong.json()["code"] == unknown.json()["code"]
 
 
+def test_malformed_email_is_reported_as_invalid_credentials_for_both_apps(client) -> None:
+    for audience in ("play", "admin"):
+        response = client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": "not-an-email",
+                "password": "random-password",
+                "audience": audience,
+            },
+        )
+
+        assert response.status_code == 401
+        assert response.json()["code"] == "invalid_credentials"
+        assert response.json()["message"] == "Неверный email или пароль."
+        assert response.json()["details"] is None
+
+
 def test_repeated_failures_lock_the_account_temporarily(client) -> None:
     participant = register_participant(client)
     codes = []

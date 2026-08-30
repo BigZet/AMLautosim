@@ -225,21 +225,20 @@ Streamlit cache без session ID в аргументах. Participant UI все
   "id": 12,
   "title": "Мастер-класс AML",
   "status": "active",
-  "config_version": "round-config-v2:sha256:8f4c...",
+  "config_version": "round-config-v4:sha256:8f4c...",
   "activated_at": "2026-10-05T08:00:00Z",
   "game_config": {
     "resources": {
       "initial_balance": "250000.00",
       "initial_energy": 14,
-      "initial_time": 18,
-      "initial_trust": 100
+      "initial_time": 18
     },
     "objectives": {"target_outflow": "150000.00", "max_actions": 8},
     "constraints": {
       "max_night_operations": 2,
       "max_identical_steps": 2
     },
-    "ruleset_version": "game-rules-v2"
+    "ruleset_version": "game-rules-v3"
   }
 }
 ```
@@ -260,7 +259,7 @@ private, max-age=0`; Streamlit применяет собственный TTL д�
   "id": 12,
   "title": "Мастер-класс AML",
   "status": "draft",
-  "config_version": "round-config-v3:sha256:8f4c...",
+  "config_version": "round-config-v4:sha256:8f4c...",
   "activated_at": null,
   "stopped_at": null,
   "completed_at": null,
@@ -315,7 +314,7 @@ browser. Он не возвращает users, scenarios, results или admin m
     "category": "Наличные",
     "flow": "credit",
     "risk_weight": "12.00",
-    "costs": {"energy": 1, "time": 2, "trust": 4},
+    "costs": {"energy": 1, "time": 2},
     "fee_rate": "0.010000",
     "min_amount": "1000.00",
     "max_amount": "100000.00",
@@ -423,8 +422,7 @@ no-store`.
       "balance": "149000.00",
       "energy": 12,
       "time": 14,
-      "trust": 90,
-      "slots": 7
+      "available_steps": 7
     },
     "totals": {
       "gross_inflow": "0.00",
@@ -470,8 +468,8 @@ no-store`.
 {
   "resources": {
     "valid": true,
-    "resources_after": {"balance": "370000.00", "energy": 13, "time": 17, "trust": 100,
-                        "slots": 7},
+    "resources_after": {"balance": "370000.00", "energy": 13, "time": 17,
+                        "available_steps": 7},
     "per_step": [{"step_id": "...", "card_title": "Получить зарплату",
                   "resources_before": {"...": "..."},
                   "resources_after": {"...": "..."}}],
@@ -500,7 +498,7 @@ no-store`.
      "created_at": "2026-10-05T08:21:03Z", "created_by_user_id": 42,
      "restored_from_revision": 1, "is_current": true, "is_submitted": false,
      "valid": true, "goal_reached": true, "balance_after": "120000.00",
-     "energy_after": 8, "time_after": 9, "trust_after": 88}
+     "energy_after": 8, "time_after": 9, "available_steps_after": 4}
   ]
 }
 ```
@@ -577,7 +575,7 @@ sequenceDiagram
   },
   "versions": {
     "scoring": "risk-rules-v2",
-    "leaderboard": "leaderboard-v1"
+    "leaderboard": "leaderboard-v2"
   },
   "explanation": {
     "top_risk_factors": [],
@@ -678,15 +676,14 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
     "resources": {
       "initial_balance": "250000.00",
       "initial_energy": 14,
-      "initial_time": 18,
-      "initial_trust": 100
+      "initial_time": 18
     },
     "objectives": {"target_outflow": "150000.00", "max_actions": 8},
     "constraints": {},
     "card_versions": [{"id": 12, "code": "cash_deposit", "version": 1}],
-    "ruleset_version": "game-rules-v2",
+    "ruleset_version": "game-rules-v3",
     "scoring": {"version": "risk-rules-v2"},
-    "leaderboard": {"version": "leaderboard-v1"}
+    "leaderboard": {"version": "leaderboard-v2"}
   }
 }
 ```
@@ -776,7 +773,7 @@ Admin UI показывает эти числа рядом с чекбоксом
   "excluded_draft_count": 8,
   "duration_ms": 842,
   "scoring_version": "risk-rules-v2",
-  "leaderboard_version": "leaderboard-v1",
+  "leaderboard_version": "leaderboard-v2",
   "completed_at": "2026-10-05T08:32:41Z"
 }
 ```
@@ -893,9 +890,9 @@ Response summary не включает steps/explanation, чтобы списо�
     {"param": "context.has_documents", "label": "Есть подтверждающие документы",
      "value": true, "display": "Да", "source": "context", "editable": false}
   ],
-  "costs": {"energy": 1, "time": 1, "trust": 0, "money_delta": "120000.00"},
-  "resources_before": {"balance": "250000.00", "energy": 14, "time": 18, "trust": 100},
-  "resources_after": {"balance": "370000.00", "energy": 13, "time": 17, "trust": 100}
+  "costs": {"energy": 1, "time": 1, "money_delta": "120000.00"},
+  "resources_before": {"balance": "250000.00", "energy": 14, "time": 18},
+  "resources_after": {"balance": "370000.00", "energy": 13, "time": 17}
 }
 ```
 

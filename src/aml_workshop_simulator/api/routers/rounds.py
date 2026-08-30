@@ -192,7 +192,6 @@ def card_out(row: ActionCard, operation: OperationPolicy | None = None) -> Actio
         costs={
             "energy": spec.energy_cost,
             "time": spec.time_cost,
-            "trust": spec.trust_cost,
         },
         fee_rate=str(spec.fee_rate),
         min_amount=str(spec.min_amount),

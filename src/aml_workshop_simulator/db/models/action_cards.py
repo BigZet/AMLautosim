@@ -26,7 +26,6 @@ class ActionCard(Base):
     risk_weight: Mapped[Decimal] = mapped_column(Numeric(8, 2))
     energy_cost: Mapped[int] = mapped_column(Integer)
     time_cost: Mapped[int] = mapped_column(Integer)
-    trust_cost: Mapped[int] = mapped_column(Integer)
     fee_rate: Mapped[Decimal] = mapped_column(Numeric(8, 6))
     min_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))
     max_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))

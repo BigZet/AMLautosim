@@ -191,8 +191,8 @@ consistency guarantees.
 
 ## D15. Game score объединяет риск и ресурсы
 
-**Решение.** Референс `leaderboard-v1`: 60% stealth (`100-risk`) и 40% resource score;
-resource score учитывает balance/energy/time/trust/fees/slots.
+**Решение.** Референс `leaderboard-v2`: 60% stealth (`100-risk`) и 40% resource score;
+resource score учитывает balance/energy/time/fees/available_steps.
 
 **Причины.** Победа только по classifier score поощряет неэффективные/тривиальные
 сценарии; ресурсы создают содержательный trade-off.

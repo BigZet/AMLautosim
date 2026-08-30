@@ -103,7 +103,6 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
                 risk_weight=entry["risk_weight"],
                 energy_cost=entry["energy_cost"],
                 time_cost=entry["time_cost"],
-                trust_cost=entry["trust_cost"],
                 fee_rate=entry["fee_rate"],
                 min_amount=entry["min_amount"],
                 max_amount=entry["max_amount"],
@@ -121,7 +120,6 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
             card.risk_weight = entry["risk_weight"]
             card.energy_cost = entry["energy_cost"]
             card.time_cost = entry["time_cost"]
-            card.trust_cost = entry["trust_cost"]
             card.fee_rate = entry["fee_rate"]
             card.min_amount = entry["min_amount"]
             card.max_amount = entry["max_amount"]

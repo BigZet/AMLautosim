@@ -25,12 +25,12 @@ from src.aml_workshop_simulator.domain.round_policy import (
 
 STRICT = ConfigDict(extra="forbid")
 
-CONFIG_SCHEMA_VERSION = 3
+CONFIG_SCHEMA_VERSION = 4
 
 #: Quota buckets an organiser can cap. They match `domain.rules.QUOTA_LABELS`.
 QUOTA_CODES = ("cash", "anonymous")
 
-RESOURCE_WEIGHT_KEYS = ("balance", "energy", "time", "trust", "fees", "slots")
+RESOURCE_WEIGHT_KEYS = ("balance", "energy", "time", "fees", "available_steps")
 
 
 def _money(value: Decimal) -> str:
@@ -43,14 +43,12 @@ class ResourcesIn(BaseModel):
     initial_balance: Decimal = Field(gt=0, le=Decimal("100000000"), decimal_places=2)
     initial_energy: int = Field(ge=1, le=200)
     initial_time: int = Field(ge=1, le=200)
-    initial_trust: int = Field(ge=1, le=1000)
 
     def dump(self) -> dict[str, Any]:
         return {
             "initial_balance": _money(self.initial_balance),
             "initial_energy": self.initial_energy,
             "initial_time": self.initial_time,
-            "initial_trust": self.initial_trust,
         }
 
 
@@ -120,7 +118,6 @@ class OperationIn(BaseModel):
     round_frequency_limit: int | None = Field(default=None, ge=1, le=64)
     energy_cost: int | None = Field(default=None, ge=0, le=50)
     time_cost: int | None = Field(default=None, ge=0, le=50)
-    trust_cost: int | None = Field(default=None, ge=0, le=200)
     fee_rate: Decimal | None = Field(default=None, ge=0, le=1, decimal_places=6)
 
     @field_validator("visible_params")
@@ -250,7 +247,7 @@ class GameConfigIn(BaseModel):
 
     model_config = STRICT
 
-    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=2, le=3)
+    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=4, le=4)
     resources: ResourcesIn
     objectives: ObjectivesIn
     constraints: ConstraintsIn

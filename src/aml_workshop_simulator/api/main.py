@@ -92,6 +92,27 @@ async def validation_exception_handler(
             message = f"Пароль должен содержать не менее {minimum} символов."
         violations.append({"field": field, "reason": reason, "message": message})
 
+    # An invalidly formatted credential is still just an invalid credential to
+    # a person signing in.  Keep this response indistinguishable from an
+    # unknown email or a wrong password, and do not expose schema terminology
+    # in either Streamlit login screen.
+    is_login_request = (
+        request.method == "POST"
+        and request.url.path == f"{settings.API_V1_STR}/auth/login"
+    )
+    credential_fields = {"email", "password"}
+    if (
+        is_login_request
+        and violations
+        and all(violation["field"] in credential_fields for violation in violations)
+    ):
+        return _envelope(
+            request,
+            status.HTTP_401_UNAUTHORIZED,
+            "invalid_credentials",
+            auth.INVALID_CREDENTIALS,
+        )
+
     response_message = "Запрос не соответствует контракту API"
     if (
         len(violations) == 1

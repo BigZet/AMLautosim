@@ -38,7 +38,7 @@ numeric rounding.
 
 - debit/credit/neutral flow и комиссии;
 - Decimal rounding;
-- energy/time/trust consumption;
+- energy/time consumption;
 - min/max amount и max frequency;
 - max actions/identical/night/anonymous constraints;
 - cash и anonymous category quotas;

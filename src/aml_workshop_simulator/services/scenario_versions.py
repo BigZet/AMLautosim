@@ -127,5 +127,5 @@ def version_summary(
         "balance_after": after.get("balance"),
         "energy_after": after.get("energy"),
         "time_after": after.get("time"),
-        "trust_after": after.get("trust"),
+        "available_steps_after": after.get("available_steps"),
     }

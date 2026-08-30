@@ -1,4 +1,4 @@
-"""Versioned game ruleset (`game-rules-v2`).
+"""Versioned game ruleset (`game-rules-v3`).
 
 The ruleset draws a hard line between two classes of problem:
 
@@ -40,8 +40,8 @@ from src.aml_workshop_simulator.domain.round_policy import (
     context_param,
 )
 
-RULESET_VERSION = "game-rules-v2"
-SNAPSHOT_SCHEMA_VERSION = 3
+RULESET_VERSION = "game-rules-v3"
+SNAPSHOT_SCHEMA_VERSION = 4
 
 MONEY = Decimal("0.01")
 ZERO = Decimal("0.00")
@@ -108,7 +108,6 @@ class CardSpec:
     risk_weight: Decimal
     energy_cost: int
     time_cost: int
-    trust_cost: int
     fee_rate: Decimal
     min_amount: Decimal
     max_amount: Decimal
@@ -171,7 +170,6 @@ def card_spec_from_row(row: Any) -> CardSpec:
         risk_weight=Decimal(str(row.risk_weight)),
         energy_cost=int(row.energy_cost),
         time_cost=int(row.time_cost),
-        trust_cost=int(row.trust_cost),
         fee_rate=Decimal(str(row.fee_rate)),
         min_amount=Decimal(str(row.min_amount)),
         max_amount=Decimal(str(row.max_amount)),
@@ -203,7 +201,6 @@ def card_spec_from_catalog(entry: dict[str, Any], card_id: int) -> CardSpec:
         risk_weight=entry["risk_weight"],
         energy_cost=entry["energy_cost"],
         time_cost=entry["time_cost"],
-        trust_cost=entry["trust_cost"],
         fee_rate=entry["fee_rate"],
         min_amount=entry["min_amount"],
         max_amount=entry["max_amount"],
@@ -228,20 +225,6 @@ QUOTA_LABELS = {
     "anonymous": "Анонимные получатели",
 }
 
-CONTEXT_TRUST_COST: dict[str, dict[str, int]] = {
-    "recipient_type": {"known_counterparty": 0, "new_counterparty": 3, "anonymous_wallet": 10},
-    "time_of_day": {"day": 0, "evening": 2, "night": 7},
-    "velocity": {"spaced": 0, "normal": 1, "rapid": 7},
-}
-
-CHANNEL_TRUST_MODIFIER: dict[str, int] = {
-    "bank": -2,
-    "branch": -3,
-    "mobile": 0,
-    "web": 2,
-    "atm": 2,
-}
-
 #: Channels that add extra handling time because a person is involved.
 CHANNEL_TIME_MODIFIER: dict[str, int] = {"branch": 2}
 
@@ -253,7 +236,6 @@ class RoundRules:
     initial_balance: Decimal
     initial_energy: int
     initial_time: int
-    initial_trust: int
     target_outflow: Decimal
     max_actions: int
     max_identical_steps: int
@@ -272,7 +254,6 @@ class RoundRules:
             initial_balance=money(resources.get("initial_balance", "250000.00")),
             initial_energy=int(resources.get("initial_energy", 14)),
             initial_time=int(resources.get("initial_time", 18)),
-            initial_trust=int(resources.get("initial_trust", 100)),
             target_outflow=money(objectives.get("target_outflow", "150000.00")),
             max_actions=int(objectives.get("max_actions", 8)),
             max_identical_steps=int(constraints.get("max_identical_steps", 2)),
@@ -304,13 +285,12 @@ def reference_operations() -> list[dict[str, Any]]:
 
 
 REFERENCE_GAME_CONFIG: dict[str, Any] = {
-    "schema_version": 3,
+    "schema_version": 4,
     "operations": reference_operations(),
     "resources": {
         "initial_balance": "250000.00",
         "initial_energy": 14,
         "initial_time": 18,
-        "initial_trust": 100,
     },
     "objectives": {"target_outflow": "150000.00", "max_actions": 8},
     "constraints": {
@@ -329,15 +309,14 @@ REFERENCE_GAME_CONFIG: dict[str, Any] = {
         "suspicious_threshold": "65.00",
     },
     "leaderboard": {
-        "version": "leaderboard-v1",
+        "version": "leaderboard-v2",
         "weights": {"stealth": "0.60", "resources": "0.40"},
         "resource_weights": {
-            "balance": "0.20",
-            "energy": "0.15",
-            "time": "0.15",
-            "trust": "0.25",
-            "fees": "0.15",
-            "slots": "0.10",
+            "balance": "0.27",
+            "energy": "0.20",
+            "time": "0.20",
+            "fees": "0.20",
+            "available_steps": "0.13",
         },
     },
 }
@@ -733,7 +712,6 @@ def action_detail_effects(spec: CardSpec, details: dict[str, Any]) -> dict[str, 
     """Resource and risk effects of the selected action details."""
     result: dict[str, Any] = {
         "risk_points": ZERO,
-        "trust_cost": 0,
         "time_cost": 0,
         "energy_cost": 0,
         "factors": [],
@@ -761,7 +739,6 @@ def action_detail_effects(spec: CardSpec, details: dict[str, Any]) -> dict[str, 
             }
         )
         result["risk_points"] += points
-        result["trust_cost"] += int(option.get("trust_cost", 0))
         result["time_cost"] += int(option.get("time_cost", 0))
         result["energy_cost"] += int(option.get("energy_cost", 0))
     return result
@@ -804,7 +781,6 @@ def evaluate_scenario(
     balance = rules.initial_balance
     energy = rules.initial_energy
     time_left = rules.initial_time
-    trust = rules.initial_trust
     inflow = ZERO
     outflow = ZERO
     fees = ZERO
@@ -842,7 +818,6 @@ def evaluate_scenario(
             "balance": str(balance),
             "energy": energy,
             "time": time_left,
-            "trust": trust,
         }
         amount = money(step["amount"])
         frequency = int(step["frequency"])
@@ -991,16 +966,6 @@ def evaluate_scenario(
             + channel_time
             + effects["time_cost"],
         )
-        contextual_trust = (
-            CONTEXT_TRUST_COST["recipient_type"].get(recipient_type, 0)
-            + CONTEXT_TRUST_COST["time_of_day"].get(time_of_day, 0)
-            + CONTEXT_TRUST_COST["velocity"].get(velocity, 0)
-            + CHANNEL_TRUST_MODIFIER.get(channel, 0)
-        )
-        if not has_documents and gross >= Decimal("75000"):
-            contextual_trust += 8
-        trust_cost = max(0, spec.trust_cost * frequency + contextual_trust + effects["trust_cost"])
-
         # ---- money ----------------------------------------------------------
         if spec.flow == "credit":
             money_delta = money(gross - fee)
@@ -1044,7 +1009,6 @@ def evaluate_scenario(
         fees = money(fees + fee)
         energy -= energy_cost
         time_left -= time_cost
-        trust -= trust_cost
 
         if balance < ZERO:
             violations.append(
@@ -1093,23 +1057,6 @@ def evaluate_scenario(
                     ),
                 )
             )
-        if trust < 0:
-            violations.append(
-                Violation(
-                    reason="insufficient_trust",
-                    step_id=step_id,
-                    step_index=index,
-                    field="context",
-                    current=str(trust),
-                    allowed="0",
-                    message=(
-                        f"{_step_label(index, spec)}: исчерпан запас доверия "
-                        f"(остаток {trust}). Выберите менее рискованный контекст: документы, "
-                        "дневное время, знакомого получателя."
-                    ),
-                )
-            )
-
         per_step.append(
             {
                 "step_id": step_id,
@@ -1122,18 +1069,15 @@ def evaluate_scenario(
                     "balance": str(balance),
                     "energy": energy,
                     "time": time_left,
-                    "trust": trust,
                 },
                 "gross": str(gross),
                 "fee": str(fee),
                 "money_delta": str(money_delta),
                 "energy_cost": energy_cost,
                 "time_cost": time_cost,
-                "trust_cost": trust_cost,
                 "balance_after": str(balance),
                 "energy_after": energy,
                 "time_after": time_left,
-                "trust_after": trust,
                 "detail_factors": [
                     {**factor, "risk_points": str(factor["risk_points"])}
                     for factor in effects["factors"]
@@ -1141,7 +1085,7 @@ def evaluate_scenario(
             }
         )
 
-    slots = max(0, rules.max_actions - len(steps))
+    available_steps = max(0, rules.max_actions - len(steps))
     goal_reached = outflow >= rules.target_outflow
 
     snapshot: dict[str, Any] = {
@@ -1152,8 +1096,7 @@ def evaluate_scenario(
             "balance": str(balance),
             "energy": energy,
             "time": time_left,
-            "trust": trust,
-            "slots": slots,
+            "available_steps": available_steps,
         },
         "totals": {
             "gross_inflow": str(inflow),

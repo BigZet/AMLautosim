@@ -76,7 +76,7 @@ def test_clean_database_reaches_alembic_head_and_seeds_idempotently() -> None:
                 cursor.execute("SELECT count(*) FROM audit_events")
                 assert cursor.fetchone()[0] == 1
                 cursor.execute("SELECT version_num FROM alembic_version")
-                assert cursor.fetchone()[0] == "c73f5a1e9d04"
+                assert cursor.fetchone()[0] == "e84a6d2c190f"
         finally:
             connection.close()
     finally:
@@ -208,11 +208,11 @@ def test_seed_removes_an_obsolete_operation(clean_database, db_dsn) -> None:
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO action_cards (code, version, title, category, flow, "
-                "risk_weight, energy_cost, time_cost, trust_cost, fee_rate, min_amount, "
+                "risk_weight, energy_cost, time_cost, fee_rate, min_amount, "
                 "max_amount, max_frequency, requires_card_code, parameter_schema, "
                 "is_active, created_at) "
                 "SELECT 'obsolete_operation', version, 'Старая операция', category, flow, "
-                "risk_weight, energy_cost, time_cost, trust_cost, fee_rate, min_amount, "
+                "risk_weight, energy_cost, time_cost, fee_rate, min_amount, "
                 "max_amount, max_frequency, requires_card_code, parameter_schema, "
                 "is_active, created_at FROM action_cards WHERE code = 'salary'"
             )

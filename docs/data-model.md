@@ -77,7 +77,6 @@ erDiagram
         numeric risk_weight
         integer energy_cost
         integer time_cost
-        integer trust_cost
         numeric fee_rate
         numeric min_amount
         numeric max_amount
@@ -240,7 +239,7 @@ Block и password reset в одной транзакции меняют user sta
 | `title`, `description`, `category` | text | UI metadata |
 | `flow` | enum | `credit`, `debit`, `neutral` |
 | `risk_weight` | `NUMERIC(8,2)` | Базовый вклад ruleset |
-| `energy_cost`, `time_cost`, `trust_cost` | `INTEGER` | Базовая стоимость одного повтора |
+| `energy_cost`, `time_cost` | `INTEGER` | Базовая стоимость одного повтора |
 | `fee_rate` | `NUMERIC(8,6)` | Доля комиссии от 0 до 1 |
 | `min_amount`, `max_amount` | `NUMERIC(14,2)` | Сумма одного повтора |
 | `max_frequency` | `INTEGER` | Лимит повторов шага |
@@ -340,13 +339,12 @@ stateDiagram-v2
 
 ```json
 {
-  "schema_version": 2,
-  "config_version": "round-config-v2:sha256:8f4c...",
+  "schema_version": 4,
+  "config_version": "round-config-v4:sha256:8f4c...",
   "resources": {
     "initial_balance": "250000.00",
     "initial_energy": 14,
-    "initial_time": 18,
-    "initial_trust": 100
+    "initial_time": 18
   },
   "objectives": {
     "target_outflow": "150000.00",
@@ -365,22 +363,21 @@ stateDiagram-v2
     {"id": 11, "code": "salary", "version": 1},
     {"id": 12, "code": "cash_deposit", "version": 1}
   ],
-  "ruleset_version": "game-rules-v2",
+  "ruleset_version": "game-rules-v3",
   "scoring": {
     "version": "risk-rules-v2",
     "review_threshold": "35.00",
     "suspicious_threshold": "65.00"
   },
   "leaderboard": {
-    "version": "leaderboard-v1",
+    "version": "leaderboard-v2",
     "weights": {"stealth": "0.60", "resources": "0.40"},
     "resource_weights": {
-      "balance": "0.20",
-      "energy": "0.15",
-      "time": "0.15",
-      "trust": "0.25",
-      "fees": "0.15",
-      "slots": "0.10"
+      "balance": "0.27",
+      "energy": "0.20",
+      "time": "0.20",
+      "fees": "0.20",
+      "available_steps": "0.13"
     }
   }
 }
@@ -475,14 +472,13 @@ class ScenarioStep(BaseModel):
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 4,
   "valid": true,
   "resources_after": {
     "balance": "99250.00",
     "energy": 8,
     "time": 10,
-    "trust": 74,
-    "slots": 5
+    "available_steps": 5
   },
   "totals": {
     "gross_inflow": "0.00",

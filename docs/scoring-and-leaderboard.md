@@ -57,8 +57,7 @@ Release image обязан содержать реализацию каждой 
 - баланс: 250 000 ₽;
 - энергию: 14;
 - время: 18;
-- доверие: 100;
-- максимум действий: 8;
+- доступные шаги: 8;
 - цель расходного оборота: 150 000 ₽.
 
 Все значения настраиваются в `rounds.game_config` и не являются constants.
@@ -72,7 +71,6 @@ gross_amount = amount * frequency
 fee          = gross_amount * effective_fee_rate
 energy_cost  = base_energy * frequency + detail/context effects
 time_cost    = base_time * frequency + detail/context effects
-trust_cost   = base_trust * frequency + detail/context effects
 ```
 
 Для `debit` баланс уменьшается на `gross_amount + fee`, для `credit` увеличивается на
@@ -92,7 +90,6 @@ flowchart TB
     common --> balance["Balance and fee"]
     common --> energy["Energy"]
     common --> time["Time"]
-    common --> trust["Trust"]
     common --> frequency["Amount and frequency"]
     context --> night["Night-operation quota"]
     context --> anonymous["Anonymous counterparty quota"]
@@ -103,7 +100,7 @@ flowchart TB
 Проверяются минимум:
 
 - отрицательный баланс с учетом комиссии;
-- исчерпание energy/time/trust;
+- исчерпание energy/time;
 - `max_actions`, `min/max_amount`, `max_frequency`;
 - квоты на наличные и анонимные операции;
 - количество ночных операций;
@@ -126,7 +123,7 @@ hard-valid chain без violations и достигнутую цель.
 | Перевод | Назначение, связь с получателем, тип получателя |
 | Снятие наличных | Тип устройства, география, серия снятий |
 
-Action details могут влиять на риск, энергию, время, доверие, комиссию и constraints.
+Action details могут влиять на риск, энергию, время, комиссию и constraints.
 Влияние определяется серверным `ruleset_version`; UI metadata лишь помогает построить
 форму.
 
@@ -222,26 +219,28 @@ Resource score рассчитывается только для hard-valid scena
 balance_ratio = clamp(balance_after / initial_balance, 0, 1)
 energy_ratio  = clamp(energy_after / initial_energy, 0, 1)
 time_ratio    = clamp(time_after / initial_time, 0, 1)
-trust_ratio   = clamp(trust_after / initial_trust, 0, 1)
-slots_ratio   = clamp(slots_after / max_actions, 0, 1)
+available_steps_ratio = clamp(available_steps / max_actions, 0, 1)
 fee_ratio     = 1 - clamp(total_fees / max(gross_outflow, 1), 0, 1)
 ```
 
-Референсная формула `leaderboard-v1`:
+Референсная формула `leaderboard-v2`:
 
 ```text
 resource_score = 100 * (
-    0.20 * balance_ratio +
-    0.15 * energy_ratio  +
-    0.15 * time_ratio    +
-    0.25 * trust_ratio   +
-    0.15 * fee_ratio     +
-    0.10 * slots_ratio
+    0.27 * balance_ratio         +
+    0.20 * energy_ratio          +
+    0.20 * time_ratio            +
+    0.20 * fee_ratio             +
+    0.13 * available_steps_ratio
 )
 ```
 
 Weights находятся в round snapshot, сумма равна 1. Если initial resource равен 0,
 версия ruleset обязана явно определить компонент, а не делить на ноль.
+
+В схеме 4 оставшиеся веса нормализованы пропорционально и округлены до 0.01
+с сохранением суммы 1. Исторические опубликованные результаты не пересчитываются
+при обновлении; новые расчёты используют `leaderboard-v2`.
 
 Сохраненный `resource_score` округляется до одного или двух знаков согласно
 `leaderboard_version`; все промежуточные вычисления остаются Decimal.

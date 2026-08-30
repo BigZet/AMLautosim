@@ -270,6 +270,9 @@ def test_an_operation_exposes_at_most_two_parameters(
     code = CODES[card_label]
 
     choose_option(page, "builder_card", card_label)
+    assert page.locator(
+        f'[data-testid="builder-operation-icon"][data-operation="{code}"] svg'
+    ).count() == 1
     exposed = marker(page, "builder-params")
     assert exposed == EXPECTED_VISIBLE_PARAMS[code], card_label
     assert len(exposed.split(",")) <= 2
@@ -284,6 +287,85 @@ def test_an_operation_exposes_at_most_two_parameters(
     assert shown_frequency == (
         1 if code in {"cash_deposit", "card_transfer", "cash_withdrawal"} else 0
     )
+
+
+def test_builder_uses_bounded_fields_in_separate_icon_labeled_rows(
+    reset_state: Stack, page: Any
+) -> None:
+    stack = reset_state
+    player = register(stack, "Компактная форма")
+    participant_login(page, stack, player["email"])
+    choose_option(page, "builder_card", "Внести наличные")
+
+    icon = page.locator(
+        '[data-testid="builder-operation-icon"][data-operation="cash_deposit"]'
+    )
+    assert icon.count() == 1
+    assert icon.locator("svg").count() == 1
+    assert icon.evaluate("element => getComputedStyle(element).backgroundColor") == (
+        "rgb(19, 131, 111)"
+    )
+    icon_box = icon.bounding_box() or {}
+    assert icon_box["width"] == 32
+    assert icon_box["height"] == 32
+
+    labels = page.locator(".aml-form-label").all_text_contents()
+    assert labels == ["Сумма, ₽", "Повторов", "Канал", "Источник наличных"]
+    assert not any("от " in label or "до " in label for label in labels)
+
+    amount = widget(page, "builder_cash_deposit_amount").locator("input").first
+    frequency = widget(page, "builder_cash_deposit_frequency").locator("input").first
+    assert float(amount.get_attribute("min") or 0) == 5000
+    assert float(amount.get_attribute("max") or 0) == 150000
+    assert float(frequency.get_attribute("min") or 0) == 1
+    assert float(frequency.get_attribute("max") or 0) == 3
+
+    row_keys = [
+        "builder_cash_deposit_amount",
+        "builder_cash_deposit_frequency",
+        "builder_cash_deposit_channel",
+        "builder_cash_deposit_detail_funds_source",
+    ]
+    tops = [(widget(page, key).bounding_box() or {})["y"] for key in row_keys]
+    assert tops == sorted(tops)
+    assert len(set(tops)) == len(tops)
+
+    gaps = page.evaluate(
+        """() => {
+            const icon = document.querySelector('[data-testid="builder-operation-icon"]');
+            let operationCard = icon;
+            while (operationCard) {
+                const style = getComputedStyle(operationCard);
+                const rect = operationCard.getBoundingClientRect();
+                if (Number(style.borderTopWidth.replace('px', '')) > 0
+                        && rect.width > 250) break;
+                operationCard = operationCard.parentElement;
+            }
+            const firstLabel = document.querySelector('.aml-form-label');
+            const impact = document.querySelector('[data-testid="candidate-impact"]');
+            const button = document.querySelector('.st-key-add_step');
+            const operationSelect = document.querySelector(
+                '.st-key-builder_card [data-testid="stSelectbox"]'
+            );
+            const iconRect = icon.getBoundingClientRect();
+            const selectRect = operationSelect.getBoundingClientRect();
+            return {
+                cardToFields: firstLabel.getBoundingClientRect().top
+                    - operationCard.getBoundingClientRect().bottom,
+                impactToButton: button.getBoundingClientRect().top
+                    - impact.getBoundingClientRect().bottom,
+                iconCenterDelta: Math.abs(
+                    iconRect.top + iconRect.height / 2
+                    - selectRect.top - selectRect.height / 2
+                ),
+                iconToSelect: selectRect.left - iconRect.right,
+            };
+        }"""
+    )
+    assert 0 < gaps["cardToFields"] < 45
+    assert 6 <= gaps["impactToButton"] <= 16
+    assert gaps["iconCenterDelta"] <= 1
+    assert 8 <= gaps["iconToSelect"] <= 40
 
 
 def test_hidden_parameters_are_stored_and_survive_a_reload(
@@ -336,7 +418,14 @@ def test_build_save_and_restore_a_draft_across_logout(reset_state: Stack, page: 
     player = register(stack, "Черновик")
     participant_login(page, stack, player["email"])
 
+    expect_marker(page, "resource-available-steps", "8")
+    labels = page.locator('[data-testid="stMetricLabel"]').all_text_contents()
+    assert {"Баланс", "Энергия", "Время", "Доступных шагов"} <= set(labels)
+    assert "Доверие" not in labels
+    assert "Свободных слотов" not in labels
+
     build_valid_chain(page)
+    expect_marker(page, "resource-available-steps", "5")
     assert marker(page, "scenario-status") == "none"
     click_button(page, "save_draft")
     expect_marker(page, "scenario-status", "draft")
@@ -355,6 +444,8 @@ def test_build_save_and_restore_a_draft_across_logout(reset_state: Stack, page: 
     participant_login(page, stack, player["email"])
     expect_marker(page, "chain-length", "3")
     expect_marker(page, "scenario-revision", "1")
+    expect_marker(page, "resource-available-steps", "5")
+    assert "доверие" not in (page.locator('[data-testid="stMain"]').text_content() or "").lower()
 
 
 def test_draft_survives_a_page_refresh(reset_state: Stack, page: Any) -> None:

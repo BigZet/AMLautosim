@@ -272,7 +272,7 @@ def test_the_resources_react_to_every_edit_before_the_draft_is_saved(
     balance = marker(driver, "resource-balance")
     energy = int(marker(driver, "resource-energy"))
     time_left = int(marker(driver, "resource-time"))
-    slots = int(marker(driver, "resource-slots"))
+    available_steps = int(marker(driver, "resource-available-steps"))
     assert marker(driver, "objective-progress") == "0.00/150000.00"
 
     add_step(driver, CASH_WITHDRAWAL, 50000, "Банкомат", frequency=1)
@@ -280,7 +280,7 @@ def test_the_resources_react_to_every_edit_before_the_draft_is_saved(
     assert marker(driver, "resource-balance") != balance
     assert int(marker(driver, "resource-energy")) < energy
     assert int(marker(driver, "resource-time")) < time_left
-    assert int(marker(driver, "resource-slots")) == slots - 1
+    assert int(marker(driver, "resource-available-steps")) == available_steps - 1
     assert marker(driver, "objective-progress") == "50000.00/150000.00"
 
     # Nothing has been saved: the numbers came from the round's own config.
@@ -290,13 +290,13 @@ def test_the_resources_react_to_every_edit_before_the_draft_is_saved(
     # The next candidate is priced before it is added.
     choose(driver, "builder_card", CARD_TRANSFER[1])
     set_number(driver, f"builder_{CARD_TRANSFER[0]}_amount", 30000)
-    assert "баланс" in text_of(driver, '[data-testid="candidate-impact"]')
+    assert "баланс" in text_of(driver, '[data-testid="candidate-impact"]').lower()
 
     click_text(driver, "Удалить")
     expect_marker(driver, "chain-length", "0")
     assert marker(driver, "resource-balance") == balance
     assert int(marker(driver, "resource-energy")) == energy
-    assert int(marker(driver, "resource-slots")) == slots
+    assert int(marker(driver, "resource-available-steps")) == available_steps
     assert marker(driver, "objective-progress") == "0.00/150000.00"
 
 

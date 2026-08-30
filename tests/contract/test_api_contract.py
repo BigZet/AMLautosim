@@ -119,7 +119,7 @@ def test_health_ready_reports_migrations_and_rulesets(client) -> None:
     body = response.json()
     assert body["status"] == "ready"
     assert body["checks"]["migrations"] == "head"
-    assert "game-rules-v2" in body["checks"]["ruleset_versions"]
+    assert "game-rules-v3" in body["checks"]["ruleset_versions"]
 
 
 def test_documented_error_envelope_shape(client, active_round) -> None:

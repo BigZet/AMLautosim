@@ -46,6 +46,7 @@ requirements-dev.txt
 *.sqlite3
 postgres_data/
 pgdata/
+.backups/
 
 # Browser automation artifacts
 test-results/

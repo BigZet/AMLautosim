@@ -20,7 +20,7 @@ from src.aml_workshop_simulator.domain.rules import (
 )
 
 SCORING_VERSION = "risk-rules-v2"
-LEADERBOARD_VERSION = "leaderboard-v1"
+LEADERBOARD_VERSION = "leaderboard-v2"
 EXPLANATION_SCHEMA_VERSION = 2
 
 SCORE = Decimal("0.01")
@@ -306,12 +306,11 @@ def resource_score(snapshot: dict[str, Any], game_config: dict[str, Any] | None)
     rules = RoundRules.from_config(config)
     weights_cfg = (config.get("leaderboard") or {}).get("resource_weights") or {}
     weights = {
-        "balance": Decimal(str(weights_cfg.get("balance", "0.20"))),
-        "energy": Decimal(str(weights_cfg.get("energy", "0.15"))),
-        "time": Decimal(str(weights_cfg.get("time", "0.15"))),
-        "trust": Decimal(str(weights_cfg.get("trust", "0.25"))),
-        "fees": Decimal(str(weights_cfg.get("fees", "0.15"))),
-        "slots": Decimal(str(weights_cfg.get("slots", "0.10"))),
+        "balance": Decimal(str(weights_cfg.get("balance", "0.27"))),
+        "energy": Decimal(str(weights_cfg.get("energy", "0.20"))),
+        "time": Decimal(str(weights_cfg.get("time", "0.20"))),
+        "fees": Decimal(str(weights_cfg.get("fees", "0.20"))),
+        "available_steps": Decimal(str(weights_cfg.get("available_steps", "0.13"))),
     }
 
     after = snapshot.get("resources_after", {})
@@ -330,9 +329,10 @@ def resource_score(snapshot: dict[str, Any], game_config: dict[str, Any] | None)
         "balance": ratio(money(after.get("balance", "0")), rules.initial_balance),
         "energy": ratio(Decimal(int(after.get("energy", 0))), Decimal(rules.initial_energy)),
         "time": ratio(Decimal(int(after.get("time", 0))), Decimal(rules.initial_time)),
-        "trust": ratio(Decimal(int(after.get("trust", 0))), Decimal(rules.initial_trust)),
         "fees": fee_ratio,
-        "slots": ratio(Decimal(int(after.get("slots", 0))), Decimal(rules.max_actions)),
+        "available_steps": ratio(
+            Decimal(int(after.get("available_steps", 0))), Decimal(rules.max_actions)
+        ),
     }
     total = sum((weights[key] * value for key, value in components.items()), ZERO)
     return _score(_clamp(HUNDRED * total, ZERO, HUNDRED))

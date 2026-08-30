@@ -58,7 +58,7 @@ def test_draft_config_update_uses_the_config_revision(client, admin_headers) -> 
 def test_activation_pins_a_config_version_and_locks_the_config(
     client, admin_headers, active_round
 ) -> None:
-    assert active_round["game_config"]["config_version"].startswith("round-config-v2:sha256:")
+    assert active_round["game_config"]["config_version"].startswith("round-config-v4:sha256:")
     locked = client.put(
         f"/api/v1/admin/rounds/{active_round['id']}",
         json={"expected_config_revision": active_round["config_revision"], "title": "Ещё"},

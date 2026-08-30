@@ -67,7 +67,7 @@ def round_out(round_obj: Round) -> RoundAdminOut:
 def config_version(game_config: dict[str, Any]) -> str:
     payload = {key: value for key, value in game_config.items() if key != "config_version"}
     blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
-    return f"round-config-v2:sha256:{hashlib.sha256(blob.encode('utf-8')).hexdigest()}"
+    return f"round-config-v4:sha256:{hashlib.sha256(blob.encode('utf-8')).hexdigest()}"
 
 
 async def get_round(db: AsyncSession, round_id: int) -> Round:

@@ -47,37 +47,67 @@ st.set_page_config(
 STYLES = """
 <style>
 :root, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
-    --aml-line: var(--border-color);
-    --aml-muted: color-mix(in srgb, var(--text-color) 62%, transparent);
-    --aml-danger: color-mix(in srgb, #ff2b2b 78%, var(--text-color));
-    --aml-ok: color-mix(in srgb, #21c354 82%, var(--text-color));
+    --aml-primary: #13836f;
+    --aml-line: rgba(127, 127, 127, .28);
+    --aml-surface: rgba(127, 127, 127, .08);
+    --aml-muted: color-mix(in srgb, currentColor 62%, transparent);
+    --aml-danger: #d63b3b;
+    --aml-ok: var(--aml-primary);
 }
 .block-container { max-width: 1240px; padding-top: 1.2rem; padding-bottom: 3rem; }
 [data-testid="stMetric"] {
     padding: .7rem .8rem;
     border: 1px solid var(--aml-line);
     border-radius: 6px;
-    background: var(--secondary-background-color);
+    background: var(--aml-surface);
 }
 .aml-kicker { font-size: 12px; font-weight: 700; text-transform: uppercase;
-    color: var(--primary-color); margin-bottom: .3rem; }
+    color: var(--aml-primary); margin-bottom: .3rem; }
 .aml-title { font-size: 30px; font-weight: 800; line-height: 1.2; margin: 0 0 .3rem; }
 .aml-subtitle { color: var(--aml-muted); font-size: 15px; margin: 0 0 1rem; max-width: 820px; }
 .aml-violation {
     border-left: 4px solid var(--aml-danger);
-    background: color-mix(in srgb, var(--aml-danger) 12%, var(--background-color));
+    background: color-mix(in srgb, var(--aml-danger) 12%, transparent);
     padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
 }
 .aml-violation strong { color: var(--aml-danger); }
 .aml-ok-box {
     border-left: 4px solid var(--aml-ok);
-    background: color-mix(in srgb, var(--aml-ok) 12%, var(--background-color));
+    background: color-mix(in srgb, var(--aml-ok) 12%, transparent);
     padding: .6rem .8rem; border-radius: 4px; margin: .35rem 0; font-size: 14px;
 }
 .aml-step-meta { color: var(--aml-muted); font-size: 13px; }
-.aml-delta { font-size: 13px; }
-.aml-delta .down { color: var(--aml-danger); }
-.aml-delta .up { color: var(--aml-ok); }
+[data-testid="stElementContainer"]:has(span[style*="display: none"][data-testid]),
+[data-testid="stElementContainer"]:has(span[style*="display:none"][data-testid]) {
+    display: none;
+}
+.aml-operation-icon {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border-radius: 50%; color: #fff; background: #13836f;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #13836f 72%, #fff);
+    position: relative; left: 8px; top: -8px;
+}
+.aml-operation-icon svg { width: 18px; height: 18px; }
+.aml-form-label {
+    color: inherit; font-size: 15px; font-weight: 650; line-height: 1.25;
+}
+.aml-impact {
+    margin-top: .65rem; margin-bottom: .5rem; padding: .75rem;
+    border: 1px solid var(--aml-line);
+    border-radius: 8px; background: var(--aml-surface);
+}
+.aml-impact-title { margin-bottom: .55rem; font-size: 14px; font-weight: 700; }
+.aml-impact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+.aml-impact-item {
+    min-width: 0; display: flex; align-items: center; gap: .45rem;
+    padding: .5rem .55rem; border: 1px solid var(--aml-line); border-radius: 7px;
+    background: var(--aml-surface); color: inherit; font-size: 13px;
+}
+.aml-impact-item svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.aml-impact-item span { min-width: 0; }
+.aml-impact-item strong { font-weight: 700; white-space: nowrap; }
+.aml-impact-item.down { color: inherit; }
+.aml-impact-item.up { color: var(--aml-ok); }
 .aml-status-badge {
     display: inline-block; padding: .15rem .55rem; border-radius: 999px;
     border: 1px solid var(--aml-line); font-size: 12px; font-weight: 600;
@@ -95,18 +125,49 @@ table.aml-board th, table.aml-board td, table.aml-table th, table.aml-table td {
 }
 [data-testid="stMetricValue"] div { white-space: normal !important; }
 [data-testid="stMetricLabel"] p { white-space: normal; }
+[data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-form-label) {
+    padding: .25rem 0 .55rem;
+    border-bottom: 1px solid var(--aml-line);
+}
 @media (max-width: 1100px) {
     [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
     [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
         flex: 1 1 320px;
         min-width: 260px;
     }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-form-label),
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) { flex-wrap: nowrap; }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-form-label) > [data-testid="stColumn"] {
+        min-width: 0;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-form-label) > [data-testid="stColumn"]:first-child {
+        flex: 0 0 38%;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) > [data-testid="stColumn"]:first-child {
+        flex: 0 0 52px;
+        min-width: 52px;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) > [data-testid="stColumn"]:last-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .aml-impact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
     [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
         flex: 1 1 100%;
         min-width: 100%;
     }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) { flex-wrap: nowrap; }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) > [data-testid="stColumn"]:first-child {
+        flex: 0 0 52px;
+        min-width: 52px;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"]:first-child > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] .aml-operation-icon) > [data-testid="stColumn"]:last-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .aml-impact-grid { grid-template-columns: 1fr; }
     .block-container { padding-left: .8rem; padding-right: .8rem; }
 }
 </style>
@@ -486,6 +547,46 @@ def login_screen(client: Any) -> None:
 # --------------------------------------------------------------------------
 
 
+_ICON_PATHS = {
+    "salary": """
+        <rect x="3" y="7" width="18" height="13" rx="2"/>
+        <path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M12 10v7m0 0-3-3m3 3 3-3"/>
+    """,
+    "cash_deposit": """
+        <rect x="4" y="3" width="16" height="18" rx="2"/>
+        <path d="M4 8h16M8 17h8M12 10v5m0 0-2-2m2 2 2-2"/>
+    """,
+    "card_transfer": """
+        <path d="M4 8h14m0 0-3-3m3 3-3 3M20 16H6m0 0 3-3m-3 3 3 3"/>
+    """,
+    "cash_withdrawal": """
+        <rect x="4" y="3" width="16" height="18" rx="2"/>
+        <path d="M4 8h16M8 17h8M12 16v-5m0 0-2 2m2-2 2 2"/>
+    """,
+    "balance": """
+        <path d="M4 6.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2h11"/>
+        <path d="M15 11h6v5h-6a2.5 2.5 0 0 1 0-5Z"/>
+    """,
+    "energy": """
+        <path d="m13 2-7 12h6l-1 8 7-12h-6l1-8Z"/>
+    """,
+    "time": """
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v5l3 2"/>
+    """,
+}
+
+
+def icon_svg(name: str) -> str:
+    """Small dependency-free line icon embedded directly into the page."""
+    paths = _ICON_PATHS.get(name, _ICON_PATHS["card_transfer"])
+    return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" '
+        f'aria-hidden="true">{paths}</svg>'
+    )
+
+
 def default_step(card: dict[str, Any]) -> dict[str, Any]:
     """A new step carrying only the parameters this round exposes."""
     context: dict[str, Any] = {}
@@ -508,7 +609,13 @@ def default_step(card: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def render_param(param: dict[str, Any], value: Any, widget_key: str) -> Any:
+def render_param(
+    param: dict[str, Any],
+    value: Any,
+    widget_key: str,
+    *,
+    label_visibility: str = "visible",
+) -> Any:
     """One control for one exposed parameter."""
     if param.get("kind") == "toggle":
         return st.toggle(
@@ -516,6 +623,7 @@ def render_param(param: dict[str, Any], value: Any, widget_key: str) -> Any:
             value=bool(value if value is not None else param.get("default")),
             key=widget_key,
             help=param.get("help"),
+            label_visibility=label_visibility,
         )
     options = [option["value"] for option in param.get("options", [])]
     labels = {option["value"]: option["label"] for option in param.get("options", [])}
@@ -530,67 +638,84 @@ def render_param(param: dict[str, Any], value: Any, widget_key: str) -> Any:
         format_func=lambda item: labels.get(item, item),
         key=widget_key,
         help=param.get("help"),
+        label_visibility=label_visibility,
     )
 
 
 def render_step_form(
     card: dict[str, Any], step: dict[str, Any], key_prefix: str
 ) -> dict[str, Any]:
-    """Amount, optional frequency and the (at most two) exposed parameters."""
+    """Render one bounded control per row for every exposed parameter."""
     context = dict(step.get("context") or {})
     details = dict(step.get("action_details") or {})
     show_frequency = bool(card.get("show_frequency", True))
 
-    widths = [1.3, 0.7] if show_frequency else [1.0]
-    columns = st.columns(widths + [1.2] * len(card.get("visible_params", [])))
-    cursor = 0
+    def field_columns(label: str) -> Any:
+        label_column, control_column = st.columns(
+            [0.85, 1.35], gap="medium", vertical_alignment="center"
+        )
+        with label_column:
+            st.markdown(
+                f'<div class="aml-form-label">{escape(label)}</div>',
+                unsafe_allow_html=True,
+            )
+        return control_column
 
-    with columns[cursor]:
+    min_amount = float(card["min_amount"])
+    max_amount = float(card["max_amount"])
+    current_amount = min(max(float(step["amount"]), min_amount), max_amount)
+    with field_columns("Сумма, ₽"):
         amount = st.number_input(
-            "Сумма, ₽ (от {} до {})".format(
-                f"{float(card['min_amount']):,.0f}".replace(",", " "),
-                f"{float(card['max_amount']):,.0f}".replace(",", " "),
-            ),
-            min_value=0.0,
-            value=float(step["amount"]),
+            "Сумма, ₽",
+            min_value=min_amount,
+            max_value=max_amount,
+            value=current_amount,
             step=1000.0,
             format="%.2f",
             key=f"{key_prefix}_amount",
+            label_visibility="collapsed",
         )
-    cursor += 1
 
     frequency = int(step.get("frequency", 1))
     if show_frequency:
-        with columns[cursor]:
+        max_frequency = int(card["max_frequency"])
+        current_frequency = min(max(frequency, 1), max_frequency)
+        with field_columns("Повторов"):
             frequency = st.number_input(
-                f"Повторов (до {card['max_frequency']})",
+                "Повторов",
                 min_value=1,
-                max_value=int(card["max_frequency"]),
-                value=min(int(step.get("frequency", 1)), int(card["max_frequency"])),
+                max_value=max_frequency,
+                value=current_frequency,
                 step=1,
                 key=f"{key_prefix}_frequency",
+                label_visibility="collapsed",
             )
-        cursor += 1
     else:
         frequency = 1
 
     for param in card.get("visible_params", []):
-        with columns[cursor]:
+        with field_columns(param["label"]):
             if param["namespace"] == "channel":
                 context["channel"] = render_param(
-                    param, context.get("channel"), f"{key_prefix}_channel"
+                    param,
+                    context.get("channel"),
+                    f"{key_prefix}_channel",
+                    label_visibility="collapsed",
                 )
             elif param["namespace"] == "context":
                 context[param["key"]] = render_param(
-                    param, context.get(param["key"]), f"{key_prefix}_ctx_{param['key']}"
+                    param,
+                    context.get(param["key"]),
+                    f"{key_prefix}_ctx_{param['key']}",
+                    label_visibility="collapsed",
                 )
             else:
                 details[param["key"]] = render_param(
                     param,
                     details.get(param["key"]),
                     f"{key_prefix}_detail_{param['key']}",
+                    label_visibility="collapsed",
                 )
-        cursor += 1
 
     return {
         **step,
@@ -604,10 +729,9 @@ def render_step_form(
 def _resource_deltas(before: dict[str, Any], after: dict[str, Any]) -> str:
     parts = []
     for key, label in (
-        ("balance", "баланс"),
-        ("energy", "энергия"),
-        ("time", "время"),
-        ("trust", "доверие"),
+        ("balance", "Баланс"),
+        ("energy", "Энергия"),
+        ("time", "Время"),
     ):
         try:
             delta = float(after.get(key, 0)) - float(before.get(key, 0))
@@ -619,8 +743,11 @@ def _resource_deltas(before: dict[str, Any], after: dict[str, Any]) -> str:
         rendered = money(delta) if key == "balance" else f"{delta:+.0f}"
         if key == "balance" and delta > 0:
             rendered = f"+{rendered}"
-        parts.append(f'<span class="{css}">{escape(label)} {escape(rendered)}</span>')
-    return " · ".join(parts) or "без изменений"
+        parts.append(
+            f'<div class="aml-impact-item {css}">{icon_svg(key)}'
+            f'<span>{escape(label)} <strong>{escape(rendered)}</strong></span></div>'
+        )
+    return "".join(parts) or '<div class="aml-impact-item">Без изменений</div>'
 
 
 def render_builder(
@@ -632,14 +759,30 @@ def render_builder(
 ) -> None:
     st.subheader("Новая операция")
     codes = list(cards)
-    selected = st.selectbox(
-        "Тип операции",
-        codes,
-        format_func=lambda code: f"{cards[code]['title']} · {cards[code]['category']}",
-        key="builder_card",
-    )
-    card = cards[selected]
-    st.caption(card.get("description", ""))
+    selected_before = st.session_state.get("builder_card", codes[0])
+    if selected_before not in cards:
+        selected_before = codes[0]
+    with st.container(border=True):
+        icon_column, picker_column = st.columns(
+            [0.13, 0.87], gap="small", vertical_alignment="center"
+        )
+        with icon_column:
+            st.markdown(
+                '<div class="aml-operation-icon" data-testid="builder-operation-icon" '
+                f'data-operation="{escape(selected_before)}">'
+                f"{icon_svg(selected_before)}</div>",
+                unsafe_allow_html=True,
+            )
+        with picker_column:
+            selected = st.selectbox(
+                "Тип операции",
+                codes,
+                format_func=lambda code: cards[code]["title"],
+                key="builder_card",
+                label_visibility="collapsed",
+            )
+        card = cards[selected]
+        st.caption(card.get("description", ""))
     marker("builder-channels", ",".join(card["channels"]))
     marker(
         "builder-params",
@@ -666,9 +809,11 @@ def render_builder(
     if candidate_resources.get("per_step"):
         impact = candidate_resources["per_step"][-1]
         st.markdown(
-            '<div class="aml-delta" data-testid="candidate-impact">Влияние шага: '
+            '<div class="aml-impact" data-testid="candidate-impact">'
+            '<div class="aml-impact-title">Влияние операции</div>'
+            '<div class="aml-impact-grid">'
             f"{_resource_deltas(impact.get('resources_before', {}), impact.get('resources_after', {}))}"
-            "</div>",
+            "</div></div>",
             unsafe_allow_html=True,
         )
 
@@ -764,12 +909,10 @@ def render_chain(
                     f'<div class="aml-delta" data-testid="step-impact-{escape(step_id)}">'
                     f"До: {escape(money(before.get('balance')))} · "
                     f"энергия {escape(str(before.get('energy')))} · "
-                    f"время {escape(str(before.get('time')))} · "
-                    f"доверие {escape(str(before.get('trust')))}<br>"
+                    f"время {escape(str(before.get('time')))}<br>"
                     f"После: {escape(money(after.get('balance')))} · "
                     f"энергия {escape(str(after.get('energy')))} · "
-                    f"время {escape(str(after.get('time')))} · "
-                    f"доверие {escape(str(after.get('trust')))}"
+                    f"время {escape(str(after.get('time')))}"
                     "</div>",
                     unsafe_allow_html=True,
                 )
@@ -844,8 +987,7 @@ def render_resources(snapshot: dict[str, Any], game_config: dict[str, Any]) -> N
         "balance": config_resources.get("initial_balance", "0"),
         "energy": config_resources.get("initial_energy", 0),
         "time": config_resources.get("initial_time", 0),
-        "trust": config_resources.get("initial_trust", 0),
-        "slots": config_objectives.get("max_actions", 0),
+        "available_steps": config_objectives.get("max_actions", 0),
     }
     totals = snapshot.get("totals") or {"gross_outflow": "0", "fees": "0"}
     objective = snapshot.get("objective") or {
@@ -853,13 +995,16 @@ def render_resources(snapshot: dict[str, Any], game_config: dict[str, Any]) -> N
         "reached": False,
     }
 
-    columns = st.columns(5)
+    columns = st.columns(4)
     values = (
         ("Баланс", money(after.get("balance", 0)), "balance"),
         ("Энергия", after.get("energy", 0), "energy"),
         ("Время", after.get("time", 0), "time"),
-        ("Доверие", after.get("trust", 0), "trust"),
-        ("Свободных слотов", after.get("slots", 0), "slots"),
+        (
+            "Доступных шагов",
+            after.get("available_steps", 0),
+            "available-steps",
+        ),
     )
     for column, (label, value, testid) in zip(columns, values, strict=False):
         with column:

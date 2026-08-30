@@ -1,4 +1,4 @@
-"""Risk engine (`risk-rules-v2`) and leaderboard formula (`leaderboard-v1`)."""
+"""Risk engine (`risk-rules-v2`) and leaderboard formula (`leaderboard-v2`)."""
 
 from __future__ import annotations
 
@@ -134,6 +134,26 @@ def test_resource_score_components_and_weights(spec_by_code, specs, game_config)
     score = resource_score(snapshot, game_config)
     assert Decimal("0") <= score <= Decimal("100")
     assert weights_sum_to_one(game_config)
+
+
+def test_full_resources_score_one_hundred(specs, game_config) -> None:
+    snapshot = evaluate_scenario([], specs, game_config)
+    assert resource_score(snapshot, game_config) == Decimal("100.00")
+    assert resource_score(snapshot, None) == Decimal("100.00")
+
+
+def test_available_steps_are_the_only_step_budget_component(specs, game_config) -> None:
+    config = copy.deepcopy(game_config)
+    config["leaderboard"]["resource_weights"] = {
+        "balance": "0",
+        "energy": "0",
+        "time": "0",
+        "fees": "0",
+        "available_steps": "1",
+    }
+    snapshot = evaluate_scenario([], specs, config)
+    snapshot["resources_after"]["available_steps"] = 4
+    assert resource_score(snapshot, config) == Decimal("50.00")
 
 
 def test_a_cheaper_chain_scores_at_least_as_well(spec_by_code, specs, game_config) -> None:

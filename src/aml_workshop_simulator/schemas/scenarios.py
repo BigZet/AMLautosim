@@ -138,7 +138,7 @@ class ScenarioVersionSummaryOut(BaseModel):
     balance_after: str | None = None
     energy_after: int | None = None
     time_after: int | None = None
-    trust_after: int | None = None
+    available_steps_after: int | None = None
 
 
 class ScenarioVersionOut(ScenarioVersionSummaryOut):

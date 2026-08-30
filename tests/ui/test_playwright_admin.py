@@ -135,6 +135,9 @@ def test_admin_sees_every_parameter_of_the_submitted_version(
     expect_marker(admin_page, "participant-count", "1", timeout=60_000)
     expect_marker(admin_page, "detail-scenario-status", "submitted")
     expect_marker(admin_page, "detail-step-count", "3")
+    labels = admin_page.locator('[data-testid="stMetricLabel"]').all_text_contents()
+    assert "Доступных шагов" in labels
+    assert "Доверие" not in labels
 
     open_tab(admin_page, "Версии черновиков")
     expect_marker(admin_page, "versions-count", "1")
@@ -159,6 +162,7 @@ def test_admin_sees_every_parameter_of_the_submitted_version(
     for code in ("salary", "card_transfer", "cash_withdrawal"):
         assert code in page_body
     assert "Ресурсы до" in page_body and "Ресурсы после" in page_body
+    assert "доверие" not in page_body.lower()
 
 
 def test_scoring_from_the_admin_ui_publishes_participant_results(
@@ -318,6 +322,9 @@ def test_a_preset_can_be_saved_and_turned_into_a_draft_round(
     open_page(admin_page, "Раунд и конфигурация")
     open_tab(admin_page, "Создать раунд")
 
+    assert admin_page.locator(".st-key-new_trust").count() == 0
+    assert admin_page.locator(".st-key-new_rw_available_steps").count() == 1
+    assert admin_page.locator(".st-key-new_rw_slots").count() == 0
     fill_number(admin_page, "new_target", 200000)
     fill_number(admin_page, "new_max_actions", 6)
     fill_text(admin_page, "new_preset_name", "Короткий мастер-класс")
@@ -329,6 +336,12 @@ def test_a_preset_can_be_saved_and_turned_into_a_draft_round(
     assert [row[0] for row in presets] == ["Короткий мастер-класс"]
     assert presets[0][1]["objectives"]["target_outflow"] == "200000.00"
     assert presets[0][1]["objectives"]["max_actions"] == 6
+    assert set(presets[0][1]["resources"]) == {
+        "initial_balance", "initial_energy", "initial_time",
+    }
+    assert set(presets[0][1]["leaderboard"]["resource_weights"]) == {
+        "balance", "energy", "time", "fees", "available_steps",
+    }
 
     open_page(admin_page, "Пресеты")
     expect_marker(admin_page, "preset-count", "1", timeout=60_000)

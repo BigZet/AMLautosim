@@ -150,7 +150,7 @@ sequenceDiagram
 `step_id` и повторной валидации.
 
 **Ошибки:** неизвестное поле, недопустимая option, amount/frequency limit, недостаток
-balance/energy/time/trust и category quota. UI привязывает violation
+balance/energy/time и category quota. UI привязывает violation
 к step/widget по `step_id + field`.
 
 ## 8. UC-P4: синхронизация и конфликт
@@ -197,7 +197,7 @@ objective достигнута.
 
 1. Admin входит под bootstrap-account.
 2. Выбирает версии карточек из catalog.
-3. Задает initial balance/energy/time/trust, max actions, objective и quotas.
+3. Задает initial balance/energy/time, max actions, objective и quotas.
 4. Выбирает поддерживаемые ruleset/scoring/leaderboard versions и weights.
 5. UI выполняет локальные range checks и отправляет full config с expected revision.
 6. API возвращает canonical draft и computed warnings.

@@ -151,7 +151,6 @@ def describe_step(
             "money_delta": impact.get("money_delta"),
             "energy": impact.get("energy_cost"),
             "time": impact.get("time_cost"),
-            "trust": impact.get("trust_cost"),
         },
         "resources_before": before,
         "resources_after": after,

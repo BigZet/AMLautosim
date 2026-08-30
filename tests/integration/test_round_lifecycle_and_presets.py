@@ -64,7 +64,7 @@ def test_start_opens_the_round_and_is_idempotent(client, admin_headers) -> None:
     )
     assert first.status_code == 200, first.text
     assert first.json()["status"] == "active"
-    assert first.json()["game_config"]["config_version"].startswith("round-config-v2:")
+    assert first.json()["game_config"]["config_version"].startswith("round-config-v4:")
 
     second = client.post(
         f"/api/v1/admin/rounds/{round_obj['id']}/start", headers=idempotency(admin_headers)

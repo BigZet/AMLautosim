@@ -41,7 +41,6 @@ CARD_OVERRIDE_KEYS: tuple[str, ...] = (
     "round_frequency_limit",
     "energy_cost",
     "time_cost",
-    "trust_cost",
     "fee_rate",
 )
 

@@ -221,7 +221,7 @@ def full_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
         for key, value in REFERENCE_GAME_CONFIG.items()
         if key != "operations"
     }
-    config["schema_version"] = 2
+    config["schema_version"] = 4
     config["card_versions"] = [
         {"id": card["id"], "code": card["code"], "version": card["version"]}
         for card in catalog

@@ -22,9 +22,8 @@ RESOURCE_WEIGHT_LABELS = {
     "balance": "Баланс",
     "energy": "Энергия",
     "time": "Время",
-    "trust": "Доверие",
     "fees": "Комиссии",
-    "slots": "Свободные слоты",
+    "available_steps": "Доступные шаги",
 }
 
 #: Card attributes a round may re-tune, with the widget bounds for each.
@@ -35,7 +34,6 @@ OVERRIDES = (
     ("round_frequency_limit", "Повторов за раунд", 1.0, 64.0, 1.0),
     ("energy_cost", "Энергия", 0.0, 50.0, 1.0),
     ("time_cost", "Время", 0.0, 50.0, 1.0),
-    ("trust_cost", "Доверие", 0.0, 200.0, 1.0),
 )
 
 MAX_VISIBLE_PARAMS = 2
@@ -85,7 +83,7 @@ def render_editor(
     }
 
     st.markdown("#### Стартовые ресурсы")
-    columns = st.columns(4)
+    columns = st.columns(3)
     with columns[0]:
         initial_balance = _number(
             "Стартовый баланс, ₽",
@@ -116,18 +114,6 @@ def render_editor(
                 key=f"{key_prefix}_time",
             )
         )
-    with columns[3]:
-        initial_trust = int(
-            _number(
-                "Доверие",
-                resources.get("initial_trust", 100),
-                min_value=1.0,
-                max_value=1000.0,
-                step=5.0,
-                key=f"{key_prefix}_trust",
-            )
-        )
-
     st.markdown("#### Цель и ограничения раунда")
     columns = st.columns(4)
     with columns[0]:
@@ -328,13 +314,12 @@ def render_editor(
         )
 
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "operations": enabled_operations,
         "resources": {
             "initial_balance": f"{initial_balance:.2f}",
             "initial_energy": initial_energy,
             "initial_time": initial_time,
-            "initial_trust": initial_trust,
         },
         "objectives": {
             "target_outflow": f"{target_outflow:.2f}",
@@ -346,14 +331,14 @@ def render_editor(
             "max_anonymous_operations": max_anonymous,
             "category_limits": category_limits,
         },
-        "ruleset_version": config.get("ruleset_version", "game-rules-v2"),
+        "ruleset_version": config.get("ruleset_version", "game-rules-v3"),
         "scoring": {
             "version": scoring.get("version", "risk-rules-v2"),
             "review_threshold": f"{review_threshold:.2f}",
             "suspicious_threshold": f"{suspicious_threshold:.2f}",
         },
         "leaderboard": {
-            "version": leaderboard.get("version", "leaderboard-v1"),
+            "version": leaderboard.get("version", "leaderboard-v2"),
             "weights": {
                 "stealth": f"{stealth_weight:.2f}",
                 "resources": f"{1 - stealth_weight:.2f}",

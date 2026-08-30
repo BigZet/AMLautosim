@@ -1,4 +1,4 @@
-"""Golden ruleset tests for `game-rules-v2`.
+"""Golden ruleset tests for `game-rules-v3`.
 
 Covers the equivalence classes and boundaries from
 docs/chain-validation-matrix.md: amounts, frequencies, quotas, sequence rules,
@@ -370,7 +370,7 @@ def test_resource_exhaustion_reports_the_right_field(spec_by_code, specs, game_c
         make_step(withdrawal, Decimal("10000.00"), frequency=4),
     ]
     snapshot = evaluate_scenario(heavy, specs, game_config)
-    assert "insufficient_trust" in reasons(snapshot) or "insufficient_energy" in reasons(snapshot)
+    assert "insufficient_energy" in reasons(snapshot)
 
 
 def test_target_outflow_below_exact_and_above(spec_by_code, specs, game_config) -> None:
@@ -465,6 +465,68 @@ def test_reference_config_is_the_documented_demo_round() -> None:
     assert REFERENCE_GAME_CONFIG["resources"]["initial_balance"] == "250000.00"
     assert REFERENCE_GAME_CONFIG["resources"]["initial_energy"] == 14
     assert REFERENCE_GAME_CONFIG["resources"]["initial_time"] == 18
-    assert REFERENCE_GAME_CONFIG["resources"]["initial_trust"] == 100
     assert REFERENCE_GAME_CONFIG["objectives"]["max_actions"] == 8
     assert REFERENCE_GAME_CONFIG["objectives"]["target_outflow"] == "150000.00"
+
+
+def test_snapshot_uses_only_the_current_resource_set(
+    spec_by_code, specs, game_config
+) -> None:
+    salary = spec_by_code["salary"]
+    snapshot = evaluate_scenario(
+        [make_step(salary, Decimal("50000.00"))], specs, game_config
+    )
+
+    assert set(snapshot["resources_after"]) == {
+        "balance",
+        "energy",
+        "time",
+        "available_steps",
+    }
+    assert snapshot["resources_after"]["available_steps"] == 7
+    assert set(snapshot["per_step"][0]["resources_before"]) == {
+        "balance",
+        "energy",
+        "time",
+    }
+    assert set(snapshot["per_step"][0]["resources_after"]) == {
+        "balance",
+        "energy",
+        "time",
+    }
+
+
+def test_risky_context_does_not_create_an_extra_resource_blocker(
+    spec_by_code, specs, game_config
+) -> None:
+    from copy import deepcopy
+
+    config = deepcopy(game_config)
+    config["constraints"].update(
+        max_identical_steps=3,
+        max_night_operations=3,
+        max_anonymous_operations=3,
+        category_limits={},
+    )
+    steps = [
+        make_step(
+            spec_by_code["card_transfer"],
+            Decimal("25000.00"),
+            frequency=frequency,
+            channel="web",
+            context={
+                "recipient_type": "anonymous_wallet",
+                "time_of_day": "night",
+                "velocity": "rapid",
+                "has_documents": False,
+            },
+            action_details={
+                "transfer_purpose": "no_purpose",
+                "recipient_relationship": "unknown",
+            },
+        )
+        for frequency in (2, 2, 3)
+    ]
+    snapshot = evaluate_scenario(steps, specs, config)
+    assert snapshot["valid"] is True
+    assert submit_blockers(snapshot) == []

@@ -687,15 +687,12 @@ def render_step_details(step: dict[str, Any]) -> None:
                 f'<div class="k">Оборот шага</div><div>{escape(money(step.get("gross")))} '
                 f'(комиссия {escape(money(step.get("fee")))})</div>'
                 f'<div class="k">Изменение баланса</div><div>{escape(money(costs.get("money_delta")))}</div>'
-                f'<div class="k">Энергия / время / доверие</div>'
-                f'<div>−{escape(str(costs.get("energy")))} / −{escape(str(costs.get("time")))} '
-                f'/ −{escape(str(costs.get("trust")))}</div>'
+                f'<div class="k">Энергия / время</div>'
+                f'<div>−{escape(str(costs.get("energy")))} / −{escape(str(costs.get("time")))}</div>'
                 f'<div class="k">Ресурсы до</div><div>{escape(money(before.get("balance")))} · '
-                f'{escape(str(before.get("energy")))} · {escape(str(before.get("time")))} · '
-                f'{escape(str(before.get("trust")))}</div>'
+                f'{escape(str(before.get("energy")))} · {escape(str(before.get("time")))}</div>'
                 f'<div class="k">Ресурсы после</div><div>{escape(money(after.get("balance")))} · '
-                f'{escape(str(after.get("energy")))} · {escape(str(after.get("time")))} · '
-                f'{escape(str(after.get("trust")))}</div>'
+                f'{escape(str(after.get("energy")))} · {escape(str(after.get("time")))}</div>'
                 "</div>",
                 unsafe_allow_html=True,
             )
@@ -791,7 +788,9 @@ def page_participants() -> None:
                 metric_columns[0].metric("Баланс", money(after.get("balance")))
                 metric_columns[1].metric("Энергия", after.get("energy"))
                 metric_columns[2].metric("Время", after.get("time"))
-                metric_columns[3].metric("Доверие", after.get("trust"))
+                metric_columns[3].metric(
+                    "Доступных шагов", after.get("available_steps")
+                )
 
     with versions_tab:
         versions = detail.get("versions") or []
