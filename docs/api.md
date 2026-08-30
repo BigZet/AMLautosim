@@ -655,6 +655,7 @@ Email, user ID, scenario ID, chain и factors в public leaderboard отсутс
 | Метод и путь | Request | Response | Семантика |
 | --- | --- | --- | --- |
 | `GET /api/v1/admin/action-cards` | filters | `ActionCardOut[]` | Catalog для draft config |
+| `GET /api/v1/admin/game-config/default` | — | `GameConfig` | Базовая конфигурация из `config/*.json`. Админка открывает по ней вкладку «Создать раунд» |
 | `POST /api/v1/admin/rounds` | `RoundCreateIn` | `201 RoundAdminOut` | Создать draft |
 | `GET /api/v1/admin/rounds` | — | `RoundAdminOut[]` | Все раунды, новые сверху; их единицы за мастер-класс, поэтому список не постраничный |
 | `GET /api/v1/admin/rounds/{round_id}` | — | `RoundAdminOut` | Full config |

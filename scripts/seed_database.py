@@ -26,7 +26,10 @@ if str(ROOT) not in sys.path:
 
 from src.aml_workshop_simulator.core.config import settings  # noqa: E402
 from src.aml_workshop_simulator.core.game_config import load_config  # noqa: E402
-from src.aml_workshop_simulator.core.security import get_password_hash  # noqa: E402
+from src.aml_workshop_simulator.core.security import (  # noqa: E402
+    get_password_hash,
+    verify_password,
+)
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent  # noqa: E402
 from src.aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
@@ -177,20 +180,31 @@ async def seed_admin(db: AsyncSession) -> User:
     email = settings.BOOTSTRAP_ADMIN_EMAIL.strip().lower()
     admin = (await db.execute(select(User).where(User.email == email))).scalars().first()
     now = datetime.now(UTC)
-    if admin is None:
-        admin = User(
-            email=email,
-            display_name="Организатор",
-            hashed_password=get_password_hash(settings.BOOTSTRAP_ADMIN_PASSWORD),
-            role="admin",
-            is_blocked=False,
-            access_revision=1,
-            failed_login_count=0,
-            created_at=now,
-            updated_at=now,
-        )
-        db.add(admin)
-        await db.flush()
+    if admin is not None:
+        # `.env.example` asks the operator to change this from any value that has
+        # ever been committed. Creating the account and then ignoring the setting
+        # made that instruction impossible to follow after the first run.
+        if not verify_password(settings.BOOTSTRAP_ADMIN_PASSWORD, admin.hashed_password):
+            admin.hashed_password = get_password_hash(settings.BOOTSTRAP_ADMIN_PASSWORD)
+            admin.failed_login_count = 0
+            admin.locked_until = None
+            admin.updated_at = now
+            print("seed: bootstrap administrator password updated", file=sys.stderr)
+        return admin
+
+    admin = User(
+        email=email,
+        display_name="Организатор",
+        hashed_password=get_password_hash(settings.BOOTSTRAP_ADMIN_PASSWORD),
+        role="admin",
+        is_blocked=False,
+        access_revision=1,
+        failed_login_count=0,
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(admin)
+    await db.flush()
     return admin
 
 

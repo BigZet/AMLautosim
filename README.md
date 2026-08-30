@@ -42,6 +42,14 @@ docker compose up -d --build
 | Панель организатора | http://localhost:8502 |
 | API (только с хоста) | http://127.0.0.1:8000/api/v1/docs |
 
+> **`docker compose` — только для локального запуска.** Оба интерфейса
+> публикуются на `0.0.0.0` по HTTP, обратного прокси в составе нет, поэтому
+> заголовки из [docs/security.md](docs/security.md) §8 (HSTS, CSP,
+> `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`) не
+> выставляются, а cookie идут с `COOKIE_SECURE=false`. Для мероприятия
+> разверните стек за TLS-прокси по [docs/deployment.md](docs/deployment.md) и
+> включите `COOKIE_SECURE=true`.
+
 Развертывание на VM, TLS и reverse proxy описаны в
 [`docs/deployment.md`](docs/deployment.md), эксплуатация — в
 [`docs/operations.md`](docs/operations.md).

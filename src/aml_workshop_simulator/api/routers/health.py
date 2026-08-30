@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Response, status
@@ -32,28 +33,24 @@ def _report(status_value: str, checks: dict[str, object]) -> dict[str, object]:
         _last_readiness = status_value
     return {"status": status_value, "checks": checks}
 
-MIGRATIONS_DIR = Path(__file__).resolve().parents[4] / "migrations" / "versions"
+ROOT = Path(__file__).resolve().parents[4]
 
 
-def _expected_heads() -> set[str]:
-    """Revision ids that have no successor inside `migrations/versions`."""
-    revisions: dict[str, str | None] = {}
-    for path in MIGRATIONS_DIR.glob("*.py"):
-        revision: str | None = None
-        down: str | None = None
-        for line in path.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if stripped.startswith("revision:") or stripped.startswith("revision ="):
-                revision = stripped.split("=", 1)[1].strip().strip("'\"")
-            elif stripped.startswith("down_revision"):
-                value = stripped.split("=", 1)[1].strip()
-                down = None if value == "None" else value.strip("'\"")
-            if revision and down is not None:
-                break
-        if revision:
-            revisions[revision] = down
-    parents = {value for value in revisions.values() if value}
-    return {revision for revision in revisions if revision not in parents}
+@lru_cache(maxsize=1)
+def _expected_heads() -> frozenset[str]:
+    """Head revisions, read the way Alembic itself reads them.
+
+    Parsing the files by hand meant a missing or moved directory produced an
+    empty set, and an empty set silently passed the comparison below: readiness
+    reported "head" having verified nothing at all. Alembic raises instead, and
+    an unverifiable migration state must fail the check.
+    """
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    config = Config(str(ROOT / "alembic.ini"))
+    config.set_main_option("script_location", str(ROOT / "migrations"))
+    return frozenset(ScriptDirectory.from_config(config).get_heads())
 
 
 @router.get("/health/live", operation_id="health_live")
@@ -89,8 +86,14 @@ async def health_ready(
         checks["migrations"] = "alembic_version missing"
         return _report("not_ready", checks)
 
-    expected = _expected_heads()
-    if expected and applied != expected:
+    try:
+        expected = _expected_heads()
+    except Exception:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        checks["migrations"] = "revision history unreadable"
+        return _report("not_ready", checks)
+
+    if applied != expected:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         checks["migrations"] = "behind head"
         return _report("not_ready", checks)

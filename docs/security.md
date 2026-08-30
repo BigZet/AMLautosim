@@ -89,7 +89,7 @@ Browser хранит отдельные `aml_play_session_id` (`Path=/play`) и 
 - Пароль существует в Streamlit только во время form submit и не сохраняется в
   `session_state`, cache, URL или log.
 - Login response для неизвестного email и неверного password одинаков.
-- После пяти неудачных попыток account временно блокируется на пять минут; значения
+- После десяти неудачных попыток account временно блокируется на пять минут; значения
   являются настраиваемой security policy.
 - Успешный login сбрасывает failed counter в транзакции.
 - Admin account создается bootstrap-командой; публичная регистрация всегда participant.

@@ -20,7 +20,13 @@ from tests.ui.conftest import (
     db_query,
     register,
 )
-from tests.ui.streamlit_driver import (
+
+# The guard must precede the driver import: `streamlit_driver` imports
+# playwright at module level, and an ImportError during collection aborts
+# the whole pytest session instead of skipping these two files.
+playwright_api = pytest.importorskip("playwright.sync_api")
+
+from tests.ui.streamlit_driver import (  # noqa: E402
     DEFAULT_TIMEOUT,
     button_is_disabled,
     choose_option,
@@ -40,9 +46,7 @@ from tests.ui.streamlit_driver import (
     select_options,
     widget,
 )
-from tests.ui.streamlit_driver import register as register_in_ui
-
-playwright_api = pytest.importorskip("playwright.sync_api")
+from tests.ui.streamlit_driver import register as register_in_ui  # noqa: E402
 
 #: The four operations a default round enables, with the channels each offers.
 EXPECTED_CHANNEL_LABELS = {

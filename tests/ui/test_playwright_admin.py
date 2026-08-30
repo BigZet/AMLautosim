@@ -17,7 +17,13 @@ from tests.ui.conftest import (
     db_query,
     register,
 )
-from tests.ui.streamlit_driver import (
+
+# The guard must precede the driver import: `streamlit_driver` imports
+# playwright at module level, and an ImportError during collection aborts
+# the whole pytest session instead of skipping these two files.
+pytest.importorskip("playwright.sync_api")
+
+from tests.ui.streamlit_driver import (  # noqa: E402
     button_is_disabled,
     check,
     clipped_elements,
@@ -33,8 +39,6 @@ from tests.ui.streamlit_driver import (
     open_tab,
     streamlit_theme_options,
 )
-
-pytest.importorskip("playwright.sync_api")
 
 
 @pytest.fixture()
