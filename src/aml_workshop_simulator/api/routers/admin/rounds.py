@@ -25,9 +25,9 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
-from src.aml_workshop_simulator.api.errors import ApiError, Conflict, NotFound
-from src.aml_workshop_simulator.api.routers.admin.common import (
+from aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
+from aml_workshop_simulator.api.errors import ApiError, Conflict, NotFound
+from aml_workshop_simulator.api.routers.admin.common import (
     ROUND_STATUS_LABELS,
     audit,
     config_version,
@@ -36,22 +36,22 @@ from src.aml_workshop_simulator.api.routers.admin.common import (
     round_out,
     validate_game_config,
 )
-from src.aml_workshop_simulator.api.routers.rounds import card_out
-from src.aml_workshop_simulator.core.logging import log_event
-from src.aml_workshop_simulator.core.security import hash_idempotency_key
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.round_presets import RoundPreset
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.db.models.users import User
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.domain.scoring import (
+from aml_workshop_simulator.api.routers.rounds import card_out
+from aml_workshop_simulator.core.logging import log_event
+from aml_workshop_simulator.core.security import hash_idempotency_key
+from aml_workshop_simulator.db.models.action_cards import ActionCard
+from aml_workshop_simulator.db.models.round_presets import RoundPreset
+from aml_workshop_simulator.db.models.rounds import Round
+from aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.db.models.users import User
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
     SCORING_VERSION,
 )
-from src.aml_workshop_simulator.schemas.admin import (
+from aml_workshop_simulator.schemas.admin import (
     RoundAdminOut,
     RoundCreateIn,
     RoundLifecycleIn,
@@ -61,9 +61,9 @@ from src.aml_workshop_simulator.schemas.admin import (
     ScoringPlanOut,
     ScoringSummaryOut,
 )
-from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
-from src.aml_workshop_simulator.services.configuration import freeze_game_config
-from src.aml_workshop_simulator.services.scoring_service import (
+from aml_workshop_simulator.schemas.rounds import ActionCardOut
+from aml_workshop_simulator.services.configuration import freeze_game_config
+from aml_workshop_simulator.services.scoring_service import (
     NoSubmissions,
     score_round,
 )
@@ -80,8 +80,8 @@ router = APIRouter()
 async def default_game_config(
     _: CurrentPrincipal = Depends(get_current_admin),
 ) -> dict[str, Any]:
-    from src.aml_workshop_simulator.core.game_config import base_game_config
-    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from aml_workshop_simulator.core.game_config import base_game_config
+    from aml_workshop_simulator.schemas.round_config import GameConfigIn
     return GameConfigIn.model_validate(base_game_config()).dump()
 
 

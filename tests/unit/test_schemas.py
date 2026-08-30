@@ -8,14 +8,14 @@ from decimal import Decimal
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from src.aml_workshop_simulator.schemas.admin import (
+from aml_workshop_simulator.schemas.admin import (
     AccessUpdateIn,
     LeaderboardAdjustmentIn,
     RoundCreateIn,
     RoundUpdateIn,
 )
-from src.aml_workshop_simulator.schemas.auth import LoginIn, RegisterIn
-from src.aml_workshop_simulator.schemas.scenarios import (
+from aml_workshop_simulator.schemas.auth import LoginIn, RegisterIn
+from aml_workshop_simulator.schemas.scenarios import (
     CardRef,
     OperationContext,
     ScenarioPutIn,
@@ -201,7 +201,7 @@ def test_resource_weights_must_sum_to_exactly_one() -> None:
     silently mis-scored round — but it means the admin editor may not hand over
     a float that has drifted. `config_editor._weight` quantises for that reason.
     """
-    from src.aml_workshop_simulator.schemas.round_config import LeaderboardIn
+    from aml_workshop_simulator.schemas.round_config import LeaderboardIn
 
     exact = LeaderboardIn.model_validate(
         {
@@ -237,7 +237,7 @@ def test_resource_weights_must_sum_to_exactly_one() -> None:
 
 def test_the_editor_never_emits_a_drifted_weight() -> None:
     """A stepper working in 0.05 increments produces float residue."""
-    from src.aml_workshop_simulator.ui.admin.config_editor import _weight
+    from aml_workshop_simulator.ui.admin.config_editor import _weight
 
     assert str(_weight(0.1 + 0.2)) == "0.30"
     assert str(_weight(0.25000000000000006)) == "0.25"

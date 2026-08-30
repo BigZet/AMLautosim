@@ -27,13 +27,13 @@ from dataclasses import asdict, dataclass, field, replace
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
-from src.aml_workshop_simulator.core.game_config import base_game_config, load_config
-from src.aml_workshop_simulator.domain.action_parameters import (
+from aml_workshop_simulator.core.game_config import base_game_config, load_config
+from aml_workshop_simulator.domain.action_parameters import (
     CONTEXT_FIELDS,
     option_label,
 )
-from src.aml_workshop_simulator.domain.channels import channel_label
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.domain.channels import channel_label
+from aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
     RoundPolicy,
@@ -193,7 +193,7 @@ def card_spec_from_row(row: Any) -> CardSpec:
 
 def card_spec_from_catalog(entry: dict[str, Any], card_id: int) -> CardSpec:
     """Build a `CardSpec` straight from a catalog entry (tests and seeding)."""
-    from src.aml_workshop_simulator.domain.catalog import build_parameter_schema
+    from aml_workshop_simulator.domain.catalog import build_parameter_schema
 
     schema = build_parameter_schema(entry)
     return CardSpec(

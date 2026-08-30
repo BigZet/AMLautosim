@@ -17,14 +17,14 @@ from typing import Any
 
 import streamlit as st
 
-from src.aml_workshop_simulator.core.game_config import (
+from aml_workshop_simulator.core.game_config import (
     LIMITS,
     base_game_config,
     load_config,
 )
-from src.aml_workshop_simulator.domain.round_policy import MAX_VISIBLE_PARAMS
-from src.aml_workshop_simulator.domain.rules import QUOTA_LABELS
-from src.aml_workshop_simulator.schemas.round_config import CONFIG_SCHEMA_VERSION
+from aml_workshop_simulator.domain.round_policy import MAX_VISIBLE_PARAMS
+from aml_workshop_simulator.domain.rules import QUOTA_LABELS
+from aml_workshop_simulator.schemas.round_config import CONFIG_SCHEMA_VERSION
 
 RESOURCE_WEIGHT_LABELS = {
     "balance": "Баланс",
@@ -158,8 +158,8 @@ def render_editor(
     config = deepcopy(config)
     if config.get("card_snapshots"):
         # Show the same frozen catalog the server uses for this existing round.
-        from src.aml_workshop_simulator.api.routers.rounds import card_out
-        from src.aml_workshop_simulator.services.configuration import snapshot_specs
+        from aml_workshop_simulator.api.routers.rounds import card_out
+        from aml_workshop_simulator.services.configuration import snapshot_specs
 
         frozen = {
             key: card_out(spec).model_dump()

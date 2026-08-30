@@ -49,7 +49,7 @@ services:
       - ./config:/app/config:ro
     command: >-
       sh -c "python -m scripts.seed_database --wait-for-db --migrate
-      && uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
+      && uvicorn aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
     ports:
       # Loopback only: the participant and admin UIs reach the API over the
       # compose network. docs/deployment.md requires that /api never be served

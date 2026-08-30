@@ -18,7 +18,7 @@ import json
 from collections.abc import Callable, Sequence
 from typing import Any, TypeVar
 
-from src.aml_workshop_simulator.api.errors import ValidationFailed
+from aml_workshop_simulator.api.errors import ValidationFailed
 
 T = TypeVar("T")
 

@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Protocol
 
-from src.aml_workshop_simulator.core.game_config import LIMITS
+from aml_workshop_simulator.core.game_config import LIMITS
 
 PARAM_CHANNEL = "channel"
 CONTEXT_PREFIX = "context."

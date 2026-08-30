@@ -11,7 +11,7 @@ import json
 import psycopg2
 import pytest
 
-from src.aml_workshop_simulator.domain.channels import ALL_CHANNELS
+from aml_workshop_simulator.domain.channels import ALL_CHANNELS
 from tests.helpers import build_step, error_reasons, put_scenario, violation_reasons
 
 

@@ -8,12 +8,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
-from src.aml_workshop_simulator.api.pagination import decode_cursor, take_page
-from src.aml_workshop_simulator.api.routers.admin.common import get_round as _get_round
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.schemas.admin import AuditEventOut, AuditPageOut
+from aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
+from aml_workshop_simulator.api.pagination import decode_cursor, take_page
+from aml_workshop_simulator.api.routers.admin.common import get_round as _get_round
+from aml_workshop_simulator.db.models.audit_events import AuditEvent
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.schemas.admin import AuditEventOut, AuditPageOut
 
 router = APIRouter()
 

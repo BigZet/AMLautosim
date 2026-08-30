@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
       - name: Lint
-        run: ruff check src tests scripts
+        run: ruff check src tests scripts migrations
       - name: Unit tests
         run: python -m pytest tests/unit -q
         env:

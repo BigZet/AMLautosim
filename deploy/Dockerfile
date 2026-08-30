@@ -17,9 +17,13 @@ RUN pip wheel --wheel-dir /wheels -r requirements.txt
 # Runtime stage.
 FROM python:3.13-slim
 
+# PYTHONPATH rather than an editable install: this is a src layout, and /app is
+# made read-only below, so the package is put on the path instead of into
+# site-packages.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app/src
 
 WORKDIR /app
 
@@ -45,4 +49,4 @@ USER app
 
 EXPOSE 8000 8501 8502
 
-CMD ["uvicorn", "src.aml_workshop_simulator.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "aml_workshop_simulator.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

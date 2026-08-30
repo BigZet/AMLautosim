@@ -15,7 +15,7 @@ import uuid
 
 import pytest
 
-from src.aml_workshop_simulator.core.logging import (
+from aml_workshop_simulator.core.logging import (
     ALLOWED_FIELDS,
     LOGGER_NAME,
     JsonFormatter,
@@ -67,7 +67,7 @@ def captured():
     """
     # Importing the app is what runs `configure_logging`, and that call replaces
     # the logger's handlers — including this one, if it were attached first.
-    import src.aml_workshop_simulator.api.main  # noqa: F401
+    import aml_workshop_simulator.api.main  # noqa: F401
 
     logger = logging.getLogger(LOGGER_NAME)
     formatter = JsonFormatter("api")
@@ -196,7 +196,7 @@ def test_a_refusal_is_logged_with_its_code(
 
 def test_a_field_outside_the_allowlist_is_dropped_not_logged(captured):
     """The allowlist is the guarantee; a careless call site must not break it."""
-    from src.aml_workshop_simulator.core.logging import log_event
+    from aml_workshop_simulator.core.logging import log_event
 
     log_event("test_event", user_id=7, email="secret@example.com")
 

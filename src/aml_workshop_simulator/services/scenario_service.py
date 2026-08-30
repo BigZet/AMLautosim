@@ -22,23 +22,23 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.db.models.action_cards import ActionCard
+from aml_workshop_simulator.db.models.rounds import Round
+from aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
     RoundPolicy,
     action_param,
     context_param,
 )
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.rules import (
     CONTEXT_DEFAULTS,
     CardSpec,
     card_spec_from_row,
     evaluate_scenario,
     money,
 )
-from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
+from aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
 
 CONTEXT_KEYS = ("recipient_type", "time_of_day", "velocity", "has_documents")
 
@@ -55,7 +55,7 @@ async def load_round_card_specs(
     """
     config = round_obj.game_config or {}
     if config.get("card_snapshots"):
-        from src.aml_workshop_simulator.services.configuration import snapshot_specs
+        from aml_workshop_simulator.services.configuration import snapshot_specs
         return snapshot_specs(config)
     operations = config.get("operations") or []
     refs = config.get("card_versions") or []

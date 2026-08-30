@@ -13,7 +13,7 @@ from decimal import Decimal
 
 import pytest
 
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
     StructuralError,
     evaluate_scenario,

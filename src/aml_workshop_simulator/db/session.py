@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from src.aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core.config import settings
 
 # Tests create a fresh event loop per case; a pooled connection must never be
 # reused across loops, so pooling can be disabled explicitly.

@@ -18,8 +18,11 @@ from typing import Any
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# `src` carries the package, the root carries `tests` and `scripts`. Both are
+# needed to run from a checkout; `pip install -e .` makes the first redundant.
+for _path in (ROOT / "src", ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 ADMIN_DSN = os.environ.get(
     "TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres"
@@ -134,7 +137,7 @@ def client(clean_database: None) -> Iterator[Any]:
     """FastAPI test client bound to a single event loop for its lifetime."""
     from fastapi.testclient import TestClient
 
-    from src.aml_workshop_simulator.api.main import app
+    from aml_workshop_simulator.api.main import app
 
     # Unhandled server errors must surface as the documented envelope, exactly
     # as they would behind uvicorn, instead of propagating into the test.
@@ -218,7 +221,7 @@ def cards(client: Any, active_round: dict[str, Any]) -> dict[str, dict[str, Any]
 @pytest.fixture()
 def full_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
     """A round with all four cards and every declared parameter visible."""
-    from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
+    from aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
 
     catalog = client.get("/api/v1/admin/action-cards", headers=admin_headers).json()
     config = {

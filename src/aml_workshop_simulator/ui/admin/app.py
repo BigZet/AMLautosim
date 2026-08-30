@@ -16,16 +16,19 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# `src` carries the package, the root carries `tests` and `scripts`. Both are
+# needed to run from a checkout; `pip install -e .` makes the first redundant.
+for _path in (ROOT / "src", ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 import streamlit as st  # noqa: E402
 
-from src.aml_workshop_simulator.ui.admin.config_editor import (  # noqa: E402
+from aml_workshop_simulator.ui.admin.config_editor import (  # noqa: E402
     render_editor,
 )
-from src.aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
-from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
+from aml_workshop_simulator.ui.shared.api_client import APIClientError  # noqa: E402
+from aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     ADMIN_COOKIE,
     apply_pending_cookie_command,
     consume_hydration_flag,
@@ -36,7 +39,7 @@ from src.aml_workshop_simulator.ui.shared.session import (  # noqa: E402
     reset_user_state,
     resolve_session,
 )
-from src.aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
+from aml_workshop_simulator.ui.shared.theme import palette_css  # noqa: E402
 
 st.set_page_config(
     page_title="AML Workshop Control",

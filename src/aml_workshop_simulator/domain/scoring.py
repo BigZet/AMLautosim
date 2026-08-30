@@ -11,10 +11,10 @@ from collections.abc import Sequence
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
-from src.aml_workshop_simulator.core.enums import RiskLabel
-from src.aml_workshop_simulator.core.game_config import base_game_config
-from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.core.enums import RiskLabel
+from aml_workshop_simulator.core.game_config import base_game_config
+from aml_workshop_simulator.domain.round_policy import RoundPolicy
+from aml_workshop_simulator.domain.rules import (
     CardSpec,
     RoundRules,
     action_detail_effects,

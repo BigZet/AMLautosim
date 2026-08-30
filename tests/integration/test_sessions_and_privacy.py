@@ -15,8 +15,8 @@ import uuid
 import psycopg2
 import pytest
 
-from src.aml_workshop_simulator.core import request_meta
-from src.aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core import request_meta
+from aml_workshop_simulator.core.config import settings
 from tests.conftest import PARTICIPANT_PASSWORD, register_participant
 from tests.helpers import put_scenario, valid_chain
 

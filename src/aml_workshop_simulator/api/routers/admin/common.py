@@ -9,21 +9,21 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.errors import Conflict, NotFound, ValidationFailed
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.api.errors import Conflict, NotFound, ValidationFailed
+from aml_workshop_simulator.db.models.action_cards import ActionCard
+from aml_workshop_simulator.db.models.rounds import Round
+from aml_workshop_simulator.domain.round_policy import (
     MAX_VISIBLE_PARAMS,
     declared_params,
 )
-from src.aml_workshop_simulator.domain.rules import RULESET_VERSION, card_spec_from_row
-from src.aml_workshop_simulator.domain.scoring import (
+from aml_workshop_simulator.domain.rules import RULESET_VERSION, card_spec_from_row
+from aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
     SCORING_VERSION,
     weights_sum_to_one,
 )
-from src.aml_workshop_simulator.schemas.admin import RoundAdminOut
-from src.aml_workshop_simulator.services.audit import record_event
+from aml_workshop_simulator.schemas.admin import RoundAdminOut
+from aml_workshop_simulator.services.audit import record_event
 
 SUPPORTED_RULESETS = {RULESET_VERSION}
 SUPPORTED_SCORING = {SCORING_VERSION}
@@ -127,8 +127,8 @@ def validate_game_config(db_cards: list[ActionCard], game_config: dict[str, Any]
 
     from pydantic import ValidationError
 
-    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
-    from src.aml_workshop_simulator.services.configuration import snapshot_specs
+    from aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from aml_workshop_simulator.services.configuration import snapshot_specs
 
     try:
         GameConfigIn.model_validate(game_config)

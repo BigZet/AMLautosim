@@ -14,7 +14,7 @@ from typing import Any
 
 import httpx
 
-from src.aml_workshop_simulator.ui.shared.browser_meta import browser_headers
+from aml_workshop_simulator.ui.shared.browser_meta import browser_headers
 
 #: Per-method (connect, read) timeouts from docs/api.md section 16.
 TIMEOUTS = {

@@ -7,8 +7,8 @@ from importlib import import_module
 import pytest
 from pydantic import ValidationError
 
-from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
 
 migration = import_module(
     "migrations.versions.e84a6d2c190f_remove_trust_and_rename_available_steps"

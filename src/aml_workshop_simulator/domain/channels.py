@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from src.aml_workshop_simulator.core.game_config import load_config
+from aml_workshop_simulator.core.game_config import load_config
 
 CHANNEL_LABELS: dict[str, str] = load_config("channels.json")
 Channel = StrEnum("Channel", {code: code for code in CHANNEL_LABELS})

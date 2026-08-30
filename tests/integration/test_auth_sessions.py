@@ -6,7 +6,7 @@ import uuid
 
 import psycopg2
 
-from src.aml_workshop_simulator.core.security import hash_session_id
+from aml_workshop_simulator.core.security import hash_session_id
 from tests.conftest import ADMIN_EMAIL, ADMIN_PASSWORD, PARTICIPANT_PASSWORD, register_participant
 
 

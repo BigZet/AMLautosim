@@ -5,9 +5,9 @@ from __future__ import annotations
 import copy
 from decimal import Decimal
 
-from src.aml_workshop_simulator.core.enums import RiskLabel
-from src.aml_workshop_simulator.domain.rules import evaluate_scenario
-from src.aml_workshop_simulator.domain.scoring import (
+from aml_workshop_simulator.core.enums import RiskLabel
+from aml_workshop_simulator.domain.rules import evaluate_scenario
+from aml_workshop_simulator.domain.scoring import (
     leaderboard_scores,
     resource_score,
     score_scenario,

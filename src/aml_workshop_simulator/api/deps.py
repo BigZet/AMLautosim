@@ -14,12 +14,12 @@ from fastapi import Depends, Header
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.errors import AccountBlocked, Forbidden, NotAuthenticated
-from src.aml_workshop_simulator.core.config import settings
-from src.aml_workshop_simulator.core.security import hash_session_id
-from src.aml_workshop_simulator.db.models.sessions import Session
-from src.aml_workshop_simulator.db.models.users import User
-from src.aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.api.errors import AccountBlocked, Forbidden, NotAuthenticated
+from aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core.security import hash_session_id
+from aml_workshop_simulator.db.models.sessions import Session
+from aml_workshop_simulator.db.models.users import User
+from aml_workshop_simulator.db.session import get_db
 
 SESSION_HEADER = "X-Session-ID"
 

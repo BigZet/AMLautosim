@@ -14,12 +14,12 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
+from aml_workshop_simulator.db.models.leaderboard_adjustments import (
     LeaderboardAdjustment,
 )
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.db.models.users import User
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.db.models.users import User
 
 
 def _effective(override: Any, base: Any) -> Decimal:

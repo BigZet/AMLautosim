@@ -15,7 +15,7 @@ from typing import Any
 import streamlit as st
 from streamlit_cookies_controller import CookieController
 
-from src.aml_workshop_simulator.ui.shared.api_client import (
+from aml_workshop_simulator.ui.shared.api_client import (
     APIClientError,
     SimulatorAPIClient,
 )

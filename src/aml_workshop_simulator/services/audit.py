@@ -19,8 +19,8 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.core.logging import log_event
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
+from aml_workshop_simulator.core.logging import log_event
+from aml_workshop_simulator.db.models.audit_events import AuditEvent
 
 
 async def record_event(

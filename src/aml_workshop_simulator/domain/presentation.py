@@ -11,19 +11,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.aml_workshop_simulator.domain.action_parameters import (
+from aml_workshop_simulator.domain.action_parameters import (
     CONTEXT_FIELDS,
     context_value_label,
     option_label,
 )
-from src.aml_workshop_simulator.domain.channels import channel_label
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.domain.channels import channel_label
+from aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
     action_param,
     context_param,
 )
-from src.aml_workshop_simulator.domain.rules import CardSpec, money
+from aml_workshop_simulator.domain.rules import CardSpec, money
 
 CONTEXT_ORDER = (
     "recipient_type",

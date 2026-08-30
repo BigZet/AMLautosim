@@ -21,9 +21,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
-from src.aml_workshop_simulator.core.game_config import LIMITS
-from src.aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
-from src.aml_workshop_simulator.domain.channels import Channel
+from aml_workshop_simulator.core.game_config import LIMITS
+from aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
+from aml_workshop_simulator.domain.channels import Channel
 
 StrictValue = str | bool | int | Decimal
 

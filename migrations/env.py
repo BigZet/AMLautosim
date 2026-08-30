@@ -1,15 +1,24 @@
 import asyncio
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+# This is a src layout, so the package is one directory below the checkout root.
+# Done here rather than through `prepend_sys_path`, whose splitting rules differ
+# between Alembic versions, and `alembic upgrade` is run as its own process by
+# the container, the seed and the migration tests alike.
+_SRC = Path(__file__).resolve().parents[1] / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 
-from alembic import context
+from alembic import context  # noqa: E402
+from sqlalchemy import pool  # noqa: E402
+from sqlalchemy.engine import Connection  # noqa: E402
+from sqlalchemy.ext.asyncio import async_engine_from_config  # noqa: E402
 
-from src.aml_workshop_simulator.core.config import settings
-from src.aml_workshop_simulator.db.models.base import Base
-import src.aml_workshop_simulator.db.models  # noqa: F401
+import aml_workshop_simulator.db.models  # noqa: E402, F401
+from aml_workshop_simulator.core.config import settings  # noqa: E402
+from aml_workshop_simulator.db.models.base import Base  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

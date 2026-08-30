@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from copy import deepcopy
 from typing import Any
 
-from src.aml_workshop_simulator.core.game_config import load_config
+from aml_workshop_simulator.core.game_config import load_config
 
 _PARAMETERS = load_config("parameters.json")
 CONTEXT_FIELDS: dict[str, dict[str, Any]] = _PARAMETERS["context_fields"]

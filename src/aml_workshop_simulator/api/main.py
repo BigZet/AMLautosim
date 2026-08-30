@@ -10,16 +10,16 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from src.aml_workshop_simulator.api.errors import ApiError
-from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
-from src.aml_workshop_simulator.core.config import settings
-from src.aml_workshop_simulator.core.logging import (
+from aml_workshop_simulator.api.errors import ApiError
+from aml_workshop_simulator.api.routers import admin, auth, health, rounds
+from aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core.logging import (
     REQUEST_ID,
     configure_logging,
     log_event,
     log_exception,
 )
-from src.aml_workshop_simulator.schemas.catalog_config import (
+from aml_workshop_simulator.schemas.catalog_config import (
     validate_configuration_files,
 )
 

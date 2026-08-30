@@ -14,22 +14,22 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
-from src.aml_workshop_simulator.api.errors import Conflict, Forbidden, NotFound
-from src.aml_workshop_simulator.api.pagination import decode_cursor, take_page
-from src.aml_workshop_simulator.api.routers.admin.common import audit, get_round
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
+from aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
+from aml_workshop_simulator.api.errors import Conflict, Forbidden, NotFound
+from aml_workshop_simulator.api.pagination import decode_cursor, take_page
+from aml_workshop_simulator.api.routers.admin.common import audit, get_round
+from aml_workshop_simulator.db.models.audit_events import AuditEvent
+from aml_workshop_simulator.db.models.leaderboard_adjustments import (
     LeaderboardAdjustment,
 )
-from src.aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.db.models.sessions import Session
-from src.aml_workshop_simulator.db.models.users import User
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.domain.presentation import describe_chain
-from src.aml_workshop_simulator.schemas.admin import (
+from aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.db.models.sessions import Session
+from aml_workshop_simulator.db.models.users import User
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.domain.presentation import describe_chain
+from aml_workshop_simulator.schemas.admin import (
     AccessUpdateIn,
     PlayerDetailOut,
     PlayerDetailUserOut,
@@ -38,11 +38,11 @@ from src.aml_workshop_simulator.schemas.admin import (
     ScenarioVersionAdminOut,
     SessionInfoOut,
 )
-from src.aml_workshop_simulator.services.scenario_service import (
+from aml_workshop_simulator.services.scenario_service import (
     load_round_card_specs,
     round_policy,
 )
-from src.aml_workshop_simulator.services.scenario_versions import (
+from aml_workshop_simulator.services.scenario_versions import (
     count_versions,
     get_version,
     list_versions,

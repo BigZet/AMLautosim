@@ -3,11 +3,11 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from src.aml_workshop_simulator.core.game_config import base_game_config, load_config
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
-from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog, money
-from src.aml_workshop_simulator.services.configuration import snapshot_specs
+from aml_workshop_simulator.core.game_config import base_game_config, load_config
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from aml_workshop_simulator.domain.round_policy import RoundPolicy
+from aml_workshop_simulator.domain.rules import card_spec_from_catalog, money
+from aml_workshop_simulator.services.configuration import snapshot_specs
 
 
 def _get_card_code(step: dict[str, Any]) -> str:

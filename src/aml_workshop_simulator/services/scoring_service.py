@@ -16,23 +16,23 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.domain.scoring import (
+from aml_workshop_simulator.db.models.audit_events import AuditEvent
+from aml_workshop_simulator.db.models.rounds import Round
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
     SCORING_VERSION,
     leaderboard_scores,
     resource_score,
     score_scenario,
 )
-from src.aml_workshop_simulator.services.scenario_service import (
+from aml_workshop_simulator.services.scenario_service import (
     build_snapshot,
     load_round_card_specs,
     round_policy,
 )
-from src.aml_workshop_simulator.services.scenario_versions import submitted_steps
+from aml_workshop_simulator.services.scenario_versions import submitted_steps
 
 #: Test hook: called with the 1-based index of each scenario before it is
 #: written, so atomicity can be verified with a controlled failure.

@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.core.logging import log_event
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
-from src.aml_workshop_simulator.domain.scoring import LEADERBOARD_VERSION, SCORING_VERSION
+from aml_workshop_simulator.core.logging import log_event
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.domain.rules import RULESET_VERSION
+from aml_workshop_simulator.domain.scoring import LEADERBOARD_VERSION, SCORING_VERSION
 
 router = APIRouter()
 

@@ -19,8 +19,8 @@ from copy import deepcopy
 from decimal import Decimal
 from typing import Any
 
-from src.aml_workshop_simulator.core.game_config import load_config
-from src.aml_workshop_simulator.domain.action_parameters import (
+from aml_workshop_simulator.core.game_config import load_config
+from aml_workshop_simulator.domain.action_parameters import (
     action_fields_for,
     context_fields_for,
 )

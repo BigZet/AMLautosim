@@ -7,7 +7,7 @@ import uuid
 import httpx
 import pytest
 
-from src.aml_workshop_simulator.ui.shared.api_client import (
+from aml_workshop_simulator.ui.shared.api_client import (
     TIMEOUTS,
     APIClientError,
     SimulatorAPIClient,

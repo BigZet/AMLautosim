@@ -11,21 +11,21 @@ from decimal import Decimal
 
 import pytest
 
-from src.aml_workshop_simulator.domain.catalog import (
+from aml_workshop_simulator.domain.catalog import (
     CARD_CATALOG,
     DEFAULT_OPERATION_CODES,
     build_parameter_schema,
     default_show_frequency,
     default_visible_params,
 )
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.domain.round_policy import (
     MAX_VISIBLE_PARAMS,
     RoundPolicy,
     declared_params,
     operations_from_specs,
     split_param,
 )
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
     StructuralError,
     evaluate_scenario,

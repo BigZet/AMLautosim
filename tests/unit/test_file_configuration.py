@@ -10,14 +10,27 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from src.aml_workshop_simulator.core.game_config import CONFIG_DIR, base_game_config
-from src.aml_workshop_simulator.domain.rules import evaluate_scenario
-from src.aml_workshop_simulator.domain.scoring import score_scenario
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
-from src.aml_workshop_simulator.services.catboost_features import (
+from aml_workshop_simulator.core.game_config import CONFIG_DIR, base_game_config
+from aml_workshop_simulator.domain.rules import evaluate_scenario
+from aml_workshop_simulator.domain.scoring import score_scenario
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.services.catboost_features import (
     extract_catboost_features,
 )
 from tests.unit.conftest import make_step
+
+PACKAGE_ROOT = Path(__file__).resolve().parents[2] / "src"
+
+
+def subprocess_env(**overrides: str) -> dict[str, str]:
+    """Environment for a child interpreter, with the package importable.
+
+    A child does not inherit the parent's `sys.path`, and in a src layout the
+    package sits one directory below the checkout root.
+    """
+    existing = os.environ.get("PYTHONPATH")
+    path = str(PACKAGE_ROOT) if not existing else f"{PACKAGE_ROOT}{os.pathsep}{existing}"
+    return {**os.environ, "PYTHONPATH": path, **overrides}
 
 
 def test_alternate_files_change_real_calculations(tmp_path):
@@ -53,10 +66,10 @@ def test_alternate_files_change_real_calculations(tmp_path):
             "-c",
             """
 import json
-from src.aml_workshop_simulator.core.game_config import base_game_config
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog, evaluate_scenario
-from src.aml_workshop_simulator.domain.scoring import score_scenario
+from aml_workshop_simulator.core.game_config import base_game_config
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from aml_workshop_simulator.domain.rules import card_spec_from_catalog, evaluate_scenario
+from aml_workshop_simulator.domain.scoring import score_scenario
 from tests.unit.conftest import make_step
 spec = card_spec_from_catalog(next(c for c in CARD_CATALOG if c['code']=='card_transfer'),1)
 step = make_step(spec, '10000.00', channel='mobile')
@@ -71,7 +84,7 @@ print(json.dumps({
 """,
         ],
         cwd=Path(__file__).resolve().parents[2],
-        env={**os.environ, "AML_GAME_CONFIG_DIR": str(config_dir)},
+        env=subprocess_env(AML_GAME_CONFIG_DIR=str(config_dir)),
         capture_output=True,
         text=True,
     )
@@ -92,9 +105,9 @@ def test_missing_configuration_fails_instead_of_using_python_defaults(tmp_path):
         [
             sys.executable,
             "-c",
-            "from src.aml_workshop_simulator.core.game_config import base_game_config; base_game_config()",
+            "from aml_workshop_simulator.core.game_config import base_game_config; base_game_config()",
         ],
-        env={**os.environ, "AML_GAME_CONFIG_DIR": str(tmp_path)},
+        env=subprocess_env(AML_GAME_CONFIG_DIR=str(tmp_path)),
         capture_output=True,
         text=True,
     )
@@ -175,12 +188,12 @@ def test_sequence_coefficients_really_apply(spec_by_code, specs):
 
 EDITOR_APP = """
 import streamlit as st
-from src.aml_workshop_simulator.core.game_config import base_game_config
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog
-from src.aml_workshop_simulator.api.routers.rounds import card_out
-from src.aml_workshop_simulator.ui.admin.config_editor import render_editor
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.core.game_config import base_game_config
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from aml_workshop_simulator.domain.rules import card_spec_from_catalog
+from aml_workshop_simulator.api.routers.rounds import card_out
+from aml_workshop_simulator.ui.admin.config_editor import render_editor
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
 cards=[card_out(card_spec_from_catalog(e,i)).model_dump() for i,e in enumerate(CARD_CATALOG,1)]
 st.session_state['edited'] = render_editor(st.session_state.get('source', base_game_config()), cards)
 """

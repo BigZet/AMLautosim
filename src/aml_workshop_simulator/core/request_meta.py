@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 from fastapi import Request
 
-from src.aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core.config import settings
 
 USER_AGENT_MAX_LENGTH = 512
 ACCEPT_LANGUAGE_MAX_LENGTH = 120

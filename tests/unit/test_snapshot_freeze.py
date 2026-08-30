@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import pytest
 
-from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
-from src.aml_workshop_simulator.services.configuration import freeze_game_config
+from aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
+from aml_workshop_simulator.services.configuration import freeze_game_config
 
 REMOVED_CARD = {
     "code": "international",

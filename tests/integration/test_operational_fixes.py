@@ -6,9 +6,9 @@ import asyncio
 
 import psycopg2
 
+from aml_workshop_simulator.api.routers import health
+from aml_workshop_simulator.core.security import verify_password
 from scripts import seed_database
-from src.aml_workshop_simulator.api.routers import health
-from src.aml_workshop_simulator.core.security import verify_password
 from tests.conftest import ADMIN_EMAIL, ADMIN_PASSWORD
 
 

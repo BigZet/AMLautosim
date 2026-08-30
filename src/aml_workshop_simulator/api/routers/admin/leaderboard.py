@@ -16,26 +16,26 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
-from src.aml_workshop_simulator.api.errors import Conflict, NotFound, ValidationFailed
-from src.aml_workshop_simulator.api.pagination import decode_cursor, encode_cursor
-from src.aml_workshop_simulator.api.routers.admin.common import audit as _audit
-from src.aml_workshop_simulator.api.routers.admin.common import get_round as _get_round
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
+from aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
+from aml_workshop_simulator.api.errors import Conflict, NotFound, ValidationFailed
+from aml_workshop_simulator.api.pagination import decode_cursor, encode_cursor
+from aml_workshop_simulator.api.routers.admin.common import audit as _audit
+from aml_workshop_simulator.api.routers.admin.common import get_round as _get_round
+from aml_workshop_simulator.db.models.leaderboard_adjustments import (
     LeaderboardAdjustment,
 )
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.schemas.admin import (
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.schemas.admin import (
     LeaderboardAdjustmentIn,
     LeaderboardAdjustmentOut,
 )
-from src.aml_workshop_simulator.schemas.leaderboard import (
+from aml_workshop_simulator.schemas.leaderboard import (
     AdminLeaderboardPageOut,
     AdminLeaderboardRowOut,
 )
-from src.aml_workshop_simulator.services.leaderboard_service import (
+from aml_workshop_simulator.services.leaderboard_service import (
     build_admin_leaderboard,
 )
 

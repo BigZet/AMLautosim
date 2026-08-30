@@ -27,8 +27,11 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# `src` carries the package, the root carries `tests` and `scripts`. Both are
+# needed to run from a checkout; `pip install -e .` makes the first redundant.
+for _path in (ROOT / "src", ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 ADMIN_DSN = os.environ.get(
     "TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres"
@@ -145,7 +148,7 @@ class Stack:
             "api",
             [
                 sys.executable, "-m", "uvicorn",
-                "src.aml_workshop_simulator.api.main:app",
+                "aml_workshop_simulator.api.main:app",
                 "--host", "127.0.0.1", "--port", str(self.api_port),
                 "--log-level", "warning",
             ],

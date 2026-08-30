@@ -12,14 +12,14 @@ Split into one module per concern so each file stays readable:
 
 from fastapi import APIRouter
 
-from src.aml_workshop_simulator.api.routers.admin import (
+from aml_workshop_simulator.api.routers.admin import (
     audit,
     leaderboard,
     participants,
     presets,
     rounds,
 )
-from src.aml_workshop_simulator.api.routers.admin.common import (
+from aml_workshop_simulator.api.routers.admin.common import (
     config_version,
     round_out,
     validate_game_config,

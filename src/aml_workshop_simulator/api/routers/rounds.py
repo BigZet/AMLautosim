@@ -8,12 +8,12 @@ from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import (
+from aml_workshop_simulator.api.deps import (
     CurrentPrincipal,
     get_current_participant,
     get_principal_optional,
 )
-from src.aml_workshop_simulator.api.errors import (
+from aml_workshop_simulator.api.errors import (
     Conflict,
     Forbidden,
     NotAuthenticated,
@@ -23,48 +23,48 @@ from src.aml_workshop_simulator.api.errors import (
     first_message,
     violations_payload,
 )
-from src.aml_workshop_simulator.api.pagination import (
+from aml_workshop_simulator.api.pagination import (
     decode_cursor,
     encode_cursor,
     take_page,
 )
-from src.aml_workshop_simulator.core.logging import log_event
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
+from aml_workshop_simulator.core.logging import log_event
+from aml_workshop_simulator.db.models.action_cards import ActionCard
+from aml_workshop_simulator.db.models.leaderboard_adjustments import (
     LeaderboardAdjustment,
 )
-from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
-from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.domain.channels import channel_label
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.db.models.rounds import Round
+from aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
+from aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.domain.channels import channel_label
+from aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
     OperationPolicy,
     split_param,
 )
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.rules import (
     CardSpec,
     StructuralError,
     card_spec_from_row,
     submit_blockers,
 )
-from src.aml_workshop_simulator.schemas.leaderboard import (
+from aml_workshop_simulator.schemas.leaderboard import (
     BaseResultOut,
     LeaderboardMetaOut,
     LeaderboardPageOut,
     LeaderboardRowOut,
     ResultOut,
 )
-from src.aml_workshop_simulator.schemas.rounds import (
+from aml_workshop_simulator.schemas.rounds import (
     ActionCardOut,
     RoundPublicOut,
     RoundSummaryOut,
     RoundSummaryPageOut,
     VisibleParamOut,
 )
-from src.aml_workshop_simulator.schemas.scenarios import (
+from aml_workshop_simulator.schemas.scenarios import (
     ScenarioOut,
     ScenarioPreviewIn,
     ScenarioPreviewOut,
@@ -75,18 +75,18 @@ from src.aml_workshop_simulator.schemas.scenarios import (
     ScenarioVersionPageOut,
     ScenarioVersionSummaryOut,
 )
-from src.aml_workshop_simulator.services.audit import record_event
-from src.aml_workshop_simulator.services.leaderboard_service import (
+from aml_workshop_simulator.services.audit import record_event
+from aml_workshop_simulator.services.leaderboard_service import (
     build_public_leaderboard,
 )
-from src.aml_workshop_simulator.services.scenario_service import (
+from aml_workshop_simulator.services.scenario_service import (
     build_snapshot,
     canonical_steps,
     load_round_card_specs,
     payload_hash,
     round_policy,
 )
-from src.aml_workshop_simulator.services.scenario_versions import (
+from aml_workshop_simulator.services.scenario_versions import (
     append_version,
     count_versions,
     get_version,

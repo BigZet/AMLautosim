@@ -12,9 +12,9 @@ from decimal import Decimal
 
 import pytest
 
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG, catalog_channels
-from src.aml_workshop_simulator.domain.channels import ALL_CHANNELS
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG, catalog_channels
+from aml_workshop_simulator.domain.channels import ALL_CHANNELS
+from aml_workshop_simulator.domain.rules import (
     StructuralError,
     evaluate_scenario,
     validate_structure,

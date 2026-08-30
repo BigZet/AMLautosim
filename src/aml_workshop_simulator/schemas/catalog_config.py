@@ -5,13 +5,13 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from src.aml_workshop_simulator.core.game_config import (
+from aml_workshop_simulator.core.game_config import (
     LIMITS,
     base_game_config,
     load_config,
 )
-from src.aml_workshop_simulator.domain.channels import Channel
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.domain.channels import Channel
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
 
 
 class OptionConfig(BaseModel):
@@ -85,9 +85,9 @@ class CardConfig(BaseModel):
 
 
 def validate_configuration_files() -> None:
-    from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-    from src.aml_workshop_simulator.domain.round_policy import declared_params
-    from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog
+    from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+    from aml_workshop_simulator.domain.round_policy import declared_params
+    from aml_workshop_simulator.domain.rules import card_spec_from_catalog
 
     config = GameConfigIn.model_validate(base_game_config())
     parameters = load_config("parameters.json")

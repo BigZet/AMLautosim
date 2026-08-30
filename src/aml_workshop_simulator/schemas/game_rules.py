@@ -5,8 +5,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from src.aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
-from src.aml_workshop_simulator.domain.channels import ALL_CHANNELS
+from aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
+from aml_workshop_simulator.domain.channels import ALL_CHANNELS
 
 NonNegative = Annotated[Decimal, Field(ge=0, allow_inf_nan=False)]
 Finite = Annotated[Decimal, Field(allow_inf_nan=False)]

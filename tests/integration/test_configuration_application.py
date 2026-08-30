@@ -6,8 +6,8 @@ from copy import deepcopy
 
 import psycopg2
 
+from aml_workshop_simulator.core.game_config import base_game_config
 from scripts import seed_database
-from src.aml_workshop_simulator.core.game_config import base_game_config
 
 
 def create_round(client, headers, config):

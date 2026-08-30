@@ -12,8 +12,8 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
-from src.aml_workshop_simulator.db.models.scenarios import Scenario
+from aml_workshop_simulator.db.models.scenario_versions import ScenarioVersion
+from aml_workshop_simulator.db.models.scenarios import Scenario
 
 
 async def append_version(

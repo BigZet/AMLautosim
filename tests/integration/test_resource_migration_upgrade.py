@@ -11,8 +11,8 @@ from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2.extras import Json
 
-from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
 from tests.conftest import ADMIN_DSN, ROOT, TEST_DATABASE_URL
 
 

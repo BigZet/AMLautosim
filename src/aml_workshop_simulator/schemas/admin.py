@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from aml_workshop_simulator.schemas.round_config import GameConfigIn
 
 STRICT = ConfigDict(extra="forbid")
 

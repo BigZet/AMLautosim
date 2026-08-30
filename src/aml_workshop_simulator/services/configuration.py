@@ -6,8 +6,8 @@ from dataclasses import asdict
 from decimal import Decimal
 from typing import Any
 
-from src.aml_workshop_simulator.core.game_config import load_config
-from src.aml_workshop_simulator.domain.rules import CardSpec, card_spec_from_row
+from aml_workshop_simulator.core.game_config import load_config
+from aml_workshop_simulator.domain.rules import CardSpec, card_spec_from_row
 
 
 def snapshot_specs(config: dict[str, Any]) -> dict[tuple[str, int], CardSpec]:

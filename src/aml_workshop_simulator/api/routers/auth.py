@@ -9,31 +9,31 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.api.deps import (
+from aml_workshop_simulator.api.deps import (
     SESSION_HEADER,
     CurrentPrincipal,
     get_principal,
 )
-from src.aml_workshop_simulator.api.errors import (
+from aml_workshop_simulator.api.errors import (
     AccountBlocked,
     Conflict,
     Forbidden,
     NotAuthenticated,
     RateLimited,
 )
-from src.aml_workshop_simulator.core.config import settings
-from src.aml_workshop_simulator.core.logging import log_event
-from src.aml_workshop_simulator.core.request_meta import request_meta
-from src.aml_workshop_simulator.core.security import (
+from aml_workshop_simulator.core.config import settings
+from aml_workshop_simulator.core.logging import log_event
+from aml_workshop_simulator.core.request_meta import request_meta
+from aml_workshop_simulator.core.security import (
     get_password_hash,
     hash_session_id,
     new_session_id,
     verify_password,
 )
-from src.aml_workshop_simulator.db.models.sessions import Session
-from src.aml_workshop_simulator.db.models.users import User
-from src.aml_workshop_simulator.db.session import get_db
-from src.aml_workshop_simulator.schemas.auth import (
+from aml_workshop_simulator.db.models.sessions import Session
+from aml_workshop_simulator.db.models.users import User
+from aml_workshop_simulator.db.session import get_db
+from aml_workshop_simulator.schemas.auth import (
     LoginIn,
     RegisterIn,
     SessionCreatedOut,

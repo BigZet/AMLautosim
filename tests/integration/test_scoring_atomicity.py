@@ -6,7 +6,7 @@ import uuid
 
 import psycopg2
 
-from src.aml_workshop_simulator.services import scoring_service
+from aml_workshop_simulator.services import scoring_service
 from tests.helpers import put_scenario, valid_chain
 
 

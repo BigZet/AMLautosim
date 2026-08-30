@@ -17,13 +17,13 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from src.aml_workshop_simulator.core.game_config import LIMITS, load_config
-from src.aml_workshop_simulator.domain.round_policy import (
+from aml_workshop_simulator.core.game_config import LIMITS, load_config
+from aml_workshop_simulator.domain.round_policy import (
     CARD_OVERRIDE_KEYS,
     MAX_VISIBLE_PARAMS,
     split_param,
 )
-from src.aml_workshop_simulator.schemas.game_rules import ResourceRulesIn, RiskRulesIn
+from aml_workshop_simulator.schemas.game_rules import ResourceRulesIn, RiskRulesIn
 
 STRICT = ConfigDict(extra="forbid")
 

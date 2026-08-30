@@ -345,7 +345,7 @@ def test_scenario_survives_a_new_api_instance(client, participant, active_round,
 
     from fastapi.testclient import TestClient
 
-    from src.aml_workshop_simulator.api.main import app
+    from aml_workshop_simulator.api.main import app
 
     with TestClient(app) as fresh_client:
         response = fresh_client.get(

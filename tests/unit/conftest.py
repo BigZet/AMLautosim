@@ -8,8 +8,8 @@ from typing import Any
 
 import pytest
 
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
     CardSpec,
     card_spec_from_catalog,

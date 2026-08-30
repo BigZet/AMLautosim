@@ -179,7 +179,7 @@ def test_check_constraints_reject_out_of_range_values(clean_database, db_dsn) ->
 
 
 def test_seeded_card_contract_matches_the_catalog(clean_database, db_dsn) -> None:
-    from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG, build_parameter_schema
+    from aml_workshop_simulator.domain.catalog import CARD_CATALOG, build_parameter_schema
 
     connection = psycopg2.connect(db_dsn)
     try:

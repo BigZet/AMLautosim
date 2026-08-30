@@ -16,15 +16,15 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.aml_workshop_simulator.core.game_config import load_config
-from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
-from src.aml_workshop_simulator.domain.rules import (
+from aml_workshop_simulator.core.game_config import load_config
+from aml_workshop_simulator.domain.catalog import CARD_CATALOG
+from aml_workshop_simulator.domain.rules import (
     REFERENCE_GAME_CONFIG,
     card_spec_from_catalog,
     specs_by_key,
 )
-from src.aml_workshop_simulator.domain.scoring import score_scenario
-from src.aml_workshop_simulator.services.catboost_features import (
+from aml_workshop_simulator.domain.scoring import score_scenario
+from aml_workshop_simulator.services.catboost_features import (
     extract_catboost_features,
     get_catboost_categorical_feature_names,
     get_catboost_feature_names,

@@ -21,29 +21,32 @@ from sqlalchemy import delete, select, text, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# `src` carries the package, the root carries `tests` and `scripts`. Both are
+# needed to run from a checkout; `pip install -e .` makes the first redundant.
+for _path in (ROOT / "src", ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
-from src.aml_workshop_simulator.core.config import settings  # noqa: E402
-from src.aml_workshop_simulator.core.game_config import load_config  # noqa: E402
-from src.aml_workshop_simulator.core.security import (  # noqa: E402
+from aml_workshop_simulator.core.config import settings  # noqa: E402
+from aml_workshop_simulator.core.game_config import load_config  # noqa: E402
+from aml_workshop_simulator.core.security import (  # noqa: E402
     get_password_hash,
     verify_password,
 )
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent  # noqa: E402
-from src.aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
-from src.aml_workshop_simulator.db.models.users import User  # noqa: E402
-from src.aml_workshop_simulator.db.session import (  # noqa: E402
+from aml_workshop_simulator.db.models.action_cards import ActionCard  # noqa: E402
+from aml_workshop_simulator.db.models.audit_events import AuditEvent  # noqa: E402
+from aml_workshop_simulator.db.models.rounds import Round  # noqa: E402
+from aml_workshop_simulator.db.models.users import User  # noqa: E402
+from aml_workshop_simulator.db.session import (  # noqa: E402
     AsyncSessionLocal,
     async_engine,
 )
-from src.aml_workshop_simulator.domain.catalog import (  # noqa: E402
+from aml_workshop_simulator.domain.catalog import (  # noqa: E402
     CARD_CATALOG,
     build_parameter_schema,
 )
-from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG  # noqa: E402
-from src.aml_workshop_simulator.services.configuration import (  # noqa: E402
+from aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG  # noqa: E402
+from aml_workshop_simulator.services.configuration import (  # noqa: E402
     freeze_game_config,
 )
 
@@ -113,7 +116,7 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
                 file=sys.stderr,
             )
         if "config_version" in config:
-            from src.aml_workshop_simulator.api.routers.admin.common import (
+            from aml_workshop_simulator.api.routers.admin.common import (
                 config_version,
             )
             config["config_version"] = config_version(config)
@@ -263,7 +266,7 @@ async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]
 
 
 async def seed(activate_round: bool = False) -> dict[str, Any]:
-    from src.aml_workshop_simulator.schemas.catalog_config import (
+    from aml_workshop_simulator.schemas.catalog_config import (
         validate_configuration_files,
     )
     validate_configuration_files()
@@ -279,7 +282,7 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
             ).scalars().first()
             if other is None:
                 config = dict(round_obj.game_config)
-                from src.aml_workshop_simulator.api.routers.admin.common import (
+                from aml_workshop_simulator.api.routers.admin.common import (
                     config_version,
                 )
 
