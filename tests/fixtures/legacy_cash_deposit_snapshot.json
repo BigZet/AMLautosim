@@ -1,0 +1,148 @@
+{
+  "id": 2,
+  "code": "cash_deposit",
+  "version": 1,
+  "title": "Внести наличные",
+  "description": "Пополнение счета через банкомат или кассу.",
+  "category": "Наличные",
+  "flow": "credit",
+  "risk_weight": "18.00",
+  "energy_cost": 3,
+  "time_cost": 1,
+  "fee_rate": "0.000000",
+  "min_amount": "10000.00",
+  "max_amount": "80000.00",
+  "max_occurrences": 3,
+  "requires_card_code": null,
+  "quota_category": "cash",
+  "channels": [
+    "atm",
+    "branch"
+  ],
+  "context_fields": [
+    {
+      "key": "time_of_day",
+      "label": "Время операции",
+      "kind": "select",
+      "default": "day",
+      "help": "Нетипичное время может усилить сигнал модели.",
+      "options": [
+        {
+          "value": "day",
+          "label": "День"
+        },
+        {
+          "value": "evening",
+          "label": "Вечер"
+        },
+        {
+          "value": "night",
+          "label": "Ночь"
+        }
+      ]
+    },
+    {
+      "key": "velocity",
+      "label": "Темп операции",
+      "kind": "select",
+      "default": "normal",
+      "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+      "options": [
+        {
+          "value": "spaced",
+          "label": "С интервалами"
+        },
+        {
+          "value": "normal",
+          "label": "Обычный темп"
+        },
+        {
+          "value": "rapid",
+          "label": "Быстро подряд"
+        }
+      ]
+    },
+    {
+      "key": "has_documents",
+      "label": "Есть подтверждающие документы",
+      "kind": "toggle",
+      "default": true,
+      "help": "От 60 000: документы стоят 1 времени и дают −5 риска; отсутствие дает +10. Для меньших сумм эффекта нет."
+    }
+  ],
+  "fields": [
+    {
+      "key": "funds_source",
+      "label": "Источник наличных",
+      "kind": "select",
+      "default": "documented_savings",
+      "options": [
+        {
+          "value": "documented_savings",
+          "label": "Подтвержденные накопления",
+          "risk_points": -2,
+          "time_cost": 1,
+          "description": "Понятный источник средств снижает неопределенность"
+        },
+        {
+          "value": "asset_sale",
+          "label": "Продажа имущества",
+          "risk_points": 2,
+          "time_cost": 0,
+          "description": "Разовое поступление требует подтверждения сделки",
+          "energy_cost": 1
+        },
+        {
+          "value": "borrowed_cash",
+          "label": "Заемные средства",
+          "risk_points": 5,
+          "description": "Заемные наличные сложнее связать с финансовым профилем"
+        },
+        {
+          "value": "unexplained",
+          "label": "Источник не указан",
+          "risk_points": 12,
+          "energy_cost": 1,
+          "description": "Необъясненные наличные дают сильный сигнал риска"
+        }
+      ]
+    },
+    {
+      "key": "deposit_pattern",
+      "label": "Способ внесения",
+      "kind": "select",
+      "default": "single_location",
+      "options": [
+        {
+          "value": "single_location",
+          "label": "Одно место",
+          "risk_points": -1,
+          "description": "Обычное внесение в одном месте выглядит последовательнее"
+        },
+        {
+          "value": "several_atms",
+          "label": "Несколько банкоматов",
+          "risk_points": 6,
+          "energy_cost": 1,
+          "description": "Разные точки внесения похожи на распределенную схему"
+        },
+        {
+          "value": "third_party",
+          "label": "Через третье лицо",
+          "risk_points": 10,
+          "description": "Внесение третьим лицом усложняет установление источника"
+        }
+      ]
+    }
+  ],
+  "default_visible_params": [
+    "channel",
+    "action.funds_source"
+  ],
+  "context_defaults": {
+    "recipient_type": "known_counterparty",
+    "time_of_day": "day",
+    "velocity": "normal",
+    "has_documents": true
+  }
+}

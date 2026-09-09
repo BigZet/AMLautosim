@@ -26,7 +26,12 @@ def snapshot_specs(config: dict[str, Any]) -> dict[tuple[str, int], CardSpec]:
 def freeze_game_config(
     config: dict[str, Any], cards: list[ActionCard]
 ) -> dict[str, Any]:
-    """Create a server-owned snapshot from validated settings and current cards."""
+    """Validate settings before creating a server-owned snapshot of current cards."""
+    from src.aml_workshop_simulator.services.round_configuration import (
+        validate_game_config,
+    )
+
+    validate_game_config(cards, config)
     result = deepcopy(config)
     pairs = {(ref["code"], ref["version"]) for ref in config["operations"]}
     known = {(card.code, card.version): card_spec_from_row(card) for card in cards}

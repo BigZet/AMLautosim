@@ -28,11 +28,11 @@
       ]
     },
     {
-      "code": "cash_deposit",
+      "code": "incoming_transfer",
       "version": 1,
-      "title": "Внести наличные",
-      "description": "Пополнение счета через банкомат или кассу.",
-      "category": "Наличные",
+      "title": "Получить входящий перевод",
+      "description": "Зачисление от банка, криптобиржи или платежного сервиса. Источник и связь с отправителем влияют на затраты и учебный риск.",
+      "category": "Поступление",
       "flow": "credit",
       "risk_weight": "18.00",
       "energy_cost": 3,
@@ -42,14 +42,13 @@
       "max_amount": "80000.00",
       "max_occurrences": 3,
       "requires_card_code": null,
-      "quota_category": "cash",
+      "quota_category": null,
       "channels": [
-        "atm",
-        "branch"
+        "bank"
       ],
       "default_visible_params": [
-        "channel",
-        "action.funds_source"
+        "action.transfer_source",
+        "action.sender_relationship"
       ]
     },
     {

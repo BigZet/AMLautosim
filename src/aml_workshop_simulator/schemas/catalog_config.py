@@ -87,6 +87,7 @@ def validate_configuration_files() -> None:
     config = GameConfigIn.model_validate(base_game_config())
     parameters = load_config("parameters.json")
     keys = set()
+    specs = {}
     for entry in CARD_CATALOG:
         card = CardConfig.model_validate(entry)
         key = (card.code, card.version)
@@ -94,6 +95,7 @@ def validate_configuration_files() -> None:
             raise ValueError(f"Duplicate card: {key}")
         keys.add(key)
         spec = card_spec_from_catalog(entry, 1)
+        specs[key] = spec
         if not set(card.default_visible_params) <= set(declared_params(spec)):
             raise ValueError(f"Unknown visible parameters: {key}")
         for field in (*spec.fields, *spec.context_fields):
@@ -104,5 +106,8 @@ def validate_configuration_files() -> None:
             raise ValueError(f"Unknown dependency: {card.requires_card_code}")
     for context in parameters["context_fields"].values():
         ParameterConfig.model_validate(context)
-    if not {(o.code, o.version) for o in config.operations} <= keys:
-        raise ValueError("Base round references unknown card versions")
+    from src.aml_workshop_simulator.schemas.game_config_validation import (
+        validate_config_against_catalog,
+    )
+
+    validate_config_against_catalog(specs, config.dump())

@@ -188,9 +188,8 @@ class SimulatorAPIClient:
         expected_revision: int,
         session_id: str,
         client_mutation_id: str,
-        label: str | None = None,
     ) -> dict[str, Any]:
-        """Full draft replacement; a change appends a new saved version.
+        """Full draft replacement with optimistic concurrency.
 
         `client_mutation_id` makes the call safe to retry: the same id with the
         same payload returns the original result instead of creating a second
@@ -203,7 +202,6 @@ class SimulatorAPIClient:
                 "expected_revision": expected_revision,
                 "client_mutation_id": client_mutation_id,
                 "steps": steps,
-                "label": label,
             },
             headers=self._headers(session_id),
             timeout=TIMEOUTS["WRITE"],
@@ -247,12 +245,21 @@ class SimulatorAPIClient:
         )
 
     def submit_scenario(
-        self, round_id: int, expected_revision: int, session_id: str
+        self,
+        round_id: int,
+        steps: list[dict[str, Any]],
+        expected_revision: int,
+        session_id: str,
+        client_mutation_id: str,
     ) -> dict[str, Any]:
         return self._send(
             "POST",
             self._url(f"/rounds/{round_id}/scenario/submit"),
-            json={"expected_revision": expected_revision},
+            json={
+                "steps": steps,
+                "expected_revision": expected_revision,
+                "client_mutation_id": client_mutation_id,
+            },
             headers=self._headers(session_id),
             timeout=TIMEOUTS["WRITE"],
         )

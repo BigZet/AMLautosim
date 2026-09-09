@@ -138,7 +138,7 @@ def chain(request_api, round_id):
     cards = {c["code"]: c for c in request_api("GET", f"/rounds/{round_id}/cards")}
     from scripts.check_game_balance import ROUTES
 
-    route = [(code, f"{amount:.2f}") for code, amount in ROUTES["cash_funding"]]
+    route = [(code, f"{amount:.2f}") for code, amount in ROUTES["incoming_funding"]]
 
     def build(count=9):
         return [
@@ -168,3 +168,22 @@ def sql(api):
     return lambda statement, parameters=None: api.portal.call(
         execute, statement, parameters
     )
+
+
+@pytest.fixture(params=["removed_field", "invalid_default", "inverted_range"])
+def invalid_game_config(request):
+    from src.aml_workshop_simulator.core.game_config import base_game_config
+
+    config = base_game_config()
+    operation = next(o for o in config["operations"] if o["code"] == "incoming_transfer")
+    if request.param == "removed_field":
+        operation["visible_params"] = ["action.funds_source"]
+        message = "не объявлен"
+    elif request.param == "invalid_default":
+        operation["visible_params"] = ["action.sender_relationship"]
+        operation["defaults"] = {"action.transfer_source": "nonexistent_source"}
+        message = "недопустимо"
+    else:
+        operation["min_amount"] = "90000.00"
+        message = "минимальная сумма больше максимальной"
+    return config, message

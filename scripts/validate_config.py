@@ -28,20 +28,19 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.aml_workshop_simulator.schemas.catalog_config import (  # noqa: E402
-    validate_configuration_files,
-)
+# Import game configuration only when validation runs, after --config-dir is set.
+# Importing earlier would cache the default directory and silently ignore the flag.
+def validate_configuration_files() -> None:
+    from src.aml_workshop_simulator.schemas.catalog_config import (
+        validate_configuration_files as validate,
+    )
 
-# Every check here must be static: no DB session, no running app. A check
-# that needs live data (e.g. reconciling config against `action_cards` rows
-# in the DB, like admin.common.validate_game_config does) belongs in a
-# migration/seed step instead, not here.
-#
-# label -> zero-arg callable that raises on failure.
+    validate()
+
+
 Validator = Callable[[], None]
 VALIDATORS: list[tuple[str, Validator]] = [
     ("schemas.catalog_config.validate_configuration_files", validate_configuration_files),
-    # ("domain.rules.validate_structure(base_round)", ...),  # add as written
 ]
 
 

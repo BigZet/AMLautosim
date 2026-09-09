@@ -55,3 +55,24 @@ def test_salary_requires_sacrificing_resources_elsewhere():
     salary = accelerated["per_step"][0]
     assert salary["energy_cost"] == 8
     assert salary["time_cost"] == 9
+
+
+def test_salary_default_costs_and_credit_at_maximum():
+    snapshot = play([("salary", 30000)])[0]
+    assert snapshot["valid"]
+    assert snapshot["per_step"][0]["energy_cost"] == 8
+    assert snapshot["per_step"][0]["time_cost"] == 9
+    assert snapshot["resources_after"]["balance"] == "210000.00"
+
+
+@pytest.mark.parametrize(
+    "route,reason",
+    [
+        ([("salary", 30000.01)], "amount_out_of_range"),
+        ([("salary", 30000), ("salary", 20000)], "max_occurrences_exceeded"),
+    ],
+)
+def test_salary_amount_and_occurrence_limits(route, reason):
+    snapshot = play(route)[0]
+    assert not snapshot["valid"]
+    assert reason in {v["reason"] for v in snapshot["violations"]}

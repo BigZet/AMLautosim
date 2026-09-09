@@ -10,11 +10,11 @@
       ]
     },
     {
-      "code": "cash_deposit",
+      "code": "incoming_transfer",
       "version": 1,
       "visible_params": [
-        "channel",
-        "action.funds_source"
+        "action.transfer_source",
+        "action.sender_relationship"
       ]
     },
     {
@@ -48,7 +48,7 @@
     "max_night_operations": 2,
     "max_anonymous_operations": 2,
     "category_limits": {
-      "cash": "240000.00",
+      "cash": "120000.00",
       "anonymous": "60000.00"
     }
   },

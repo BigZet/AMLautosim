@@ -240,17 +240,72 @@ conflict.
 
 ```json
 {
-  "code": "cash_deposit",
+  "code": "incoming_transfer",
   "version": 1,
   "fields": [
     {
-      "key": "funds_source",
-      "label": "Источник наличных",
+      "key": "transfer_source",
+      "label": "Источник перевода",
       "kind": "select",
-      "required": true,
+      "default": "domestic_bank",
+      "help": "Откуда поступают деньги. Все суммы — в рублевом эквиваленте; это учебные профили источников.",
       "options": [
-        {"value": "documented_savings", "label": "Подтвержденные накопления"},
-        {"value": "unexplained", "label": "Источник не указан"}
+        {
+          "value": "domestic_bank",
+          "label": "Российский банк",
+          "risk_points": -2,
+          "time_cost": 1,
+          "description": "Стандартный банковский источник: требуется время на сверку перевода"
+        },
+        {
+          "value": "foreign_bank_kg",
+          "label": "Зарубежный банк — Кыргызстан (Киргизия)",
+          "risk_points": 4,
+          "time_cost": 2,
+          "energy_cost": 1,
+          "description": "Учебный международный перевод требует дополнительной сверки реквизитов и происхождения средств"
+        },
+        {
+          "value": "crypto_exchange",
+          "label": "Криптобиржа",
+          "risk_points": 9,
+          "energy_cost": 1,
+          "description": "Зачисление после продажи криптоактивов: в учебном профиле меньше контекста о предшествующих операциях"
+        },
+        {
+          "value": "payment_service",
+          "label": "Платежный сервис",
+          "risk_points": 5,
+          "description": "Посредник ускоряет зачисление, но в учебном профиле дает меньше сведений о первоначальном отправителе"
+        }
+      ]
+    },
+    {
+      "key": "sender_relationship",
+      "label": "Связь с отправителем",
+      "kind": "select",
+      "default": "regular_sender",
+      "help": "Профиль владельца исходного счета. Прогретый аккаунт в игре означает аккаунт с историей операций; отправитель при этом остается анонимным.",
+      "options": [
+        {
+          "value": "anonymous_new_account",
+          "label": "Анонимный отправитель — новый аккаунт",
+          "risk_points": 12,
+          "description": "В учебном профиле отправитель неизвестен и история операций отсутствует"
+        },
+        {
+          "value": "anonymous_established_account",
+          "label": "Анонимный отправитель — прогретый аккаунт",
+          "risk_points": 6,
+          "time_cost": 1,
+          "description": "В учебном профиле есть история операций, ее просмотр требует времени; личность отправителя не подтверждена"
+        },
+        {
+          "value": "regular_sender",
+          "label": "Постоянный отправитель",
+          "risk_points": -1,
+          "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+        }
       ]
     }
   ]

@@ -37,14 +37,7 @@ RESOURCE_WEIGHT_LABELS = {
 OVERRIDES = (
     ("min_amount", "Мин. сумма", 0.01, float(LIMITS["max_balance"]), 1000.0),
     ("max_amount", "Макс. сумма", 0.01, float(LIMITS["max_balance"]), 1000.0),
-    ("max_frequency", "Повторов в шаге", 1.0, float(LIMITS["max_frequency"]), 1.0),
-    (
-        "round_frequency_limit",
-        "Повторов за раунд",
-        1.0,
-        float(LIMITS["max_actions"]),
-        1.0,
-    ),
+    ("max_occurrences", "Карточек за раунд", 1.0, float(LIMITS["max_actions"]), 1.0),
     ("energy_cost", "Энергия", 0.0, float(LIMITS["max_operation_cost"]), 1.0),
     ("time_cost", "Время", 0.0, float(LIMITS["max_operation_cost"]), 1.0),
     ("fee_rate", "Комиссия (доля, 0.01 = 1%)", 0.0, 1.0, 0.000001),
@@ -138,8 +131,8 @@ def render_editor(
     config = deepcopy(config)
     if config.get("card_snapshots"):
         # Show the same frozen catalog the server uses for this existing round.
-        from src.aml_workshop_simulator.api.routers.rounds import card_out
         from src.aml_workshop_simulator.services.configuration import snapshot_specs
+        from src.aml_workshop_simulator.services.projections import card_out
 
         frozen = {
             key: card_out(spec).model_dump()
@@ -285,7 +278,7 @@ def render_editor(
 
     st.markdown("#### Доступные операции и видимые параметры")
     st.caption(
-        "Для одной операции участник видит сумму, при необходимости число повторов "
+        "Для одной операции участник видит сумму "
         f"и не более {MAX_VISIBLE_PARAMS} дополнительных параметров. Остальные "
         "параметры получают серверные значения по умолчанию."
     )
@@ -300,25 +293,13 @@ def render_editor(
         stored = operations.get(key)
         operation_prefix = f"{key_prefix}_{card['code']}_v{card['version']}"
         with st.container(border=True):
-            head, freq = st.columns([3, 1])
-            with head:
-                enabled = st.checkbox(
-                    f"{card['title']} · {card['category']}",
-                    value=stored is not None,
-                    key=f"{operation_prefix}_enabled",
-                )
+            enabled = st.checkbox(
+                f"{card['title']} · {card['category']}",
+                value=stored is not None,
+                key=f"{operation_prefix}_enabled",
+            )
             if not enabled:
                 continue
-            with freq:
-                show_frequency = st.checkbox(
-                    "Повторы",
-                    value=bool(
-                        stored.get("show_frequency", card.get("show_frequency", True))
-                        if stored
-                        else card.get("show_frequency", True)
-                    ),
-                    key=f"{operation_prefix}_frequency",
-                )
             available = declarable_params(card)
             default_visible = (
                 list(stored.get("visible_params", []))
@@ -337,7 +318,6 @@ def render_editor(
                 "code": card["code"],
                 "version": card["version"],
                 "visible_params": visible,
-                "show_frequency": show_frequency,
             }
             with st.expander("Числовые параметры операции", expanded=False):
                 override_columns = st.columns(4)

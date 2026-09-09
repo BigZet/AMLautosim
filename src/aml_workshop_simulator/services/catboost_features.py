@@ -37,6 +37,12 @@ def extract_catboost_features(
             "outflow_to_inflow_ratio": 0.0,
             "fees_total": 0.0,
             "fees_ratio": 0.0,
+            "incoming_transfer_sum": 0.0,
+            "incoming_transfer_count": 0,
+            "crypto_exchange_inflow_sum": 0.0,
+            "foreign_bank_inflow_sum": 0.0,
+            "primary_incoming_source": "none",
+            "primary_sender_relationship": "none",
             "cash_inflow_sum": 0.0,
             "cash_outflow_sum": 0.0,
             "cash_turnover_ratio": 0.0,
@@ -90,6 +96,12 @@ def extract_catboost_features(
     total_inflow = 0.0
     total_outflow = 0.0
     fees_total = 0.0
+    incoming_sum = 0.0
+    incoming_count = 0
+    crypto_inflow = 0.0
+    foreign_inflow = 0.0
+    source_counts: dict[str, int] = {}
+    sender_counts: dict[str, int] = {}
     cash_inflow = 0.0
     cash_outflow = 0.0
     anon_recipient_sum = 0.0
@@ -124,6 +136,29 @@ def extract_catboost_features(
         has_docs = bool(ctx["has_documents"])
         channel_counts[channel] = channel_counts.get(channel, 0) + 1
         fees_total += float(money(money(amount) * freq * spec.fee_rate))
+
+        if spec.code == "incoming_transfer":
+            details = {field["key"]: field["default"] for field in spec.fields}
+            operation = policy.for_card(spec.key)
+            if operation:
+                details.update(
+                    {
+                        key.removeprefix("action."): value
+                        for key, value in operation.pinned.items()
+                        if key.startswith("action.")
+                    }
+                )
+            details.update(step.get("action_details") or {})
+            source = details["transfer_source"]
+            sender = details["sender_relationship"]
+            source_counts[source] = source_counts.get(source, 0) + freq
+            sender_counts[sender] = sender_counts.get(sender, 0) + freq
+            incoming_sum += gross
+            incoming_count += freq
+            if source == "crypto_exchange":
+                crypto_inflow += gross
+            elif source == "foreign_bank_kg":
+                foreign_inflow += gross
 
         if spec.flow == "credit":
             total_inflow += gross
@@ -202,6 +237,16 @@ def extract_catboost_features(
         "outflow_to_inflow_ratio": round(total_outflow / max(1.0, total_inflow), 4),
         "fees_total": round(fees_total, 2),
         "fees_ratio": round(fees_total / max(1.0, total_turnover), 4),
+        "incoming_transfer_sum": round(incoming_sum, 2),
+        "incoming_transfer_count": incoming_count,
+        "crypto_exchange_inflow_sum": round(crypto_inflow, 2),
+        "foreign_bank_inflow_sum": round(foreign_inflow, 2),
+        "primary_incoming_source": max(source_counts, key=source_counts.get)
+        if source_counts
+        else "none",
+        "primary_sender_relationship": max(sender_counts, key=sender_counts.get)
+        if sender_counts
+        else "none",
         "cash_inflow_sum": round(cash_inflow, 2),
         "cash_outflow_sum": round(cash_outflow, 2),
         "cash_turnover_ratio": round(
@@ -245,4 +290,10 @@ def get_catboost_feature_names() -> list[str]:
 
 def get_catboost_categorical_feature_names() -> list[str]:
     """Return the list of categorical feature names to pass to CatBoostPool / cat_features."""
-    return ["primary_channel", "primary_category", "most_frequent_card"]
+    return [
+        "primary_channel",
+        "primary_category",
+        "most_frequent_card",
+        "primary_incoming_source",
+        "primary_sender_relationship",
+    ]

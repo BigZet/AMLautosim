@@ -21,34 +21,34 @@ from src.aml_workshop_simulator.services.scenario_service import canonical_steps
 
 ROUTES = {
     "transfers": [
-        ("cash_deposit", 80000),
+        ("incoming_transfer", 80000),
         ("card_transfer", 80000),
         ("card_transfer", 80000),
-        ("cash_deposit", 80000),
+        ("incoming_transfer", 80000),
         ("card_transfer", 80000),
         ("card_transfer", 80000),
-        ("cash_deposit", 70000),
+        ("incoming_transfer", 70000),
         ("card_transfer", 80000),
     ],
     "mixed": [
         ("salary", 30000),
         ("card_transfer", 80000),
         ("card_transfer", 80000),
-        ("cash_deposit", 70000),
+        ("incoming_transfer", 70000),
         ("card_transfer", 80000),
-        ("cash_deposit", 70000),
-        ("cash_deposit", 55000),
+        ("incoming_transfer", 70000),
+        ("incoming_transfer", 55000),
         ("card_transfer", 80000),
         ("card_transfer", 80000),
     ],
-    "cash_funding": [
-        ("cash_deposit", 80000),
+    "incoming_funding": [
+        ("incoming_transfer", 80000),
         ("card_transfer", 78000),
         ("card_transfer", 78000),
-        ("cash_deposit", 80000),
+        ("incoming_transfer", 80000),
         ("card_transfer", 78000),
         ("cash_withdrawal", 10000),
-        ("cash_deposit", 70000),
+        ("incoming_transfer", 70000),
         ("card_transfer", 78000),
         ("card_transfer", 78000),
     ],
@@ -56,16 +56,16 @@ ROUTES = {
 
 # Long route without salary; the resource budget limits usable slots.
 LONG_ROUTE = [
-    ("cash_deposit", 80000),
+    ("incoming_transfer", 80000),
     ("card_transfer", 48750),
     ("card_transfer", 48750),
-    ("cash_deposit", 80000),
+    ("incoming_transfer", 80000),
     ("card_transfer", 48750),
     ("card_transfer", 48750),
     ("cash_withdrawal", 10000),
     ("card_transfer", 48750),
     ("card_transfer", 48750),
-    ("cash_deposit", 70000),
+    ("incoming_transfer", 70000),
     ("card_transfer", 48750),
     ("card_transfer", 48750),
 ]
@@ -73,7 +73,14 @@ LONG_ROUTE = [
 ROUTE_OPTIONS = {"mixed": {"velocity": "rapid"}}
 
 
-def play(route, velocity="normal", documents=True, branch=False):
+def play(
+    route,
+    velocity="normal",
+    documents=True,
+    branch=False,
+    transfer_source="domestic_bank",
+    sender_relationship="regular_sender",
+):
     config = base_game_config()
     specs = {
         s.key: s
@@ -89,8 +96,13 @@ def play(route, velocity="normal", documents=True, branch=False):
             context["velocity"] = velocity
         if code == "card_transfer":
             context["has_documents"] = documents
-        if branch and code != "card_transfer":
+        if branch and code in ("salary", "cash_withdrawal"):
             context["channel"] = "branch"
+        details = {f["key"]: f["default"] for f in spec.fields}
+        if code == "incoming_transfer":
+            details.update(
+                transfer_source=transfer_source, sender_relationship=sender_relationship
+            )
         inputs.append(
             ScenarioStepIn.model_validate(
                 {
@@ -98,7 +110,7 @@ def play(route, velocity="normal", documents=True, branch=False):
                     "card": {"id": spec.id, "code": code, "version": 1},
                     "amount": str(amount),
                     "context": context,
-                    "action_details": {f["key"]: f["default"] for f in spec.fields},
+                    "action_details": details,
                 }
             )
         )

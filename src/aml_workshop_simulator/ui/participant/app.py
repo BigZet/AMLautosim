@@ -170,6 +170,7 @@ table.aml-board th, table.aml-board td, table.aml-table th, table.aml-table td {
 """
 
 STATUS_LABELS = {
+    "editing": "Черновик",
     "draft": "Черновик",
     "submitted": "Отправлен",
     "scored": "Оценен",
@@ -355,7 +356,6 @@ def save_draft(
     session_id: str,
     *,
     quiet: bool = False,
-    label: str | None = None,
 ) -> dict[str, Any] | None:
     """PUT the local draft; returns the canonical scenario or None on error."""
     if st.session_state.get("pending_command"):
@@ -368,7 +368,6 @@ def save_draft(
             st.session_state["server_revision"],
             session_id,
             client_mutation_id=str(uuid.uuid4()),
-            label=label or None,
         )
     except APIClientError as error:
         apply_error(error)
@@ -402,7 +401,10 @@ def submit_scenario(client: Any, round_id: int, session_id: str) -> None:
         return
     st.session_state["pending_command"] = "submit"
     try:
-        scenario = client.submit_scenario(round_id, saved["revision"], session_id)
+        scenario = client.submit_scenario(
+            round_id, saved["steps"], saved["revision"], session_id,
+            client_mutation_id=str(uuid.uuid4()),
+        )
     except APIClientError as error:
         apply_error(error)
         return
@@ -553,9 +555,8 @@ _ICON_PATHS = {
         <rect x="3" y="7" width="18" height="13" rx="2"/>
         <path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M12 10v7m0 0-3-3m3 3 3-3"/>
     """,
-    "cash_deposit": """
-        <rect x="4" y="3" width="16" height="18" rx="2"/>
-        <path d="M4 8h16M8 17h8M12 10v5m0 0-2-2m2 2 2-2"/>
+    "incoming_transfer": """
+        <path d="M12 3v12m0 0-4-4m4 4 4-4M4 15v5h16v-5"/>
     """,
     "card_transfer": """
         <path d="M4 8h14m0 0-3-3m3 3-3 3M20 16H6m0 0 3-3m-3 3 3 3"/>
@@ -604,7 +605,6 @@ def default_step(card: dict[str, Any]) -> dict[str, Any]:
         "step_id": str(uuid.uuid4()),
         "card": {"id": card["id"], "code": card["code"], "version": card["version"]},
         "amount": f"{float(card['min_amount']):.2f}",
-        "frequency": 1,
         "context": context,
         "action_details": details,
     }
@@ -662,8 +662,6 @@ def update_step_from_widgets(card: dict[str, Any], step_id: str) -> None:
     }
     prefix = f"edit_{step_id}"
     step["amount"] = f"{float(st.session_state[f'{prefix}_amount']):.2f}"
-    if card.get("show_frequency", True):
-        step["frequency"] = int(st.session_state[f"{prefix}_frequency"])
     for param in card.get("visible_params", []):
         namespace, key = param["namespace"], param["key"]
         if namespace == "channel":
@@ -687,14 +685,11 @@ def render_step_form(
     """Render one bounded control per row for every exposed parameter."""
     context = dict(step.get("context") or {})
     details = dict(step.get("action_details") or {})
-    show_frequency = bool(card.get("show_frequency", True))
 
     # A widget with a stable key keeps its frontend value even when its default
     # changes. Explicitly hydrate editor controls after loading a server version.
     if on_change is not None and f"{key_prefix}_initialized" not in st.session_state:
         st.session_state[f"{key_prefix}_amount"] = float(step["amount"])
-        if show_frequency:
-            st.session_state[f"{key_prefix}_frequency"] = int(step.get("frequency", 1))
         for param in card.get("visible_params", []):
             namespace, key = param["namespace"], param["key"]
             if namespace == "channel":
@@ -732,24 +727,6 @@ def render_step_form(
             on_change=on_change,
         )
 
-    frequency = int(step.get("frequency", 1))
-    if show_frequency:
-        max_frequency = int(card["max_frequency"])
-        current_frequency = min(max(frequency, 1), max_frequency)
-        with field_columns("Повторов"):
-            frequency = st.number_input(
-                "Повторов",
-                min_value=1,
-                max_value=max_frequency,
-                value=current_frequency,
-                step=1,
-                key=f"{key_prefix}_frequency",
-                label_visibility="collapsed",
-                on_change=on_change,
-            )
-    else:
-        frequency = 1
-
     for param in card.get("visible_params", []):
         with field_columns(param["label"]):
             if param["namespace"] == "channel":
@@ -780,7 +757,6 @@ def render_step_form(
     return {
         **step,
         "amount": f"{float(amount):.2f}",
-        "frequency": int(frequency),
         "context": context,
         "action_details": details,
     }
@@ -1272,7 +1248,7 @@ def scenario_workspace() -> None:
 
     scenario = st.session_state.get("server_scenario")
     status = (scenario or {}).get("status", "none")
-    editable = status in {"draft", "none"} and editable_round
+    editable = status in {"editing", "none"} and editable_round
 
     marker("scenario-status", status)
     marker("scenario-revision", (scenario or {}).get("revision", 0))
@@ -1298,8 +1274,6 @@ def scenario_workspace() -> None:
             "идет и сценарий находится в черновике."
         )
         render_chain(client, round_id, session_id, cards_by_key, editable=False)
-        with st.expander("История сохранённых черновиков", expanded=False):
-            render_versions(client, round_id, session_id)
         return
 
     builder_column, chain_column = st.columns([1.0, 1.1], gap="large")
@@ -1322,9 +1296,6 @@ def scenario_workspace() -> None:
         marker("submit-enabled", "true" if can_submit else "false")
         marker("draft-synchronized", "true" if synchronized else "false")
 
-        label = st.text_input(
-            "Название версии (необязательно)", key="draft_label", max_chars=120
-        )
         save_column, submit_column = st.columns(2)
         with save_column:
             if st.button(
@@ -1333,7 +1304,7 @@ def scenario_workspace() -> None:
                 use_container_width=True,
                 disabled=bool(st.session_state.get("pending_command")),
             ):
-                save_draft(client, round_id, session_id, label=label)
+                save_draft(client, round_id, session_id)
                 st.rerun(scope="fragment")
         with submit_column:
             if st.button(
@@ -1350,10 +1321,6 @@ def scenario_workspace() -> None:
                 "Отправка доступна, когда сохранённая на сервере цепочка не содержит "
                 "нарушений и достигает цели раунда."
             )
-
-    st.divider()
-    st.subheader("История сохранённых черновиков")
-    render_versions(client, round_id, session_id)
 
 
 def page_scenario() -> None:
@@ -1537,4 +1504,5 @@ def main() -> None:
     navigation.run()
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -76,11 +76,6 @@
       "time_of_day",
       "has_documents"
     ],
-    "cash_deposit": [
-      "time_of_day",
-      "velocity",
-      "has_documents"
-    ],
     "card_transfer": [
       "recipient_type",
       "time_of_day",
@@ -90,6 +85,11 @@
     "cash_withdrawal": [
       "time_of_day",
       "velocity"
+    ],
+    "incoming_transfer": [
+      "time_of_day",
+      "velocity",
+      "has_documents"
     ]
   },
   "action_fields": {
@@ -146,71 +146,6 @@
             "label": "Без назначения",
             "risk_points": 8,
             "description": "Отсутствие назначения затрудняет проверку источника дохода"
-          }
-        ]
-      }
-    ],
-    "cash_deposit": [
-      {
-        "key": "funds_source",
-        "label": "Источник наличных",
-        "kind": "select",
-        "default": "documented_savings",
-        "options": [
-          {
-            "value": "documented_savings",
-            "label": "Подтвержденные накопления",
-            "risk_points": -2,
-            "time_cost": 1,
-            "description": "Понятный источник средств снижает неопределенность"
-          },
-          {
-            "value": "asset_sale",
-            "label": "Продажа имущества",
-            "risk_points": 2,
-            "time_cost": 0,
-            "description": "Разовое поступление требует подтверждения сделки",
-            "energy_cost": 1
-          },
-          {
-            "value": "borrowed_cash",
-            "label": "Заемные средства",
-            "risk_points": 5,
-            "description": "Заемные наличные сложнее связать с финансовым профилем"
-          },
-          {
-            "value": "unexplained",
-            "label": "Источник не указан",
-            "risk_points": 12,
-            "energy_cost": 1,
-            "description": "Необъясненные наличные дают сильный сигнал риска"
-          }
-        ]
-      },
-      {
-        "key": "deposit_pattern",
-        "label": "Способ внесения",
-        "kind": "select",
-        "default": "single_location",
-        "options": [
-          {
-            "value": "single_location",
-            "label": "Одно место",
-            "risk_points": -1,
-            "description": "Обычное внесение в одном месте выглядит последовательнее"
-          },
-          {
-            "value": "several_atms",
-            "label": "Несколько банкоматов",
-            "risk_points": 6,
-            "energy_cost": 1,
-            "description": "Разные точки внесения похожи на распределенную схему"
-          },
-          {
-            "value": "third_party",
-            "label": "Через третье лицо",
-            "risk_points": 10,
-            "description": "Внесение третьим лицом усложняет установление источника"
           }
         ]
       }
@@ -338,6 +273,73 @@
             "risk_points": 7,
             "energy_cost": 1,
             "description": "Снятие за границей заметно отличается от обычного поведения"
+          }
+        ]
+      }
+    ],
+    "incoming_transfer": [
+      {
+        "key": "transfer_source",
+        "label": "Источник перевода",
+        "kind": "select",
+        "default": "domestic_bank",
+        "help": "Откуда поступают деньги. Все суммы — в рублевом эквиваленте; это учебные профили источников.",
+        "options": [
+          {
+            "value": "domestic_bank",
+            "label": "Российский банк",
+            "risk_points": -2,
+            "time_cost": 1,
+            "description": "Стандартный банковский источник: требуется время на сверку перевода"
+          },
+          {
+            "value": "foreign_bank_kg",
+            "label": "Зарубежный банк — Кыргызстан (Киргизия)",
+            "risk_points": 4,
+            "time_cost": 2,
+            "energy_cost": 1,
+            "description": "Учебный международный перевод требует дополнительной сверки реквизитов и происхождения средств"
+          },
+          {
+            "value": "crypto_exchange",
+            "label": "Криптобиржа",
+            "risk_points": 9,
+            "energy_cost": 1,
+            "description": "Зачисление после продажи криптоактивов: в учебном профиле меньше контекста о предшествующих операциях"
+          },
+          {
+            "value": "payment_service",
+            "label": "Платежный сервис",
+            "risk_points": 5,
+            "description": "Посредник ускоряет зачисление, но в учебном профиле дает меньше сведений о первоначальном отправителе"
+          }
+        ]
+      },
+      {
+        "key": "sender_relationship",
+        "label": "Связь с отправителем",
+        "kind": "select",
+        "default": "regular_sender",
+        "help": "Профиль владельца исходного счета. Прогретый аккаунт в игре означает аккаунт с историей операций; отправитель при этом остается анонимным.",
+        "options": [
+          {
+            "value": "anonymous_new_account",
+            "label": "Анонимный отправитель — новый аккаунт",
+            "risk_points": 12,
+            "description": "В учебном профиле отправитель неизвестен и история операций отсутствует"
+          },
+          {
+            "value": "anonymous_established_account",
+            "label": "Анонимный отправитель — прогретый аккаунт",
+            "risk_points": 6,
+            "time_cost": 1,
+            "description": "В учебном профиле есть история операций, ее просмотр требует времени; личность отправителя не подтверждена"
+          },
+          {
+            "value": "regular_sender",
+            "label": "Постоянный отправитель",
+            "risk_points": -1,
+            "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
           }
         ]
       }

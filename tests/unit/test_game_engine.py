@@ -31,6 +31,7 @@ def game():
     }
     config["objectives"] = {"target_outflow": "150000.00", "max_actions": 8}
     config["constraints"]["max_identical_steps"] = 3
+    config["constraints"]["category_limits"]["cash"] = "150000.00"
     for operation in config["operations"]:
         if operation["code"] == "cash_withdrawal":
             operation["max_occurrences"] = 3

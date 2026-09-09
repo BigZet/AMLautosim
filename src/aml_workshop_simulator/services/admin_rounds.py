@@ -25,7 +25,6 @@ from src.aml_workshop_simulator.services.configuration import freeze_game_config
 from src.aml_workshop_simulator.services.round_configuration import (
     config_version,
     round_out,
-    validate_game_config,
 )
 
 
@@ -36,7 +35,6 @@ async def prepare_config(db: AsyncSession, config: GameConfigIn | None = None) -
         .scalars()
         .all()
     )
-    validate_game_config(cards, value)
     frozen = freeze_game_config(value, cards)
     frozen["config_version"] = config_version(frozen)
     return frozen

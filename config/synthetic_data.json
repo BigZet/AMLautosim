@@ -9,19 +9,15 @@
           "card_code": "salary",
           "amount": {
             "choices": [
-              50000,
-              80000,
-              120000
+              20000,
+              25000,
+              30000
             ]
           },
-          "frequency": 1,
           "context": {
-            "channel": "bank",
-            "time_of_day": "day",
-            "has_documents": true
+            "channel": "bank"
           },
           "details": {
-            "employer_profile": "verified_employer",
             "income_basis": "payroll_registry"
           }
         }
@@ -30,102 +26,100 @@
         {
           "card_code": "card_transfer",
           "amount": {
-            "min": 5000,
-            "max": 40000
-          },
-          "frequency": {
-            "min": 1,
-            "max": 2
+            "min": 10000,
+            "max": 80000
           },
           "context": {
-            "channel": "mobile"
+            "velocity": {
+              "choices": [
+                "spaced",
+                "normal",
+                "rapid"
+              ]
+            },
+            "has_documents": {
+              "choices": [
+                true,
+                false
+              ]
+            }
           },
           "details": {}
         },
         {
           "card_code": "cash_withdrawal",
           "amount": {
-            "min": 5000,
-            "max": 40000
-          },
-          "frequency": {
-            "min": 1,
-            "max": 2
+            "min": 10000,
+            "max": 100000
           },
           "context": {
-            "channel": "atm"
+            "channel": {
+              "choices": [
+                "atm",
+                "branch"
+              ]
+            },
+            "velocity": {
+              "choices": [
+                "spaced",
+                "normal",
+                "rapid"
+              ]
+            }
           },
           "details": {}
-        }
-      ]
-    },
-    "smurfing": {
-      "initial": [
-        {
-          "card_code": "cash_deposit",
-          "amount": 30000,
-          "frequency": 3,
-          "context": {
-            "channel": "atm",
-            "time_of_day": "night",
-            "velocity": "rapid",
-            "has_documents": false
-          },
-          "details": {
-            "funds_source": "unexplained",
-            "deposit_pattern": "several_atms"
-          }
-        }
-      ],
-      "repeat": [
-        {
-          "card_code": "card_transfer",
-          "amount": 29000,
-          "frequency": 1,
-          "context": {
-            "channel": "mobile",
-            "recipient_type": "new_counterparty",
-            "time_of_day": "night",
-            "velocity": "rapid",
-            "has_documents": false
-          },
-          "details": {
-            "transfer_purpose": "no_purpose",
-            "recipient_relationship": "unknown"
-          }
         }
       ]
     },
     "rapid_cash_out": {
       "initial": [
         {
-          "card_code": "cash_deposit",
-          "amount": 100000,
-          "frequency": 1,
-          "context": {
-            "channel": "atm",
-            "time_of_day": "evening",
-            "velocity": "rapid",
-            "has_documents": false
+          "card_code": "incoming_transfer",
+          "amount": {
+            "min": 10000,
+            "max": 80000
           },
+          "context": {},
           "details": {
-            "funds_source": "borrowed_cash",
-            "deposit_pattern": "third_party"
+            "transfer_source": {
+              "choices": [
+                "domestic_bank",
+                "foreign_bank_kg",
+                "crypto_exchange",
+                "payment_service"
+              ]
+            },
+            "sender_relationship": {
+              "choices": [
+                "anonymous_new_account",
+                "anonymous_established_account",
+                "regular_sender"
+              ]
+            }
           }
         },
         {
           "card_code": "cash_withdrawal",
-          "amount": 95000,
-          "frequency": 1,
-          "context": {
-            "channel": "atm",
-            "time_of_day": "night",
-            "velocity": "rapid"
+          "amount": {
+            "min": 10000,
+            "max": 100000
           },
-          "details": {
-            "cash_purpose": "unspecified",
-            "withdrawal_location": "other_region"
-          }
+          "context": {
+            "channel": {
+              "choices": [
+                "atm",
+                "branch"
+              ]
+            },
+            "velocity": {
+              "choices": [
+                "spaced",
+                "normal",
+                "rapid"
+              ]
+            }
+          },
+          "details": {}
         }
       ],
       "repeat": []
@@ -134,40 +128,105 @@
       "initial": [
         {
           "card_code": "salary",
-          "amount": 150000,
-          "frequency": 1,
+          "amount": {
+            "choices": [
+              20000,
+              25000,
+              30000
+            ]
+          },
           "context": {
             "channel": "bank"
           },
           "details": {
-            "employer_profile": "small_business",
             "income_basis": "service_contract"
           }
         },
         {
           "card_code": "card_transfer",
-          "amount": 140000,
-          "frequency": 1,
-          "context": {
-            "channel": "web",
-            "recipient_type": "anonymous_wallet",
-            "time_of_day": "evening",
-            "velocity": "rapid",
-            "has_documents": false
+          "amount": {
+            "min": 10000,
+            "max": 80000
           },
-          "details": {
-            "transfer_purpose": "no_purpose",
-            "recipient_relationship": "unknown"
-          }
+          "context": {
+            "velocity": {
+              "choices": [
+                "spaced",
+                "normal",
+                "rapid"
+              ]
+            },
+            "has_documents": {
+              "choices": [
+                true,
+                false
+              ]
+            }
+          },
+          "details": {}
         }
       ],
       "repeat": []
+    },
+    "incoming_series": {
+      "initial": [
+        {
+          "card_code": "incoming_transfer",
+          "amount": {
+            "min": 10000,
+            "max": 80000
+          },
+          "context": {},
+          "details": {
+            "transfer_source": {
+              "choices": [
+                "domestic_bank",
+                "foreign_bank_kg",
+                "crypto_exchange",
+                "payment_service"
+              ]
+            },
+            "sender_relationship": {
+              "choices": [
+                "anonymous_new_account",
+                "anonymous_established_account",
+                "regular_sender"
+              ]
+            }
+          }
+        }
+      ],
+      "repeat": [
+        {
+          "card_code": "card_transfer",
+          "amount": {
+            "min": 10000,
+            "max": 80000
+          },
+          "context": {
+            "velocity": {
+              "choices": [
+                "spaced",
+                "normal",
+                "rapid"
+              ]
+            },
+            "has_documents": {
+              "choices": [
+                true,
+                false
+              ]
+            }
+          },
+          "details": {}
+        }
+      ]
     }
   },
   "feature_categories": {
     "salary": "salary",
-    "cash_deposit": "cash",
     "card_transfer": "transfer",
-    "cash_withdrawal": "cash"
+    "cash_withdrawal": "cash",
+    "incoming_transfer": "incoming_transfer"
   }
 }

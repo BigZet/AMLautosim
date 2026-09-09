@@ -4,7 +4,6 @@ from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.domain.channels import channel_label
 from src.aml_workshop_simulator.domain.round_policy import (
-    PARAM_CHANNEL,
     OperationPolicy,
     split_param,
 )
@@ -48,9 +47,7 @@ def card_out(
         params = operation.visible_params
         pinned = dict(operation.pinned)
     else:
-        params = (PARAM_CHANNEL,) + tuple(
-            item for item in spec.default_visible_params if item != PARAM_CHANNEL
-        )
+        params = spec.default_visible_params
         pinned = {}
     visible = [
         rendered
