@@ -17,8 +17,7 @@ class RuleModel(BaseModel):
 
 
 class VelocityTimeIn(RuleModel):
-    per_repeat: int
-    per_extra_repeat: int
+    time_cost: int
 
 
 class DocumentTimeIn(RuleModel):
@@ -74,7 +73,6 @@ class RiskRulesIn(RuleModel):
     channel_points: dict[str, Finite]
     amount_divisor: Decimal = Field(gt=0, allow_inf_nan=False)
     amount_max_points: NonNegative
-    extra_repeat_points: NonNegative
     documents: DocumentRiskIn
     sequence: SequenceRiskIn
     explanation_factor_limit: int = Field(ge=1)

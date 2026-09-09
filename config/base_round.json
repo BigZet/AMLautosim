@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "operations": [
     {
       "code": "salary",
@@ -7,8 +7,7 @@
       "visible_params": [
         "channel",
         "context.time_of_day"
-      ],
-      "show_frequency": false
+      ]
     },
     {
       "code": "cash_deposit",
@@ -16,8 +15,7 @@
       "visible_params": [
         "channel",
         "action.funds_source"
-      ],
-      "show_frequency": true
+      ]
     },
     {
       "code": "card_transfer",
@@ -25,8 +23,7 @@
       "visible_params": [
         "channel",
         "context.recipient_type"
-      ],
-      "show_frequency": true
+      ]
     },
     {
       "code": "cash_withdrawal",
@@ -34,8 +31,7 @@
       "visible_params": [
         "channel",
         "context.time_of_day"
-      ],
-      "show_frequency": true
+      ]
     }
   ],
   "resources": {
@@ -48,7 +44,7 @@
     "max_actions": 8
   },
   "constraints": {
-    "max_identical_steps": 2,
+    "max_identical_steps": 3,
     "max_night_operations": 2,
     "max_anonymous_operations": 2,
     "category_limits": {
@@ -56,7 +52,7 @@
       "anonymous": "75000.00"
     }
   },
-  "ruleset_version": "game-rules-v3",
+  "ruleset_version": "game-rules-v4",
   "scoring": {
     "version": "risk-rules-v2",
     "review_threshold": "35.00",

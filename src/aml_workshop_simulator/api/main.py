@@ -1,150 +1,87 @@
-from __future__ import annotations
+"""FastAPI composition root."""
 
 import uuid
-from typing import Any
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.exceptions import HTTPException
 
-from src.aml_workshop_simulator.api.errors import ApiError
+from src.aml_workshop_simulator.api import error_handlers
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.errors import ApplicationError
+from src.aml_workshop_simulator.db.session import async_engine
 from src.aml_workshop_simulator.schemas.catalog_config import (
     validate_configuration_files,
 )
-
-validate_configuration_files()
-
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version="1.0.0",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc",
-)
-
-#: Request/response headers that must never reach logs or audit events.
-SENSITIVE_HEADERS = {"x-session-id", "authorization", "cookie"}
+from src.aml_workshop_simulator.schemas.common import ErrorEnvelope
 
 
-@app.middleware("http")
-async def correlation_middleware(request: Request, call_next: Any) -> Any:
-    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-    request.state.request_id = request_id
-    response = await call_next(request)
-    response.headers["X-Request-ID"] = request_id
-    response.headers.setdefault("Cache-Control", "no-store")
-    return response
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    validate_configuration_files()
+    try:
+        yield
+    finally:
+        await async_engine.dispose()
 
 
-def _envelope(
-    request: Request,
-    status_code: int,
-    code: str,
-    message: str,
-    details: dict[str, Any] | None = None,
-    headers: dict[str, str] | None = None,
-) -> JSONResponse:
-    request_id = getattr(request.state, "request_id", None)
-    payload = {
-        "code": code,
-        "message": message,
-        "details": details,
-        "request_id": request_id,
-    }
-    response_headers = dict(headers or {})
-    if request_id:
-        response_headers["X-Request-ID"] = request_id
-    return JSONResponse(status_code=status_code, content=payload, headers=response_headers)
-
-
-@app.exception_handler(ApiError)
-async def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
-    return _envelope(
-        request, exc.status_code, exc.code, exc.message, exc.details, exc.headers
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version="2.0.0",
+        lifespan=lifespan,
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        docs_url=f"{settings.API_V1_STR}/docs",
+        redoc_url=f"{settings.API_V1_STR}/redoc",
+        responses={
+            code: {"model": ErrorEnvelope, "description": description}
+            for code, description in {
+                400: "Сценарий не удовлетворяет игровым условиям",
+                401: "Требуется действующая сессия",
+                403: "Недостаточно прав",
+                404: "Ресурс не найден",
+                409: "Конфликт состояния или ревизии",
+                422: "Нарушен контракт запроса",
+                429: "Временное ограничение входа",
+                500: "Ошибка сервиса или скоринга",
+                503: "Сервис не готов",
+            }.items()
+        },
     )
-
-
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-) -> JSONResponse:
-    default_codes = {
-        401: "session_missing",
-        403: "forbidden",
-        404: "not_found",
-        405: "method_not_allowed",
-        409: "conflict",
-        413: "payload_too_large",
-    }
-    code = default_codes.get(exc.status_code, "http_error")
-    return _envelope(request, exc.status_code, code, str(exc.detail))
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
-    violations = []
-    for error in exc.errors():
-        field = ".".join(str(part) for part in error.get("loc", ())[1:]) or "body"
-        reason = error.get("type", "value_error")
-        message = error.get("msg", "Некорректное значение")
-        if field == "password" and reason == "string_too_short":
-            minimum = (error.get("ctx") or {}).get("min_length", 10)
-            message = f"Пароль должен содержать не менее {minimum} символов."
-        violations.append({"field": field, "reason": reason, "message": message})
-
-    # An invalidly formatted credential is still just an invalid credential to
-    # a person signing in.  Keep this response indistinguishable from an
-    # unknown email or a wrong password, and do not expose schema terminology
-    # in either Streamlit login screen.
-    is_login_request = (
-        request.method == "POST"
-        and request.url.path == f"{settings.API_V1_STR}/auth/login"
+    app.add_exception_handler(ApplicationError, error_handlers.api_error_handler)
+    app.add_exception_handler(HTTPException, error_handlers.http_exception_handler)
+    app.add_exception_handler(
+        RequestValidationError, error_handlers.validation_exception_handler
     )
-    credential_fields = {"email", "password"}
-    if (
-        is_login_request
-        and violations
-        and all(violation["field"] in credential_fields for violation in violations)
-    ):
-        return _envelope(
-            request,
-            status.HTTP_401_UNAUTHORIZED,
-            "invalid_credentials",
-            auth.INVALID_CREDENTIALS,
+    app.add_exception_handler(Exception, error_handlers.unhandled_exception_handler)
+
+    @app.middleware("http")
+    async def request_context(request: Request, call_next):
+        candidate = request.headers.get("X-Request-ID", "")
+        request.state.request_id = (
+            candidate
+            if 0 < len(candidate) <= 128
+            and candidate.isascii()
+            and candidate.isprintable()
+            else str(uuid.uuid4())
         )
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request.state.request_id
+        response.headers["Cache-Control"] = "no-store"
+        return response
 
-    response_message = "Запрос не соответствует контракту API"
-    if (
-        len(violations) == 1
-        and violations[0]["field"] == "password"
-        and violations[0]["reason"] == "string_too_short"
+    app.include_router(health.router, tags=["Health"])
+    for prefix, router in (
+        ("auth", auth.router),
+        ("rounds", rounds.router),
+        ("admin", admin.router),
     ):
-        response_message = violations[0]["message"]
-    return _envelope(
-        request,
-        422,
-        "validation_error",
-        response_message,
-        {"violations": violations},
-    )
+        app.include_router(
+            router, prefix=f"{settings.API_V1_STR}/{prefix}", tags=[prefix.title()]
+        )
+    return app
 
 
-@app.exception_handler(Exception)
-async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    return _envelope(
-        request,
-        status.HTTP_500_INTERNAL_SERVER_ERROR,
-        "internal_error",
-        "Внутренняя ошибка сервиса",
-    )
-
-
-app.include_router(health.router, tags=["Health"])
-app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Auth"])
-app.include_router(rounds.router, prefix=f"{settings.API_V1_STR}/rounds", tags=["Rounds"])
-app.include_router(admin.router, prefix=f"{settings.API_V1_STR}/admin", tags=["Admin"])
+app = create_app()

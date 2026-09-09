@@ -1,7 +1,7 @@
 """Server-side scenario orchestration.
 
 The canonical chain always lives in PostgreSQL. Streamlit sends a full
-replacement of the draft; FastAPI normalises it against the round policy,
+replacement of the editable scenario; FastAPI normalises it against the round policy,
 re-validates it against the immutable card versions pinned by the round
 snapshot and stores the canonical form together with a freshly computed
 resource snapshot.
@@ -19,10 +19,6 @@ import json
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
@@ -34,7 +30,6 @@ from src.aml_workshop_simulator.domain.round_policy import (
 from src.aml_workshop_simulator.domain.rules import (
     CONTEXT_DEFAULTS,
     CardSpec,
-    card_spec_from_row,
     evaluate_scenario,
     money,
 )
@@ -43,41 +38,11 @@ from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
 CONTEXT_KEYS = ("recipient_type", "time_of_day", "velocity", "has_documents")
 
 
-async def load_round_card_specs(
-    db: AsyncSession, round_obj: Round
-) -> dict[tuple[str, int], CardSpec]:
-    """Card versions pinned by the round snapshot.
+def load_round_card_specs(round_obj: Round) -> dict[tuple[str, int], CardSpec]:
+    """Every current round contains a complete server-owned card snapshot."""
+    from src.aml_workshop_simulator.services.configuration import snapshot_specs
 
-    A round configured with an `operations` block plays exactly those versions.
-    Older snapshots pin their catalogue through `card_versions`. A draft round
-    without either falls back to every active catalog version so an
-    administrator can preview the round.
-    """
-    config = round_obj.game_config or {}
-    if config.get("card_snapshots"):
-        from src.aml_workshop_simulator.services.configuration import snapshot_specs
-        return snapshot_specs(config)
-    operations = config.get("operations") or []
-    refs = config.get("card_versions") or []
-    pairs: set[tuple[str, int]] = set()
-    if operations:
-        pairs = {(str(item["code"]), int(item.get("version", 1))) for item in operations}
-    elif refs:
-        pairs = {(str(ref["code"]), int(ref["version"])) for ref in refs}
-
-    if pairs:
-        rows = (await db.execute(select(ActionCard))).scalars().all()
-        specs = [
-            card_spec_from_row(row) for row in rows if (row.code, row.version) in pairs
-        ]
-    else:
-        rows = (
-            (await db.execute(select(ActionCard).where(ActionCard.is_active)))
-            .scalars()
-            .all()
-        )
-        specs = [card_spec_from_row(row) for row in rows]
-    return {spec.key: spec for spec in specs}
+    return snapshot_specs(round_obj.game_config)
 
 
 def round_policy(
@@ -151,7 +116,7 @@ def canonical_steps(
     specs: dict[tuple[str, int], CardSpec] | None = None,
     policy: RoundPolicy | None = None,
 ) -> list[dict[str, Any]]:
-    """Deterministic JSON-safe representation stored in `scenario_versions.steps`.
+    """Deterministic JSON-safe representation stored in `scenarios.steps`.
 
     The channel exists exactly once, inside `context`; there is no parallel flat
     field that could drift away from it.
@@ -163,13 +128,8 @@ def canonical_steps(
         spec = specs.get(key)
         operation = policy.for_card(key) if policy is not None else None
 
-        frequency = step.frequency
-        if frequency is None:
-            frequency = 1
         context = {
-            name: _context_value(
-                name, getattr(step.context, name), spec, operation
-            )
+            name: _context_value(name, getattr(step.context, name), spec, operation)
             for name in CONTEXT_KEYS
         }
         context["channel"] = _channel_value(step.context.channel, spec, operation)
@@ -182,7 +142,6 @@ def canonical_steps(
                     "version": step.card.version,
                 },
                 "amount": f"{money(step.amount):.2f}",
-                "frequency": int(frequency),
                 "context": {
                     "recipient_type": context["recipient_type"],
                     "time_of_day": context["time_of_day"],
@@ -191,7 +150,9 @@ def canonical_steps(
                     "has_documents": bool(context["has_documents"]),
                 },
                 "action_details": dict(
-                    sorted(_action_details(step.action_details, spec, operation).items())
+                    sorted(
+                        _action_details(step.action_details, spec, operation).items()
+                    )
                 ),
             }
         )
@@ -212,3 +173,25 @@ def build_snapshot(
 ) -> dict[str, Any]:
     """Full resource snapshot for an already canonical chain."""
     return evaluate_scenario(steps, card_specs, game_config, policy)
+
+
+def prepare_scenario(
+    round_obj: Round, steps: list[ScenarioStepIn]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    specs = load_round_card_specs(round_obj)
+    policy = round_policy(round_obj, specs)
+    canonical = canonical_steps(steps, specs, policy)
+    return canonical, checked_snapshot(canonical, specs, round_obj.game_config, policy)
+
+
+def checked_snapshot(steps, specs, config, policy) -> dict[str, Any]:
+    from src.aml_workshop_simulator.core.errors import ValidationFailed
+    from src.aml_workshop_simulator.domain.rules import StructuralError
+
+    try:
+        return build_snapshot(steps, specs, config, policy)
+    except StructuralError as exc:
+        violations = [item.as_dict() for item in exc.violations]
+        raise ValidationFailed(
+            violations[0]["message"], details={"violations": violations}
+        ) from exc

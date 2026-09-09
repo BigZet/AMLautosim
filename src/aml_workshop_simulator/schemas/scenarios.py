@@ -5,7 +5,7 @@ fixed-point string, and the operation channel is the global `Channel` enum. The
 subset of channels a concrete card version accepts is enforced by
 `domain.rules` against the card contract stored in PostgreSQL, not here.
 
-Context fields, `frequency` and the action details are **optional** on the
+Context fields and the action details are **optional** on the
 wire: a participant only sends the parameters their round actually exposes.
 `services.scenario_service.canonical_steps` fills everything else from the
 round policy, and `domain.rules` rejects any hidden parameter that was sent
@@ -16,14 +16,19 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from src.aml_workshop_simulator.core.enums import ScenarioStatus
 from src.aml_workshop_simulator.core.game_config import LIMITS
 from src.aml_workshop_simulator.domain.action_parameters import CONTEXT_FIELDS
 from src.aml_workshop_simulator.domain.channels import Channel
+from src.aml_workshop_simulator.schemas.game_state import (
+    ResourceSnapshotOut,
+    ViolationOut,
+)
 
 StrictValue = str | bool | int | Decimal
 
@@ -40,6 +45,19 @@ class CardRef(BaseModel):
     version: int = Field(ge=1)
 
 
+RecipientType = StrEnum(
+    "RecipientType",
+    {o["value"]: o["value"] for o in CONTEXT_FIELDS["recipient_type"]["options"]},
+)
+TimeOfDay = StrEnum(
+    "TimeOfDay",
+    {o["value"]: o["value"] for o in CONTEXT_FIELDS["time_of_day"]["options"]},
+)
+Velocity = StrEnum(
+    "Velocity", {o["value"]: o["value"] for o in CONTEXT_FIELDS["velocity"]["options"]}
+)
+
+
 class OperationContext(BaseModel):
     """Common operation context shared by all cards.
 
@@ -48,19 +66,11 @@ class OperationContext(BaseModel):
 
     model_config = STRICT
 
-    recipient_type: str | None = None
-    time_of_day: str | None = None
-    velocity: str | None = None
+    recipient_type: RecipientType | None = None
+    time_of_day: TimeOfDay | None = None
+    velocity: Velocity | None = None
     channel: Channel | None = None
     has_documents: bool | None = None
-
-    @field_validator("recipient_type", "time_of_day", "velocity")
-    @classmethod
-    def declared_value(cls, value, info):
-        options = {option["value"] for option in CONTEXT_FIELDS[info.field_name]["options"]}
-        if value is not None and value not in options:
-            raise ValueError("Допустимые значения: " + ", ".join(sorted(options)))
-        return value
 
 
 class ScenarioStepIn(BaseModel):
@@ -71,7 +81,6 @@ class ScenarioStepIn(BaseModel):
     step_id: UUID
     card: CardRef
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
-    frequency: int | None = Field(default=None, ge=1, le=LIMITS["max_frequency"])
     context: OperationContext = Field(default_factory=OperationContext)
     action_details: dict[str, StrictValue] = Field(default_factory=dict)
 
@@ -84,19 +93,28 @@ class ScenarioStepIn(BaseModel):
         return str(value)
 
 
-class ScenarioPutIn(BaseModel):
-    """Full idempotent replacement of the server draft.
+class StoredContext(OperationContext):
+    recipient_type: RecipientType
+    time_of_day: TimeOfDay
+    velocity: Velocity
+    channel: Channel
+    has_documents: bool
 
-    A successful call that changes the payload appends a new immutable version;
-    `label` names it in the participant's version history.
-    """
+
+class StoredStep(ScenarioStepIn):
+    context: StoredContext
+
+
+class ScenarioPutIn(BaseModel):
+    """Autosave the current editable scenario; revision protects against stale writes."""
 
     model_config = STRICT
 
     expected_revision: int = Field(ge=0)
     client_mutation_id: UUID
-    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=LIMITS["max_actions"])
-    label: str | None = Field(default=None, max_length=120)
+    steps: list[ScenarioStepIn] = Field(
+        default_factory=list, max_length=LIMITS["max_actions"]
+    )
 
 
 class ScenarioPreviewIn(BaseModel):
@@ -104,60 +122,15 @@ class ScenarioPreviewIn(BaseModel):
 
     model_config = STRICT
 
-    steps: list[ScenarioStepIn] = Field(default_factory=list, max_length=LIMITS["max_actions"])
+    steps: list[ScenarioStepIn] = Field(
+        default_factory=list, max_length=LIMITS["max_actions"]
+    )
 
 
-class ScenarioSubmitIn(BaseModel):
-    """Submit one stored revision."""
+class ScenarioSubmitIn(ScenarioPutIn):
+    """Validate and submit the complete chain without a preceding autosave."""
 
-    model_config = STRICT
-
-    expected_revision: int = Field(ge=1)
-
-
-class ScenarioRestoreIn(BaseModel):
-    """Continue from an older saved version.
-
-    The old version is copied into a **new** current version; nothing that was
-    saved after it is deleted.
-    """
-
-    model_config = STRICT
-
-    expected_revision: int = Field(ge=0)
-    client_mutation_id: UUID
-    label: str | None = Field(default=None, max_length=120)
-
-
-class ScenarioVersionSummaryOut(BaseModel):
-    """One row of the participant's saved-draft history."""
-
-    id: int
-    revision: int
-    label: str | None = None
-    step_count: int
-    created_at: datetime
-    created_by_user_id: int
-    restored_from_revision: int | None = None
-    is_current: bool = False
-    is_submitted: bool = False
-    valid: bool = False
-    goal_reached: bool = False
-    balance_after: str | None = None
-    energy_after: int | None = None
-    time_after: int | None = None
-    available_steps_after: int | None = None
-
-
-class ScenarioVersionOut(ScenarioVersionSummaryOut):
-    """One stored version with its full chain and resource snapshot."""
-
-    steps: list[dict[str, Any]] = Field(default_factory=list)
-    resources: dict[str, Any] = Field(default_factory=dict)
-
-
-class ScenarioVersionPageOut(BaseModel):
-    rows: list[ScenarioVersionSummaryOut] = Field(default_factory=list)
+    steps: list[ScenarioStepIn] = Field(max_length=LIMITS["max_actions"])
 
 
 class ScenarioOut(BaseModel):
@@ -166,19 +139,20 @@ class ScenarioOut(BaseModel):
     id: int
     round_id: int
     participant_id: int
-    status: str
+    status: ScenarioStatus
     revision: int
-    steps: list[dict[str, Any]] = Field(default_factory=list)
-    resources: dict[str, Any] = Field(default_factory=dict)
+    steps: list[StoredStep] = Field(default_factory=list)
+    resources: ResourceSnapshotOut
     updated_at: datetime
     submitted_at: datetime | None = None
-    current_version_id: int | None = None
-    submitted_revision: int | None = None
-    version_count: int = 0
+    can_edit: bool
+    can_submit: bool
+    blockers: list[ViolationOut]
 
 
 class ScenarioPreviewOut(BaseModel):
     """Server-computed snapshot of a chain that has not been saved yet."""
 
-    resources: dict[str, Any] = Field(default_factory=dict)
-    blockers: list[dict[str, Any]] = Field(default_factory=list)
+    resources: ResourceSnapshotOut
+    blockers: list[ViolationOut] = Field(default_factory=list)
+    can_submit: bool

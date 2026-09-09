@@ -11,7 +11,8 @@ import secrets
 
 from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# SHA-256 prehash prevents bcrypt truncation for the 128-character password contract.
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 SESSION_ID_BYTES = 32
 
@@ -34,8 +35,3 @@ def new_session_id() -> str:
 
 def hash_session_id(session_id: str) -> str:
     return hashlib.sha256(session_id.encode("utf-8")).hexdigest()
-
-
-def hash_idempotency_key(key: str) -> str:
-    """Irreversible digest stored in audit events; the raw key is never kept."""
-    return hashlib.sha256(key.encode("utf-8")).hexdigest()

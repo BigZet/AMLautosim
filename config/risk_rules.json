@@ -23,7 +23,6 @@
   },
   "amount_divisor": "20000",
   "amount_max_points": "20",
-  "extra_repeat_points": "3",
   "documents": {
     "minimum_gross": "75000.00",
     "present_large": "-4",

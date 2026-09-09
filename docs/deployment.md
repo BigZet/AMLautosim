@@ -1,3 +1,5 @@
+> Документ описывает прежнюю версию. Актуальное ядро: [architecture.md](architecture.md), сессии: [sessions-and-cookies.md](sessions-and-cookies.md). Обновление UI и тестов — следующий этап.
+
 # Развертывание на одной облачной VM
 
 ## 1. Целевая топология v1

@@ -1,9 +1,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
+
+from src.aml_workshop_simulator.core.enums import RoundStatus
+from src.aml_workshop_simulator.schemas.card_contract import (
+    CardCostsOut,
+    OptionOut,
+    ParameterOut,
+    ParameterValue,
+)
+from src.aml_workshop_simulator.schemas.round_config import GameConfigOut
 
 
 class RoundPublicOut(BaseModel):
@@ -11,30 +20,18 @@ class RoundPublicOut(BaseModel):
 
     id: int
     title: str
-    status: str
+    status: RoundStatus
     config_version: str | None = None
     activated_at: datetime | None = None
-    stopped_at: datetime | None = None
+    closed_at: datetime | None = None
+    scoring_started_at: datetime | None = None
     completed_at: datetime | None = None
-    game_config: dict[str, Any]
+    game_config: GameConfigOut
 
+    @computed_field
     @property
     def accepts_changes(self) -> bool:
         return self.status == "active"
-
-
-class RoundSummaryOut(BaseModel):
-    id: int
-    title: str
-    status: str
-    scenario_status: str | None = None
-    result_available: bool = False
-    completed_at: datetime | None = None
-
-
-class RoundSummaryPageOut(BaseModel):
-    rows: list[RoundSummaryOut]
-    next_cursor: str | None = None
 
 
 class VisibleParamOut(BaseModel):
@@ -42,12 +39,12 @@ class VisibleParamOut(BaseModel):
 
     param: str
     key: str
-    namespace: str
+    namespace: Literal["channel", "context", "action"]
     label: str
     kind: str = "select"
     help: str | None = None
-    default: Any = None
-    options: list[dict[str, Any]] = Field(default_factory=list)
+    default: ParameterValue | None = None
+    options: list[OptionOut] = Field(default_factory=list)
 
 
 class ActionCardOut(BaseModel):
@@ -68,18 +65,16 @@ class ActionCardOut(BaseModel):
     category: str
     flow: str
     risk_weight: str
-    costs: dict[str, int]
+    costs: CardCostsOut
     fee_rate: str
     min_amount: str
     max_amount: str
-    max_frequency: int
-    round_frequency_limit: int
+    max_occurrences: int
     requires_card_code: str | None = None
     quota_category: str | None = None
     channels: list[str] = Field(default_factory=list)
     channel_labels: dict[str, str] = Field(default_factory=dict)
-    fields: list[dict[str, Any]] = Field(default_factory=list)
-    context_fields: list[dict[str, Any]] = Field(default_factory=list)
+    fields: list[ParameterOut] = Field(default_factory=list)
+    context_fields: list[ParameterOut] = Field(default_factory=list)
     visible_params: list[VisibleParamOut] = Field(default_factory=list)
-    show_frequency: bool = True
-    pinned_defaults: dict[str, Any] = Field(default_factory=dict)
+    pinned_defaults: dict[str, ParameterValue] = Field(default_factory=dict)

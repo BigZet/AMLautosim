@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "cards": [
     {
       "code": "salary",
@@ -14,8 +14,7 @@
       "fee_rate": "0.000000",
       "min_amount": "10000.00",
       "max_amount": "150000.00",
-      "max_frequency": 2,
-      "round_frequency_limit": 2,
+      "max_occurrences": 2,
       "requires_card_code": null,
       "quota_category": null,
       "channels": [
@@ -26,8 +25,7 @@
       "default_visible_params": [
         "channel",
         "context.time_of_day"
-      ],
-      "default_show_frequency": false
+      ]
     },
     {
       "code": "cash_deposit",
@@ -42,8 +40,7 @@
       "fee_rate": "0.000000",
       "min_amount": "5000.00",
       "max_amount": "150000.00",
-      "max_frequency": 3,
-      "round_frequency_limit": 3,
+      "max_occurrences": 3,
       "requires_card_code": null,
       "quota_category": "cash",
       "channels": [
@@ -53,8 +50,7 @@
       "default_visible_params": [
         "channel",
         "action.funds_source"
-      ],
-      "default_show_frequency": true
+      ]
     },
     {
       "code": "card_transfer",
@@ -69,8 +65,7 @@
       "fee_rate": "0.005000",
       "min_amount": "1000.00",
       "max_amount": "500000.00",
-      "max_frequency": 5,
-      "round_frequency_limit": 7,
+      "max_occurrences": 7,
       "requires_card_code": null,
       "quota_category": null,
       "channels": [
@@ -81,8 +76,7 @@
       "default_visible_params": [
         "channel",
         "context.recipient_type"
-      ],
-      "default_show_frequency": true
+      ]
     },
     {
       "code": "cash_withdrawal",
@@ -97,8 +91,7 @@
       "fee_rate": "0.010000",
       "min_amount": "5000.00",
       "max_amount": "120000.00",
-      "max_frequency": 4,
-      "round_frequency_limit": 4,
+      "max_occurrences": 4,
       "requires_card_code": null,
       "quota_category": "cash",
       "channels": [
@@ -108,8 +101,7 @@
       "default_visible_params": [
         "channel",
         "context.time_of_day"
-      ],
-      "default_show_frequency": true
+      ]
     }
   ]
 }

@@ -1,120 +1,85 @@
-"""Leaderboard projection.
+"""Ranking from computed scores; no manual overlays or stored ranks."""
 
-The base scoring result is immutable; an admin overlay only changes the
-*effective* values. Ranking uses dense rank on the effective game score with
-deterministic tie-breakers taken from the base result, so a manual override can
-never hide the ordering rationale.
-"""
-
-from __future__ import annotations
-
-from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.aml_workshop_simulator.db.models.leaderboard_adjustments import (
-    LeaderboardAdjustment,
-)
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.db.models.users import User
 
 
-def _effective(override: Any, base: Any) -> Decimal:
-    return Decimal(str(override if override is not None else base))
+def ranked_scenarios(round_id: int | None = None):
+    """Shared dense ranking of eligible participants, independently per round."""
+    query = (
+        select(
+            Scenario.id.label("scenario_id"),
+            func.dense_rank()
+            .over(
+                partition_by=Scenario.round_id,
+                order_by=(
+                    ScoringResult.game_score.desc(),
+                    ScoringResult.risk_score,
+                    ScoringResult.resource_score.desc(),
+                ),
+            )
+            .label("rank"),
+        )
+        .select_from(Scenario)
+        .join(ScoringResult, ScoringResult.scenario_id == Scenario.id)
+        .join(User, User.id == Scenario.participant_id)
+        .where(User.is_blocked.is_(False), Scenario.status == "scored")
+    )
+    if round_id is not None:
+        query = query.where(Scenario.round_id == round_id)
+    return query.subquery()
 
 
-async def _rows(db: AsyncSession, round_id: int) -> list[dict[str, Any]]:
+async def build_leaderboard(
+    db: AsyncSession,
+    round_id: int,
+    *,
+    include_blocked: bool = False,
+    current_user_id: int | None = None,
+) -> list[dict[str, Any]]:
+    ranks = ranked_scenarios(round_id)
+    query = (
+        select(Scenario, User, ScoringResult, ranks.c.rank)
+        .select_from(Scenario)
+        .join(User, Scenario.participant_id == User.id)
+        .join(ScoringResult, ScoringResult.scenario_id == Scenario.id)
+        .outerjoin(ranks, ranks.c.scenario_id == Scenario.id)
+        .where(Scenario.round_id == round_id, Scenario.status == "scored")
+    )
+    if not include_blocked:
+        query = query.where(User.is_blocked.is_(False))
     records = (
         await db.execute(
-            select(Scenario, User, ScoringResult, LeaderboardAdjustment)
-            .join(User, Scenario.participant_id == User.id)
-            .join(ScoringResult, ScoringResult.scenario_id == Scenario.id)
-            .outerjoin(
-                LeaderboardAdjustment,
-                LeaderboardAdjustment.scenario_id == Scenario.id,
+            query.order_by(
+                ScoringResult.game_score.desc(),
+                ScoringResult.risk_score,
+                ScoringResult.resource_score.desc(),
+                Scenario.id,
             )
-            .where(Scenario.round_id == round_id)
         )
     ).all()
-
-    rows: list[dict[str, Any]] = []
-    for scenario, user, result, adjustment in records:
+    rows = []
+    for scenario, user, result, rank in records:
         rows.append(
-            {
-                "scenario_id": int(scenario.id),
-                "participant_id": int(user.id),
-                "display_name": user.display_name or f"Участник #{user.id}",
-                "email": user.email,
-                "is_blocked": bool(user.is_blocked),
-                "base_game_score": Decimal(str(result.game_score)),
-                "base_risk_score": Decimal(str(result.risk_score)),
-                "base_resource_score": Decimal(str(result.resource_score)),
-                "stealth_score": Decimal(str(result.stealth_score)),
-                "risk_label": result.risk_label,
-                "effective_game_score": _effective(
-                    adjustment.game_score_override if adjustment else None,
-                    result.game_score,
-                ),
-                "effective_risk_score": _effective(
-                    adjustment.risk_score_override if adjustment else None,
-                    result.risk_score,
-                ),
-                "effective_resource_score": _effective(
-                    adjustment.resource_score_override if adjustment else None,
-                    result.resource_score,
-                ),
-                "is_adjusted": adjustment is not None,
-                "adjustment_reason": adjustment.reason if adjustment else None,
-            }
+            dict(
+                rank=rank,
+                scenario_id=scenario.id,
+                participant_id=user.id,
+                display_name=user.display_name or f"Участник #{user.id}",
+                email=user.email,
+                is_blocked=user.is_blocked,
+                is_current_user=user.id == current_user_id,
+                game_score=f"{result.game_score:.2f}",
+                risk_score=f"{result.risk_score:.2f}",
+                resource_score=f"{result.resource_score:.2f}",
+                stealth_score=f"{result.stealth_score:.2f}",
+                risk_label=result.risk_label,
+            )
         )
-    return rows
-
-
-def _sort_and_rank(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    rows.sort(
-        key=lambda row: (
-            -row["effective_game_score"],
-            row["base_risk_score"],
-            -row["base_resource_score"],
-            row["scenario_id"],
-        )
-    )
-    rank = 0
-    previous_key: tuple[Any, ...] | None = None
-    for row in rows:
-        key = (
-            row["effective_game_score"],
-            row["base_risk_score"],
-            row["base_resource_score"],
-        )
-        if key != previous_key:
-            rank += 1
-            previous_key = key
-        row["rank"] = rank
-    return rows
-
-
-async def build_public_leaderboard(
-    db: AsyncSession, round_id: int, current_user_id: int | None = None
-) -> list[dict[str, Any]]:
-    """Blocked participants are excluded from the public projection only."""
-    rows = [row for row in await _rows(db, round_id) if not row["is_blocked"]]
-    ranked = _sort_and_rank(rows)
-    for row in ranked:
-        row["is_current_user"] = current_user_id is not None and (
-            row["participant_id"] == current_user_id
-        )
-        row["game_score"] = f"{row['effective_game_score']:.2f}"
-        row["stealth_score"] = f"{row['stealth_score']:.2f}"
-        row["resource_score"] = f"{row['effective_resource_score']:.2f}"
-    return ranked
-
-
-async def build_admin_leaderboard(
-    db: AsyncSession, round_id: int
-) -> list[dict[str, Any]]:
-    """Admin board keeps blocked participants and shows base vs effective."""
-    return _sort_and_rank(await _rows(db, round_id))
+    return sorted(rows, key=lambda row: row["is_blocked"])

@@ -13,14 +13,12 @@ without ambiguity:
 ``context.<key>``           one of the shared context fields
 ``action.<key>``            one card-specific action detail
 
-A round config written before this module existed carries no ``operations``
-block. Such a round is *legacy*: every declared parameter stays editable, which
-is exactly what its stored drafts were validated against.
+Every round explicitly declares the playable operations and their parameters.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Protocol
@@ -31,7 +29,7 @@ PARAM_CHANNEL = "channel"
 CONTEXT_PREFIX = "context."
 ACTION_PREFIX = "action."
 
-#: Amount and frequency are always their own controls; on top of them a round
+#: Amount is always its own control; on top of it a round
 #: may expose at most this many parameters per operation.
 MAX_VISIBLE_PARAMS = LIMITS["max_visible_params"]
 
@@ -39,15 +37,16 @@ MAX_VISIBLE_PARAMS = LIMITS["max_visible_params"]
 CARD_OVERRIDE_KEYS: tuple[str, ...] = (
     "min_amount",
     "max_amount",
-    "max_frequency",
-    "round_frequency_limit",
+    "max_occurrences",
     "energy_cost",
     "time_cost",
     "fee_rate",
     "risk_weight",
 )
 
-DECIMAL_OVERRIDE_KEYS = frozenset({"min_amount", "max_amount", "fee_rate", "risk_weight"})
+DECIMAL_OVERRIDE_KEYS = frozenset(
+    {"min_amount", "max_amount", "fee_rate", "risk_weight"}
+)
 
 
 class CardContract(Protocol):
@@ -73,9 +72,9 @@ def split_param(param: str) -> tuple[str, str]:
     if param == PARAM_CHANNEL:
         return ("channel", PARAM_CHANNEL)
     if param.startswith(CONTEXT_PREFIX):
-        return ("context", param[len(CONTEXT_PREFIX):])
+        return ("context", param[len(CONTEXT_PREFIX) :])
     if param.startswith(ACTION_PREFIX):
-        return ("action", param[len(ACTION_PREFIX):])
+        return ("action", param[len(ACTION_PREFIX) :])
     raise ValueError(f"unknown parameter namespace: {param!r}")
 
 
@@ -95,7 +94,6 @@ class OperationPolicy:
     code: str
     version: int
     visible_params: tuple[str, ...]
-    show_frequency: bool
     #: Value every *non visible* parameter is pinned to for this round.
     pinned: dict[str, Any] = field(default_factory=dict)
     #: Numeric card attributes this round overrides.
@@ -116,7 +114,6 @@ class OperationPolicy:
 class RoundPolicy:
     """Resolved ``operations`` block of one round snapshot."""
 
-    legacy: bool
     operations: dict[tuple[str, int], OperationPolicy]
 
     def enabled_keys(self) -> tuple[tuple[str, int], ...]:
@@ -139,11 +136,7 @@ class RoundPolicy:
         raw_operations = config.get("operations")
 
         if not raw_operations:
-            # Legacy snapshot: no operations block, so nothing is hidden.
-            return cls(
-                legacy=True,
-                operations={key: _legacy_policy(spec) for key, spec in specs.items()},
-            )
+            raise ValueError("Round configuration must declare operations")
 
         operations: dict[tuple[str, int], OperationPolicy] = {}
         for entry in raw_operations:
@@ -152,7 +145,7 @@ class RoundPolicy:
             if spec is None:
                 continue
             operations[key] = restricted_policy(spec, entry)
-        return cls(legacy=False, operations=operations)
+        return cls(operations=operations)
 
 
 def field_default(spec: CardContract, param: str) -> Any:
@@ -165,17 +158,6 @@ def field_default(spec: CardContract, param: str) -> Any:
         if item["key"] == key:
             return item.get("default")
     return None
-
-
-def _legacy_policy(spec: CardContract) -> OperationPolicy:
-    return OperationPolicy(
-        code=spec.code,
-        version=spec.version,
-        visible_params=declared_params(spec),
-        show_frequency=True,
-        pinned={},
-        overrides={},
-    )
 
 
 def restricted_policy(spec: CardContract, entry: Mapping[str, Any]) -> OperationPolicy:
@@ -212,34 +194,6 @@ def restricted_policy(spec: CardContract, entry: Mapping[str, Any]) -> Operation
         code=spec.code,
         version=spec.version,
         visible_params=visible,
-        show_frequency=bool(entry.get("show_frequency", True)),
         pinned=pinned,
         overrides=overrides,
     )
-
-
-def operations_from_specs(
-    specs: Sequence[CardContract],
-    codes: Sequence[str] | None = None,
-) -> list[dict[str, Any]]:
-    """Default ``operations`` block for a fresh round configuration."""
-    wanted = set(codes) if codes is not None else None
-    block: list[dict[str, Any]] = []
-    for spec in specs:
-        if wanted is not None and spec.code not in wanted:
-            continue
-        declared = declared_params(spec)
-        visible = [
-            param
-            for param in getattr(spec, "default_visible_params", ())
-            if param in declared
-        ]
-        block.append(
-            {
-                "code": spec.code,
-                "version": spec.version,
-                "visible_params": visible,
-                "show_frequency": bool(getattr(spec, "default_show_frequency", True)),
-            }
-        )
-    return block

@@ -27,7 +27,7 @@ from src.aml_workshop_simulator.schemas.game_rules import ResourceRulesIn, RiskR
 
 STRICT = ConfigDict(extra="forbid")
 
-CONFIG_SCHEMA_VERSION = 4
+CONFIG_SCHEMA_VERSION = 5
 
 #: Quota buckets an organiser can cap. They match `domain.rules.QUOTA_LABELS`.
 QUOTA_CODES = ("cash", "anonymous")
@@ -118,8 +118,7 @@ class OperationIn(BaseModel):
     code: str = Field(min_length=1, max_length=80)
     version: int = Field(default=1, ge=1)
     visible_params: list[str] = Field(default_factory=list)
-    show_frequency: bool = True
-    defaults: dict[str, Any] = Field(default_factory=dict)
+    defaults: dict[str, ParameterValue] = Field(default_factory=dict)
 
     min_amount: Decimal | None = Field(
         default=None, gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
@@ -127,10 +126,7 @@ class OperationIn(BaseModel):
     max_amount: Decimal | None = Field(
         default=None, gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
     )
-    max_frequency: int | None = Field(default=None, ge=1, le=LIMITS["max_frequency"])
-    round_frequency_limit: int | None = Field(
-        default=None, ge=1, le=LIMITS["max_actions"]
-    )
+    max_occurrences: int | None = Field(default=None, ge=1, le=LIMITS["max_actions"])
     energy_cost: int | None = Field(default=None, ge=0, le=LIMITS["max_operation_cost"])
     time_cost: int | None = Field(default=None, ge=0, le=LIMITS["max_operation_cost"])
     fee_rate: Decimal | None = Field(default=None, ge=0, le=1, decimal_places=6)
@@ -167,15 +163,6 @@ class OperationIn(BaseModel):
             raise ValueError(
                 f"Операция «{self.code}»: минимальная сумма больше максимальной."
             )
-        if (
-            self.max_frequency is not None
-            and self.round_frequency_limit is not None
-            and self.round_frequency_limit < self.max_frequency
-        ):
-            raise ValueError(
-                f"Операция «{self.code}»: лимит повторов за раунд меньше лимита "
-                "повторов одного шага."
-            )
         return self
 
     def dump(self) -> dict[str, Any]:
@@ -183,7 +170,6 @@ class OperationIn(BaseModel):
             "code": self.code,
             "version": self.version,
             "visible_params": list(self.visible_params),
-            "show_frequency": self.show_frequency,
         }
         if self.defaults:
             payload["defaults"] = dict(sorted(self.defaults.items()))
@@ -282,12 +268,12 @@ class GameConfigIn(BaseModel):
 
     model_config = STRICT
 
-    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=4, le=4)
+    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=5, le=5)
     resources: ResourcesIn
     objectives: ObjectivesIn
     constraints: ConstraintsIn
     operations: list[OperationIn] = Field(
-        default_factory=list, max_length=LIMITS["max_operations"]
+        min_length=1, max_length=LIMITS["max_operations"]
     )
     resource_rules: ResourceRulesIn = Field(
         default_factory=lambda: ResourceRulesIn.model_validate(
@@ -297,17 +283,10 @@ class GameConfigIn(BaseModel):
     ruleset_version: str = Field(min_length=1, max_length=64)
     scoring: ScoringIn
     leaderboard: LeaderboardIn
-    #: Legacy pin list kept for configurations written before `operations`.
-    card_versions: list[dict[str, Any]] | None = None
-    #: Derived by the server on activation; accepted so a stored snapshot can be
-    #: round-tripped through the editor without being rejected.
-    config_version: str | None = None
-    # Server-owned catalog snapshot; never trust a client-supplied replacement.
-    card_snapshots: list[dict[str, Any]] | None = None
 
     @model_validator(mode="after")
     def _has_operations(self) -> GameConfigIn:
-        if not self.operations and not self.card_versions:
+        if not self.operations:
             raise ValueError("Раунд должен содержать хотя бы одну операцию.")
         codes = [(item.code, item.version) for item in self.operations]
         if len(set(codes)) != len(codes):
@@ -327,35 +306,17 @@ class GameConfigIn(BaseModel):
             "scoring": self.scoring.dump(),
             "leaderboard": self.leaderboard.dump(),
         }
-        if self.card_versions:
-            payload["card_versions"] = self.card_versions
         return payload
 
 
-class RoundPresetIn(BaseModel):
-    model_config = STRICT
-
-    name: str = Field(min_length=3, max_length=160)
-    description: str | None = Field(default=None, max_length=500)
-    game_config: GameConfigIn
+from src.aml_workshop_simulator.schemas.card_contract import (
+    CardSnapshotOut,
+    ParameterValue,
+)
 
 
-class RoundPresetUpdateIn(BaseModel):
-    model_config = STRICT
+class GameConfigOut(GameConfigIn):
+    """Stored configuration including the server-owned snapshot."""
 
-    expected_revision: int = Field(ge=1)
-    name: str | None = Field(default=None, min_length=3, max_length=160)
-    description: str | None = Field(default=None, max_length=500)
-    game_config: GameConfigIn | None = None
-
-
-class RoundPresetOut(BaseModel):
-    id: int
-    name: str
-    description: str | None = None
-    revision: int
-    game_config: dict[str, Any]
-    created_by_user_id: int
-    updated_by_user_id: int
-    created_at: Any
-    updated_at: Any
+    config_version: str
+    card_snapshots: list[CardSnapshotOut]

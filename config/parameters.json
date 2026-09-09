@@ -44,10 +44,10 @@
     },
     "velocity": {
       "key": "velocity",
-      "label": "Темп повторов",
+      "label": "Темп операции",
       "kind": "select",
       "default": "normal",
-      "help": "Интервал между повторами внутри одного шага.",
+      "help": "Темп выполнения операции в цепочке.",
       "options": [
         {
           "value": "spaced",

@@ -82,19 +82,6 @@ def run_migrations() -> None:
 
 async def seed_cards(db: AsyncSession) -> list[ActionCard]:
     """Insert or refresh the catalog and remove obsolete card versions."""
-    # Freeze existing rounds before catalog refresh (including the first upgrade
-    # from versions that stored only card references). Never rewrite their rules.
-    old_cards = list((await db.execute(select(ActionCard))).scalars().all())
-    rounds = list((await db.execute(select(Round).with_for_update())).scalars().all())
-    for round_obj in rounds:
-        config = freeze_game_config(round_obj.game_config, old_cards)
-        if "config_version" in config:
-            from src.aml_workshop_simulator.api.routers.admin.common import (
-                config_version,
-            )
-            config["config_version"] = config_version(config)
-        if config != round_obj.game_config:
-            round_obj.game_config = config
     now = datetime.now(UTC)
     result: list[ActionCard] = []
     catalog_keys = [(entry["code"], entry["version"]) for entry in CARD_CATALOG]
@@ -105,13 +92,17 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
     )
     for entry in CARD_CATALOG:
         card = (
-            await db.execute(
-                select(ActionCard).where(
-                    ActionCard.code == entry["code"],
-                    ActionCard.version == entry["version"],
+            (
+                await db.execute(
+                    select(ActionCard).where(
+                        ActionCard.code == entry["code"],
+                        ActionCard.version == entry["version"],
+                    )
                 )
             )
-        ).scalars().first()
+            .scalars()
+            .first()
+        )
         schema = build_parameter_schema(entry)
         if card is None:
             card = ActionCard(
@@ -126,7 +117,6 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
                 fee_rate=entry["fee_rate"],
                 min_amount=entry["min_amount"],
                 max_amount=entry["max_amount"],
-                max_frequency=entry["max_frequency"],
                 requires_card_code=entry["requires_card_code"],
                 parameter_schema=schema,
                 is_active=True,
@@ -143,7 +133,6 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
             card.fee_rate = entry["fee_rate"]
             card.min_amount = entry["min_amount"]
             card.max_amount = entry["max_amount"]
-            card.max_frequency = entry["max_frequency"]
             card.requires_card_code = entry["requires_card_code"]
             card.parameter_schema = schema
             card.is_active = True
@@ -154,7 +143,9 @@ async def seed_cards(db: AsyncSession) -> list[ActionCard]:
 
 async def seed_admin(db: AsyncSession) -> User:
     email = settings.BOOTSTRAP_ADMIN_EMAIL.strip().lower()
-    admin = (await db.execute(select(User).where(User.email == email))).scalars().first()
+    admin = (
+        (await db.execute(select(User).where(User.email == email))).scalars().first()
+    )
     now = datetime.now(UTC)
     if admin is None:
         admin = User(
@@ -174,29 +165,21 @@ async def seed_admin(db: AsyncSession) -> User:
 
 
 def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
-    """Reference configuration pinned to the seeded card rows.
+    """Build the initial snapshot from the current base configuration."""
+    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from src.aml_workshop_simulator.services.round_configuration import config_version
 
-    `operations` decides what is playable; `card_versions` repeats the same set
-    so a snapshot written by this seed stays readable by the older loader.
-    """
-    from copy import deepcopy
-    config = deepcopy(REFERENCE_GAME_CONFIG)
-    enabled = {
-        (str(item["code"]), int(item.get("version", 1)))
-        for item in config.get("operations", [])
-    }
-    config["card_versions"] = [
-        {"id": card.id, "code": card.code, "version": card.version}
-        for card in cards
-        if (card.code, card.version) in enabled
-    ]
-    return freeze_game_config(config, cards)
+    config = freeze_game_config(
+        GameConfigIn.model_validate(REFERENCE_GAME_CONFIG).dump(), cards
+    )
+    config["config_version"] = config_version(config)
+    return config
 
 
-async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]) -> Round:
-    round_obj = (
-        await db.execute(select(Round).where(Round.title == DEMO_ROUND_TITLE))
-    ).scalars().first()
+async def seed_demo_round(
+    db: AsyncSession, admin: User, cards: list[ActionCard]
+) -> Round:
+    round_obj = (await db.execute(select(Round))).scalars().first()
     if round_obj is not None:
         return round_obj
     now = datetime.now(UTC)
@@ -227,44 +210,16 @@ async def seed_demo_round(db: AsyncSession, admin: User, cards: list[ActionCard]
     return round_obj
 
 
-async def seed(activate_round: bool = False) -> dict[str, Any]:
+async def seed() -> dict[str, Any]:
     from src.aml_workshop_simulator.schemas.catalog_config import (
         validate_configuration_files,
     )
+
     validate_configuration_files()
     async with AsyncSessionLocal() as db:
         cards = await seed_cards(db)
         admin = await seed_admin(db)
         round_obj = await seed_demo_round(db, admin, cards)
-        if activate_round and round_obj.status == "draft":
-            other = (
-                await db.execute(
-                    select(Round).where(Round.status.in_(["active", "scoring"]))
-                )
-            ).scalars().first()
-            if other is None:
-                config = dict(round_obj.game_config)
-                from src.aml_workshop_simulator.api.routers.admin.common import (
-                    config_version,
-                )
-
-                config["config_version"] = config_version(config)
-                activated_at = datetime.now(UTC)
-                round_obj.game_config = config
-                round_obj.status = "active"
-                round_obj.activated_at = activated_at
-                db.add(
-                    AuditEvent(
-                        actor_user_id=admin.id,
-                        round_id=round_obj.id,
-                        event_type="round_activated",
-                        target_type="round",
-                        target_id=str(round_obj.id),
-                        reason="Seeded demo round activated",
-                        metadata_={"config_version": config["config_version"]},
-                        created_at=activated_at,
-                    )
-                )
         await db.commit()
         return {
             "cards": len(cards),
@@ -274,20 +229,19 @@ async def seed(activate_round: bool = False) -> dict[str, Any]:
         }
 
 
-async def _seed_and_dispose(activate_round: bool) -> dict[str, Any]:
-    summary = await seed(activate_round=activate_round)
+async def _seed_and_dispose() -> dict[str, Any]:
+    summary = await seed()
     await async_engine.dispose()
     return summary
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed the AML simulator database")
-    parser.add_argument("--migrate", action="store_true", help="run alembic upgrade head first")
-    parser.add_argument("--wait-for-db", action="store_true", help="wait until PostgreSQL answers")
     parser.add_argument(
-        "--activate-round",
-        action="store_true",
-        help="activate the demo round when no other round is active",
+        "--migrate", action="store_true", help="run alembic upgrade head first"
+    )
+    parser.add_argument(
+        "--wait-for-db", action="store_true", help="wait until PostgreSQL answers"
     )
     args = parser.parse_args()
     if args.wait_for_db:
@@ -295,7 +249,7 @@ def main() -> None:
     if args.migrate:
         # Alembic opens its own event loop, so migrations must run outside ours.
         run_migrations()
-    summary = asyncio.run(_seed_and_dispose(args.activate_round))
+    summary = asyncio.run(_seed_and_dispose())
     print(
         "seed complete: "
         f"cards={summary['cards']} admin_id={summary['admin_id']} "

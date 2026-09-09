@@ -1,24 +1,28 @@
 from datetime import datetime
-from typing import Any
 from decimal import Decimal
-from sqlalchemy import String, Numeric, ForeignKey, UniqueConstraint
+from typing import Any
+
+from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import Base, BigIntVariant, TZDateTime, JSONVariant
+
+from .base import Base, BigIntVariant, JSONVariant, TZDateTime
 
 
 class ScoringResult(Base):
-    __tablename__ = 'scoring_results'
+    __tablename__ = "scoring_results"
     __table_args__ = (
-        UniqueConstraint(
-            'scenario_id',
-            name='uq_scoring_results_scenario_id'),
+        CheckConstraint(
+            "risk_score BETWEEN 0 AND 100 AND stealth_score BETWEEN 0 AND 100 AND resource_score BETWEEN 0 AND 100 AND game_score BETWEEN 0 AND 100",
+            name="ck_scoring_results_ranges",
+        ),
+        CheckConstraint(
+            "risk_label IN ('normal', 'review', 'suspicious')",
+            name="ck_scoring_results_label",
+        ),
+        UniqueConstraint("scenario_id", name="uq_scoring_results_scenario_id"),
     )
-    id: Mapped[int] = mapped_column(
-        BigIntVariant,
-        primary_key=True,
-        autoincrement=True)
-    scenario_id: Mapped[int] = mapped_column(
-        BigIntVariant, ForeignKey('scenarios.id'))
+    id: Mapped[int] = mapped_column(BigIntVariant, primary_key=True, autoincrement=True)
+    scenario_id: Mapped[int] = mapped_column(BigIntVariant, ForeignKey("scenarios.id"))
     risk_score: Mapped[Decimal] = mapped_column(Numeric(14, 2))
     risk_label: Mapped[str] = mapped_column(String)
     stealth_score: Mapped[Decimal] = mapped_column(Numeric(14, 2))

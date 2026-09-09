@@ -51,10 +51,6 @@ def default_visible_params(code: str) -> tuple[str, ...]:
     return tuple(catalog_entry(code)["default_visible_params"])
 
 
-def default_show_frequency(code: str) -> bool:
-    return catalog_entry(code)["default_show_frequency"]
-
-
 def build_parameter_schema(entry: dict[str, Any]) -> dict[str, Any]:
     """Contract stored in `action_cards.parameter_schema` for one card version.
 
@@ -65,13 +61,12 @@ def build_parameter_schema(entry: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": CARD_SCHEMA_VERSION,
         "channels": [str(channel) for channel in entry["channels"]],
-        "round_frequency_limit": entry["round_frequency_limit"],
+        "max_occurrences": entry["max_occurrences"],
         "quota_category": entry["quota_category"],
         "description": entry["description"],
         "context_fields": deepcopy(list(context_fields_for(code))),
         "fields": deepcopy(list(action_fields_for(code))),
         "default_visible_params": list(entry["default_visible_params"]),
-        "default_show_frequency": entry["default_show_frequency"],
     }
 
 

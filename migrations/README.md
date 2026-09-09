@@ -1,10 +1,22 @@
-# Database migrations
+# Alembic
 
-Alembic environment and immutable migration revisions live here. Production startup
-must not call `create_all`; the schema is applied by `python -m scripts.seed_database
---migrate`, which the `api` service runs before uvicorn.
+Для текущего проекта существует одна начальная ревизия:
+`0001_current_schema`. Она создаёт актуальные семь таблиц, ограничения и индексы
+на **пустой PostgreSQL**. Старые ревизии разработки удалены; перенос прежних
+игровых данных не поддерживается.
 
-- `versions/` — ordered Alembic revisions; see `versions/README.md` for the chain.
+```bash
+alembic upgrade head
+python -m scripts.seed_database
+```
 
-Initial data (card versions, bootstrap administrator, demo round) is seeded
-idempotently by `scripts/seed_database.py`, not by a migration.
+Контейнер API выполняет это через `python -m scripts.seed_database --migrate`.
+Seed заполняет каталог, создаёт администратора и единственную настройку раунда.
+Миграция содержит фиксированное описание схемы и не импортирует ORM-модели.
+`migrations/env.py` использует ORM metadata для будущего `--autogenerate`.
+
+Для просмотра SQL без подключения к БД: `alembic upgrade head --sql`.
+`alembic downgrade base` удаляет таблицы текущей схемы.
+
+Нужна именно новая БД: пересборка образа сама по себе не очищает существующий
+PostgreSQL volume. Очистка контейнеров и томов здесь не выполнялась.

@@ -9,12 +9,13 @@ class UserRole(str, Enum):
 class RoundStatus(str, Enum):
     draft = "draft"
     active = "active"
+    closed = "closed"
     scoring = "scoring"
     completed = "completed"
 
 
 class ScenarioStatus(str, Enum):
-    draft = "draft"
+    editing = "editing"
     submitted = "submitted"
     scored = "scored"
 

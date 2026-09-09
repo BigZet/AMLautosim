@@ -1,11 +1,21 @@
-from __future__ import annotations
+"""Common documented error contract."""
 
-from typing import Any, Optional
 from pydantic import BaseModel
+
+from src.aml_workshop_simulator.core.enums import RoundStatus
+from src.aml_workshop_simulator.schemas.game_state import ViolationOut
+
+
+class ErrorDetails(BaseModel):
+    violations: list[ViolationOut] | None = None
+    round_status: RoundStatus | None = None
+    current_revision: int | None = None
+    current_config_revision: int | None = None
+    current_access_revision: int | None = None
 
 
 class ErrorEnvelope(BaseModel):
     code: str
     message: str
-    details: Optional[dict[str, Any]] = None
-    request_id: Optional[str] = None
+    details: ErrorDetails | None = None
+    request_id: str | None = None

@@ -12,7 +12,6 @@ from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
 from src.aml_workshop_simulator.core.enums import RiskLabel
-from src.aml_workshop_simulator.core.game_config import base_game_config
 from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
 from src.aml_workshop_simulator.domain.rules import (
     CardSpec,
@@ -73,7 +72,7 @@ def score_scenario(
 ) -> dict[str, Any]:
     """Risk score, label and explanation for one canonical chain."""
     config = game_config or {}
-    scoring_cfg = {**base_game_config()["scoring"], **config.get("scoring", {})}
+    scoring_cfg = config["scoring"]
     rules = scoring_cfg["rules"]
     review_threshold = Decimal(str(scoring_cfg["review_threshold"]))
     suspicious_threshold = Decimal(str(scoring_cfg["suspicious_threshold"]))
@@ -87,8 +86,7 @@ def score_scenario(
         operation = policy.for_card(spec.key)
         spec = spec.with_overrides(operation.overrides if operation else None)
         amount = money(step["amount"])
-        frequency = int(step["frequency"])
-        gross = money(amount * frequency)
+        gross = amount
         context = step["context"]
         details = dict(step.get("action_details") or {})
 
@@ -118,17 +116,6 @@ def score_scenario(
         )
         factors.append(
             _factor(
-                "frequency:repeats",
-                "frequency",
-                Decimal(max(0, frequency - 1))
-                * Decimal(str(rules["extra_repeat_points"])),
-                "Повторы могут быть похожи на дробление операции",
-                step_id,
-                {"frequency": frequency},
-            )
-        )
-        factors.append(
-            _factor(
                 f"recipient:{context['recipient_type']}",
                 "context",
                 Decimal(rules["recipient_points"][context["recipient_type"]]),
@@ -150,7 +137,7 @@ def score_scenario(
                 f"velocity:{context['velocity']}",
                 "context",
                 Decimal(rules["velocity_points"][context["velocity"]]),
-                "Темп повторов влияет на сходство с автоматизированной цепочкой",
+                "Темп операций влияет на сходство с автоматизированной цепочкой",
                 step_id,
             )
         )
@@ -279,8 +266,8 @@ def _sequence_factors(
     for index in range(1, len(steps)):
         previous, current = steps[index - 1], steps[index]
         previous_spec, current_spec = spec_of(previous), spec_of(current)
-        previous_gross = money(money(previous["amount"]) * int(previous["frequency"]))
-        current_gross = money(money(current["amount"]) * int(current["frequency"]))
+        previous_gross = money(money(previous["amount"]))
+        current_gross = money(money(current["amount"]))
         if (
             previous_spec.flow == CREDIT_FLOW
             and current_spec.flow == DEBIT_FLOW
@@ -311,9 +298,7 @@ def resource_score(
     """Normalised resource efficiency in `0..100`."""
     config = game_config or {}
     rules = RoundRules.from_config(config)
-    weights_cfg = (config.get("leaderboard") or {}).get("resource_weights")
-    if weights_cfg is None:
-        weights_cfg = base_game_config()["leaderboard"]["resource_weights"]
+    weights_cfg = config["leaderboard"]["resource_weights"]
     weights = {key: Decimal(str(value)) for key, value in weights_cfg.items()}
 
     after = snapshot.get("resources_after", {})
@@ -349,8 +334,7 @@ def leaderboard_scores(
     game_config: dict[str, Any] | None,
 ) -> dict[str, Decimal]:
     """Stealth and composite game score from the round's leaderboard weights."""
-    config = (game_config or {}).get("leaderboard", {}) or {}
-    weights = config.get("weights") or base_game_config()["leaderboard"]["weights"]
+    weights = game_config["leaderboard"]["weights"]
     stealth_weight = Decimal(str(weights["stealth"]))
     resource_weight = Decimal(str(weights["resources"]))
     stealth = _score(_clamp(HUNDRED - risk, ZERO, HUNDRED))

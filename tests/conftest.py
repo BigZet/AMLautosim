@@ -1,253 +1,171 @@
-"""Shared PostgreSQL 16 test fixtures.
+"""Real PostgreSQL; each run owns and removes only its disposable database."""
 
-Every test level except the pure-domain unit tests runs against a real
-PostgreSQL 16 database (`aml_simulator_test` by default). SQLite is never used:
-partial unique indexes, JSONB, row locks and `NUMERIC` rounding must behave
-exactly as they do in production.
-"""
-
-from __future__ import annotations
-
+import asyncio
 import os
 import sys
-import uuid
-from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from uuid import uuid4
 
+import asyncpg
 import pytest
+from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-ADMIN_DSN = os.environ.get(
-    "TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres"
-)
-TEST_DB_NAME = os.environ.get("TEST_DATABASE_NAME", "aml_simulator_test")
-TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL",
-    f"postgresql+asyncpg://aml:aml@localhost:5432/{TEST_DB_NAME}",
-)
-
-# Must be set before any application module reads the settings singleton.
-os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-os.environ["DB_POOL_DISABLED"] = "true"
-os.environ.setdefault("BOOTSTRAP_ADMIN_EMAIL", "admin@example.com")
-os.environ.setdefault("BOOTSTRAP_ADMIN_PASSWORD", "admin12345")
-
-ADMIN_EMAIL = os.environ["BOOTSTRAP_ADMIN_EMAIL"]
-ADMIN_PASSWORD = os.environ["BOOTSTRAP_ADMIN_PASSWORD"]
-PARTICIPANT_PASSWORD = "correct-horse-42"
-
-TABLES = (
-    "audit_events",
-    "leaderboard_adjustments",
-    "scoring_results",
-    "scenarios",
-    "sessions",
-    "rounds",
-    "users",
-    "action_cards",
+sys.path.insert(0, str(ROOT))
+ADMIN_URL = make_url(
+    os.getenv("TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres")
+).set(drivername="postgresql")
+DATABASE_NAME = f"aml_test_{uuid4().hex}"
+os.environ.update(
+    DATABASE_URL=ADMIN_URL.set(
+        drivername="postgresql+asyncpg", database=DATABASE_NAME
+    ).render_as_string(hide_password=False),
+    DB_POOL_DISABLED="true",
+    BOOTSTRAP_ADMIN_EMAIL="admin@example.com",
+    BOOTSTRAP_ADMIN_PASSWORD="admin12345",
 )
 
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy import text  # noqa: E402
 
-def _sync_dsn() -> str:
-    return TEST_DATABASE_URL.replace("+asyncpg", "").replace(
-        "postgresql://", "postgresql://"
-    )
-
-
-def _create_database_if_missing() -> None:
-    import psycopg2
-    from psycopg2 import sql
-    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-
-    connection = psycopg2.connect(ADMIN_DSN)
-    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (TEST_DB_NAME,))
-            if cursor.fetchone() is None:
-                cursor.execute(
-                    sql.SQL("CREATE DATABASE {}").format(sql.Identifier(TEST_DB_NAME))
-                )
-    finally:
-        connection.close()
+from scripts.seed_database import run_migrations, seed  # noqa: E402
+from src.aml_workshop_simulator.api.main import app  # noqa: E402
+from src.aml_workshop_simulator.db.session import AsyncSessionLocal  # noqa: E402
 
 
-def _migrate() -> None:
-    from alembic import command
-    from alembic.config import Config
-
-    config = Config(str(ROOT / "alembic.ini"))
-    config.set_main_option("script_location", str(ROOT / "migrations"))
-    command.upgrade(config, "head")
+async def execute(statement, parameters=None):
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(text(statement), parameters or {})
+        rows = result.mappings().all() if result.returns_rows else []
+        await db.commit()
+        return rows
 
 
 @pytest.fixture(scope="session")
-def database() -> Iterator[None]:
-    """Create and migrate the test database once per session."""
+def database():
+    async def manage(create):
+        conn = await asyncpg.connect(ADMIN_URL.render_as_string(hide_password=False))
+        try:
+            if create:
+                await conn.execute(f'CREATE DATABASE "{DATABASE_NAME}"')
+            else:
+                await conn.execute(f'DROP DATABASE "{DATABASE_NAME}" WITH (FORCE)')
+        finally:
+            await conn.close()
+
+    asyncio.run(manage(True))
     try:
-        _create_database_if_missing()
-    except Exception as exc:  # pragma: no cover - environment problem, not a test failure
-        pytest.exit(f"PostgreSQL 16 is required for the test suite: {exc}", returncode=3)
-    _migrate()
-    yield
-
-
-@pytest.fixture()
-def db_dsn(database: None) -> str:
-    return _sync_dsn()
-
-
-@pytest.fixture()
-def clean_database(database: None) -> Iterator[None]:
-    """Truncate every table and re-seed the catalog before each test."""
-    import asyncio
-
-    import psycopg2
-
-    connection = psycopg2.connect(_sync_dsn())
-    connection.autocommit = True
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "TRUNCATE TABLE " + ", ".join(TABLES) + " RESTART IDENTITY CASCADE"
-            )
+        run_migrations()
+        yield
     finally:
-        connection.close()
-
-    from scripts.seed_database import seed
-
-    asyncio.run(seed(activate_round=False))
-    yield
+        asyncio.run(manage(False))
 
 
-@pytest.fixture()
-def client(clean_database: None) -> Iterator[Any]:
-    """FastAPI test client bound to a single event loop for its lifetime."""
-    from fastapi.testclient import TestClient
-
-    from src.aml_workshop_simulator.api.main import app
-
-    # Unhandled server errors must surface as the documented envelope, exactly
-    # as they would behind uvicorn, instead of propagating into the test.
-    # A real peer address is supplied so the request metadata the API records
-    # (and the trusted-proxy rules around it) can be exercised.
-    with TestClient(
-        app, raise_server_exceptions=False, client=("127.0.0.1", 50000)
-    ) as test_client:
-        yield test_client
-
-
-@pytest.fixture()
-def admin_headers(client: Any) -> dict[str, str]:
-    response = client.post(
-        "/api/v1/auth/login",
-        json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD, "audience": "admin"},
+@pytest.fixture
+def api(database):
+    asyncio.run(
+        execute("TRUNCATE action_cards, users, rounds RESTART IDENTITY CASCADE")
     )
-    assert response.status_code == 200, response.text
-    return {"X-Session-ID": response.json()["session_id"]}
+    asyncio.run(seed())
+    with TestClient(app, raise_server_exceptions=False) as client:
+        yield client
 
 
-def register_participant(
-    client: Any, email: str | None = None, display_name: str = "Участник"
-) -> dict[str, Any]:
-    """Register and log in one participant, returning identity plus headers."""
-    email = email or f"p{uuid.uuid4().hex[:10]}@example.com"
-    created = client.post(
-        "/api/v1/auth/register",
-        json={
-            "email": email,
-            "display_name": display_name,
-            "password": PARTICIPANT_PASSWORD,
+@pytest.fixture
+def request_api(api):
+    def request(method, path, headers=None, body=None, status=200):
+        response = api.request(method, "/api/v1" + path, headers=headers, json=body)
+        assert response.status_code == status, response.text
+        return response.json() if response.content else None
+
+    return request
+
+
+@pytest.fixture
+def admin(request_api):
+    session = request_api(
+        "POST",
+        "/auth/login",
+        body={
+            "email": "admin@example.com",
+            "password": "admin12345",
+            "audience": "admin",
         },
     )
-    assert created.status_code == 201, created.text
-    logged_in = client.post(
-        "/api/v1/auth/login",
-        json={"email": email, "password": PARTICIPANT_PASSWORD, "audience": "play"},
+    return {"X-Session-ID": session["session_id"]}
+
+
+@pytest.fixture
+def player_factory(request_api):
+    def create(name="Участник", password="participant123"):
+        email = f"{uuid4().hex}@example.com"
+        user = request_api(
+            "POST",
+            "/auth/register",
+            body={
+                "email": email,
+                "password": password,
+                "display_name": name,
+            },
+            status=201,
+        )
+        session = request_api(
+            "POST", "/auth/login", body={"email": email, "password": password}
+        )
+        return {**user, "headers": {"X-Session-ID": session["session_id"]}}
+
+    return create
+
+
+@pytest.fixture
+def player(player_factory):
+    return player_factory()
+
+
+@pytest.fixture
+def round_id(request_api, admin):
+    return request_api("GET", "/admin/rounds/current", admin)["id"]
+
+
+@pytest.fixture
+def active_round(request_api, admin, round_id):
+    request_api("POST", f"/admin/rounds/{round_id}/start", admin)
+    return round_id
+
+
+@pytest.fixture
+def chain(request_api, round_id):
+    card = next(
+        c
+        for c in request_api("GET", f"/rounds/{round_id}/cards")
+        if c["code"] == "cash_withdrawal"
     )
-    assert logged_in.status_code == 200, logged_in.text
-    payload = logged_in.json()
-    return {
-        "id": created.json()["id"],
-        "email": email,
-        "display_name": display_name,
-        "session_id": payload["session_id"],
-        "headers": {"X-Session-ID": payload["session_id"]},
-    }
+
+    def build(count=3):
+        return [
+            {
+                "step_id": str(uuid4()),
+                "card": {key: card[key] for key in ("id", "code", "version")},
+                "amount": "50000.00",
+                "action_details": {
+                    field["key"]: field["default"] for field in card["fields"]
+                },
+            }
+            for _ in range(count)
+        ]
+
+    return build
 
 
-@pytest.fixture()
-def participant(client: Any) -> dict[str, Any]:
-    return register_participant(client)
-
-
-@pytest.fixture()
-def second_participant(client: Any) -> dict[str, Any]:
-    return register_participant(client, display_name="Второй участник")
-
-
-@pytest.fixture()
-def active_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
-    """Activate the seeded demo round and return it."""
-    rounds = client.get("/api/v1/admin/rounds", headers=admin_headers).json()
-    draft = next(item for item in rounds if item["status"] == "draft")
-    response = client.post(
-        f"/api/v1/admin/rounds/{draft['id']}/activate",
-        headers={**admin_headers, "Idempotency-Key": str(uuid.uuid4())},
+@pytest.fixture
+def command():
+    return lambda steps, revision=0: dict(
+        steps=steps, expected_revision=revision, client_mutation_id=str(uuid4())
     )
-    assert response.status_code == 200, response.text
-    return response.json()
 
 
-@pytest.fixture()
-def cards(client: Any, active_round: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    response = client.get(f"/api/v1/rounds/{active_round['id']}/cards")
-    assert response.status_code == 200, response.text
-    return {card["code"]: card for card in response.json()}
-
-
-@pytest.fixture()
-def full_round(client: Any, admin_headers: dict[str, str]) -> dict[str, Any]:
-    """A round with all four cards and every declared parameter visible."""
-    from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG
-
-    catalog = client.get("/api/v1/admin/action-cards", headers=admin_headers).json()
-    config = {
-        key: value
-        for key, value in REFERENCE_GAME_CONFIG.items()
-        if key != "operations"
-    }
-    config["schema_version"] = 4
-    config["card_versions"] = [
-        {"id": card["id"], "code": card["code"], "version": card["version"]}
-        for card in catalog
-    ]
-
-    rounds = client.get("/api/v1/admin/rounds", headers=admin_headers).json()
-    draft = next(item for item in rounds if item["status"] == "draft")
-    updated = client.put(
-        f"/api/v1/admin/rounds/{draft['id']}",
-        json={
-            "expected_config_revision": draft["config_revision"],
-            "game_config": config,
-        },
-        headers=admin_headers,
+@pytest.fixture
+def sql(api):
+    return lambda statement, parameters=None: api.portal.call(
+        execute, statement, parameters
     )
-    assert updated.status_code == 200, updated.text
-    response = client.post(
-        f"/api/v1/admin/rounds/{draft['id']}/activate",
-        headers={**admin_headers, "Idempotency-Key": str(uuid.uuid4())},
-    )
-    assert response.status_code == 200, response.text
-    return response.json()
-
-
-@pytest.fixture()
-def full_cards(client: Any, full_round: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    response = client.get(f"/api/v1/rounds/{full_round['id']}/cards")
-    assert response.status_code == 200, response.text
-    return {card["code"]: card for card in response.json()}

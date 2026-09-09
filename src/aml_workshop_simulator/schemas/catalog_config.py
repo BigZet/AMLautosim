@@ -64,20 +64,15 @@ class CardConfig(BaseModel):
     max_amount: Decimal = Field(
         gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
     )
-    max_frequency: int = Field(ge=1, le=LIMITS["max_frequency"])
-    round_frequency_limit: int = Field(ge=1, le=LIMITS["max_actions"])
+    max_occurrences: int = Field(ge=1, le=LIMITS["max_actions"])
     requires_card_code: str | None
     quota_category: Literal["cash", "anonymous"] | None
     channels: list[Channel] = Field(min_length=1)
     default_visible_params: list[str] = Field(max_length=LIMITS["max_visible_params"])
-    default_show_frequency: bool
 
     @model_validator(mode="after")
     def ranges(self):
-        if (
-            self.min_amount > self.max_amount
-            or self.max_frequency > self.round_frequency_limit
-        ):
+        if self.min_amount > self.max_amount:
             raise ValueError(f"Inconsistent card limits: {self.code}")
         if len(set(self.channels)) != len(self.channels):
             raise ValueError(f"Duplicate channels: {self.code}")

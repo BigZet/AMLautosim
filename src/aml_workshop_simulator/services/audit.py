@@ -27,7 +27,6 @@ async def record_event(
     target_id: str | None = None,
     reason: str | None = None,
     request_id: str | None = None,
-    idempotency_key_hash: str | None = None,
     metadata: dict[str, Any] | None = None,
 ) -> None:
     db.add(
@@ -40,7 +39,6 @@ async def record_event(
             target_id=target_id,
             reason=reason,
             request_id=request_id,
-            idempotency_key_hash=idempotency_key_hash,
             metadata_=metadata,
             created_at=datetime.now(UTC),
         )
