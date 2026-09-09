@@ -8,13 +8,13 @@
       "description": "Регулярное поступление от известного работодателя.",
       "category": "Поступление",
       "flow": "credit",
-      "risk_weight": "0.00",
-      "energy_cost": 1,
-      "time_cost": 1,
+      "risk_weight": "10.00",
+      "energy_cost": 8,
+      "time_cost": 7,
       "fee_rate": "0.000000",
-      "min_amount": "10000.00",
-      "max_amount": "150000.00",
-      "max_occurrences": 2,
+      "min_amount": "20000.00",
+      "max_amount": "30000.00",
+      "max_occurrences": 1,
       "requires_card_code": null,
       "quota_category": null,
       "channels": [
@@ -24,7 +24,7 @@
       ],
       "default_visible_params": [
         "channel",
-        "context.time_of_day"
+        "action.income_basis"
       ]
     },
     {
@@ -34,12 +34,12 @@
       "description": "Пополнение счета через банкомат или кассу.",
       "category": "Наличные",
       "flow": "credit",
-      "risk_weight": "12.00",
-      "energy_cost": 2,
-      "time_cost": 2,
+      "risk_weight": "18.00",
+      "energy_cost": 3,
+      "time_cost": 1,
       "fee_rate": "0.000000",
-      "min_amount": "5000.00",
-      "max_amount": "150000.00",
+      "min_amount": "10000.00",
+      "max_amount": "80000.00",
       "max_occurrences": 3,
       "requires_card_code": null,
       "quota_category": "cash",
@@ -59,13 +59,13 @@
       "description": "Перевод другому клиенту банка.",
       "category": "Перевод",
       "flow": "debit",
-      "risk_weight": "5.00",
-      "energy_cost": 1,
+      "risk_weight": "16.00",
+      "energy_cost": 2,
       "time_cost": 1,
       "fee_rate": "0.005000",
-      "min_amount": "1000.00",
-      "max_amount": "500000.00",
-      "max_occurrences": 7,
+      "min_amount": "10000.00",
+      "max_amount": "80000.00",
+      "max_occurrences": 8,
       "requires_card_code": null,
       "quota_category": null,
       "channels": [
@@ -74,23 +74,23 @@
         "branch"
       ],
       "default_visible_params": [
-        "channel",
-        "context.recipient_type"
+        "context.velocity",
+        "context.has_documents"
       ]
     },
     {
       "code": "cash_withdrawal",
       "version": 1,
       "title": "Снять наличные",
-      "description": "Получение наличных вскоре после поступления.",
+      "description": "Получение наличных в банкомате или отделении.",
       "category": "Наличные",
       "flow": "debit",
-      "risk_weight": "14.00",
+      "risk_weight": "22.00",
       "energy_cost": 2,
-      "time_cost": 2,
+      "time_cost": 1,
       "fee_rate": "0.010000",
-      "min_amount": "5000.00",
-      "max_amount": "120000.00",
+      "min_amount": "10000.00",
+      "max_amount": "100000.00",
       "max_occurrences": 4,
       "requires_card_code": null,
       "quota_category": "cash",
@@ -100,7 +100,7 @@
       ],
       "default_visible_params": [
         "channel",
-        "context.time_of_day"
+        "context.velocity"
       ]
     }
   ]

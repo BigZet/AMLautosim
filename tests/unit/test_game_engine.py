@@ -23,6 +23,19 @@ from src.aml_workshop_simulator.services.scenario_service import (
 @pytest.fixture
 def game():
     config = deepcopy(base_game_config())
+    # Fixed mechanics fixture; production balance has its own playthrough checks.
+    config["resources"] = {
+        "initial_balance": "250000.00",
+        "initial_energy": 14,
+        "initial_time": 18,
+    }
+    config["objectives"] = {"target_outflow": "150000.00", "max_actions": 8}
+    config["constraints"]["max_identical_steps"] = 3
+    for operation in config["operations"]:
+        if operation["code"] == "cash_withdrawal":
+            operation["max_occurrences"] = 3
+            operation["visible_params"] = ["channel", "context.time_of_day"]
+
     specs = {
         s.key: s
         for i, entry in enumerate(CARD_CATALOG, 1)

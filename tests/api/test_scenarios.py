@@ -14,7 +14,7 @@ def test_direct_submission_and_retry(
     submitted = request_api("POST", path + "/submit", headers, payload)
     assert submitted["status"] == "submitted" and submitted["revision"] == 1
     assert not submitted["can_edit"] and not submitted["can_submit"]
-    assert len(submitted["steps"]) == 3 and submitted["blockers"] == []
+    assert len(submitted["steps"]) == 9 and submitted["blockers"] == []
     assert request_api("POST", path + "/submit", headers, payload) == submitted
     for changed in (
         {**payload, "client_mutation_id": str(uuid4())},

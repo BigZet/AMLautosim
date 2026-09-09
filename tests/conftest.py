@@ -135,23 +135,22 @@ def active_round(request_api, admin, round_id):
 
 @pytest.fixture
 def chain(request_api, round_id):
-    card = next(
-        c
-        for c in request_api("GET", f"/rounds/{round_id}/cards")
-        if c["code"] == "cash_withdrawal"
-    )
+    cards = {c["code"]: c for c in request_api("GET", f"/rounds/{round_id}/cards")}
+    from scripts.check_game_balance import ROUTES
 
-    def build(count=3):
+    route = [(code, f"{amount:.2f}") for code, amount in ROUTES["cash_funding"]]
+
+    def build(count=9):
         return [
             {
                 "step_id": str(uuid4()),
-                "card": {key: card[key] for key in ("id", "code", "version")},
-                "amount": "50000.00",
+                "card": {key: cards[code][key] for key in ("id", "code", "version")},
+                "amount": amount,
                 "action_details": {
-                    field["key"]: field["default"] for field in card["fields"]
+                    field["key"]: field["default"] for field in cards[code]["fields"]
                 },
             }
-            for _ in range(count)
+            for code, amount in route[:count]
         ]
 
     return build

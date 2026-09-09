@@ -9,17 +9,17 @@
   },
   "velocity_time": {
     "spaced": {
-      "time_cost": 1
+      "time_cost": 2
     },
     "normal": {
-      "time_cost": 0
+      "time_cost": 1
     },
     "rapid": {
       "time_cost": 0
     }
   },
   "documents": {
-    "minimum_gross": "75000.00",
+    "minimum_gross": "60000.00",
     "time_cost": 1
   }
 }

@@ -6,7 +6,7 @@
       "version": 1,
       "visible_params": [
         "channel",
-        "context.time_of_day"
+        "action.income_basis"
       ]
     },
     {
@@ -21,8 +21,8 @@
       "code": "card_transfer",
       "version": 1,
       "visible_params": [
-        "channel",
-        "context.recipient_type"
+        "context.velocity",
+        "context.has_documents"
       ]
     },
     {
@@ -30,46 +30,46 @@
       "version": 1,
       "visible_params": [
         "channel",
-        "context.time_of_day"
+        "context.velocity"
       ]
     }
   ],
   "resources": {
-    "initial_balance": "250000.00",
-    "initial_energy": 14,
-    "initial_time": 18
+    "initial_balance": "180000.00",
+    "initial_energy": 30,
+    "initial_time": 30
   },
   "objectives": {
-    "target_outflow": "150000.00",
-    "max_actions": 8
+    "target_outflow": "400000.00",
+    "max_actions": 14
   },
   "constraints": {
-    "max_identical_steps": 3,
+    "max_identical_steps": 2,
     "max_night_operations": 2,
     "max_anonymous_operations": 2,
     "category_limits": {
-      "cash": "150000.00",
-      "anonymous": "75000.00"
+      "cash": "240000.00",
+      "anonymous": "60000.00"
     }
   },
   "ruleset_version": "game-rules-v4",
   "scoring": {
     "version": "risk-rules-v2",
-    "review_threshold": "35.00",
-    "suspicious_threshold": "65.00"
+    "review_threshold": "20.00",
+    "suspicious_threshold": "35.00"
   },
   "leaderboard": {
     "version": "leaderboard-v2",
     "weights": {
-      "stealth": "0.60",
-      "resources": "0.40"
+      "stealth": "0.65",
+      "resources": "0.35"
     },
     "resource_weights": {
-      "balance": "0.27",
-      "energy": "0.20",
-      "time": "0.20",
-      "fees": "0.20",
-      "available_steps": "0.13"
+      "balance": "0.10",
+      "energy": "0.25",
+      "time": "0.40",
+      "fees": "0.05",
+      "available_steps": "0.20"
     }
   }
 }

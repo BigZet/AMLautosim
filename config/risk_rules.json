@@ -10,7 +10,7 @@
     "night": "9"
   },
   "velocity_points": {
-    "spaced": "-4",
+    "spaced": "-5",
     "normal": "0",
     "rapid": "12"
   },
@@ -21,13 +21,13 @@
     "web": "2",
     "atm": "3"
   },
-  "amount_divisor": "20000",
-  "amount_max_points": "20",
+  "amount_divisor": "10000",
+  "amount_max_points": "12",
   "documents": {
-    "minimum_gross": "75000.00",
-    "present_large": "-4",
-    "present_small": "-1",
-    "absent_large": "7",
+    "minimum_gross": "60000.00",
+    "present_large": "-5",
+    "present_small": "0",
+    "absent_large": "10",
     "absent_small": "0"
   },
   "sequence": {
