@@ -1,0 +1,12 @@
+# Direct runtime dependencies; requirements.txt locks the complete Python 3.13 environment.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+asyncpg==0.31.0
+alembic==1.19.1
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+pydantic[email]==2.13.5
+pydantic-settings==2.15.0
+httpx==0.28.1
+nicegui==3.16.0

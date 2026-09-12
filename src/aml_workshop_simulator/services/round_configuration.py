@@ -40,7 +40,7 @@ def config_version(game_config: dict[str, Any]) -> str:
     blob = json.dumps(
         payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")
     )
-    return f"round-config-v5:sha256:{hashlib.sha256(blob.encode('utf-8')).hexdigest()}"
+    return f"round-config-v{game_config.get('schema_version', 5)}:sha256:{hashlib.sha256(blob.encode('utf-8')).hexdigest()}"
 
 
 def validate_game_config(
@@ -55,4 +55,9 @@ def validate_game_config(
     try:
         validate_config_against_catalog(available, game_config)
     except ValueError as error:
-        raise Conflict(str(error), code="round_configuration_invalid") from error
+        violations = getattr(error, "violations", None)
+        raise Conflict(
+            str(error),
+            code="round_configuration_invalid",
+            details={"violations": violations} if violations else None,
+        ) from error

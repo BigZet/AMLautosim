@@ -1,19 +1,12 @@
-"""Standalone, DB-free config validation.
+"""Validate game configuration without a server or database.
 
-Every process that reads config/*.json (the API, both Streamlit UIs) fails
-fast on its own if the config is broken — but that only catches a bad
-config once that specific process happens to start. This script runs the
-same checks up front, with no server and no database, so it can gate a
-deploy before any process starts:
+API lifespan and seed call the same validate_configuration_files function.
+NiceGUI consumes validated contracts over HTTP, never the config files.
 
     python -m scripts.validate_config
     python -m scripts.validate_config --config-dir /path/to/other/config
 
-Exit code 0 = config is sound, 1 = at least one check failed. Meant to run
-as a `docker-compose` precondition or a CI step, not to be imported by the
-services themselves — they call `validate_configuration_files()` directly
-(see `api/main.py`'s lifespan, and the equivalent startup hook the two
-Streamlit apps should call before rendering anything).
+Exit status is 0 for valid configuration and 1 on validation failure.
 """
 
 from __future__ import annotations

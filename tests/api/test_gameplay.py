@@ -26,8 +26,11 @@ def test_incoming_profiles_complete_game(
     cards = request_api("GET", path + "/cards")
     incoming = next(c for c in cards if c["code"] == "incoming_transfer")
     assert [p["key"] for p in incoming["visible_params"]] == [
-        "transfer_source",
+        "channel",
+        "velocity",
         "sender_relationship",
+        "transfer_source",
+        "time_of_day",
     ]
     assert {c["code"] for c in cards} == {
         "salary",

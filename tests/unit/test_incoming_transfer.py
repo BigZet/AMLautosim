@@ -121,7 +121,7 @@ def test_old_cash_contract_is_not_accepted_by_new_round(defect, reason):
     assert reason in {v.reason for v in exc.value.violations}
 
 
-def test_new_source_features_do_not_report_cash_and_respect_frozen_defaults():
+def test_new_source_features_do_not_report_cash_or_use_hidden_defaults():
     steps, _, config = canonical_incoming(
         "crypto_exchange", "anonymous_established_account"
     )
@@ -142,8 +142,9 @@ def test_new_source_features_do_not_report_cash_and_respect_frozen_defaults():
     }
     steps[0]["action_details"] = {}
     features = extract_catboost_features(steps, config)
-    assert features["foreign_bank_inflow_sum"] == 80000
-    assert features["primary_sender_relationship"] == "anonymous_new_account"
+    # Legacy visibility and pinned defaults cannot hide or override editable fields.
+    assert features["foreign_bank_inflow_sum"] == 0
+    assert features["primary_sender_relationship"] == "regular_sender"
 
 
 def test_synthetic_examples_are_reproducible_and_use_current_sources():

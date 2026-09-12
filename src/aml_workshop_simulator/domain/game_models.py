@@ -8,9 +8,6 @@ from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
 from src.aml_workshop_simulator.core.game_config import base_game_config
-from src.aml_workshop_simulator.domain.action_parameters import (
-    CONTEXT_FIELDS,
-)
 from src.aml_workshop_simulator.domain.channels import channel_label
 from src.aml_workshop_simulator.domain.round_policy import (
     PARAM_CHANNEL,
@@ -18,7 +15,7 @@ from src.aml_workshop_simulator.domain.round_policy import (
     context_param,
 )
 
-RULESET_VERSION = "game-rules-v4"
+RULESET_VERSION = "game-rules-v5"
 
 SNAPSHOT_SCHEMA_VERSION = 5
 
@@ -88,11 +85,6 @@ class CardSpec:
     context_fields: tuple[dict[str, Any], ...] = ()
     fields: tuple[dict[str, Any], ...] = ()
     default_visible_params: tuple[str, ...] = ()
-    context_defaults: dict[str, Any] = field(
-        default_factory=lambda: {
-            key: item["default"] for key, item in CONTEXT_FIELDS.items()
-        }
-    )
 
     @property
     def key(self) -> tuple[str, int]:
@@ -109,7 +101,7 @@ class CardSpec:
 
     def field_spec(self, param: str) -> dict[str, Any] | None:
         """Declarative spec of one parameter, or None when not declared."""
-        if param == PARAM_CHANNEL:
+        if param == PARAM_CHANNEL and self.channels:
             return {
                 "key": PARAM_CHANNEL,
                 "label": "Канал",
@@ -227,13 +219,6 @@ class RoundRules:
 
 
 REFERENCE_GAME_CONFIG: dict[str, Any] = base_game_config()
-
-
-def _context_defaults() -> dict[str, Any]:
-    return {key: spec["default"] for key, spec in CONTEXT_FIELDS.items()}
-
-
-CONTEXT_DEFAULTS = _context_defaults()
 
 
 def _step_label(index: int, spec: CardSpec | None) -> str:

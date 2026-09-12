@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "cards": [
     {
       "code": "salary",
@@ -8,22 +8,17 @@
       "description": "Регулярное поступление от известного работодателя.",
       "category": "Поступление",
       "flow": "credit",
-      "risk_weight": "10.00",
+      "risk_weight": "3.00",
       "energy_cost": 8,
-      "time_cost": 7,
+      "time_cost": 8,
       "fee_rate": "0.000000",
       "min_amount": "20000.00",
       "max_amount": "30000.00",
       "max_occurrences": 1,
       "requires_card_code": null,
       "quota_category": null,
-      "channels": [
-        "bank",
-        "branch",
-        "mobile"
-      ],
+      "channels": [],
       "default_visible_params": [
-        "channel",
         "action.income_basis"
       ]
     },
@@ -47,8 +42,11 @@
         "bank"
       ],
       "default_visible_params": [
+        "channel",
+        "context.velocity",
+        "action.sender_relationship",
         "action.transfer_source",
-        "action.sender_relationship"
+        "context.time_of_day"
       ]
     },
     {
@@ -58,7 +56,7 @@
       "description": "Перевод другому клиенту банка.",
       "category": "Перевод",
       "flow": "debit",
-      "risk_weight": "16.00",
+      "risk_weight": "12.00",
       "energy_cost": 2,
       "time_cost": 1,
       "fee_rate": "0.005000",
@@ -73,8 +71,10 @@
         "branch"
       ],
       "default_visible_params": [
-        "context.velocity",
-        "context.has_documents"
+        "channel",
+        "context.time_of_day",
+        "context.recipient_type",
+        "context.velocity"
       ]
     },
     {
@@ -84,7 +84,7 @@
       "description": "Получение наличных в банкомате или отделении.",
       "category": "Наличные",
       "flow": "debit",
-      "risk_weight": "22.00",
+      "risk_weight": "18.00",
       "energy_cost": 2,
       "time_cost": 1,
       "fee_rate": "0.010000",
@@ -99,6 +99,7 @@
       ],
       "default_visible_params": [
         "channel",
+        "context.time_of_day",
         "context.velocity"
       ]
     }

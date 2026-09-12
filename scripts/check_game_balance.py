@@ -76,7 +76,6 @@ ROUTE_OPTIONS = {"mixed": {"velocity": "rapid"}}
 def play(
     route,
     velocity="normal",
-    documents=True,
     branch=False,
     transfer_source="domestic_bank",
     sender_relationship="regular_sender",
@@ -94,9 +93,7 @@ def play(
         context = {}
         if code in ("card_transfer", "cash_withdrawal"):
             context["velocity"] = velocity
-        if code == "card_transfer":
-            context["has_documents"] = documents
-        if branch and code in ("salary", "cash_withdrawal"):
+        if branch and code == "cash_withdrawal":
             context["channel"] = "branch"
         details = {f["key"]: f["default"] for f in spec.fields}
         if code == "incoming_transfer":
@@ -131,13 +128,13 @@ def main():
     # The old one-card shortcut and a chain without funding must fail.
     assert submit_blockers(play([("card_transfer", 240000)])[0])
     assert submit_blockers(play([("card_transfer", 80000)] * 3)[0])
-    for name, velocity, documents, branch in product(
-        ROUTES, ("spaced", "normal", "rapid"), (True, False), (False, True)
+    for name, velocity, branch in product(
+        ROUTES, ("spaced", "normal", "rapid"), (False, True)
     ):
-        snapshot, risk, board = play(ROUTES[name], velocity, documents, branch)
+        snapshot, risk, board = play(ROUTES[name], velocity, branch=branch)
         blockers = submit_blockers(snapshot)
         print(
-            f"{name:12} {velocity:6} docs={documents!s:5} branch={branch!s:5} "
+            f"{name:12} {velocity:6} branch={branch!s:5} "
             f"valid={not blockers!s:5} risk={risk['risk_score']:5} "
             f"label={risk['risk_label'].value:10} score={board['game_score']:5} "
             f"left={snapshot['resources_after']} "

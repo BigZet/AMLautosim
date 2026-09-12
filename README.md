@@ -1,59 +1,49 @@
 # AML Workshop Simulator
 
-> Обновление ядра: актуальная модель одной игры описана в [docs/architecture.md](docs/architecture.md), новый API — в [docs/api.md](docs/api.md). Streamlit и тесты пока относятся к прежней модели; план адаптации — [docs/streamlit-next-step.md](docs/streamlit-next-step.md). Упоминания истории, шаблонов, остановки и ручных оценок ниже устарели.
-
-Учебный симулятор AML для 45-минутного мастер-класса: участники собирают цепочки
-финансовых операций, сервер детерминированно считает риск и ресурсы, организатор
-управляет раундом и лидербордом.
+Учебный симулятор для мастер-класса: участники собирают цепочки операций,
+FastAPI рассчитывает ресурсы и риск, организатор управляет игрой и рейтингом.
 
 ```text
-Browser -> Streamlit (participant / admin) -> FastAPI -> PostgreSQL 16
+Браузер → NiceGUI (:8080, /play и /admin) → FastAPI (:8000) → PostgreSQL 16
 ```
 
-## Структура
-
-- [`config/`](config/README.md) — игровые цены, лимиты, базовый раунд и коэффициенты расчёта;
-- [`src/`](src/) — production-код модульного монолита (API, домен, сервисы, БД, оба UI);
-- [`migrations/`](migrations/) — Alembic-миграции;
-- [`tests/`](tests/) — unit, contract, integration, UI и E2E проверки;
-- [`deploy/`](deploy/) и [`scripts/`](scripts/) — образ приложения и служебные скрипты;
-- [`resources/`](resources/) — сгенерированные датасеты для обучения ML-модели;
-- [`docs/`](docs/) — архитектурная и продуктовая документация.
-
-## Быстрый старт
+## Запуск через Docker Compose
 
 ```bash
 cp .env.example .env
 ```
 
-Заполните в `.env` обязательные секреты (`POSTGRES_PASSWORD`,
-`BOOTSTRAP_ADMIN_PASSWORD`) — без них стек не стартует намеренно. Затем:
+Заполните `POSTGRES_PASSWORD`, `BOOTSTRAP_ADMIN_PASSWORD` (10–128 символов)
+и `NICEGUI_STORAGE_SECRET`. Для генерации используйте `openssl rand -hex 32`.
+Секреты со специальными символами заключайте в одинарные кавычки в `.env`.
 
 ```bash
-docker compose up -d --build
+docker compose up -d --build --wait
 ```
 
-Поднимаются четыре сервиса: PostgreSQL, API, интерфейс участника и панель
-организатора. Миграции и идемпотентный seed выполняются автоматически при старте
-`api`. Порты PostgreSQL и API публикуются только на `127.0.0.1`; наружу смотрят
-только два Streamlit-интерфейса.
+Участник: http://localhost:8080/play. Организатор: http://localhost:8080/admin.
+Адрес организатора задаёт `BOOTSTRAP_ADMIN_EMAIL`. API и БД опубликованы только
+на loopback; Swagger: http://127.0.0.1:8000/api/v1/docs.
+Миграции и идемпотентный seed выполняются перед запуском API.
 
-| Сервис | Адрес |
-| --- | --- |
-| Интерфейс участника | http://localhost:8501 |
-| Панель организатора | http://localhost:8502 |
-| API (только с хоста) | http://127.0.0.1:8000/api/v1/docs |
+Текущий запуск использует HTTP. Настройка реверс-прокси и HTTPS — отдельный этап.
 
-Развертывание на VM, TLS и reverse proxy описаны в
-[`docs/deployment.md`](docs/deployment.md), эксплуатация — в
-[`docs/operations.md`](docs/operations.md).
+## Разработка и документация
 
-## Разработка
+Python 3.13. `requirements.in` содержит прямые зависимости,
+`requirements.txt` фиксирует полный runtime-набор, `requirements-dev.txt` — инструменты проверок.
 
 ```bash
-python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+python3.13 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/ruff check src scripts tests migrations
+.venv/bin/python -m pytest -q tests/unit
 ```
 
-Карта production-структуры — в
-[`docs/project-structure.md`](docs/project-structure.md), навигация по документации —
-в [`docs/README.md`](docs/README.md), запуск тестов — в [`tests/README.md`](tests/README.md).
+- [Развёртывание](docs/deployment.md) и [эксплуатация](docs/operations.md).
+- [NiceGUI](docs/nicegui.md), [архитектура](docs/architecture.md), [API](docs/api.md).
+- [Конфигурация](config/README.md), [баланс](config/BALANCE.md), [тесты](tests/README.md).
+- [Все документы](docs/README.md) и [структура проекта](docs/project-structure.md).
+
+CatBoost отложен. Адаптер и примеры сохранены в исходниках, серверный образ
+их не включает. Текущий скоринг детерминированный, без ML-модели.

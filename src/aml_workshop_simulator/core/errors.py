@@ -5,7 +5,7 @@
 ```
 
 `message` is the text a participant or administrator can act on; `code` and
-`details` are the stable contract the Streamlit client branches on.
+`details` are the stable contract the NiceGUI client branches on.
 """
 
 from __future__ import annotations

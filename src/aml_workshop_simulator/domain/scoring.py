@@ -1,4 +1,4 @@
-"""Versioned risk engine (`risk-rules-v2`) and leaderboard formula.
+"""Versioned risk engine (`risk-rules-v3`) and leaderboard formula.
 
 Everything is a pure function of `steps + round snapshot + card versions`; no
 clock, randomness or mutable catalog is consulted, so the same input always
@@ -20,7 +20,7 @@ from src.aml_workshop_simulator.domain.rules import (
     money,
 )
 
-SCORING_VERSION = "risk-rules-v2"
+SCORING_VERSION = "risk-rules-v3"
 LEADERBOARD_VERSION = "leaderboard-v2"
 EXPLANATION_SCHEMA_VERSION = 2
 
@@ -114,57 +114,44 @@ def score_scenario(
                 {"amount": str(amount)},
             )
         )
-        factors.append(
-            _factor(
-                f"recipient:{context['recipient_type']}",
-                "context",
-                Decimal(rules["recipient_points"][context["recipient_type"]]),
-                "Неизвестный или анонимный получатель повышает неопределенность",
-                step_id,
+        context_rules = {
+            "recipient_type": ("recipient", "recipient_points", "Профиль получателя"),
+            "time_of_day": ("time_of_day", "time_of_day_points", "Время операции"),
+            "velocity": ("velocity", "velocity_points", "Темп операции"),
+            "channel": ("channel", "channel_points", "Канал операции"),
+        }
+        applicable = {f["key"] for f in spec.context_fields}
+        if spec.channels:
+            applicable.add("channel")
+        for key, (code, rule, description) in context_rules.items():
+            if key in applicable:
+                value = context[key]
+                factors.append(
+                    _factor(
+                        f"{code}:{value}",
+                        "context",
+                        Decimal(rules[rule][value]),
+                        description,
+                        step_id,
+                    )
+                )
+        adjustment = rules["amount_adjustment"]
+        if gross >= Decimal(str(adjustment["minimum_gross"])):
+            factors.append(
+                _factor(
+                    "amount:adjustment",
+                    "amount",
+                    Decimal(str(adjustment["risk_points"])),
+                    "Балансировочная поправка для суммы от "
+                    + str(adjustment["minimum_gross"])
+                    + " ₽",
+                    step_id,
+                    {
+                        "amount": str(gross),
+                        "minimum_gross": str(adjustment["minimum_gross"]),
+                    },
+                )
             )
-        )
-        factors.append(
-            _factor(
-                f"time_of_day:{context['time_of_day']}",
-                "context",
-                Decimal(rules["time_of_day_points"][context["time_of_day"]]),
-                "Нетипичное время операции может потребовать проверки",
-                step_id,
-            )
-        )
-        factors.append(
-            _factor(
-                f"velocity:{context['velocity']}",
-                "context",
-                Decimal(rules["velocity_points"][context["velocity"]]),
-                "Темп операций влияет на сходство с автоматизированной цепочкой",
-                step_id,
-            )
-        )
-        factors.append(
-            _factor(
-                f"channel:{context['channel']}",
-                "context",
-                Decimal(rules["channel_points"][context["channel"]]),
-                "Канал операции влияет на доступность подтверждающего контекста",
-                step_id,
-            )
-        )
-        factors.append(
-            _factor(
-                "documents:present" if context["has_documents"] else "documents:absent",
-                "context",
-                _document_points(
-                    gross, bool(context["has_documents"]), rules["documents"]
-                ),
-                (
-                    "Подтверждающие документы снижают неопределенность операции"
-                    if context["has_documents"]
-                    else "Отсутствие документов повышает неопределенность операции"
-                ),
-                step_id,
-            )
-        )
 
         for detail in action_detail_effects(spec, details)["factors"]:
             factors.append(
@@ -222,14 +209,6 @@ def score_scenario(
         "risk_label": label,
         "explanation": explanation,
     }
-
-
-def _document_points(
-    gross: Decimal, has_documents: bool, rules: dict[str, Any]
-) -> Decimal:
-    size = "large" if gross >= Decimal(str(rules["minimum_gross"])) else "small"
-    presence = "present" if has_documents else "absent"
-    return Decimal(rules[f"{presence}_{size}"])
 
 
 def _sequence_factors(

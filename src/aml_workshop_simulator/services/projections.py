@@ -5,6 +5,7 @@ from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.domain.channels import channel_label
 from src.aml_workshop_simulator.domain.round_policy import (
     OperationPolicy,
+    declared_params,
     split_param,
 )
 from src.aml_workshop_simulator.domain.rules import (
@@ -45,10 +46,8 @@ def card_out(
     if operation is not None:
         spec = spec.with_overrides(operation.overrides)
         params = operation.visible_params
-        pinned = dict(operation.pinned)
     else:
-        params = spec.default_visible_params
-        pinned = {}
+        params = declared_params(spec)
     visible = [
         rendered
         for rendered in (visible_param_out(spec, param) for param in params)
@@ -78,7 +77,6 @@ def card_out(
         fields=[dict(item) for item in spec.fields],
         context_fields=[dict(item) for item in spec.context_fields],
         visible_params=visible,
-        pinned_defaults=pinned,
     )
 
 

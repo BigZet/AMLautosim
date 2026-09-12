@@ -14,9 +14,7 @@
               30000
             ]
           },
-          "context": {
-            "channel": "bank"
-          },
+          "context": {},
           "details": {
             "income_basis": "payroll_registry"
           }
@@ -35,12 +33,6 @@
                 "spaced",
                 "normal",
                 "rapid"
-              ]
-            },
-            "has_documents": {
-              "choices": [
-                true,
-                false
               ]
             }
           },
@@ -135,9 +127,7 @@
               30000
             ]
           },
-          "context": {
-            "channel": "bank"
-          },
+          "context": {},
           "details": {
             "income_basis": "service_contract"
           }
@@ -154,12 +144,6 @@
                 "spaced",
                 "normal",
                 "rapid"
-              ]
-            },
-            "has_documents": {
-              "choices": [
-                true,
-                false
               ]
             }
           },
@@ -209,12 +193,6 @@
                 "spaced",
                 "normal",
                 "rapid"
-              ]
-            },
-            "has_documents": {
-              "choices": [
-                true,
-                false
               ]
             }
           },

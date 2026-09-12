@@ -18,7 +18,7 @@
       "time_cost": 0
     }
   },
-  "documents": {
+  "amount_adjustment": {
     "minimum_gross": "60000.00",
     "time_cost": 1
   }

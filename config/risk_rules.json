@@ -23,13 +23,6 @@
   },
   "amount_divisor": "10000",
   "amount_max_points": "12",
-  "documents": {
-    "minimum_gross": "60000.00",
-    "present_large": "-5",
-    "present_small": "0",
-    "absent_large": "10",
-    "absent_small": "0"
-  },
   "sequence": {
     "repeated_min_amount": "10000.00",
     "repeated_points": "8",
@@ -37,5 +30,9 @@
     "turnover_ratio": "0.7",
     "turnover_points": "10"
   },
-  "explanation_factor_limit": 5
+  "explanation_factor_limit": 5,
+  "amount_adjustment": {
+    "minimum_gross": "60000.00",
+    "risk_points": "-5"
+  }
 }

@@ -13,6 +13,7 @@ from src.aml_workshop_simulator.schemas.admin import (
     RoundUpdateIn,
     ScoringSummaryOut,
 )
+from src.aml_workshop_simulator.schemas.editor_metadata import EditorMetadataOut
 from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
 from src.aml_workshop_simulator.services import admin_rounds as operations
@@ -104,3 +105,12 @@ async def restart_round(
     return await operations.restart(
         db, round_id, principal.user_id, request.state.request_id
     )
+
+
+@router.get("/game-config/editor-metadata", response_model=EditorMetadataOut)
+async def editor_metadata():
+    from src.aml_workshop_simulator.services.editor_metadata import (
+        editor_metadata as build,
+    )
+
+    return build()

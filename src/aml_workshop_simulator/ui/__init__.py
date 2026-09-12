@@ -1,1 +1,1 @@
-"""Streamlit presentation layer."""
+"""NiceGUI presentation layer."""

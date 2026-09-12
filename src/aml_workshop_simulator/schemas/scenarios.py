@@ -1,16 +1,4 @@
-"""Strict scenario DTOs.
-
-Every input model forbids unknown fields, money is a `Decimal` serialised as a
-fixed-point string, and the operation channel is the global `Channel` enum. The
-subset of channels a concrete card version accepts is enforced by
-`domain.rules` against the card contract stored in PostgreSQL, not here.
-
-Context fields and the action details are **optional** on the
-wire: a participant only sends the parameters their round actually exposes.
-`services.scenario_service.canonical_steps` fills everything else from the
-round policy, and `domain.rules` rejects any hidden parameter that was sent
-with a value the round does not pin it to.
-"""
+"""Scenario DTOs: only card-declared context is stored; unknown fields are rejected."""
 
 from __future__ import annotations
 
@@ -19,7 +7,7 @@ from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_serializer
 
 from src.aml_workshop_simulator.core.enums import ScenarioStatus
 from src.aml_workshop_simulator.core.game_config import LIMITS
@@ -61,7 +49,7 @@ Velocity = StrEnum(
 class OperationContext(BaseModel):
     """Common operation context shared by all cards.
 
-    `None` means "not sent": the round policy decides the stored value.
+    Only card-declared fields are applicable; omitted applicable fields use catalog defaults.
     """
 
     model_config = STRICT
@@ -70,7 +58,6 @@ class OperationContext(BaseModel):
     time_of_day: TimeOfDay | None = None
     velocity: Velocity | None = None
     channel: Channel | None = None
-    has_documents: bool | None = None
 
 
 class ScenarioStepIn(BaseModel):
@@ -94,11 +81,11 @@ class ScenarioStepIn(BaseModel):
 
 
 class StoredContext(OperationContext):
-    recipient_type: RecipientType
-    time_of_day: TimeOfDay
-    velocity: Velocity
-    channel: Channel
-    has_documents: bool
+    """Sparse context: inapplicable keys are absent, not serialized as null."""
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler):
+        return {key: value for key, value in handler(self).items() if value is not None}
 
 
 class StoredStep(ScenarioStepIn):

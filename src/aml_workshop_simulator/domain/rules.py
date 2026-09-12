@@ -1,7 +1,6 @@
 """Public game-engine facade used by the CatBoost adapter and shared callers."""
 
 from .game_models import (
-    CONTEXT_DEFAULTS,
     MONEY,
     QUOTA_LABELS,
     REFERENCE_GAME_CONFIG,
@@ -25,7 +24,6 @@ from .simulation import (
 from .structure import resolve_policy, validate_structure
 
 __all__ = [
-    "CONTEXT_DEFAULTS",
     "MONEY",
     "QUOTA_LABELS",
     "REFERENCE_GAME_CONFIG",

@@ -22,8 +22,6 @@ htmlcov/
 .env
 .env.local
 *.env.local
-.streamlit/secrets.toml
-mvp/.streamlit/secrets.toml
 
 # Local databases and data volumes
 *.db
@@ -32,6 +30,7 @@ mvp/.streamlit/secrets.toml
 postgres_data/
 pgdata/
 .backups/
+.nicegui/
 
 # Browser automation artifacts
 test-results/
@@ -45,3 +44,6 @@ tests/artifacts/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local execution state and private verification artifacts
+.local-run/

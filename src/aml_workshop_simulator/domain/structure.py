@@ -5,17 +5,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from src.aml_workshop_simulator.domain.action_parameters import (
-    CONTEXT_FIELDS,
-    option_label,
-)
-from src.aml_workshop_simulator.domain.channels import channel_label
 from src.aml_workshop_simulator.domain.round_policy import (
-    PARAM_CHANNEL,
     OperationPolicy,
     RoundPolicy,
-    action_param,
-    context_param,
 )
 
 from .game_models import CardSpec, Violation, _step_label
@@ -142,96 +134,38 @@ def validate_structure(
     return violations
 
 
-def _pinned_violation(
-    index: int,
-    step_id: str,
-    spec: CardSpec,
-    param: str,
-    label: str,
-    current: Any,
-    expected: Any,
-    field_name: str,
-    current_label: str | None = None,
-    expected_label: str | None = None,
-) -> Violation:
-    return Violation(
-        reason="parameter_not_editable",
-        step_id=step_id,
-        step_index=index,
-        field=field_name,
-        current=str(current),
-        allowed=str(expected),
-        message=(
-            f"{_step_label(index, spec)}, поле «{label}»: этот параметр закреплен "
-            f"настройками раунда и допускает только значение "
-            f"«{expected_label or expected}», получено «{current_label or current}». "
-            "Уберите поле из шага или верните значение раунда."
-        ),
-    )
+def _validate_channel(index, step_id, step, spec, operation):
+    context = step["context"]
+    if not spec.channels and "channel" not in context:
+        return []
+    channel = context.get("channel")
+    if channel in spec.channels:
+        return []
+    return [
+        Violation(
+            reason="channel_not_allowed",
+            step_id=step_id,
+            step_index=index,
+            field="context.channel",
+            current=str(channel),
+            allowed=", ".join(spec.channels) or "—",
+            message=f"{_step_label(index, spec)}, поле «Канал»: значение недопустимо. "
+            + (
+                f"Допустимые каналы: {spec.channel_labels()}."
+                if spec.channels
+                else "У этой операции нет канала. Удалите поле."
+            ),
+        )
+    ]
 
 
-def _validate_channel(
-    index: int,
-    step_id: str,
-    step: dict[str, Any],
-    spec: CardSpec,
-    operation: OperationPolicy | None,
-) -> list[Violation]:
-    channel = step["context"]["channel"]
-    if channel not in spec.channels:
-        return [
-            Violation(
-                reason="channel_not_allowed",
-                step_id=step_id,
-                step_index=index,
-                field="context.channel",
-                current=channel,
-                allowed=", ".join(spec.channels),
-                message=(
-                    f"{_step_label(index, spec)}, поле «Канал»: значение "
-                    f"«{channel_label(channel)}» недоступно для этой карточки. "
-                    f"Допустимые каналы: {spec.channel_labels()}. "
-                    "Выберите один из допустимых каналов и сохраните шаг заново."
-                ),
-            )
-        ]
-    if operation is not None and not operation.is_visible(PARAM_CHANNEL):
-        expected = operation.default_for(PARAM_CHANNEL)
-        if expected is not None and channel != expected:
-            return [
-                _pinned_violation(
-                    index,
-                    step_id,
-                    spec,
-                    PARAM_CHANNEL,
-                    "Канал",
-                    channel,
-                    expected,
-                    "context.channel",
-                    current_label=channel_label(channel),
-                    expected_label=channel_label(str(expected)),
-                )
-            ]
-    return []
-
-
-def _validate_context_fields(
-    index: int,
-    step_id: str,
-    step: dict[str, Any],
-    spec: CardSpec,
-    operation: OperationPolicy | None,
-) -> list[Violation]:
-    """Every context field the participant may not edit must hold its value."""
-    declared = {item["key"] for item in spec.context_fields}
-    violations: list[Violation] = []
-    for key, default in spec.context_defaults.items():
-        label = CONTEXT_FIELDS[key]["label"]
-        param = context_param(key)
+def _validate_context_fields(index, step_id, step, spec, operation):
+    declared = {item["key"]: item for item in spec.context_fields}
+    violations = []
+    for key, value in step["context"].items():
+        if key == "channel":
+            continue
         if key not in declared:
-            value = step["context"].get(key, default)
-            if value == default:
-                continue
             violations.append(
                 Violation(
                     reason="context_field_not_applicable",
@@ -239,27 +173,20 @@ def _validate_context_fields(
                     step_index=index,
                     field=f"context.{key}",
                     current=str(value),
-                    allowed=str(default),
-                    message=(
-                        f"{_step_label(index, spec)}, поле «{label}»: карточка не использует "
-                        f"этот признак, поэтому допустимо только значение по умолчанию "
-                        f"«{default}», получено «{value}». Уберите поле из шага или верните "
-                        "значение по умолчанию."
-                    ),
+                    message=f"{_step_label(index, spec)}: поле «{key}» не используется. Удалите поле.",
                 )
             )
-            continue
-        if operation is None or operation.is_visible(param):
-            continue
-        expected = operation.default_for(param)
-        value = step["context"].get(key, expected)
-        if expected is None or value == expected:
-            continue
-        violations.append(
-            _pinned_violation(
-                index, step_id, spec, param, label, value, expected, f"context.{key}"
+        elif value not in {o["value"] for o in declared[key].get("options", [])}:
+            violations.append(
+                Violation(
+                    reason="invalid_context_parameter",
+                    step_id=step_id,
+                    step_index=index,
+                    field=f"context.{key}",
+                    current=str(value),
+                    message=f"{_step_label(index, spec)}: недопустимое значение поля «{declared[key]['label']}».",
+                )
             )
-        )
     return violations
 
 
@@ -292,27 +219,6 @@ def _validate_action_details(
         )
 
     for key, field_spec in declared.items():
-        param = action_param(key)
-        hidden = operation is not None and not operation.is_visible(param)
-        if hidden:
-            expected = operation.default_for(param)
-            if key in details and expected is not None and details[key] != expected:
-                violations.append(
-                    _pinned_violation(
-                        index,
-                        step_id,
-                        spec,
-                        param,
-                        field_spec["label"],
-                        details[key],
-                        expected,
-                        f"action_details.{key}",
-                        current_label=option_label([field_spec], key, details[key]),
-                        expected_label=option_label([field_spec], key, expected),
-                    )
-                )
-            continue
-
         required = bool(field_spec.get("required", True))
         if key not in details:
             if required:

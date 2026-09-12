@@ -92,8 +92,11 @@ def generate_synthetic_scenarios(n_samples: int | None = None) -> list[dict]:
                             for key, value in step.get("context", {}).items()
                         },
                         "action_details": {
-                            key: choose(value)
-                            for key, value in step.get("details", {}).items()
+                            **{field["key"]: field["default"] for field in spec.fields},
+                            **{
+                                key: choose(value)
+                                for key, value in step.get("details", {}).items()
+                            },
                         },
                     }
                 )
@@ -178,7 +181,7 @@ Regenerate with `python -m scripts.generate_catboost_sample_data` after config c
 - Financial aggregates: `total_turnover`, `total_inflow`, `total_outflow`, `net_turnover`, `outflow_to_inflow_ratio`, `fees_total`, `fees_ratio`
 - Incoming transfers: `incoming_transfer_sum`, `incoming_transfer_count`, `crypto_exchange_inflow_sum`, `foreign_bank_inflow_sum`
 - Cash breakdowns: `cash_inflow_sum`, `cash_outflow_sum`, `cash_turnover_ratio`
-- Risk & Behavioral signals: `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`, `without_docs_large_sum`, `without_docs_ratio`
+- Risk & Behavioral signals: `anonymous_recipient_turnover`, `anonymous_recipient_ratio`, `night_operations_count`, `night_operations_ratio`, `rapid_velocity_count`, `rapid_velocity_ratio`
 - Statistical amounts: `avg_step_amount`, `max_step_amount`, `std_step_amount`, `max_frequency_single_step`
 - Sequential patterns: `repeated_amount_count`, `rapid_credit_to_debit_count`
 - Indicator flags: `has_cash`, `num_steps`, `unique_channels_count`, `unique_cards_count`
@@ -195,7 +198,8 @@ Regenerate with `python -m scripts.generate_catboost_sample_data` after config c
 The incoming channel is `bank`: sources describe provenance, not cash or a UI channel.
 Crypto values represent bank credits after selling assets, in RUB equivalent. Source
 coefficients are fictional workshop settings, not country or institution ratings.
-New source features change the feature schema; regenerate data and retrain future models.
+The current feature schema excludes document signals. Salary has no context and does
+not contribute a channel. Regenerate data and retrain future models after schema changes.
 
 ### Target Variables
 - `target_risk_score`: Continuous risk score (0.0 to 100.0) -> for `CatBoostRegressor(loss_function='RMSE')`

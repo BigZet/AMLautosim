@@ -11,7 +11,6 @@ from src.aml_workshop_simulator.domain.round_policy import (
 )
 
 from .game_models import (
-    CONTEXT_DEFAULTS,
     QUOTA_LABELS,
     RULESET_VERSION,
     SNAPSHOT_SCHEMA_VERSION,
@@ -132,24 +131,25 @@ def _resource_costs(
     costs: dict[str, Any],
 ) -> tuple[int, int]:
     """Energy and time charged once for this transaction."""
-    velocity = context["velocity"]
-    channel = context["channel"]
-    has_documents = context["has_documents"]
-    # ---- resource costs -------------------------------------------------
     energy_cost = spec.energy_cost + effects["energy_cost"]
-    velocity_rule = costs["velocity_time"][velocity]
-    velocity_time = velocity_rule["time_cost"]
-    document_time = (
-        costs["documents"]["time_cost"]
-        if has_documents and gross >= Decimal(str(costs["documents"]["minimum_gross"]))
+    declared = {f["key"] for f in spec.context_fields}
+    velocity_time = (
+        costs["velocity_time"][context["velocity"]]["time_cost"]
+        if "velocity" in declared
         else 0
     )
-    channel_time = costs["channel_time"][channel]
+    adjustment = costs["amount_adjustment"]
+    amount_time = (
+        adjustment["time_cost"]
+        if gross >= Decimal(str(adjustment["minimum_gross"]))
+        else 0
+    )
+    channel_time = costs["channel_time"][context["channel"]] if spec.channels else 0
     time_cost = max(
         costs["minimum_time_cost"],
         spec.time_cost
         + velocity_time
-        + document_time
+        + amount_time
         + channel_time
         + effects["time_cost"],
     )
@@ -261,10 +261,8 @@ def evaluate_scenario(
         }
         amount = money(step["amount"])
         context = step["context"]
-        recipient_type = context.get(
-            "recipient_type", CONTEXT_DEFAULTS["recipient_type"]
-        )
-        time_of_day = context.get("time_of_day", CONTEXT_DEFAULTS["time_of_day"])
+        recipient_type = context.get("recipient_type")
+        time_of_day = context.get("time_of_day")
         details = dict(step.get("action_details") or {})
         effects = action_detail_effects(spec, details)
 

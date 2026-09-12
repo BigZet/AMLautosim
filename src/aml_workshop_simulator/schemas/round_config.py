@@ -20,14 +20,16 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from src.aml_workshop_simulator.core.game_config import LIMITS, load_config
 from src.aml_workshop_simulator.domain.round_policy import (
     CARD_OVERRIDE_KEYS,
-    MAX_VISIBLE_PARAMS,
     split_param,
+)
+from src.aml_workshop_simulator.schemas.card_contract import (
+    CardSnapshotOut,
 )
 from src.aml_workshop_simulator.schemas.game_rules import ResourceRulesIn, RiskRulesIn
 
 STRICT = ConfigDict(extra="forbid")
 
-CONFIG_SCHEMA_VERSION = 5
+CONFIG_SCHEMA_VERSION = 7
 
 #: Quota buckets an organiser can cap. They match `domain.rules.QUOTA_LABELS`.
 QUOTA_CODES = ("cash", "anonymous")
@@ -118,7 +120,6 @@ class OperationIn(BaseModel):
     code: str = Field(min_length=1, max_length=80)
     version: int = Field(default=1, ge=1)
     visible_params: list[str] = Field(default_factory=list)
-    defaults: dict[str, ParameterValue] = Field(default_factory=dict)
 
     min_amount: Decimal | None = Field(
         default=None, gt=0, le=Decimal(LIMITS["max_balance"]), decimal_places=2
@@ -136,11 +137,6 @@ class OperationIn(BaseModel):
     @field_validator("visible_params")
     @classmethod
     def _valid_params(cls, value: list[str]) -> list[str]:
-        if len(value) > MAX_VISIBLE_PARAMS:
-            raise ValueError(
-                f"Для одной операции можно показать не более {MAX_VISIBLE_PARAMS} "
-                f"параметров, получено {len(value)}."
-            )
         if len(set(value)) != len(value):
             raise ValueError("Параметры операции продублированы.")
         for param in value:
@@ -171,8 +167,6 @@ class OperationIn(BaseModel):
             "version": self.version,
             "visible_params": list(self.visible_params),
         }
-        if self.defaults:
-            payload["defaults"] = dict(sorted(self.defaults.items()))
         for key in CARD_OVERRIDE_KEYS:
             value = getattr(self, key)
             if value is None:
@@ -268,7 +262,7 @@ class GameConfigIn(BaseModel):
 
     model_config = STRICT
 
-    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=5, le=5)
+    schema_version: int = Field(default=CONFIG_SCHEMA_VERSION, ge=7, le=7)
     resources: ResourcesIn
     objectives: ObjectivesIn
     constraints: ConstraintsIn
@@ -307,12 +301,6 @@ class GameConfigIn(BaseModel):
             "leaderboard": self.leaderboard.dump(),
         }
         return payload
-
-
-from src.aml_workshop_simulator.schemas.card_contract import (
-    CardSnapshotOut,
-    ParameterValue,
-)
 
 
 class GameConfigOut(GameConfigIn):

@@ -6,7 +6,6 @@ from typing import Any
 
 from src.aml_workshop_simulator.domain.game_models import RULESET_VERSION, CardSpec
 from src.aml_workshop_simulator.domain.round_policy import (
-    MAX_VISIBLE_PARAMS,
     declared_params,
 )
 from src.aml_workshop_simulator.domain.scoring import (
@@ -20,28 +19,45 @@ SUPPORTED_SCORING = {SCORING_VERSION}
 SUPPORTED_LEADERBOARD = {LEADERBOARD_VERSION}
 
 
+class ConfigurationViolation(ValueError):
+    """Semantic error with a stable path for an independent configuration UI."""
+
+    def __init__(self, message: str, field: str, reason: str = "configuration_invalid"):
+        super().__init__(message)
+        self.violations = [{"field": field, "reason": reason, "message": message}]
+
+
 def validate_config_against_catalog(
     available: dict[tuple[str, int], CardSpec], game_config: dict[str, Any]
 ) -> None:
     """Validate a new round against its available cards; raise ValueError on failure."""
     ruleset = game_config.get("ruleset_version")
     if ruleset not in SUPPORTED_RULESETS:
-        raise ValueError(
+        raise ConfigurationViolation(
             f"Версия правил «{ruleset}» отсутствует в этой сборке. "
-            f"Доступны: {', '.join(sorted(SUPPORTED_RULESETS))}."
+            f"Доступны: {', '.join(sorted(SUPPORTED_RULESETS))}.",
+            "game_config.ruleset_version",
+            "unsupported_version",
         )
     scoring_version = (game_config.get("scoring") or {}).get("version")
     if scoring_version not in SUPPORTED_SCORING:
-        raise ValueError(
-            f"Версия скоринга «{scoring_version}» отсутствует в этой сборке."
+        raise ConfigurationViolation(
+            f"Версия скоринга «{scoring_version}» отсутствует в этой сборке.",
+            "game_config.scoring.version",
+            "unsupported_version",
         )
     board_version = (game_config.get("leaderboard") or {}).get("version")
     if board_version not in SUPPORTED_LEADERBOARD:
-        raise ValueError(
-            f"Версия лидерборда «{board_version}» отсутствует в этой сборке."
+        raise ConfigurationViolation(
+            f"Версия лидерборда «{board_version}» отсутствует в этой сборке.",
+            "game_config.leaderboard.version",
+            "unsupported_version",
         )
     if not weights_sum_to_one(game_config):
-        raise ValueError("Веса лидерборда должны в сумме давать 1.")
+        raise ConfigurationViolation(
+            "Веса лидерборда должны в сумме давать 1.",
+            "game_config.leaderboard.weights",
+        )
 
     from pydantic import ValidationError
 
@@ -55,59 +71,31 @@ def validate_config_against_catalog(
     if not operations:
         raise ValueError("Не указана ни одна операция для раунда.")
 
-    for entry in operations:
+    for index, entry in enumerate(operations):
+        path = f"game_config.operations.{index}"
         key = (str(entry.get("code")), int(entry.get("version", 1)))
         card = available.get(key)
         if card is None:
-            raise ValueError(
-                f"Операция «{key[0]}» версии {key[1]} не найдена или неактивна."
+            raise ConfigurationViolation(
+                f"Операция «{key[0]}» версии {key[1]} не найдена или неактивна.",
+                f"{path}.code",
+                "card_unavailable",
             )
         spec = card
         allowed = set(declared_params(spec))
         visible = list(entry.get("visible_params") or [])
-        if len(visible) > MAX_VISIBLE_PARAMS:
-            raise ValueError(
-                f"Операция «{spec.title}»: показать можно не более "
-                f"{MAX_VISIBLE_PARAMS} параметров, выбрано {len(visible)}."
-            )
         unknown = [param for param in visible if param not in allowed]
         if unknown:
-            raise ValueError(
+            raise ConfigurationViolation(
                 f"Операция «{spec.title}»: параметр {', '.join(unknown)} не объявлен "
-                "этой карточкой."
+                "этой карточкой.",
+                f"{path}.visible_params",
+                "unknown_parameter",
             )
-        for param, value in (entry.get("defaults") or {}).items():
-            if param not in allowed:
-                raise ValueError(
-                    f"Операция «{spec.title}»: значение по умолчанию задано для "
-                    f"неизвестного параметра «{param}»."
-                )
-            if param in visible:
-                raise ValueError(
-                    f"Операция «{spec.title}»: закрепить можно только скрытый параметр «{param}»."
-                )
-            field = spec.field_spec(param)
-            if field and field.get("kind") == "toggle" and not isinstance(value, bool):
-                raise ValueError(
-                    f"Операция «{spec.title}»: «{param}» должен быть true или false."
-                )
-            options = _param_options(spec, param)
-            if options and value not in options:
-                raise ValueError(
-                    f"Операция «{spec.title}», параметр «{param}»: значение "
-                    f"«{value}» недопустимо."
-                )
-        _validate_overrides(spec, entry)
+        _validate_overrides(spec, entry, path)
 
 
-def _param_options(spec: CardSpec, param: str) -> list[Any]:
-    field = spec.field_spec(param)
-    if not field:
-        return []
-    return [option["value"] for option in field.get("options", [])]
-
-
-def _validate_overrides(spec: CardSpec, entry: dict[str, Any]) -> None:
+def _validate_overrides(spec: CardSpec, entry: dict[str, Any], path: str) -> None:
     from decimal import Decimal
 
     minimum = entry.get("min_amount", spec.min_amount)
@@ -117,6 +105,8 @@ def _validate_overrides(spec: CardSpec, entry: dict[str, Any]) -> None:
         and maximum is not None
         and Decimal(str(minimum)) > Decimal(str(maximum))
     ):
-        raise ValueError(
-            f"Операция «{spec.title}»: минимальная сумма больше максимальной."
+        raise ConfigurationViolation(
+            f"Операция «{spec.title}»: минимальная сумма больше максимальной.",
+            f"{path}.min_amount",
+            "inverted_range",
         )

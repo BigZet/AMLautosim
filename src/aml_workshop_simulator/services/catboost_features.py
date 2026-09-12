@@ -52,8 +52,6 @@ def extract_catboost_features(
             "night_operations_ratio": 0.0,
             "rapid_velocity_count": 0,
             "rapid_velocity_ratio": 0.0,
-            "without_docs_large_sum": 0.0,
-            "without_docs_ratio": 0.0,
             "avg_step_amount": 0.0,
             "max_step_amount": 0.0,
             "std_step_amount": 0.0,
@@ -107,7 +105,6 @@ def extract_catboost_features(
     anon_recipient_sum = 0.0
     night_ops = 0
     rapid_velocity_ops = 0
-    without_docs_large_sum = 0.0
 
     amounts: list[float] = []
     card_counts: dict[str, int] = {}
@@ -126,28 +123,21 @@ def extract_catboost_features(
         card_counts[card_code] = card_counts.get(card_code, 0) + freq
 
         # Resolve omitted context from the same card contract used by the game.
-        ctx = {**spec.context_defaults, "channel": spec.channels[0]}
-        ctx.update({key: step[key] for key in ctx if key in step})
-        ctx.update(step.get("context") or {})
-        recipient_type = ctx["recipient_type"]
-        time_of_day = ctx["time_of_day"]
-        velocity = ctx["velocity"]
-        channel = ctx["channel"]
-        has_docs = bool(ctx["has_documents"])
-        channel_counts[channel] = channel_counts.get(channel, 0) + 1
+        ctx = {f["key"]: f["default"] for f in spec.context_fields}
+        if spec.channels:
+            ctx["channel"] = spec.channels[0]
+        supplied = {**step, **(step.get("context") or {})}
+        ctx.update({key: supplied[key] for key in ctx if key in supplied})
+        recipient_type = ctx.get("recipient_type")
+        time_of_day = ctx.get("time_of_day")
+        velocity = ctx.get("velocity")
+        channel = ctx.get("channel")
+        if channel is not None:
+            channel_counts[channel] = channel_counts.get(channel, 0) + 1
         fees_total += float(money(money(amount) * freq * spec.fee_rate))
 
         if spec.code == "incoming_transfer":
             details = {field["key"]: field["default"] for field in spec.fields}
-            operation = policy.for_card(spec.key)
-            if operation:
-                details.update(
-                    {
-                        key.removeprefix("action."): value
-                        for key, value in operation.pinned.items()
-                        if key.startswith("action.")
-                    }
-                )
             details.update(step.get("action_details") or {})
             source = details["transfer_source"]
             sender = details["sender_relationship"]
@@ -179,8 +169,6 @@ def extract_catboost_features(
             night_ops += 1
         if velocity == "rapid":
             rapid_velocity_ops += 1
-        if not has_docs and gross >= float(risk_rules["documents"]["minimum_gross"]):
-            without_docs_large_sum += gross
 
     total_turnover = total_inflow + total_outflow
     num_steps = len(steps)
@@ -260,10 +248,6 @@ def extract_catboost_features(
         "night_operations_ratio": round(night_ops / max(1, num_steps), 4),
         "rapid_velocity_count": rapid_velocity_ops,
         "rapid_velocity_ratio": round(rapid_velocity_ops / max(1, num_steps), 4),
-        "without_docs_large_sum": round(without_docs_large_sum, 2),
-        "without_docs_ratio": round(
-            without_docs_large_sum / max(1.0, total_turnover), 4
-        ),
         "avg_step_amount": round(avg_amount, 2),
         "max_step_amount": round(max_amount, 2),
         "std_step_amount": round(std_amount, 2),

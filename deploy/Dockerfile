@@ -1,17 +1,13 @@
-# Build stage: compilers live here and never reach the runtime image.
+# Download the locked binary wheels in a separate stage.
 FROM python:3.13-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /build
 COPY requirements.txt ./
-# Resolve every dependency to a wheel once, so the runtime stage installs
-# without a toolchain even when a pinned release ships no matching wheel.
-RUN pip wheel --wheel-dir /wheels -r requirements.txt
+# Fail explicitly if the target platform lacks a wheel instead of resolving
+# extra build dependencies outside the runtime lock.
+RUN pip download --only-binary=:all: --dest /wheels -r requirements.txt
 
 
 # Runtime stage.
@@ -33,16 +29,18 @@ COPY migrations ./migrations
 COPY scripts ./scripts
 COPY src ./src
 COPY config ./config
-COPY .streamlit ./.streamlit
 
 # The application only reads its own code; it never writes into /app.
-# Streamlit still needs a writable HOME for its own runtime state.
+# NiceGUI persists browser sessions in its private writable volume.
 RUN useradd --create-home --uid 10001 app \
+    && mkdir -p /home/app/nicegui \
+    && chown app:app /home/app/nicegui \
+    && chmod 700 /home/app/nicegui \
     && chown -R root:root /app \
     && chmod -R a-w /app
 ENV HOME=/home/app
 USER app
 
-EXPOSE 8000 8501 8502
+EXPOSE 8000 8080
 
 CMD ["uvicorn", "src.aml_workshop_simulator.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

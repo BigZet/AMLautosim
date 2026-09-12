@@ -2,9 +2,8 @@
 
 A card version declares *everything* it could ever accept (`domain.catalog`).
 A round snapshot decides which of those card versions are playable and, for
-each of them, the small set of parameters the participant may actually edit.
-Everything else is pinned to a stable server-side default so the resource
-calculation and the scoring stay deterministic.
+each of them, all declared parameters are editable. Legacy visibility lists
+and pinned defaults no longer restrict participant input.
 
 Parameter keys live in one flat namespace so a round config can name them
 without ambiguity:
@@ -23,15 +22,9 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Protocol
 
-from src.aml_workshop_simulator.core.game_config import LIMITS
-
 PARAM_CHANNEL = "channel"
 CONTEXT_PREFIX = "context."
 ACTION_PREFIX = "action."
-
-#: Amount is always its own control; on top of it a round
-#: may expose at most this many parameters per operation.
-MAX_VISIBLE_PARAMS = LIMITS["max_visible_params"]
 
 #: Numeric card attributes a round is allowed to re-tune for its own snapshot.
 CARD_OVERRIDE_KEYS: tuple[str, ...] = (
@@ -80,10 +73,14 @@ def split_param(param: str) -> tuple[str, str]:
 
 def declared_params(spec: CardContract) -> tuple[str, ...]:
     """Every parameter key a card version could expose, in display order."""
-    return (
-        (PARAM_CHANNEL,)
+    declared = (
+        ((PARAM_CHANNEL,) if spec.channels else ())
         + tuple(context_param(item["key"]) for item in spec.context_fields)
         + tuple(action_param(item["key"]) for item in spec.fields)
+    )
+    order = tuple(getattr(spec, "default_visible_params", ()))
+    return tuple(p for p in order if p in declared) + tuple(
+        p for p in declared if p not in order
     )
 
 
@@ -94,8 +91,6 @@ class OperationPolicy:
     code: str
     version: int
     visible_params: tuple[str, ...]
-    #: Value every *non visible* parameter is pinned to for this round.
-    pinned: dict[str, Any] = field(default_factory=dict)
     #: Numeric card attributes this round overrides.
     overrides: dict[str, Any] = field(default_factory=dict)
 
@@ -105,9 +100,6 @@ class OperationPolicy:
 
     def is_visible(self, param: str) -> bool:
         return param in self.visible_params
-
-    def default_for(self, param: str) -> Any:
-        return self.pinned.get(param)
 
 
 @dataclass(frozen=True)
@@ -148,38 +140,10 @@ class RoundPolicy:
         return cls(operations=operations)
 
 
-def field_default(spec: CardContract, param: str) -> Any:
-    """Catalog default of one parameter of a card version."""
-    namespace, key = split_param(param)
-    if namespace == "channel":
-        return spec.channels[0] if spec.channels else None
-    source = spec.context_fields if namespace == "context" else spec.fields
-    for item in source:
-        if item["key"] == key:
-            return item.get("default")
-    return None
-
-
 def restricted_policy(spec: CardContract, entry: Mapping[str, Any]) -> OperationPolicy:
     """One `operations[]` entry resolved against the card version contract."""
     declared = declared_params(spec)
-    requested = entry.get("visible_params")
-    if requested is None:
-        requested = tuple(getattr(spec, "default_visible_params", ()) or ())
-    wanted = {param for param in requested if param in declared}
-    # Order the visible parameters the way the card declares them so the form
-    # layout does not depend on how the administrator typed the list.
-    visible = tuple(param for param in declared if param in wanted)
-
-    pinned: dict[str, Any] = {}
-    explicit_defaults = dict(entry.get("defaults") or {})
-    for param in declared:
-        if param in visible:
-            continue
-        if param in explicit_defaults:
-            pinned[param] = explicit_defaults[param]
-        else:
-            pinned[param] = field_default(spec, param)
+    visible = declared
 
     overrides: dict[str, Any] = {}
     for key in CARD_OVERRIDE_KEYS:
@@ -194,6 +158,5 @@ def restricted_policy(spec: CardContract, entry: Mapping[str, Any]) -> Operation
         code=spec.code,
         version=spec.version,
         visible_params=visible,
-        pinned=pinned,
         overrides=overrides,
     )

@@ -170,7 +170,7 @@ def sql(api):
     )
 
 
-@pytest.fixture(params=["removed_field", "invalid_default", "inverted_range"])
+@pytest.fixture(params=["removed_field", "salary_channel", "inverted_range"])
 def invalid_game_config(request):
     from src.aml_workshop_simulator.core.game_config import base_game_config
 
@@ -179,10 +179,10 @@ def invalid_game_config(request):
     if request.param == "removed_field":
         operation["visible_params"] = ["action.funds_source"]
         message = "не объявлен"
-    elif request.param == "invalid_default":
-        operation["visible_params"] = ["action.sender_relationship"]
-        operation["defaults"] = {"action.transfer_source": "nonexistent_source"}
-        message = "недопустимо"
+    elif request.param == "salary_channel":
+        operation = next(o for o in config["operations"] if o["code"] == "salary")
+        operation["visible_params"] = ["channel"]
+        message = "не объявлен"
     else:
         operation["min_amount"] = "90000.00"
         message = "минимальная сумма больше максимальной"

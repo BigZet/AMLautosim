@@ -1,0 +1,10 @@
+[
+  "Organizer: configuration saved and game started through browser",
+  "All four cards: exact fields, every control edited, autosaved, reloaded and compared against real API",
+  "Editing after autosave, copying current values, moving and deleting verified against API",
+  "Viewport 1440: no horizontal overflow; screenshot captured",
+  "Viewport 768: no horizontal overflow; screenshot captured",
+  "Viewport 390: no horizontal overflow; screenshot captured",
+  "Browser submission/scoring/results tabs completed; API risk=21.00",
+  "No browser page errors"
+]

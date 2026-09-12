@@ -17,21 +17,16 @@ def test_goal_needs_funding_and_more_than_one_debit():
     assert "insufficient_balance" in {v["reason"] for v in snapshot["violations"]}
 
 
-def test_speed_and_documents_have_resource_risk_tradeoffs():
+def test_speed_has_resource_risk_tradeoffs():
     route = ROUTES["transfers"]
     regular, regular_risk, _ = play(route)
     fast, fast_risk, _ = play(route, velocity="rapid")
-    undocumented, undocumented_risk, _ = play(route, documents=False)
-    risky, risky_risk, _ = play(route, velocity="rapid", documents=False)
-    for snapshot in (regular, fast, undocumented, risky):
+    for snapshot in (regular, fast):
         assert not submit_blockers(snapshot)
     assert fast["resources_after"]["time"] > regular["resources_after"]["time"]
-    assert undocumented["resources_after"]["time"] > regular["resources_after"]["time"]
     assert fast_risk["risk_score"] > regular_risk["risk_score"]
-    assert undocumented_risk["risk_score"] > regular_risk["risk_score"]
     assert regular_risk["risk_label"].value == "review"
     assert fast_risk["risk_label"].value == "review"
-    assert risky_risk["risk_label"].value == "suspicious"
     assert "insufficient_time" in {
         v["reason"] for v in play(route, velocity="spaced")[0]["violations"]
     }

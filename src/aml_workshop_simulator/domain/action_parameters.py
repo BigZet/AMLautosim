@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from copy import deepcopy
 from typing import Any
 
@@ -25,29 +24,3 @@ def context_fields_for(card_code: str) -> tuple[dict[str, Any], ...]:
 def action_fields_for(card_code: str) -> tuple[dict[str, Any], ...]:
     """Declarative action-detail field specs for one card code."""
     return deepcopy(ACTION_PARAMETER_SCHEMAS.get(card_code, ()))
-
-
-def context_value_label(field_key: str, value: Any) -> str:
-    field = CONTEXT_FIELDS.get(field_key)
-    if field is None:
-        return str(value)
-    if field["kind"] == "toggle":
-        return "Да" if value else "Нет"
-    option = next(
-        (item for item in field.get("options", []) if item["value"] == value),
-        None,
-    )
-    return option["label"] if option else str(value)
-
-
-def option_label(fields: Sequence[dict[str, Any]], field_key: str, value: Any) -> str:
-    """Label of one option inside a declarative field list."""
-    for field in fields:
-        if field["key"] != field_key:
-            continue
-        option = next(
-            (item for item in field.get("options", []) if item["value"] == value),
-            None,
-        )
-        return option["label"] if option else str(value)
-    return str(value)

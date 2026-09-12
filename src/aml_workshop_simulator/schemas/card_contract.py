@@ -52,4 +52,3 @@ class CardSnapshotOut(BaseModel):
     context_fields: list[ParameterOut]
     fields: list[ParameterOut]
     default_visible_params: list[str]
-    context_defaults: dict[str, ParameterValue]

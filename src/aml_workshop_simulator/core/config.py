@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
 
 
 class Settings(BaseSettings):
@@ -17,12 +18,31 @@ class Settings(BaseSettings):
     LOGIN_MAX_FAILED_ATTEMPTS: int = 10
     LOGIN_LOCKOUT_MINUTES: int = 5
 
-    DATABASE_URL: str = "postgresql+asyncpg://aml:aml@localhost:5432/aml_simulator"
+    # Explicit URL takes precedence for local tooling and disposable test DBs.
+    DATABASE_URL: str | None = None
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "aml_simulator"
+    POSTGRES_USER: str = "aml"
+    POSTGRES_PASSWORD: str = ""
     ECHO_SQL: bool = False
     DB_POOL_DISABLED: bool = False
 
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
-    BOOTSTRAP_ADMIN_PASSWORD: str = "admin12345"
+    BOOTSTRAP_ADMIN_PASSWORD: str = ""
+
+    @property
+    def database_url(self) -> str | URL:
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
+        return URL.create(
+            "postgresql+asyncpg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            database=self.POSTGRES_DB,
+        )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

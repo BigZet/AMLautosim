@@ -35,8 +35,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aml}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-aml_simulator}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-240}
       LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
@@ -46,11 +49,10 @@ services:
       - ./config:/app/config:ro
     command: >-
       sh -c "python -m scripts.seed_database --wait-for-db --migrate
-      && uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
+      && exec uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
     ports:
       # Loopback only: the participant and admin UIs reach the API over the
-      # compose network. docs/deployment.md requires that /api never be served
-      # to browsers.
+      # compose network. Browsers connect only to NiceGUI.
       - "127.0.0.1:${API_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status==200 else 1)\""]
@@ -58,7 +60,7 @@ services:
       timeout: 5s
       retries: 20
 
-  play:
+  ui:
     build:
       context: .
       dockerfile: deploy/Dockerfile
@@ -68,43 +70,23 @@ services:
         condition: service_healthy
     environment:
       API_URL: http://api:8000
+      UI_HOST: 0.0.0.0
+      UI_PORT: 8080
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      NICEGUI_STORAGE_SECRET: ${NICEGUI_STORAGE_SECRET:?set NICEGUI_STORAGE_SECRET in .env}
+      NICEGUI_STORAGE_PATH: /home/app/nicegui
     volumes:
-      - ./config:/app/config:ro
-    command: >-
-      streamlit run src/aml_workshop_simulator/ui/participant/app.py
-      --server.port 8501 --server.address 0.0.0.0 --server.headless true
+      - nicegui_data:/home/app/nicegui
+    command: python -m src.aml_workshop_simulator.ui.nicegui.app
     ports:
-      - "${PLAY_PORT:-8501}:8501"
+      - "${UI_PORT:-8080}:8080"
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health').status==200 else 1)\""]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/live')\""]
       interval: 10s
       timeout: 5s
-      retries: 20
+      retries: 10
 
-  admin:
-    build:
-      context: .
-      dockerfile: deploy/Dockerfile
-    restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
-    environment:
-      API_URL: http://api:8000
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-    volumes:
-      - ./config:/app/config:ro
-    command: >-
-      streamlit run src/aml_workshop_simulator/ui/admin/app.py
-      --server.port 8502 --server.address 0.0.0.0 --server.headless true
-    ports:
-      - "${ADMIN_PORT:-8502}:8502"
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8502/_stcore/health').status==200 else 1)\""]
-      interval: 10s
-      timeout: 5s
-      retries: 20
 
 volumes:
   postgres_data:
+  nicegui_data:

@@ -52,9 +52,8 @@ class ActionCardOut(BaseModel):
 
     `channels`, `fields` and `context_fields` come from the very
     `parameter_schema` the server validates against, so the UI cannot offer an
-    option the API would reject. `visible_params` narrows that contract down to
-    what *this round* exposes; everything else is pinned server-side and listed
-    in `pinned_defaults`.
+    option the API would reject. `visible_params` contains all declared fields
+    in display order; `pinned_defaults` is empty.
     """
 
     id: int

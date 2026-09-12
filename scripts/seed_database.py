@@ -2,7 +2,7 @@
 
 Running it repeatedly leaves exactly one row per card version, one bootstrap
 administrator and one demo round draft. Nothing is duplicated and no existing
-participant data is touched.
+participant data is touched unless --reset-game is explicitly requested.
 
     python -m scripts.seed_database --migrate
 """
@@ -148,6 +148,10 @@ async def seed_admin(db: AsyncSession) -> User:
     )
     now = datetime.now(UTC)
     if admin is None:
+        if not 10 <= len(settings.BOOTSTRAP_ADMIN_PASSWORD) <= 128:
+            raise ValueError(
+                "Set BOOTSTRAP_ADMIN_PASSWORD to 10–128 characters before creating the administrator."
+            )
         admin = User(
             email=email,
             display_name="Организатор",
@@ -210,7 +214,7 @@ async def seed_demo_round(
     return round_obj
 
 
-async def seed() -> dict[str, Any]:
+async def seed(reset_game: bool = False) -> dict[str, Any]:
     from src.aml_workshop_simulator.schemas.catalog_config import (
         validate_configuration_files,
     )
@@ -219,6 +223,16 @@ async def seed() -> dict[str, Any]:
     async with AsyncSessionLocal() as db:
         cards = await seed_cards(db)
         admin = await seed_admin(db)
+        if reset_game:
+            from src.aml_workshop_simulator.db.models.scenarios import Scenario
+            from src.aml_workshop_simulator.db.models.scoring_results import (
+                ScoringResult,
+            )
+
+            await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
+            for model in (AuditEvent, ScoringResult, Scenario, Round):
+                await db.execute(delete(model))
+            await db.flush()
         round_obj = await seed_demo_round(db, admin, cards)
         await db.commit()
         return {
@@ -229,8 +243,8 @@ async def seed() -> dict[str, Any]:
         }
 
 
-async def _seed_and_dispose() -> dict[str, Any]:
-    summary = await seed()
+async def _seed_and_dispose(reset_game: bool = False) -> dict[str, Any]:
+    summary = await seed(reset_game=reset_game)
     await async_engine.dispose()
     return summary
 
@@ -243,13 +257,18 @@ def main() -> None:
     parser.add_argument(
         "--wait-for-db", action="store_true", help="wait until PostgreSQL answers"
     )
+    parser.add_argument(
+        "--reset-game",
+        action="store_true",
+        help="discard game data and create a current draft; keep users and sessions",
+    )
     args = parser.parse_args()
     if args.wait_for_db:
         asyncio.run(wait_for_db())
     if args.migrate:
         # Alembic opens its own event loop, so migrations must run outside ours.
         run_migrations()
-    summary = asyncio.run(_seed_and_dispose())
+    summary = asyncio.run(_seed_and_dispose(reset_game=args.reset_game))
     print(
         "seed complete: "
         f"cards={summary['cards']} admin_id={summary['admin_id']} "

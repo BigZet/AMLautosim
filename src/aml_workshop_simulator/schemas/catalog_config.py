@@ -67,8 +67,8 @@ class CardConfig(BaseModel):
     max_occurrences: int = Field(ge=1, le=LIMITS["max_actions"])
     requires_card_code: str | None
     quota_category: Literal["cash", "anonymous"] | None
-    channels: list[Channel] = Field(min_length=1)
-    default_visible_params: list[str] = Field(max_length=LIMITS["max_visible_params"])
+    channels: list[Channel] = Field(default_factory=list)
+    default_visible_params: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def ranges(self):

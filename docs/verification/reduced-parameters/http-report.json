@@ -1,0 +1,11 @@
+[
+  "salary: exact catalog order, edited every field, preview/save/read OK",
+  "cash_withdrawal: exact catalog order, edited every field, preview/save/read OK",
+  "card_transfer: exact catalog order, edited every field, preview/save/read OK",
+  "incoming_transfer: exact catalog order, edited every field, preview/save/read OK",
+  "14 removed/inapplicable parameter requests rejected with field errors",
+  "incoming_transfer: amount boundary time costs [3, 4, 4]",
+  "card_transfer: amount boundary time costs [2, 3, 3]",
+  "cash_withdrawal: amount boundary time costs [2, 3, 3]",
+  "Full lifecycle via real HTTP: submit/score/result OK"
+]

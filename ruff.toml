@@ -1,0 +1,9 @@
+target-version = "py313"
+line-length = 88
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+
+[lint.per-file-ignores]
+# Storage must be configured before NiceGUI is imported.
+"src/aml_workshop_simulator/ui/nicegui/app.py" = ["E402"]

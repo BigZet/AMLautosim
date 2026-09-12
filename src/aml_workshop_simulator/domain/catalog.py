@@ -77,9 +77,4 @@ def catalog_entry(code: str, version: int = 1) -> dict[str, Any]:
     raise KeyError(f"unknown card version {code} v{version}")
 
 
-def catalog_channels(code: str, version: int = 1) -> tuple[str, ...]:
-    """Allowed channels of one card version, as plain strings."""
-    return tuple(str(channel) for channel in catalog_entry(code, version)["channels"])
-
-
 CARD_CODES: tuple[str, ...] = tuple(entry["code"] for entry in CARD_CATALOG)

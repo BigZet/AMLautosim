@@ -20,7 +20,7 @@ class VelocityTimeIn(RuleModel):
     time_cost: int
 
 
-class DocumentTimeIn(RuleModel):
+class AmountTimeIn(RuleModel):
     minimum_gross: NonNegative
     time_cost: int = Field(ge=0)
 
@@ -35,7 +35,7 @@ class ResourceRulesIn(RuleModel):
     minimum_time_cost: int = Field(ge=0)
     channel_time: dict[str, Annotated[int, Field(ge=0)]]
     velocity_time: dict[str, VelocityTimeIn]
-    documents: DocumentTimeIn
+    amount_adjustment: AmountTimeIn
 
     @field_validator("channel_time")
     @classmethod
@@ -50,12 +50,9 @@ class ResourceRulesIn(RuleModel):
         )
 
 
-class DocumentRiskIn(RuleModel):
+class AmountRiskIn(RuleModel):
     minimum_gross: NonNegative
-    present_large: Finite
-    present_small: Finite
-    absent_large: Finite
-    absent_small: Finite
+    risk_points: Finite
 
 
 class SequenceRiskIn(RuleModel):
@@ -73,7 +70,7 @@ class RiskRulesIn(RuleModel):
     channel_points: dict[str, Finite]
     amount_divisor: Decimal = Field(gt=0, allow_inf_nan=False)
     amount_max_points: NonNegative
-    documents: DocumentRiskIn
+    amount_adjustment: AmountRiskIn
     sequence: SequenceRiskIn
     explanation_factor_limit: int = Field(ge=1)
 

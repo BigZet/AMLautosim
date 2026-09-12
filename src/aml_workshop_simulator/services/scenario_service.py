@@ -1,16 +1,4 @@
-"""Server-side scenario orchestration.
-
-The canonical chain always lives in PostgreSQL. Streamlit sends a full
-replacement of the editable scenario; FastAPI normalises it against the round policy,
-re-validates it against the immutable card versions pinned by the round
-snapshot and stores the canonical form together with a freshly computed
-resource snapshot.
-
-Normalisation only ever *fills in* parameters the participant was not offered.
-A hidden parameter that arrives with a value the round does not pin it to is
-kept as sent, so `domain.rules` can reject it instead of silently repairing a
-payload that no legal client could have produced.
-"""
+"""Normalize declared context, preserving invalid input for structural rejection."""
 
 from __future__ import annotations
 
@@ -20,22 +8,9 @@ from decimal import Decimal
 from typing import Any
 
 from src.aml_workshop_simulator.db.models.rounds import Round
-from src.aml_workshop_simulator.domain.round_policy import (
-    PARAM_CHANNEL,
-    OperationPolicy,
-    RoundPolicy,
-    action_param,
-    context_param,
-)
-from src.aml_workshop_simulator.domain.rules import (
-    CONTEXT_DEFAULTS,
-    CardSpec,
-    evaluate_scenario,
-    money,
-)
+from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
+from src.aml_workshop_simulator.domain.rules import CardSpec, evaluate_scenario, money
 from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
-
-CONTEXT_KEYS = ("recipient_type", "time_of_day", "velocity", "has_documents")
 
 
 def load_round_card_specs(round_obj: Round) -> dict[tuple[str, int], CardSpec]:
@@ -49,66 +24,6 @@ def round_policy(
     round_obj: Round, specs: dict[tuple[str, int], CardSpec]
 ) -> RoundPolicy:
     return RoundPolicy.from_config(round_obj.game_config or {}, specs)
-
-
-def _context_value(
-    key: str,
-    provided: Any,
-    spec: CardSpec | None,
-    operation: OperationPolicy | None,
-) -> Any:
-    if provided is not None:
-        return provided
-    if spec is None:
-        return CONTEXT_DEFAULTS[key]
-    param = context_param(key)
-    declared = next((item for item in spec.context_fields if item["key"] == key), None)
-    if declared is None:
-        return spec.context_defaults[key]
-    if operation is not None and not operation.is_visible(param):
-        pinned = operation.default_for(param)
-        return declared["default"] if pinned is None else pinned
-    return declared["default"]
-
-
-def _channel_value(
-    provided: Any, spec: CardSpec | None, operation: OperationPolicy | None
-) -> str:
-    if provided is not None:
-        return str(provided)
-    if operation is not None and not operation.is_visible(PARAM_CHANNEL):
-        pinned = operation.default_for(PARAM_CHANNEL)
-        if pinned is not None:
-            return str(pinned)
-    if spec is not None and spec.channels:
-        return str(spec.channels[0])
-    return ""
-
-
-def _action_details(
-    provided: dict[str, Any],
-    spec: CardSpec | None,
-    operation: OperationPolicy | None,
-) -> dict[str, Any]:
-    details = {
-        key: (str(value) if isinstance(value, Decimal) else value)
-        for key, value in provided.items()
-    }
-    if spec is None or operation is None:
-        return details
-    # Only parameters the round hides are filled in. A visible required field
-    # that the client did not send stays missing, so `domain.rules` reports
-    # `missing_action_parameter` instead of the server inventing a value.
-    for declared in spec.fields:
-        key = declared["key"]
-        if key in details:
-            continue
-        param = action_param(key)
-        if operation.is_visible(param):
-            continue
-        pinned = operation.default_for(param)
-        details[key] = declared["default"] if pinned is None else pinned
-    return details
 
 
 def canonical_steps(
@@ -126,13 +41,16 @@ def canonical_steps(
     for step in steps:
         key = (step.card.code, step.card.version)
         spec = specs.get(key)
-        operation = policy.for_card(key) if policy is not None else None
-
-        context = {
-            name: _context_value(name, getattr(step.context, name), spec, operation)
-            for name in CONTEXT_KEYS
-        }
-        context["channel"] = _channel_value(step.context.channel, spec, operation)
+        # Preserve all explicitly supplied keys (including null) so a field
+        # inapplicable to this card cannot disappear during normalization.
+        context = step.context.model_dump(exclude_unset=True)
+        if spec is not None:
+            for declared in spec.context_fields:
+                name = declared["key"]
+                if context.get(name) is None:
+                    context[name] = declared["default"]
+            if spec.channels and context.get("channel") is None:
+                context["channel"] = spec.channels[0]
         canonical.append(
             {
                 "step_id": str(step.step_id),
@@ -142,16 +60,11 @@ def canonical_steps(
                     "version": step.card.version,
                 },
                 "amount": f"{money(step.amount):.2f}",
-                "context": {
-                    "recipient_type": context["recipient_type"],
-                    "time_of_day": context["time_of_day"],
-                    "velocity": context["velocity"],
-                    "channel": context["channel"],
-                    "has_documents": bool(context["has_documents"]),
-                },
+                "context": context,
                 "action_details": dict(
                     sorted(
-                        _action_details(step.action_details, spec, operation).items()
+                        (key, str(value) if isinstance(value, Decimal) else value)
+                        for key, value in step.action_details.items()
                     )
                 ),
             }

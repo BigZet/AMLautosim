@@ -17,7 +17,7 @@ _engine_kwargs: dict[str, object] = {
 if settings.DB_POOL_DISABLED:
     _engine_kwargs["poolclass"] = NullPool
 
-async_engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
+async_engine = create_async_engine(settings.database_url, **_engine_kwargs)
 AsyncSessionLocal = async_sessionmaker(
     async_engine, class_=AsyncSession, expire_on_commit=False
 )
