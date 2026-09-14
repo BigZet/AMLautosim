@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "rows": 26315,
+  "groups": 144,
+  "no_group_leakage": true,
+  "no_projected_label_conflicts": true,
+  "engine_and_extractor_verified": true
+}

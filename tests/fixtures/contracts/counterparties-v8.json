@@ -1,0 +1,8 @@
+[
+  {"id":"A","name":"Алексей — постоянный отправитель","kind":"person","information_status":"sufficient","personal_relationship":"known","category":null},
+  {"id":"B","name":"Борис — известный новый контрагент","kind":"person","information_status":"sufficient","personal_relationship":"known","category":null},
+  {"id":"C","name":"Контрагент с ограниченными сведениями","kind":"person","information_status":"limited","personal_relationship":"unknown","category":null},
+  {"id":"D","name":"Контрагент без доступных сведений","kind":"person","information_status":"unknown","personal_relationship":"unknown","category":null},
+  {"id":"employer","name":"Работодатель","kind":"institution","information_status":"sufficient","personal_relationship":"unknown","category":"employer"},
+  {"id":"shop","name":"Магазин","kind":"merchant","information_status":"sufficient","personal_relationship":"unknown","category":"groceries"}
+]

@@ -80,7 +80,7 @@ class CardConfig(BaseModel):
 
 
 def validate_configuration_files() -> None:
-    from src.aml_workshop_simulator.domain.catalog import CARD_CATALOG
+    from src.aml_workshop_simulator.domain.catalog import SEED_CARD_CATALOG as CARD_CATALOG
     from src.aml_workshop_simulator.domain.round_policy import declared_params
     from src.aml_workshop_simulator.domain.rules import card_spec_from_catalog
 
@@ -111,3 +111,6 @@ def validate_configuration_files() -> None:
     )
 
     validate_config_against_catalog(specs, config.dump())
+    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+
+    validate_config_against_catalog(specs, expanded_game_config())

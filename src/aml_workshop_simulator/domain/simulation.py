@@ -6,6 +6,9 @@ from collections.abc import Iterable, Sequence
 from decimal import Decimal
 from typing import Any
 
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_legacy_contract,
+)
 from src.aml_workshop_simulator.domain.round_policy import (
     RoundPolicy,
 )
@@ -129,13 +132,15 @@ def _resource_costs(
     gross: Decimal,
     effects: dict[str, Any],
     costs: dict[str, Any],
+    *,
+    waiting_time_cost: int | None = None,
 ) -> tuple[int, int]:
     """Energy and time charged once for this transaction."""
     energy_cost = spec.energy_cost + effects["energy_cost"]
     declared = {f["key"] for f in spec.context_fields}
     velocity_time = (
         costs["velocity_time"][context["velocity"]]["time_cost"]
-        if "velocity" in declared
+        if waiting_time_cost is None and "velocity" in declared
         else 0
     )
     adjustment = costs["amount_adjustment"]
@@ -153,7 +158,7 @@ def _resource_costs(
         + channel_time
         + effects["time_cost"],
     )
-    return energy_cost, time_cost
+    return energy_cost, time_cost + (waiting_time_cost or 0)
 
 
 def _limit_report(
@@ -209,11 +214,19 @@ def evaluate_scenario(
 
     Raises `StructuralError` when the payload breaks a card version contract.
     """
+    require_legacy_contract(game_config)
     policy = resolve_policy(card_specs, game_config, policy)
     structural = validate_structure(steps, card_specs, policy)
     if structural:
         raise StructuralError(structural)
 
+    return _evaluate_validated(steps, card_specs, game_config, policy)
+
+
+def _evaluate_validated(
+    steps, card_specs, game_config, policy, *, timeline=None, purchase_policy=None
+):
+    """Shared accounting kernel; callers must validate their version's input."""
     rules = RoundRules.from_config(game_config)
     costs = game_config["resource_rules"]
     violations: list[Violation] = []
@@ -223,6 +236,9 @@ def evaluate_scenario(
     time_left = rules.initial_time
     inflow = ZERO
     outflow = ZERO
+    target_outflow = ZERO
+    purchase_outflow = ZERO
+    purchase_limit_reported = False
     fees = ZERO
     night_operations = 0
     anonymous_operations = 0
@@ -262,7 +278,8 @@ def evaluate_scenario(
         amount = money(step["amount"])
         context = step["context"]
         recipient_type = context.get("recipient_type")
-        time_of_day = context.get("time_of_day")
+        timing = timeline[index - 1] if timeline is not None else None
+        time_of_day = timing["time_of_day"] if timing else context.get("time_of_day")
         details = dict(step.get("action_details") or {})
         effects = action_detail_effects(spec, details)
 
@@ -333,7 +350,14 @@ def evaluate_scenario(
                     )
                 )
 
-        energy_cost, time_cost = _resource_costs(spec, context, gross, effects, costs)
+        energy_cost, time_cost = _resource_costs(
+            spec,
+            context,
+            gross,
+            effects,
+            costs,
+            waiting_time_cost=timing["waiting_time_cost"] if timing else None,
+        )
         # ---- money ----------------------------------------------------------
         if spec.flow == "credit":
             money_delta = money(gross - fee)
@@ -341,6 +365,26 @@ def evaluate_scenario(
         elif spec.flow == "debit":
             money_delta = money(-(gross + fee))
             outflow = money(outflow + gross)
+            if spec.code in {"card_transfer", "cash_withdrawal"}:
+                target_outflow = money(target_outflow + gross)
+            if purchase_policy is not None and spec.code == "purchase":
+                purchase_outflow = money(purchase_outflow + gross)
+                if (
+                    purchase_outflow > money(purchase_policy["max_total"])
+                    and not purchase_limit_reported
+                ):
+                    purchase_limit_reported = True
+                    violations.append(
+                        Violation(
+                            reason="purchase_total_exceeded",
+                            step_id=step_id,
+                            step_index=index,
+                            field="amount",
+                            current=str(purchase_outflow),
+                            allowed=str(money(purchase_policy["max_total"])),
+                            message="Общая сумма покупок превышает 30 000 ₽. Уменьшите сумму или удалите покупку.",
+                        )
+                    )
         else:  # neutral
             money_delta = money(-fee)
 
@@ -450,8 +494,21 @@ def evaluate_scenario(
             }
         )
 
+        if purchase_policy is not None and spec.code == "purchase":
+            party = next(
+                p
+                for p in game_config["behavior"]["counterparties"]
+                if p["id"] == step["recipient_id"]
+            )
+            per_step[-1]["purchase"] = {
+                "merchant_id": party["id"],
+                "category": party.get("category"),
+            }
+
     available_steps = max(0, rules.max_actions - len(steps))
-    goal_reached = outflow >= rules.target_outflow
+    goal_reached = (
+        target_outflow if purchase_policy is not None else outflow
+    ) >= rules.target_outflow
 
     snapshot: dict[str, Any] = {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
@@ -484,6 +541,53 @@ def evaluate_scenario(
         "violations": [violation.as_dict() for violation in violations],
         "per_step": per_step,
     }
+    if timeline is not None:
+        snapshot["schema_version"] = 6
+        snapshot["ruleset_version"] = "expanded-rules-stage03-v1"
+        snapshot["timeline"] = {
+            "version": "operation-timeline-v1",
+            "timezone": game_config["behavior"]["timeline"]["timezone"],
+            "steps": [
+                {
+                    **item,
+                    "operation_time_cost": impact["time_cost"]
+                    - item["waiting_time_cost"],
+                }
+                for item, impact in zip(timeline, per_step)
+            ],
+        }
+    if purchase_policy is not None:
+        snapshot["schema_version"] = 7
+        snapshot["ruleset_version"] = "expanded-rules-stage04-v1"
+        snapshot["totals"].update(
+            target_outflow=str(target_outflow), purchase_outflow=str(purchase_outflow)
+        )
+        for code, label, kind, used, limit in [
+            (
+                "purchase_total",
+                "Сумма покупок",
+                "money",
+                purchase_outflow,
+                money(purchase_policy["max_total"]),
+            ),
+            (
+                "purchase_count",
+                "Количество покупок",
+                "count",
+                card_counts.get("purchase", 0),
+                3,
+            ),
+        ]:
+            snapshot["limits"].append(
+                {
+                    "code": code,
+                    "label": label,
+                    "kind": kind,
+                    "used": str(used),
+                    "limit": str(limit),
+                    "remaining": str(max(0, limit - used)),
+                }
+            )
     return snapshot
 
 
@@ -505,7 +609,11 @@ def submit_blockers(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     objective = snapshot.get("objective", {})
     if not objective.get("reached", False):
         target = money(objective.get("target_outflow", "0"))
-        current = money(snapshot.get("totals", {}).get("gross_outflow", "0"))
+        current = money(
+            snapshot.get("totals", {}).get(
+                "target_outflow", snapshot.get("totals", {}).get("gross_outflow", "0")
+            )
+        )
         blockers.append(
             Violation(
                 reason="target_outflow_not_reached",

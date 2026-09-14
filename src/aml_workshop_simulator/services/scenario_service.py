@@ -9,8 +9,16 @@ from typing import Any
 
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
+from src.aml_workshop_simulator.domain.contract_versions import (
+    contract_version,
+    require_playable_contract,
+)
+from src.aml_workshop_simulator.core.errors import ValidationFailed
 from src.aml_workshop_simulator.domain.rules import CardSpec, evaluate_scenario, money
-from src.aml_workshop_simulator.schemas.scenarios import ScenarioStepIn
+from src.aml_workshop_simulator.schemas.scenarios import (
+    ScenarioStepIn,
+    ExpandedScenarioStepIn,
+)
 
 
 def load_round_card_specs(round_obj: Round) -> dict[tuple[str, int], CardSpec]:
@@ -39,6 +47,10 @@ def canonical_steps(
     specs = specs or {}
     canonical: list[dict[str, Any]] = []
     for step in steps:
+        if isinstance(step, ExpandedScenarioStepIn):
+            raise ValidationFailed(
+                "Шаг v8 неприменим к раунду v7.", code="scenario_contract_mismatch"
+            )
         key = (step.card.code, step.card.version)
         spec = specs.get(key)
         # Preserve all explicitly supplied keys (including null) so a field
@@ -85,16 +97,33 @@ def build_snapshot(
     policy: RoundPolicy | None = None,
 ) -> dict[str, Any]:
     """Full resource snapshot for an already canonical chain."""
+    if contract_version(game_config) == 8:
+        from src.aml_workshop_simulator.services.expanded_simulation import (
+            evaluate_expanded_scenario,
+        )
+
+        return evaluate_expanded_scenario(steps, game_config)
     return evaluate_scenario(steps, card_specs, game_config, policy)
 
 
 def prepare_scenario(
     round_obj: Round, steps: list[ScenarioStepIn]
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    require_playable_contract(round_obj.game_config)
     specs = load_round_card_specs(round_obj)
     policy = round_policy(round_obj, specs)
-    canonical = canonical_steps(steps, specs, policy)
+    canonical = canonical_round_steps(round_obj, steps, specs, policy)
     return canonical, checked_snapshot(canonical, specs, round_obj.game_config, policy)
+
+
+def canonical_round_steps(round_obj, steps, specs, policy):
+    if contract_version(round_obj.game_config) == 8:
+        from src.aml_workshop_simulator.services.counterparties import (
+            canonical_expanded_steps,
+        )
+
+        return canonical_expanded_steps(steps, round_obj.game_config)
+    return canonical_steps(steps, specs, policy)
 
 
 def checked_snapshot(steps, specs, config, policy) -> dict[str, Any]:

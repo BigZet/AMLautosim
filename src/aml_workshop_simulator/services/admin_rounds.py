@@ -6,20 +6,27 @@ from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict
-from src.aml_workshop_simulator.core.game_config import base_game_config
+from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.db.queries import get_round
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_playable_contract,
+    require_new_round_allowed,
+)
 from src.aml_workshop_simulator.domain.lifecycle import require_round_status
 from src.aml_workshop_simulator.schemas.admin import (
     RoundAdminOut,
     RoundCreateIn,
     RoundUpdateIn,
 )
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from src.aml_workshop_simulator.schemas.round_config import (
+    parse_game_config,
+    RoundConfigInput,
+)
 from src.aml_workshop_simulator.services.audit import record_event
 from src.aml_workshop_simulator.services.configuration import freeze_game_config
 from src.aml_workshop_simulator.services.round_configuration import (
@@ -28,14 +35,24 @@ from src.aml_workshop_simulator.services.round_configuration import (
 )
 
 
-async def prepare_config(db: AsyncSession, config: GameConfigIn | None = None) -> dict:
-    value = (config or GameConfigIn.model_validate(base_game_config())).dump()
+async def prepare_config(
+    db: AsyncSession, config: RoundConfigInput | None = None, *, new_round: bool = True
+) -> dict:
+    value = (config or parse_game_config(expanded_game_config())).dump()
+    require_playable_contract(value)
+    if new_round and value.get("behavior", {}).get("release") is not None:
+        require_new_round_allowed(value)
     cards = list(
         (await db.execute(select(ActionCard).where(ActionCard.is_active)))
         .scalars()
         .all()
     )
     frozen = freeze_game_config(value, cards)
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    scorer = get_model_scorer()
+    scorer.check_config(frozen)
+    frozen["risk_model"] = scorer.identity.copy()
     frozen["config_version"] = config_version(frozen)
     return frozen
 
@@ -90,10 +107,33 @@ async def update_config(
             code="round_config_revision_conflict",
             details={"current_config_revision": row.config_revision},
         )
+    require_playable_contract(row.game_config)
+    if (
+        payload.game_config is not None
+        and (
+            row.game_config.get("behavior", {}).get("release") is not None
+            or getattr(getattr(payload.game_config, "behavior", None), "release", None)
+            is not None
+        )
+        and (
+            row.game_config["schema_version"] != payload.game_config.schema_version
+            or row.game_config.get("behavior", {}).get("release")
+            != getattr(getattr(payload.game_config, "behavior", None), "release", None)
+        )
+    ):
+        raise Conflict(
+            "Версию правил выбирают при создании новой игры.",
+            code="round_contract_immutable",
+        )
+    new_config = (
+        await prepare_config(db, payload.game_config, new_round=False)
+        if payload.game_config is not None
+        else None
+    )
     if payload.title is not None:
         row.title = payload.title
-    if payload.game_config is not None:
-        row.game_config = await prepare_config(db, payload.game_config)
+    if new_config is not None:
+        row.game_config = new_config
     row.config_revision += 1
     await record_event(
         db,
@@ -110,9 +150,14 @@ async def start(
     db: AsyncSession, round_id: int, actor_id: int, request_id: str | None
 ) -> RoundAdminOut:
     row = await get_round(db, round_id, lock="update")
+    require_playable_contract(row.game_config)
     if row.status == "active":
         return round_out(row)
     require_round_status(row.status, "draft")
+    require_new_round_allowed(row.game_config)
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    get_model_scorer().check_config(row.game_config, require_pin=True)
     row.status = "active"
     row.activated_at = datetime.now(UTC)
     await record_event(
@@ -127,11 +172,25 @@ async def start(
 
 
 async def restart(
-    db: AsyncSession, round_id: int, actor_id: int, request_id: str | None
+    db: AsyncSession,
+    round_id: int,
+    actor_id: int,
+    request_id: str | None,
+    schema_version: int = 8,
 ) -> RoundAdminOut:
     await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
     row = await get_round(db, round_id, lock="update")
-    config = await prepare_config(db)
+    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+    from src.aml_workshop_simulator.schemas.round_config import parse_game_config
+
+    if schema_version != 8:
+        raise Conflict(
+            "Доступна только игра с CatBoost v8.", code="model_contract_mismatch"
+        )
+    selected = (
+        parse_game_config(expanded_game_config()) if schema_version == 8 else None
+    )
+    config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.
     await db.execute(delete(AuditEvent))
     await db.execute(delete(ScoringResult))

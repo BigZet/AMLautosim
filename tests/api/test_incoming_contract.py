@@ -22,14 +22,12 @@ def test_incoming_card_preview_save_submit_and_score(
                 "incoming_transfer",
                 "card_transfer",
                 "cash_withdrawal",
+                "purchase",
             }
             incoming = next(c for c in cards if c["code"] == "incoming_transfer")
             assert [p["key"] for p in incoming["visible_params"]] == [
                 "channel",
-                "velocity",
-                "sender_relationship",
                 "transfer_source",
-                "time_of_day",
             ]
             assert (
                 incoming["channels"] == ["bank"] and incoming["quota_category"] is None
@@ -39,7 +37,6 @@ def test_incoming_card_preview_save_submit_and_score(
                 if step["card"]["code"] == "incoming_transfer":
                     step["action_details"] = {
                         "transfer_source": "crypto_exchange",
-                        "sender_relationship": "anonymous_established_account",
                     }
             sid = player["headers"]["X-Session-ID"]
             preview = await client.request(
@@ -107,7 +104,7 @@ def test_explicit_seed_reset_replaces_game_but_keeps_accounts_and_sessions(
     current = request_api("GET", "/admin/rounds/current", admin)
     assert current["id"] != active_round
     assert current["status"] == "draft"
-    assert current["game_config"]["schema_version"] == 7
+    assert current["game_config"]["schema_version"] == 8
     assert sql("SELECT id FROM scenarios") == []
     assert sql("SELECT id FROM scoring_results") == []
     assert sql("SELECT id, email FROM users ORDER BY id") == users

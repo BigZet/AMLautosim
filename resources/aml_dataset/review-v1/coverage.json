@@ -1,0 +1,184 @@
+{
+  "family": {
+    "ordinary": 8,
+    "transit": 8,
+    "cash": 8,
+    "repeated": 8,
+    "mixed": 8,
+    "ambiguous": 8
+  },
+  "income_basis": {
+    "payroll_registry": 1,
+    "no_reference": 2,
+    "service_contract": 2,
+    "none": 43
+  },
+  "num_steps": {
+    "10": 12,
+    "9": 25,
+    "11": 11
+  },
+  "card_incoming_transfer_count": {
+    "3": 48
+  },
+  "by_risk_family_length": {
+    "25|ordinary|10": 5,
+    "25|ordinary|9": 2,
+    "0|ordinary|10": 1,
+    "0|transit|9": 3,
+    "25|transit|11": 1,
+    "25|transit|9": 3,
+    "0|transit|10": 1,
+    "0|cash|9": 2,
+    "25|cash|11": 1,
+    "0|cash|10": 1,
+    "25|cash|10": 2,
+    "50|cash|9": 1,
+    "0|cash|11": 1,
+    "25|repeated|11": 2,
+    "50|repeated|9": 1,
+    "0|repeated|9": 1,
+    "0|repeated|10": 1,
+    "25|repeated|9": 3,
+    "50|mixed|11": 1,
+    "25|mixed|10": 1,
+    "25|mixed|9": 2,
+    "25|mixed|11": 2,
+    "0|mixed|9": 2,
+    "0|ambiguous|9": 4,
+    "0|ambiguous|11": 2,
+    "25|ambiguous|9": 1,
+    "25|ambiguous|11": 1
+  },
+  "source": {
+    "source_domestic_bank_count": 44,
+    "source_foreign_bank_kg_count": 36,
+    "source_crypto_exchange_count": 34,
+    "source_payment_service_count": 30
+  },
+  "velocity": {
+    "velocity_spaced_count": 37,
+    "velocity_normal_count": 143,
+    "velocity_rapid_count": 281
+  },
+  "recipient": {
+    "recipient_known_counterparty_count": 199,
+    "recipient_new_counterparty_count": 85,
+    "recipient_anonymous_wallet_count": 13
+  },
+  "sender": {
+    "sender_regular_sender_count": 74,
+    "sender_anonymous_new_account_count": 33,
+    "sender_anonymous_established_account_count": 37
+  },
+  "channel": {
+    "channel_bank_count": 144,
+    "channel_mobile_count": 144,
+    "channel_web_count": 132,
+    "channel_branch_count": 23,
+    "channel_atm_count": 18
+  },
+  "time": {
+    "time_day_count": 305,
+    "time_evening_count": 112,
+    "time_night_count": 44
+  },
+  "comparable_turnover_pairs": [
+    {
+      "left": "9a2a7ea994282ee0d1babc74150859f17e732f14a2bccb89006163c601feed21",
+      "right": "532e83ecd9616f4d991b7a53d950d16f4347050bd957bd5fbff6fb6908d73b58",
+      "outflow_gap": 196.0,
+      "risk_gap": 16.85
+    },
+    {
+      "left": "532e83ecd9616f4d991b7a53d950d16f4347050bd957bd5fbff6fb6908d73b58",
+      "right": "b8db7e0f875d118f29df9ecd6d60cfc64b2752fab267799d60f84ea23cfe325b",
+      "outflow_gap": 149.0,
+      "risk_gap": 39.93
+    },
+    {
+      "left": "b8db7e0f875d118f29df9ecd6d60cfc64b2752fab267799d60f84ea23cfe325b",
+      "right": "975f631cf936e093edd1fd90473e161521a954dfe4d91d2153daf69aaed5fa53",
+      "outflow_gap": 54.0,
+      "risk_gap": 24.25
+    },
+    {
+      "left": "975f631cf936e093edd1fd90473e161521a954dfe4d91d2153daf69aaed5fa53",
+      "right": "cfa4d5edd689f352f46812fee75563554f60ac6784b9d45ed67f2b3bd0c00421",
+      "outflow_gap": 145.0,
+      "risk_gap": 20.330000000000002
+    },
+    {
+      "left": "d21969f52151d51564721f575d587a64ccab5c9ea49b822bf8d30d557d0417b9",
+      "right": "13288e84917808b361deeab4feb80f6f97a3beba45ef0f1cb5e7e9f9c85a3383",
+      "outflow_gap": 23.0,
+      "risk_gap": 19.43
+    },
+    {
+      "left": "06e312bd74e06b196c0428a55e1f90ee014866438df83edaf5d8bf1c381f6467",
+      "right": "4b25b3f3bbc16b8e0bde998d2f4e5c327f57e3c74fe6c908ad2b42c3789b2173",
+      "outflow_gap": 372.0,
+      "risk_gap": 22.18
+    },
+    {
+      "left": "63080c22472554fb01c73928f318d202ed4e3bd2a04918871ad08adac0e150b2",
+      "right": "003a33030f02484d2073b9d603504deb123a039d0143cc7aade94dafefbf7a66",
+      "outflow_gap": 208.0,
+      "risk_gap": 30.72
+    },
+    {
+      "left": "003a33030f02484d2073b9d603504deb123a039d0143cc7aade94dafefbf7a66",
+      "right": "21e78978a71d7e0e3546c53f7d6423fd5d18d6686d9c99a0ed5dd95ca9722051",
+      "outflow_gap": 349.0,
+      "risk_gap": 38.66
+    },
+    {
+      "left": "63b3a426265ddfa99014664697ea6ed124e3e5255465dfcac34a53b84609e9c6",
+      "right": "517ca1e7e5e5c2d46ad491eecbe331918ca49512f119bad51de67b2b9bf5b0f9",
+      "outflow_gap": 303.0,
+      "risk_gap": 26.42
+    },
+    {
+      "left": "517ca1e7e5e5c2d46ad491eecbe331918ca49512f119bad51de67b2b9bf5b0f9",
+      "right": "1cd9ca5708c2a196bf0e04d9a5623a3c12c5dbf0b30d3eff09820244a737b333",
+      "outflow_gap": 189.0,
+      "risk_gap": 21.950000000000003
+    },
+    {
+      "left": "fcc08fd5319f5c838d62dcd8af775c44464a671dd4d926e6b8183d084f21e1b5",
+      "right": "a67628bb23a17b38f8f45083e9ece77186ab00014cda54e6bb15a06b77284a87",
+      "outflow_gap": 19.0,
+      "risk_gap": 16.12
+    },
+    {
+      "left": "ccefd479cf8a670830bf0f534106a695785bd64fc5b387797c8ef2924b7f1519",
+      "right": "c4dd93d625e269f7bad1156128199dd6965cc111b12df08a590e70cc2a7bcd40",
+      "outflow_gap": 241.0,
+      "risk_gap": 27.4
+    },
+    {
+      "left": "c4dd93d625e269f7bad1156128199dd6965cc111b12df08a590e70cc2a7bcd40",
+      "right": "b6f877215724a64c9969f757bb04ea00abb4a009ead2f51c39e29edac68ec55c",
+      "outflow_gap": 309.0,
+      "risk_gap": 17.549999999999997
+    },
+    {
+      "left": "cd7b282ea893adb02918ab28ebf60524e6e50a3cdfbe12dee81869f93f024041",
+      "right": "66bc48ab0167f562a8930fe42d00b7cab4c903759ce508d70a89751e4ef1d155",
+      "outflow_gap": 50.0,
+      "risk_gap": 31.199999999999996
+    },
+    {
+      "left": "a1454943b0a5c14767c35dfa81aa5a150517b4095d1a8529f842fa7255f4b257",
+      "right": "72975855ce823054d579261c22a33838fbc80c0a8fc507bd436d05d28fe38b07",
+      "outflow_gap": 121.0,
+      "risk_gap": 18.869999999999997
+    },
+    {
+      "left": "72975855ce823054d579261c22a33838fbc80c0a8fc507bd436d05d28fe38b07",
+      "right": "bbebbcf2ec5e83627c27be1c1a3ce84421fb7ac110548211e7456e7ce13ba7b7",
+      "outflow_gap": 163.0,
+      "risk_gap": 42.87
+    }
+  ]
+}

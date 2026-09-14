@@ -10,7 +10,6 @@ from src.aml_workshop_simulator.db.session import get_db
 from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
 from src.aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
-    SCORING_VERSION,
 )
 from src.aml_workshop_simulator.schemas.health import LiveOut, ReadyOut
 
@@ -41,10 +40,14 @@ async def health_ready(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    scorer = get_model_scorer()
     checks: dict[str, object] = {
+        "model": scorer.identity,
         "ruleset_versions": sorted(
-            {RULESET_VERSION, SCORING_VERSION, LEADERBOARD_VERSION}
-        )
+            {RULESET_VERSION, scorer.identity["model_version"], LEADERBOARD_VERSION}
+        ),
     }
     try:
         # Простейший ping — не полноценный запрос к данным, а проверка, что

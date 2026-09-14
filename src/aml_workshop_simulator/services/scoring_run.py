@@ -10,6 +10,9 @@ from src.aml_workshop_simulator.core.errors import ApplicationError, Conflict
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.queries import get_round
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_playable_contract,
+)
 from src.aml_workshop_simulator.domain.lifecycle import require_round_status
 from src.aml_workshop_simulator.schemas.admin import RoundAdminOut, ScoringSummaryOut
 from src.aml_workshop_simulator.services.audit import record_event
@@ -33,6 +36,7 @@ async def close_admission(
 ) -> RoundAdminOut:
     """Wait for admitted writes, then permanently close admission in its own commit."""
     row = await get_round(db, round_id, lock="update")
+    require_playable_contract(row.game_config)
     if row.status == "draft":
         raise Conflict("Раунд ещё не начат.", code="round_locked")
     if row.status == "active":

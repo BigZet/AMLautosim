@@ -7,7 +7,8 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "code", ["salary", "incoming_transfer", "card_transfer", "cash_withdrawal"]
+    "code",
+    ["salary", "incoming_transfer", "card_transfer", "cash_withdrawal", "purchase"],
 )
 def test_all_parameters_are_exposed_and_saved(
     code, request_api, player, active_round, command, sql
@@ -37,6 +38,10 @@ def test_all_parameters_are_exposed_and_saved(
         "context": {},
         "action_details": {},
     }
+    if code in ("salary", "incoming_transfer"):
+        step["sender_id"] = "employer" if code == "salary" else "A"
+    if code in ("card_transfer", "purchase"):
+        step["recipient_id"] = "shop" if code == "purchase" else "A"
     for param in card["visible_params"]:
         value = (
             not param["default"]
@@ -61,7 +66,6 @@ def test_all_parameters_are_exposed_and_saved(
     "code,namespace,key,value",
     [
         ("salary", "context", "channel", "bank"),
-        ("salary", "context", "channel", None),
         ("salary", "context", "time_of_day", "day"),
         ("salary", "context", "velocity", "normal"),
         ("salary", "action_details", "employer_profile", "verified_employer"),
@@ -97,8 +101,14 @@ def test_removed_parameters_are_rejected_without_saving(
         "context": {},
         "action_details": {f["key"]: f["default"] for f in card["fields"]},
     }
-    step[namespace][key] = value
+    if code in ("salary", "incoming_transfer"):
+        step["sender_id"] = "employer" if code == "salary" else "A"
+    if code == "card_transfer":
+        step["recipient_id"] = "A"
     path = f"/rounds/{active_round}/scenario"
+    # Establish a valid control before changing exactly one forbidden field.
+    request_api("POST", path + "/preview", player["headers"], {"steps": [step]})
+    step[namespace][key] = value
     for suffix, body in [
         ("/preview", {"steps": [step]}),
         ("", command([step])),
@@ -111,5 +121,27 @@ def test_removed_parameters_are_rejected_without_saving(
             body,
             status=422,
         )
-        assert key in json.dumps(error["details"])
+        assert error["details"]  # field-specific or whole-step schema rejection
     assert request_api("GET", path, player["headers"]) is None
+
+
+def test_null_salary_channel_is_canonicalized_as_absent(
+    request_api, player, active_round, command
+):
+    card = next(
+        c
+        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        if c["code"] == "salary"
+    )
+    step = {
+        "step_id": str(uuid4()),
+        "card": {k: card[k] for k in ("id", "code", "version")},
+        "amount": card["min_amount"],
+        "sender_id": "employer",
+        "context": {"channel": None},
+        "action_details": {},
+    }
+    path = f"/rounds/{active_round}/scenario"
+    saved = request_api("PUT", path, player["headers"], command([step]))
+    assert not saved["steps"][0]["context"].get("channel")
+    assert request_api("GET", path, player["headers"]) == saved

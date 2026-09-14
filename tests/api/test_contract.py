@@ -64,7 +64,7 @@ def test_migration_and_seed_are_current_and_idempotent(api, sql):
     api.portal.call(seed)
     assert sql("SELECT id, game_config FROM rounds") == before
     assert sql("SELECT count(*) AS n FROM users")[0]["n"] == 1
-    assert sql("SELECT count(*) AS n FROM action_cards")[0]["n"] == 4
+    assert sql("SELECT count(*) AS n FROM action_cards")[0]["n"] == 5
     tables = {
         r["tablename"]
         for r in sql("SELECT tablename FROM pg_tables WHERE schemaname='public'")

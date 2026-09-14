@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, JsonValue
 
 
 class LiveOut(BaseModel):
@@ -12,6 +12,7 @@ class LiveOut(BaseModel):
 
 
 class ReadinessChecks(BaseModel):
+    model: dict[str, JsonValue] | None = None
     database: Literal["connected", "unavailable"]
     ruleset_versions: list[str] | None = None
     migrations: Literal["head", "behind head", "alembic_version missing"] | None = None

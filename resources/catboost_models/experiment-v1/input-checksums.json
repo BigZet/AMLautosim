@@ -1,0 +1,11 @@
+{
+  "scenarios.jsonl": "b14f0e10bed6da7238ebdf350cf6f738cb146167f58ce5c679aafdfeba3e8cb9",
+  "features.csv": "346c4328c424d82991ca2a2301874d729b651a4dd2bd43cf6ccd92d4a6702904",
+  "split.csv": "13d4be332854f6935299de5fadd092ea30f75fc3b27763f86758ee8d25848908",
+  "configurations.json": "ef62b7a5c6c9f7aef219ec4752d2bb822ca22a46751e752ebdbbb88264308db0",
+  "rubric.json": "11a982e042a5cebda96349f859bc4da9f1ee0be5c3821494b16a39d0dae000cd",
+  "manifest.json": "64388ae2e0fa4a77e0f4240018cd153dcfabb461d639371317db857ac6692067",
+  "feature-schema.json": "dec40b855fb4c986ee815cf014f2eb7a9191d5ba8cca3026a64fc331fdcde1e1",
+  "quality.json": "d73bc5a8b45d795e02b59e2914548aedb69d7c3fa857c3d76e1f0dc972b71474",
+  "AUDIT.json": "4db56644ae1a99c8c925310f9e67648ebcd4e21af3796afa4e72ea52695d1aad"
+}

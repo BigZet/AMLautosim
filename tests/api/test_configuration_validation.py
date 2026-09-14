@@ -11,9 +11,9 @@ from src.aml_workshop_simulator.services.configuration import freeze_game_config
 
 
 def test_invalid_update_keeps_round_and_audit_unchanged(
-    invalid_game_config, request_api, admin, round_id, sql
+    invalid_expanded_game_config, request_api, admin, round_id, sql
 ):
-    config, message = invalid_game_config
+    config, message = invalid_expanded_game_config
     path = f"/admin/rounds/{round_id}"
     before = request_api("GET", path, admin)
     audit = sql("SELECT * FROM audit_events ORDER BY id")
@@ -31,9 +31,9 @@ def test_invalid_update_keeps_round_and_audit_unchanged(
 
 
 def test_invalid_create_does_not_write_round(
-    invalid_game_config, request_api, admin, sql
+    invalid_expanded_game_config, request_api, admin, sql
 ):
-    config, message = invalid_game_config
+    config, message = invalid_expanded_game_config
     sql("TRUNCATE rounds, audit_events CASCADE")
     error = request_api(
         "POST",
@@ -49,10 +49,13 @@ def test_invalid_create_does_not_write_round(
 
 
 def test_snapshot_and_seed_reference_reject_invalid_config(
-    invalid_game_config, api, monkeypatch
+    invalid_expanded_game_config, api, monkeypatch
 ):
-    config, message = invalid_game_config
-    monkeypatch.setattr(seed_database, "REFERENCE_GAME_CONFIG", config)
+    config, message = invalid_expanded_game_config
+    monkeypatch.setattr(
+        "src.aml_workshop_simulator.core.expanded_game.expanded_game_config",
+        lambda: config,
+    )
 
     async def check():
         async with AsyncSessionLocal() as db:

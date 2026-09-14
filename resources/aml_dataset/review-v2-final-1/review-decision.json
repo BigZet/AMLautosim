@@ -1,0 +1,10 @@
+{
+  "status": "approved",
+  "package_hash": "3a230fcf5df7adebaf1f79c169be88bcff7333d459c21943fa693996e87d25f1",
+  "rubric_hash": "681236bc0b384182cd9b8262c97a54d9eb6178c4e99effa4cfb3501600a63fea",
+  "reviewer": "Codex, delegated completion by user",
+  "reviewed_at": "2026-09-14T00:21:01.802727+00:00",
+  "user_decision_evidence": "User: correct the underestimated intensive activity and finish stage 7. Prior acceptance of remaining noncritical cases. See docs/verification/aml-dataset-stage07-final.md",
+  "rubric_accepted": true,
+  "review_mode": "delegated_feedback_resolution"
+}

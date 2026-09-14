@@ -1,0 +1,5 @@
+{
+  "version": "human-12-no-blind-v1",
+  "user_evidence": "User accepted reducing review, requested all cases at once and no blind assessment. See docs/verification/aml-pilot-stage07.md.",
+  "independent_blind_review_required": false
+}

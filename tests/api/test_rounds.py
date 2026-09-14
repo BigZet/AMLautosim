@@ -89,29 +89,20 @@ def test_unsent_chain_hidden_from_admin_and_deleted_at_cutoff(
     assert sql("SELECT count(*) AS n FROM scenarios")[0]["n"] == 0
 
 
-def test_custom_configuration_controls_submission(
-    request_api, admin, player, round_id, chain, command
+def test_unsupported_financial_configuration_is_rejected_atomically(
+    request_api, admin, round_id, sql
 ):
+    before = request_api("GET", "/admin/rounds/current", admin)
+    audit = sql("SELECT * FROM audit_events ORDER BY id")
     config = request_api("GET", "/admin/game-config/default", admin)
     config["resources"]["initial_energy"] = 1
-    updated = request_api(
+    error = request_api(
         "PUT",
         f"/admin/rounds/{round_id}",
         admin,
-        {
-            "expected_config_revision": 1,
-            "game_config": config,
-        },
+        {"expected_config_revision": before["config_revision"], "game_config": config},
+        409,
     )
-    assert updated["game_config"]["resources"]["initial_energy"] == 1
-    request_api("POST", f"/admin/rounds/{round_id}/start", admin)
-    error = request_api(
-        "POST",
-        f"/rounds/{round_id}/scenario/submit",
-        player["headers"],
-        command(chain()),
-        400,
-    )
-    assert "insufficient_energy" in {
-        v["reason"] for v in error["details"]["violations"]
-    }
+    assert error["code"] == "model_contract_mismatch"
+    assert request_api("GET", "/admin/rounds/current", admin) == before
+    assert sql("SELECT * FROM audit_events ORDER BY id") == audit

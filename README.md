@@ -1,5 +1,7 @@
 # AML Workshop Simulator
 
+> Датасеты JSONL/CSV и модели CBM хранятся через Git LFS. Перед сборкой или проверками установите Git LFS и выполните `git lfs install`, затем `git lfs pull` в клонированном репозитории.
+
 Учебный симулятор для мастер-класса: участники собирают цепочки операций,
 FastAPI рассчитывает ресурсы и риск, организатор управляет игрой и рейтингом.
 
@@ -45,5 +47,8 @@ python3.13 -m venv .venv
 - [Конфигурация](config/README.md), [баланс](config/BALANCE.md), [тесты](tests/README.md).
 - [Все документы](docs/README.md) и [структура проекта](docs/project-structure.md).
 
-CatBoost отложен. Адаптер и примеры сохранены в исходниках, серверный образ
-их не включает. Текущий скоринг детерминированный, без ML-модели.
+Первая модель CatBoost [обучена и оценена офлайн](docs/verification/catboost-training-v1.md).
+Модель и датасет не входят в серверный образ. Подключение к игре — отдельный этап;
+текущий игровой скоринг остаётся детерминированным.
+
+Итоговая офлайн-модель CatBoost подготовлена: [качество и ограничения](docs/verification/catboost-behavior-v2.md), [команды и пакет](docs/catboost-behavior-model.md). CatBoost и SHAP подключены к новому выпуску игры; [отчёт интеграции](docs/verification/catboost-shap-integration.md).

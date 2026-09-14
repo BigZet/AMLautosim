@@ -7,12 +7,14 @@ from decimal import Decimal
 from typing import Any
 
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
+from src.aml_workshop_simulator.domain.contract_versions import contract_version
 from src.aml_workshop_simulator.domain.round_policy import declared_params
 from src.aml_workshop_simulator.domain.rules import CardSpec, card_spec_from_row
-from src.aml_workshop_simulator.schemas.round_config import CONFIG_SCHEMA_VERSION
+from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
 
 def snapshot_specs(config: dict[str, Any]) -> dict[tuple[str, int], CardSpec]:
+    contract_version(config)
     result = {}
     for item in config.get("card_snapshots", []):
         data = deepcopy(item)
@@ -34,12 +36,11 @@ def freeze_game_config(
     )
 
     validate_game_config(cards, config)
-    result = deepcopy(config)
+    result = parse_game_config(config).dump()
     pairs = {(ref["code"], ref["version"]) for ref in config["operations"]}
     known = {(card.code, card.version): card_spec_from_row(card) for card in cards}
     if not pairs <= known.keys():
         raise ValueError("Cannot freeze round: a referenced card is missing")
-    result["schema_version"] = CONFIG_SCHEMA_VERSION
     for operation in result["operations"]:
         spec = known[(operation["code"], operation["version"])]
         operation["visible_params"] = list(declared_params(spec))

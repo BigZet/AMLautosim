@@ -11,10 +11,10 @@
 | `src/aml_workshop_simulator/ui/nicegui` | Единый UI участника и организатора, HTTP-клиент |
 | `config` | Каталог и игровые настройки JSON |
 | `migrations` | Начальная схема и Alembic |
-| `scripts` | Seed, валидация, баланс и transport smoke |
-| `tests` | Unit, API, компоненты NiceGUI и нагрузка |
-| `deploy` | Dockerfile |
-| `resources` | Отложенные примеры CatBoost, вне runtime |
+| `scripts` | Seed, валидация, баланс, transport smoke; отдельные команды офлайн-обучения и оценки |
+| `tests` | Unit, API, компоненты NiceGUI, нагрузка; `tests/ml` в отдельном ML-окружении |
+| `deploy` | Dockerfile приложения и отдельный Dockerfile.ml |
+| `resources` | Синтетический датасет, обученная модель и отчёты, вне runtime |
 
 Точки запуска: `src.aml_workshop_simulator.api.main:app` и
 `python -m src.aml_workshop_simulator.ui.nicegui.app`.
@@ -22,5 +22,7 @@ UI общается с API по HTTP и не обращается к БД или
 Маршруты FastAPI и страницы NiceGUI регистрируются декораторами.
 
 `domain/rules.py` — используемый фасад движка, в том числе для отложенного
-CatBoost-адаптера. Адаптер и генератор датасетов сохранены, но не включены в образ.
+исторического CatBoost-адаптера. Текущий офлайн-эксперимент использует общий
+extractor v2.6; его команды запускаются в отдельном ML-образе.
+[Протокол обучения](catboost-training.md).
 Неиспользуемые слои и второй UI не поддерживаются.

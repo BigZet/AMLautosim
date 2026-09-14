@@ -1,0 +1,112 @@
+{
+  "independent_test": false,
+  "sign_tolerance": 1,
+  "pairs": [
+    {
+      "kind": "party",
+      "expected": "increase",
+      "rubric": {
+        "before": 45.0,
+        "after": 77.8433
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 65.80719905186743
+      },
+      "predicted_delta": 20.210543970012772,
+      "rubric_delta": 32.8433,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "interval",
+      "expected": "decrease",
+      "rubric": {
+        "before": 45.0,
+        "after": 38.25
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 41.62777035922031
+      },
+      "predicted_delta": -3.9688847226343498,
+      "rubric_delta": -6.75,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "order",
+      "expected": "equal",
+      "rubric": {
+        "before": 45.0,
+        "after": 45.0
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 45.99986123660653
+      },
+      "predicted_delta": 0.4032061547518708,
+      "rubric_delta": 0.0,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "purchase",
+      "expected": "decrease",
+      "rubric": {
+        "before": 45.0,
+        "after": 44.95
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 45.035728481332455
+      },
+      "predicted_delta": -0.5609266005222011,
+      "rubric_delta": -0.04999999999999716,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "purchase_background",
+      "expected": "decrease",
+      "rubric": {
+        "before": 45.0,
+        "after": 44.1
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 44.99549286707388
+      },
+      "predicted_delta": -0.6011622147807785,
+      "rubric_delta": -0.8999999999999986,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "salary",
+      "expected": "decrease",
+      "rubric": {
+        "before": 45.0,
+        "after": 33.75
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 44.65771250512117
+      },
+      "predicted_delta": -0.9389425767334885,
+      "rubric_delta": -11.25,
+      "consistent_within_1_point": true
+    },
+    {
+      "kind": "source",
+      "expected": "equal",
+      "rubric": {
+        "before": 45.0,
+        "after": 45.0
+      },
+      "prediction": {
+        "before": 45.59665508185466,
+        "after": 45.59665508185466
+      },
+      "predicted_delta": 0.0,
+      "rubric_delta": 0.0,
+      "consistent_within_1_point": true
+    }
+  ],
+  "input_sha256": "ee175847ffaf6b39cf168e93ce92b6ea0a1dbf6d71c1166074c539ba48f4cea7"
+}

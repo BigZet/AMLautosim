@@ -50,6 +50,14 @@ class GameEditor:
         )
 
     def changed(self):
+        config = (self.state.get("round") or {}).get("game_config", {})
+        if config.get("schema_version") == 8:
+            from src.aml_workshop_simulator.domain.operation_timeline import (
+                canonical_intervals,
+            )
+
+            for step, interval in zip(self.steps, canonical_intervals(self.steps)):
+                step["interval_minutes"] = interval
         self.version += 1
         self.record["dirty"] = True
         self.error = None

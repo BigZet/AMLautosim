@@ -1,0 +1,674 @@
+[
+  {
+    "group": "52e8f51faec113fe",
+    "shape": "DCCDDCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "ac4a2d0a23e3c5e2",
+    "shape": "CDDCDDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "992e78923d378ad8",
+    "shape": "DCDCDDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "4cd09a0834bd241f",
+    "shape": "CCCDDDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "c8e2c8864a9b7789",
+    "shape": "CDCDDDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "95233485f8236199",
+    "shape": "CDDCCDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "728ea467ba0987b3",
+    "shape": "DCDCDCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "f79e6f9d54f18263",
+    "shape": "CCDCDDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "ed7bd75d3edcaed7",
+    "shape": "CDDDCDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "88c61c8416ca5663",
+    "shape": "DDCCCDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "d9587218a7ad693d",
+    "shape": "CDCDCDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "aa876b8f15a0bd11",
+    "shape": "DDCDCDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "8b9c38153b4dc2a3",
+    "shape": "DCDDCCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "6e7d747be5a9e47f",
+    "shape": "CCDDDCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "3e81723aea1bde7e",
+    "shape": "CDCDDCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "f4cd3eaf2fa1df47",
+    "shape": "DCDDCDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "1beb02b002357bb2",
+    "shape": "DDCCDCDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "b4e270b84ba5c669",
+    "shape": "DCDCCDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "deed26a51423a238",
+    "shape": "CCDDDDCD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "cc811cfbd70c83ab",
+    "shape": "DCCDCDDD",
+    "split": "train",
+    "debit_count": 5
+  },
+  {
+    "group": "51b158c8dfdb0cb9",
+    "shape": "CDDCDCDD",
+    "split": "validation",
+    "debit_count": 5
+  },
+  {
+    "group": "6d5bc401069d8782",
+    "shape": "CDDDCCDD",
+    "split": "validation",
+    "debit_count": 5
+  },
+  {
+    "group": "b44856a0f817b2a4",
+    "shape": "DDCCDDCD",
+    "split": "validation",
+    "debit_count": 5
+  },
+  {
+    "group": "3c36c7111ce89606",
+    "shape": "DDCDCCDD",
+    "split": "validation",
+    "debit_count": 5
+  },
+  {
+    "group": "662a38e3f54b5208",
+    "shape": "CCDDCDDD",
+    "split": "test",
+    "debit_count": 5
+  },
+  {
+    "group": "0b516c9ec106f12e",
+    "shape": "DCCCDDDD",
+    "split": "test",
+    "debit_count": 5
+  },
+  {
+    "group": "da6fae7824dc3d96",
+    "shape": "CDCCDDDD",
+    "split": "test",
+    "debit_count": 5
+  },
+  {
+    "group": "280e0e66c6198aee",
+    "shape": "DCCDDDCD",
+    "split": "test",
+    "debit_count": 5
+  },
+  {
+    "group": "2da2d0fb0a2eb017",
+    "shape": "CDCDDCDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "026aeb564524e662",
+    "shape": "CDDCDDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "044bc95944b43a21",
+    "shape": "CCDDDDDCD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "e8ed7cb07d0ab340",
+    "shape": "DDCCDDDCD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "3cfa28f1edffe781",
+    "shape": "DDCCCDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "bf131f5a2aa3851f",
+    "shape": "DDCDCDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "5ebc1216160bbd65",
+    "shape": "DCCCDDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "ed777012b0a29306",
+    "shape": "DCCDCDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "32cc8bd8f2fd7dfe",
+    "shape": "DDCDCCDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "c4e5e39329ab691b",
+    "shape": "DCDCDDDCD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "6e5911a0ccbcd003",
+    "shape": "CCDDDDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "89f119638f109b75",
+    "shape": "CDCDDDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "0504699c24bf537e",
+    "shape": "DDCDCDDCD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "a5ceba7ea2b4214a",
+    "shape": "DCDCCDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "7e59c7124d578369",
+    "shape": "CDDDCCDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "7fc9e3c61c927db0",
+    "shape": "DDCCDDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "810df74105909bb1",
+    "shape": "CCDDDCDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "8465ef5906e470fa",
+    "shape": "CCDDCDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "3ed9fd18591ed9bf",
+    "shape": "CCDCDDDDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "21feab44c09125f1",
+    "shape": "DCDCDDCDD",
+    "split": "train",
+    "debit_count": 6
+  },
+  {
+    "group": "b39a5a0f4e5caa99",
+    "shape": "CDDDCDDCD",
+    "split": "validation",
+    "debit_count": 6
+  },
+  {
+    "group": "9483a111e458a386",
+    "shape": "CDDCDDDCD",
+    "split": "validation",
+    "debit_count": 6
+  },
+  {
+    "group": "ed53e68f34f41c82",
+    "shape": "DCCDDDCDD",
+    "split": "validation",
+    "debit_count": 6
+  },
+  {
+    "group": "94f4026a912874f7",
+    "shape": "DCDCDCDDD",
+    "split": "validation",
+    "debit_count": 6
+  },
+  {
+    "group": "363031a60f7fa210",
+    "shape": "DCDDCDDCD",
+    "split": "test",
+    "debit_count": 6
+  },
+  {
+    "group": "847b4f3f5f29a5ed",
+    "shape": "DCDDCCDDD",
+    "split": "test",
+    "debit_count": 6
+  },
+  {
+    "group": "8123e7ec3842927b",
+    "shape": "CDCCDDDDD",
+    "split": "test",
+    "debit_count": 6
+  },
+  {
+    "group": "9307fba5d5595328",
+    "shape": "DCCDDDDCD",
+    "split": "test",
+    "debit_count": 6
+  },
+  {
+    "group": "38380a35e78a2fa6",
+    "shape": "DCDCDDCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "a431da9515c77421",
+    "shape": "CCCDDDDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "68806376f03757e3",
+    "shape": "DDDCCCDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "e4404e5b0a41c97e",
+    "shape": "CDDDCDCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "54ee0946b563dde5",
+    "shape": "DDDCDCDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "49dd6b4677b9cf85",
+    "shape": "CDDDDCCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "9171356573178c3b",
+    "shape": "CDCDDCDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "63d7de65fbd4103a",
+    "shape": "DCCDDCDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "42c2ff34ec7bcb9a",
+    "shape": "DCDDDCCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "29c6173954571085",
+    "shape": "DCCDDDDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "0da5be31863be607",
+    "shape": "CDCDDDDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "fa45a0a19d388df1",
+    "shape": "CDDDDCDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "8b76b38898abeac8",
+    "shape": "DCDDCDDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "2d6f2cb4d03a31ff",
+    "shape": "CDDDCDDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "3819b68100a71b08",
+    "shape": "DCCCDDDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "6eb483ec4caf8b12",
+    "shape": "DDCDDCCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "eb075c1045ef0cfc",
+    "shape": "DCCDDDCDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "99dc2229c1274475",
+    "shape": "CCDDCDDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "ad05788df3979509",
+    "shape": "CDDCDDDCDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "e0d263f80786bfee",
+    "shape": "CDCDCDDDDD",
+    "split": "train",
+    "debit_count": 7
+  },
+  {
+    "group": "a0bed294e7a9d541",
+    "shape": "DDDCCDDCDD",
+    "split": "validation",
+    "debit_count": 7
+  },
+  {
+    "group": "db0cb1cce4f413db",
+    "shape": "DDCDCDCDDD",
+    "split": "validation",
+    "debit_count": 7
+  },
+  {
+    "group": "f68846ba70376edb",
+    "shape": "DDCCDDDCDD",
+    "split": "validation",
+    "debit_count": 7
+  },
+  {
+    "group": "6611bd5a5ab138b0",
+    "shape": "DDCDDCDCDD",
+    "split": "validation",
+    "debit_count": 7
+  },
+  {
+    "group": "9f4539d04e6ff91d",
+    "shape": "CCDDDDCDDD",
+    "split": "test",
+    "debit_count": 7
+  },
+  {
+    "group": "0d7c2090a982c6d6",
+    "shape": "CCDDDCDDDD",
+    "split": "test",
+    "debit_count": 7
+  },
+  {
+    "group": "c2c926dbb38f4365",
+    "shape": "DDCCDCDDDD",
+    "split": "test",
+    "debit_count": 7
+  },
+  {
+    "group": "1b13c6802baa28ed",
+    "shape": "DCDCDDDCDD",
+    "split": "test",
+    "debit_count": 7
+  },
+  {
+    "group": "4c066f2430b7b3d3",
+    "shape": "DDCDDCDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "04c2ca7d9ef2c2bb",
+    "shape": "DDDCCDCDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "64c88b2689842614",
+    "shape": "DCCDDDDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "f42413565a45db93",
+    "shape": "CDDCDDDCDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "0225889b0ed92c5b",
+    "shape": "CCCDDDDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "43fcb543a2f7a4fe",
+    "shape": "CCDDDDDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "ac58bd993197d8ed",
+    "shape": "DDCDDCCDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "192b41a95e05ab18",
+    "shape": "DDDCCCDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "cf50b266e62599df",
+    "shape": "DDCCCDDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "de79eeec40840930",
+    "shape": "CDCCDDDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "641e1a13678e3be5",
+    "shape": "DDCCDDDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "9ebd9faec897ff04",
+    "shape": "DCDCDCDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "93333e794083bd9b",
+    "shape": "DDCDCDDCDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "e841470c76572a4d",
+    "shape": "CDDDCDDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "6d7d6d932ca3dfe9",
+    "shape": "DCDCDDCDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "6fe0aa545e1d5b35",
+    "shape": "DCCDDCDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "41bc3466a3673a27",
+    "shape": "DCDCDDDCDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "2f4de44fc679373a",
+    "shape": "CDDDCCDDDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "18046f4d419fe296",
+    "shape": "DDDCDCDCDDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "7e423ab3d7d22303",
+    "shape": "CDDDDCDDCDD",
+    "split": "train",
+    "debit_count": 8
+  },
+  {
+    "group": "e3076265c051f38f",
+    "shape": "DCDCDDDDCDD",
+    "split": "validation",
+    "debit_count": 8
+  },
+  {
+    "group": "c86e1c76c619dcea",
+    "shape": "CDDDDCCDDDD",
+    "split": "validation",
+    "debit_count": 8
+  },
+  {
+    "group": "5c5f7522bc486de0",
+    "shape": "CDDCDDCDDDD",
+    "split": "validation",
+    "debit_count": 8
+  },
+  {
+    "group": "8858eaf31aee0e4b",
+    "shape": "DDDCDDCCDDD",
+    "split": "validation",
+    "debit_count": 8
+  },
+  {
+    "group": "87f3e49ee877fc2f",
+    "shape": "CDDDCDCDDDD",
+    "split": "test",
+    "debit_count": 8
+  },
+  {
+    "group": "a0bc2f10afc46aa1",
+    "shape": "CDCDDDDDCDD",
+    "split": "test",
+    "debit_count": 8
+  },
+  {
+    "group": "f27a232d4ac190e5",
+    "shape": "DCDDCDCDDDD",
+    "split": "test",
+    "debit_count": 8
+  },
+  {
+    "group": "e5053f666b4a7041",
+    "shape": "DDCDCDDDCDD",
+    "split": "test",
+    "debit_count": 8
+  }
+]

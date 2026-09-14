@@ -1,0 +1,3 @@
+# Isolated offline training and its tests. Does not change runtime requirements.
+-r requirements-dev.txt
+catboost==1.2.10

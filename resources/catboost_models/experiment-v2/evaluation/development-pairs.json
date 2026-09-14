@@ -1,0 +1,44 @@
+[
+  {
+    "kind": "party",
+    "expected_delta": 32.8433,
+    "predicted_delta": 33.09193314520097,
+    "delta_error": 0.24863314520096935
+  },
+  {
+    "kind": "interval",
+    "expected_delta": -6.75,
+    "predicted_delta": -5.724184155848846,
+    "delta_error": 1.025815844151154
+  },
+  {
+    "kind": "order",
+    "expected_delta": 0.0,
+    "predicted_delta": -0.1990858756172713,
+    "delta_error": -0.1990858756172713
+  },
+  {
+    "kind": "purchase",
+    "expected_delta": -0.04999999999999716,
+    "predicted_delta": -0.050815488727977254,
+    "delta_error": -0.000815488727980096
+  },
+  {
+    "kind": "purchase_background",
+    "expected_delta": -0.8999999999999986,
+    "predicted_delta": -0.8828368176538035,
+    "delta_error": 0.01716318234619507
+  },
+  {
+    "kind": "salary",
+    "expected_delta": -11.25,
+    "predicted_delta": -11.758321839539576,
+    "delta_error": -0.5083218395395761
+  },
+  {
+    "kind": "source",
+    "expected_delta": 0.0,
+    "predicted_delta": 0.04390776808564567,
+    "delta_error": 0.04390776808564567
+  }
+]

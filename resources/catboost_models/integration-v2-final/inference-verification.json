@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "test_rows": 4413,
+  "max_prediction_difference": 1.4210854715202004e-14,
+  "renamed_id_checks": 12,
+  "invalid_inputs_rejected": {
+    "missing_feature": true,
+    "nonfinite": true,
+    "invalid_chain": true,
+    "legacy_v7": true,
+    "changed_balance": true,
+    "changed_model": true
+  },
+  "latency_ms": {
+    "median": 3.1902499904390424,
+    "p95": 3.7710335920564826,
+    "max": 11.593041010200977
+  },
+  "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b"
+}

@@ -4,12 +4,14 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import NotFound
+from src.aml_workshop_simulator.domain.contract_versions import is_playable_contract
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.schemas.leaderboard import BaseResultOut, ResultOut
 from src.aml_workshop_simulator.schemas.participant_state import ParticipantStateOut
 from src.aml_workshop_simulator.schemas.rounds import RoundPublicOut
+from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 from src.aml_workshop_simulator.services.leaderboard_service import ranked_scenarios
 from src.aml_workshop_simulator.services.projections import scenario_out
 
@@ -19,9 +21,10 @@ def public_round_out(row: Round) -> RoundPublicOut:
         **{
             key: getattr(row, key)
             for key in RoundPublicOut.model_fields
-            if key != "config_version"
+            if key not in {"config_version", "game_config"}
         },
         config_version=row.game_config["config_version"],
+        game_config=parse_game_config(row.game_config, stored=True),
     )
 
 
@@ -86,8 +89,11 @@ async def read(
         round=public_round_out(row),
         scenario=own,
         result=result,
-        can_edit=row.status == "active"
+        can_edit=is_playable_contract(row.game_config)
+        and row.status == "active"
         and (scenario is None or scenario.status == "editing"),
-        can_submit=own.can_submit if own is not None else False,
+        can_submit=(own.can_submit and is_playable_contract(row.game_config))
+        if own is not None
+        else False,
         can_view_leaderboard=row.status == "completed",
     )

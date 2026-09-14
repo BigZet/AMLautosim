@@ -1,6 +1,6 @@
 """HTTP commands for the current game."""
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
@@ -14,7 +14,14 @@ from src.aml_workshop_simulator.schemas.admin import (
     ScoringSummaryOut,
 )
 from src.aml_workshop_simulator.schemas.editor_metadata import EditorMetadataOut
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+from src.aml_workshop_simulator.schemas.round_config import (
+    RoundConfigInput,
+    parse_game_config,
+)
+from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_new_round_allowed,
+)
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
 from src.aml_workshop_simulator.services import admin_rounds as operations
 from src.aml_workshop_simulator.services import scoring_run
@@ -24,14 +31,21 @@ from src.aml_workshop_simulator.services.round_configuration import round_out
 router = APIRouter(dependencies=[Depends(get_current_admin)])
 
 
-@router.get("/game-config/default", response_model=GameConfigIn)
-async def default_game_config() -> dict:
-    return GameConfigIn.model_validate(base_game_config()).dump()
+@router.get("/game-config/default", response_model=RoundConfigInput)
+async def default_game_config(
+    schema_version: int = Query(default=8, ge=8, le=8),
+) -> dict:
+    value = expanded_game_config() if schema_version == 8 else base_game_config()
+    require_new_round_allowed(value)
+    return parse_game_config(value).dump()
 
 
 @router.get("/action-cards", response_model=list[ActionCardOut])
-async def action_cards(db: AsyncSession = Depends(get_db)):
-    return await catalog_cards(db)
+async def action_cards(
+    schema_version: int = Query(default=8, ge=8, le=8),
+    db: AsyncSession = Depends(get_db),
+):
+    return await catalog_cards(db, schema_version=schema_version)
 
 
 @router.get("/rounds/current", response_model=RoundAdminOut | None)
@@ -99,11 +113,12 @@ async def score_round(
 async def restart_round(
     round_id: int,
     request: Request,
+    schema_version: int = Query(default=8, ge=8, le=8),
     principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
     return await operations.restart(
-        db, round_id, principal.user_id, request.state.request_id
+        db, round_id, principal.user_id, request.state.request_id, schema_version
     )
 
 

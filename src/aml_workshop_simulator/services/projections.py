@@ -40,7 +40,10 @@ def visible_param_out(spec: CardSpec, param: str) -> VisibleParamOut | None:
 
 
 def card_out(
-    row: ActionCard | CardSpec, operation: OperationPolicy | None = None
+    row: ActionCard | CardSpec,
+    operation: OperationPolicy | None = None,
+    *,
+    schema_version: int = 7,
 ) -> ActionCardOut:
     spec = row if isinstance(row, CardSpec) else card_spec_from_row(row)
     if operation is not None:
@@ -53,6 +56,17 @@ def card_out(
         for rendered in (visible_param_out(spec, param) for param in params)
         if rendered is not None
     ]
+    fields = list(spec.fields)
+    context_fields = list(spec.context_fields)
+    if schema_version == 8:
+        fields = [f for f in fields if f["key"] != "sender_relationship"]
+        context_fields = []
+        visible = [
+            p
+            for p in visible
+            if p.namespace == "channel"
+            or (p.namespace == "action" and p.key != "sender_relationship")
+        ]
     return ActionCardOut(
         id=spec.id,
         code=spec.code,
@@ -74,8 +88,8 @@ def card_out(
         quota_category=spec.quota_category,
         channels=list(spec.channels),
         channel_labels={item: channel_label(item) for item in spec.channels},
-        fields=[dict(item) for item in spec.fields],
-        context_fields=[dict(item) for item in spec.context_fields],
+        fields=[dict(item) for item in fields],
+        context_fields=[dict(item) for item in context_fields],
         visible_params=visible,
     )
 

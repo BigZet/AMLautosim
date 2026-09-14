@@ -1,0 +1,105 @@
+{
+  "status": "changes_requested",
+  "accepted": 4,
+  "revisions": 8,
+  "cases": [
+    {
+      "id": "D01770",
+      "decision": "revise",
+      "proposed": 18.8175,
+      "reviewed": 43.8175,
+      "delta": 25.0,
+      "reason": "Высокая транзакционная активность покупки не обеляют так сильно"
+    },
+    {
+      "id": "D00379",
+      "decision": "revise",
+      "proposed": 38.4444,
+      "reviewed": 48.4444,
+      "delta": 10.0,
+      "reason": "Высокая транзакционная активность"
+    },
+    {
+      "id": "D00544",
+      "decision": "revise",
+      "proposed": 46.3695,
+      "reviewed": 56.3695,
+      "delta": 10.0,
+      "reason": "высокая транзакционная активность особенно на контрагента с огр сведениями"
+    },
+    {
+      "id": "D01109",
+      "decision": "accept",
+      "proposed": 87.4536,
+      "reviewed": 87.4536,
+      "delta": 0.0,
+      "reason": "Предложенная оценка принята пользователем."
+    },
+    {
+      "id": "D00624",
+      "decision": "revise",
+      "proposed": 49.9974,
+      "reviewed": 59.9974,
+      "delta": 10.0,
+      "reason": "высокая транз активность"
+    },
+    {
+      "id": "D00443",
+      "decision": "accept",
+      "proposed": 49.9806,
+      "reviewed": 49.9806,
+      "delta": 0.0,
+      "reason": "Предложенная оценка принята пользователем."
+    },
+    {
+      "id": "D01030",
+      "decision": "revise",
+      "proposed": 49.9625,
+      "reviewed": 59.9625,
+      "delta": 10.0,
+      "reason": "высокая транз активность"
+    },
+    {
+      "id": "D01621",
+      "decision": "revise",
+      "proposed": 49.9602,
+      "reviewed": 45.9602,
+      "delta": -4.0,
+      "reason": "зарплата снизила риск"
+    },
+    {
+      "id": "D00228",
+      "decision": "revise",
+      "proposed": 84.9296,
+      "reviewed": 89.9296,
+      "delta": 5.0,
+      "reason": "высокая транз активность с контрагентов без сведений"
+    },
+    {
+      "id": "D00320",
+      "decision": "revise",
+      "proposed": 81.8889,
+      "reviewed": 88.8889,
+      "delta": 7.0,
+      "reason": "высокая транз активность"
+    },
+    {
+      "id": "D01995",
+      "decision": "accept",
+      "proposed": 85.3812,
+      "reviewed": 85.3812,
+      "delta": 0.0,
+      "reason": "Предложенная оценка принята пользователем."
+    },
+    {
+      "id": "D01681",
+      "decision": "accept",
+      "proposed": 83.8032,
+      "reviewed": 83.8032,
+      "delta": 0.0,
+      "reason": "Предложенная оценка принята пользователем."
+    }
+  ],
+  "source_sha256": "bbf9a2ceff2899bb5c3928a14d8c22d9ce4ab54e5065747dbf26096ef8b4ef87",
+  "imported_at": "2026-09-14T00:11:52.129836+00:00"
+}

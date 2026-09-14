@@ -6,8 +6,16 @@ from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
 from uuid import UUID
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_serializer
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_serializer,
+    model_serializer,
+    field_validator,
+)
 
 from src.aml_workshop_simulator.core.enums import ScenarioStatus
 from src.aml_workshop_simulator.core.game_config import LIMITS
@@ -92,6 +100,35 @@ class StoredStep(ScenarioStepIn):
     context: StoredContext
 
 
+class ExpandedOperationContext(BaseModel):
+    model_config = STRICT
+    channel: Channel | None = None
+
+
+class ExpandedScenarioStepIn(ScenarioStepIn):
+    """V8 input: identity references, never participant-supplied party properties."""
+
+    context: ExpandedOperationContext = Field(default_factory=ExpandedOperationContext)
+    sender_id: str | None = Field(default=None, min_length=1, max_length=80)
+    recipient_id: str | None = Field(default=None, min_length=1, max_length=80)
+    interval_minutes: Literal[1, 10, 60, 1440] | None = None
+
+    @field_validator("interval_minutes", mode="before")
+    @classmethod
+    def strict_interval(cls, value):
+        if value is not None and type(value) is not int:
+            raise ValueError("Интервал задаётся целым числом минут")
+        return value
+
+
+ScenarioStepInput = Annotated[
+    ScenarioStepIn | ExpandedScenarioStepIn, Field(union_mode="left_to_right")
+]
+ScenarioStepStored = Annotated[
+    StoredStep | ExpandedScenarioStepIn, Field(union_mode="left_to_right")
+]
+
+
 class ScenarioPutIn(BaseModel):
     """Autosave the current editable scenario; revision protects against stale writes."""
 
@@ -99,7 +136,7 @@ class ScenarioPutIn(BaseModel):
 
     expected_revision: int = Field(ge=0)
     client_mutation_id: UUID
-    steps: list[ScenarioStepIn] = Field(
+    steps: list[ScenarioStepInput] = Field(
         default_factory=list, max_length=LIMITS["max_actions"]
     )
 
@@ -109,7 +146,7 @@ class ScenarioPreviewIn(BaseModel):
 
     model_config = STRICT
 
-    steps: list[ScenarioStepIn] = Field(
+    steps: list[ScenarioStepInput] = Field(
         default_factory=list, max_length=LIMITS["max_actions"]
     )
 
@@ -117,7 +154,7 @@ class ScenarioPreviewIn(BaseModel):
 class ScenarioSubmitIn(ScenarioPutIn):
     """Validate and submit the complete chain without a preceding autosave."""
 
-    steps: list[ScenarioStepIn] = Field(max_length=LIMITS["max_actions"])
+    steps: list[ScenarioStepInput] = Field(max_length=LIMITS["max_actions"])
 
 
 class ScenarioOut(BaseModel):
@@ -128,7 +165,7 @@ class ScenarioOut(BaseModel):
     participant_id: int
     status: ScenarioStatus
     revision: int
-    steps: list[StoredStep] = Field(default_factory=list)
+    steps: list[ScenarioStepStored] = Field(default_factory=list)
     resources: ResourceSnapshotOut
     updated_at: datetime
     submitted_at: datetime | None = None

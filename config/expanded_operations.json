@@ -1,0 +1,15 @@
+{
+  "schema_version": 4,
+  "cards": [
+    {
+      "code": "purchase", "version": 1,
+      "title": "Оплатить товары или услуги",
+      "description": "Покупка у торговой организации: 1 000–20 000 ₽, до трёх покупок и не более 30 000 ₽ суммарно. Расходует ресурсы, не засчитывается в цель.",
+      "category": "Покупка", "flow": "debit", "risk_weight": "0.00",
+      "energy_cost": 1, "time_cost": 1, "fee_rate": "0.000000",
+      "min_amount": "1000.00", "max_amount": "20000.00", "max_occurrences": 3,
+      "requires_card_code": null, "quota_category": null,
+      "channels": [], "default_visible_params": []
+    }
+  ]
+}

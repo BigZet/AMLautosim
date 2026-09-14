@@ -1,0 +1,535 @@
+{
+  "ready_for_integration": true,
+  "model_version": "aml-catboost-behavior-v2",
+  "splits": {
+    "train": {
+      "raw": {
+        "n": 17521,
+        "mae": 0.11588943247413613,
+        "rmse": 0.17792080675842434,
+        "median_abs_error": 0.07225875338930621,
+        "p90_abs_error": 0.26941397716100823,
+        "bias_prediction_minus_target": 0.004484058450557324,
+        "high_n": 1897,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "clipped": {
+        "n": 17521,
+        "mae": 0.11553476488958647,
+        "rmse": 0.17731952236396809,
+        "median_abs_error": 0.07206385638826873,
+        "p90_abs_error": 0.2688842133432203,
+        "bias_prediction_minus_target": 0.004129390866007663,
+        "high_n": 1897,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "income": {
+        "absent": {
+          "n": 14449,
+          "mae": 0.10704022539064632,
+          "rmse": 0.16762570418104483,
+          "median_abs_error": 0.06518520384449289,
+          "p90_abs_error": 0.24976442942820265,
+          "bias_prediction_minus_target": -0.00039315682611549613,
+          "high_n": 1755,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "payroll_registry": {
+          "n": 1024,
+          "mae": 0.13924023917535747,
+          "rmse": 0.19336499727164103,
+          "median_abs_error": 0.10779095156423679,
+          "p90_abs_error": 0.30374960366565573,
+          "bias_prediction_minus_target": 0.054628974070730946,
+          "high_n": 6,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "service_contract": {
+          "n": 1024,
+          "mae": 0.15913791079816997,
+          "rmse": 0.2255510623401236,
+          "median_abs_error": 0.12060260657336386,
+          "p90_abs_error": 0.34727681855896303,
+          "bias_prediction_minus_target": 0.004836004805467885,
+          "high_n": 10,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "no_reference": {
+          "n": 1024,
+          "mae": 0.1680870833868201,
+          "rmse": 0.23075103690281842,
+          "median_abs_error": 0.12395663341755991,
+          "p90_abs_error": 0.36207924935145497,
+          "bias_prediction_minus_target": 0.016737931615854955,
+          "high_n": 126,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "cash": {
+        "False": {
+          "n": 1202,
+          "mae": 0.1579627074798175,
+          "rmse": 0.21826070102274123,
+          "median_abs_error": 0.11416975251613692,
+          "p90_abs_error": 0.34848890569736213,
+          "bias_prediction_minus_target": -0.007043146507139558,
+          "high_n": 295,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "True": {
+          "n": 16319,
+          "mae": 0.11240967223725129,
+          "rmse": 0.17392328213508498,
+          "median_abs_error": 0.06981025038575694,
+          "p90_abs_error": 0.261270527963464,
+          "bias_prediction_minus_target": 0.004952320575090509,
+          "high_n": 1602,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "pairs": {
+        "interval": {
+          "n": 577,
+          "delta_mae": 0.06535281389241045,
+          "delta_p90": 0.18708380167378774,
+          "strong_n": 150,
+          "direction_rate": 1.0
+        },
+        "no_reference": {
+          "n": 1024,
+          "delta_mae": 0.16682949523730317,
+          "delta_p90": 0.36266555874766127,
+          "strong_n": 482,
+          "direction_rate": 1.0
+        },
+        "order": {
+          "n": 578,
+          "delta_mae": 0.05277773861695409,
+          "delta_p90": 0.17187781686619877,
+          "strong_n": 19,
+          "direction_rate": 1.0
+        },
+        "party": {
+          "n": 6144,
+          "delta_mae": 0.17182820321614012,
+          "delta_p90": 0.4082244310903846,
+          "strong_n": 6141,
+          "direction_rate": 1.0
+        },
+        "payroll_registry": {
+          "n": 1024,
+          "delta_mae": 0.20450791401797452,
+          "delta_p90": 0.4258188641306667,
+          "strong_n": 1024,
+          "direction_rate": 1.0
+        },
+        "purchase": {
+          "n": 512,
+          "delta_mae": 0.04047755916883977,
+          "delta_p90": 0.08893810083995889,
+          "strong_n": 0,
+          "direction_rate": null
+        },
+        "service_contract": {
+          "n": 1024,
+          "delta_mae": 0.20796608359399377,
+          "delta_p90": 0.44699599956802283,
+          "strong_n": 1024,
+          "direction_rate": 1.0
+        },
+        "source": {
+          "n": 494,
+          "delta_mae": 0.015721567800088963,
+          "delta_p90": 0.0356669598515424,
+          "strong_n": 0,
+          "direction_rate": null
+        }
+      },
+      "checks": {
+        "overall_mae": true,
+        "beats_median": true,
+        "high_coverage": true,
+        "high_under_rate": true,
+        "high_below_50": true,
+        "income_coverage": true,
+        "cash_coverage": true,
+        "income_accuracy": true,
+        "cash_accuracy": true,
+        "pair_accuracy": true,
+        "pair_direction": true
+      },
+      "passed": true,
+      "objective": 0.12486460050676601,
+      "median_baseline_mae": 12.881534073397637
+    },
+    "validation": {
+      "raw": {
+        "n": 4381,
+        "mae": 0.21408755571194796,
+        "rmse": 0.37650951634653484,
+        "median_abs_error": 0.10296109748944815,
+        "p90_abs_error": 0.562883193261591,
+        "bias_prediction_minus_target": 0.02028166913272216,
+        "high_n": 528,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "clipped": {
+        "n": 4381,
+        "mae": 0.21148546391385578,
+        "rmse": 0.372788581995345,
+        "median_abs_error": 0.10180310181300456,
+        "p90_abs_error": 0.5574475638965666,
+        "bias_prediction_minus_target": 0.01767957733462998,
+        "high_n": 528,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "income": {
+        "absent": {
+          "n": 3613,
+          "mae": 0.1883318195121192,
+          "rmse": 0.34167909463157564,
+          "median_abs_error": 0.08848383484422584,
+          "p90_abs_error": 0.48418265017191975,
+          "bias_prediction_minus_target": -0.0032991289610192743,
+          "high_n": 482,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "payroll_registry": {
+          "n": 256,
+          "mae": 0.291835999684944,
+          "rmse": 0.4592785232781751,
+          "median_abs_error": 0.16296317840919983,
+          "p90_abs_error": 0.6960039654294441,
+          "bias_prediction_minus_target": 0.14108319628115934,
+          "high_n": 4,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "service_contract": {
+          "n": 256,
+          "mae": 0.30327765331429996,
+          "rmse": 0.46960918943658037,
+          "median_abs_error": 0.19211778375833077,
+          "p90_abs_error": 0.6642653558624616,
+          "bias_prediction_minus_target": 0.09257457323076523,
+          "high_n": 8,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "no_reference": {
+          "n": 256,
+          "mae": 0.36611663414651996,
+          "rmse": 0.5469336550652354,
+          "median_abs_error": 0.22304741973449893,
+          "p90_abs_error": 0.8696877876827713,
+          "bias_prediction_minus_target": 0.115459344703609,
+          "high_n": 34,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "cash": {
+        "False": {
+          "n": 461,
+          "mae": 0.3896140223720134,
+          "rmse": 0.6296769087128852,
+          "median_abs_error": 0.18734728446238336,
+          "p90_abs_error": 1.0657909235113436,
+          "bias_prediction_minus_target": 0.04861843238854699,
+          "high_n": 123,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "True": {
+          "n": 3920,
+          "mae": 0.19053718191150612,
+          "rmse": 0.3296759794853615,
+          "median_abs_error": 0.09502718628158036,
+          "p90_abs_error": 0.48663004398469234,
+          "bias_prediction_minus_target": 0.014041104839768824,
+          "high_n": 405,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "pairs": {
+        "interval": {
+          "n": 154,
+          "delta_mae": 0.07882281024557175,
+          "delta_p90": 0.20325827020984694,
+          "strong_n": 35,
+          "direction_rate": 1.0
+        },
+        "no_reference": {
+          "n": 256,
+          "delta_mae": 0.27017279402768,
+          "delta_p90": 0.6497627965055344,
+          "strong_n": 134,
+          "direction_rate": 1.0
+        },
+        "order": {
+          "n": 138,
+          "delta_mae": 0.07333720197566013,
+          "delta_p90": 0.19054130377504133,
+          "strong_n": 4,
+          "direction_rate": 1.0
+        },
+        "party": {
+          "n": 1536,
+          "delta_mae": 0.2828179759158325,
+          "delta_p90": 0.6814673624333594,
+          "strong_n": 1536,
+          "direction_rate": 1.0
+        },
+        "payroll_registry": {
+          "n": 256,
+          "delta_mae": 0.2774380381715816,
+          "delta_p90": 0.6580972462362809,
+          "strong_n": 256,
+          "direction_rate": 1.0
+        },
+        "purchase": {
+          "n": 129,
+          "delta_mae": 0.04886573812371559,
+          "delta_p90": 0.1217808397203399,
+          "strong_n": 0,
+          "direction_rate": null
+        },
+        "service_contract": {
+          "n": 256,
+          "delta_mae": 0.2784536529538584,
+          "delta_p90": 0.6112709574054271,
+          "strong_n": 256,
+          "direction_rate": 1.0
+        },
+        "source": {
+          "n": 120,
+          "delta_mae": 0.016059475748890863,
+          "delta_p90": 0.047451480888042165,
+          "strong_n": 0,
+          "direction_rate": null
+        }
+      },
+      "checks": {
+        "overall_mae": true,
+        "beats_median": true,
+        "high_coverage": true,
+        "high_under_rate": true,
+        "high_below_50": true,
+        "income_coverage": true,
+        "cash_coverage": true,
+        "income_accuracy": true,
+        "cash_accuracy": true,
+        "pair_accuracy": true,
+        "pair_direction": true
+      },
+      "passed": true,
+      "objective": 0.22154065049122515,
+      "median_baseline_mae": 13.089174572015523
+    },
+    "test": {
+      "raw": {
+        "n": 4413,
+        "mae": 0.20353494282945286,
+        "rmse": 0.3566653218632124,
+        "median_abs_error": 0.09773115288355427,
+        "p90_abs_error": 0.5180015850812539,
+        "bias_prediction_minus_target": 0.012718736277404857,
+        "high_n": 517,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "clipped": {
+        "n": 4413,
+        "mae": 0.20318155139435284,
+        "rmse": 0.3563708406429332,
+        "median_abs_error": 0.09747015362954414,
+        "p90_abs_error": 0.5174278565335784,
+        "bias_prediction_minus_target": 0.01236534484230482,
+        "high_n": 517,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "income": {
+        "absent": {
+          "n": 3645,
+          "mae": 0.18292137836544176,
+          "rmse": 0.3369345824430548,
+          "median_abs_error": 0.08507762582982537,
+          "p90_abs_error": 0.4644009351933888,
+          "bias_prediction_minus_target": 0.004276995861178953,
+          "high_n": 483,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "payroll_registry": {
+          "n": 256,
+          "mae": 0.2774454234581246,
+          "rmse": 0.39523146023690736,
+          "median_abs_error": 0.1865194675130155,
+          "p90_abs_error": 0.6690168110765757,
+          "bias_prediction_minus_target": 0.08822186053052725,
+          "high_n": 0,
+          "high_under_15_count": 0,
+          "high_under_15_rate": null,
+          "high_below_50_count": 0
+        },
+        "service_contract": {
+          "n": 256,
+          "mae": 0.2864328442366296,
+          "rmse": 0.403842758982097,
+          "median_abs_error": 0.1956139521737228,
+          "p90_abs_error": 0.6403630521886612,
+          "bias_prediction_minus_target": 0.03555198975707344,
+          "high_n": 0,
+          "high_under_15_count": 0,
+          "high_under_15_rate": null,
+          "high_below_50_count": 0
+        },
+        "no_reference": {
+          "n": 256,
+          "mae": 0.33413642824760414,
+          "rmse": 0.5035555923667805,
+          "median_abs_error": 0.19989322945693289,
+          "p90_abs_error": 0.7987551957203465,
+          "bias_prediction_minus_target": 0.0284863718807348,
+          "high_n": 34,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "cash": {
+        "False": {
+          "n": 372,
+          "mae": 0.3683621779239351,
+          "rmse": 0.5773184070938046,
+          "median_abs_error": 0.18210682891589158,
+          "p90_abs_error": 1.0823179763601747,
+          "bias_prediction_minus_target": 0.0019432163167103858,
+          "high_n": 91,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        },
+        "True": {
+          "n": 4041,
+          "mae": 0.18797561398554197,
+          "rmse": 0.32864763912036027,
+          "median_abs_error": 0.09197097480107175,
+          "p90_abs_error": 0.4824693649259473,
+          "bias_prediction_minus_target": 0.013324768700637195,
+          "high_n": 426,
+          "high_under_15_count": 0,
+          "high_under_15_rate": 0.0,
+          "high_below_50_count": 0
+        }
+      },
+      "pairs": {
+        "interval": {
+          "n": 142,
+          "delta_mae": 0.08789994905650944,
+          "delta_p90": 0.22523010195949097,
+          "strong_n": 28,
+          "direction_rate": 1.0
+        },
+        "no_reference": {
+          "n": 256,
+          "delta_mae": 0.2149216909062371,
+          "delta_p90": 0.48384666890088823,
+          "strong_n": 108,
+          "direction_rate": 1.0
+        },
+        "order": {
+          "n": 161,
+          "delta_mae": 0.09270451571015301,
+          "delta_p90": 0.3180922137630873,
+          "strong_n": 6,
+          "direction_rate": 1.0
+        },
+        "party": {
+          "n": 1536,
+          "delta_mae": 0.26786344191382616,
+          "delta_p90": 0.6797856301106435,
+          "strong_n": 1536,
+          "direction_rate": 1.0
+        },
+        "payroll_registry": {
+          "n": 256,
+          "delta_mae": 0.28799151896872144,
+          "delta_p90": 0.6490311226509924,
+          "strong_n": 256,
+          "direction_rate": 1.0
+        },
+        "purchase": {
+          "n": 139,
+          "delta_mae": 0.04343736109412062,
+          "delta_p90": 0.09425878271827631,
+          "strong_n": 0,
+          "direction_rate": null
+        },
+        "service_contract": {
+          "n": 256,
+          "delta_mae": 0.277638596942652,
+          "delta_p90": 0.6039848376567889,
+          "strong_n": 256,
+          "direction_rate": 1.0
+        },
+        "source": {
+          "n": 131,
+          "delta_mae": 0.022375549639785327,
+          "delta_p90": 0.03130213061662346,
+          "strong_n": 0,
+          "direction_rate": null
+        }
+      },
+      "checks": {
+        "overall_mae": true,
+        "beats_median": true,
+        "high_coverage": true,
+        "high_under_rate": true,
+        "high_below_50": true,
+        "income_coverage": true,
+        "cash_coverage": true,
+        "income_accuracy": true,
+        "cash_accuracy": true,
+        "pair_accuracy": true,
+        "pair_direction": true
+      },
+      "passed": true,
+      "objective": 0.2117565493334345,
+      "median_baseline_mae": 13.175977498300476
+    }
+  },
+  "fit_called": false
+}

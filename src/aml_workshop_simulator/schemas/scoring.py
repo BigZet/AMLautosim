@@ -1,33 +1,36 @@
-"""Published contract of the temporary rule-based scorer."""
+"""Published CatBoost and SHAP result contract."""
 
-from pydantic import BaseModel, JsonValue
+from typing import Literal
+from pydantic import BaseModel, ConfigDict, JsonValue
 
 
-class ScoringFactorOut(BaseModel):
-    step_id: str | None
+class ShapFactorOut(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
     code: str
-    category: str
-    points: str
+    title: str
     description: str
-    evidence: dict[str, JsonValue]
-
-
-class RiskThresholdsOut(BaseModel):
-    review: str
-    suspicious: str
+    unit: str
+    value: JsonValue
+    display_value: str
+    contribution: float
 
 
 class ScoringExplanationOut(BaseModel):
-    schema_version: int
-    scoring_version: str
-    top_risk_factors: list[ScoringFactorOut]
-    protective_factors: list[ScoringFactorOut]
-    sequence_factors: list[ScoringFactorOut]
-    all_factors: list[ScoringFactorOut]
-    raw_score: str
+    model_config = ConfigDict(allow_inf_nan=False)
+    schema_version: Literal[3]
+    method: Literal["catboost-tree-shap"]
+    model: dict[str, JsonValue]
+    reference: str
+    base_value: float
+    raw_score: float
     normalized_score: str
-    step_count: int
-    thresholds: RiskThresholdsOut
+    clipping_adjustment: float
+    rounding_adjustment: float
+    additivity_error: float
+    factors: list[ShapFactorOut]
+    top_positive: list[str]
+    top_negative: list[str]
+    remaining_contribution: float
     disclaimer: str
 
 

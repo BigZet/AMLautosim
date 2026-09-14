@@ -1,0 +1,56 @@
+{
+  "version": "behavior-coverage-v3-1",
+  "extractor": "aml-observable-v3.0",
+  "rubric": "educational-risk-v2-final-1",
+  "count": 26315,
+  "coverage": {
+    "train": {
+      "rows": 17521,
+      "groups": 96,
+      "salary": {
+        "absent": 14449,
+        "payroll_registry": 1024,
+        "service_contract": 1024,
+        "no_reference": 1024
+      },
+      "cash": {
+        "1": 16319,
+        "0": 1202
+      }
+    },
+    "validation": {
+      "rows": 4381,
+      "groups": 24,
+      "salary": {
+        "absent": 3613,
+        "payroll_registry": 256,
+        "service_contract": 256,
+        "no_reference": 256
+      },
+      "cash": {
+        "0": 461,
+        "1": 3920
+      }
+    },
+    "test": {
+      "rows": 4413,
+      "groups": 24,
+      "salary": {
+        "absent": 3645,
+        "payroll_registry": 256,
+        "service_contract": 256,
+        "no_reference": 256
+      },
+      "cash": {
+        "0": 372,
+        "1": 4041
+      }
+    }
+  },
+  "rejections": {
+    "invalid_packet": 138874,
+    "duplicate_variant": 309
+  },
+  "old_release_overlap": 0,
+  "unique_observable_hashes": 26315
+}

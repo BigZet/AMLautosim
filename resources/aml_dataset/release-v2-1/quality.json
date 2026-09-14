@@ -1,0 +1,12 @@
+{
+  "count": 20000,
+  "status": "technical_checks_passed",
+  "joint_review_verified_by_this_validator": false,
+  "rejected_candidates": 11693,
+  "shortfall": 0,
+  "groups": 3,
+  "risk_range": [
+    32.4844,
+    91.19
+  ]
+}

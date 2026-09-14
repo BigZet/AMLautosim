@@ -9,7 +9,10 @@ from uuid import uuid4
 
 from nicegui import ui
 
+from .profile_history import profile_history_panel
 from .game import GameEditor
+from .operation_timeline import timeline_control, timeline_summary
+from .counterparties import editable_params, expanded, party_selector, party_readonly
 
 STATUS = {
     "none": "Игра ещё не создана",
@@ -25,10 +28,30 @@ def display_number(value):
     return f"{Decimal(str(value)):,f}".replace(",", " ").replace(".", ",")
 
 
+def credited_outflow(snapshot):
+    totals = snapshot["totals"]
+    return totals.get("target_outflow", totals["gross_outflow"])
+
+
+def turnover_summary(snapshot):
+    if "target_outflow" in snapshot["totals"]:
+        totals = snapshot["totals"]
+        ui.label(
+            f"Всего потрачено (без комиссий): {display_number(totals['gross_outflow'])} ₽"
+        ).classes("text-sm")
+        ui.label(
+            f"Засчитано в цель: {display_number(totals['target_outflow'])} ₽"
+        ).classes("text-sm")
+        ui.label(
+            f"Покупки: {display_number(totals['purchase_outflow'])} ₽ · Комиссии: {display_number(totals['fees'])} ₽"
+        ).classes("text-xs muted")
+
+
 def scenario_resources(snapshot):
     ui.label("Ваш сценарий").classes("text-lg font-semibold")
     objective = snapshot["objective"]
-    outflow = Decimal(snapshot["totals"]["gross_outflow"])
+    turnover_summary(snapshot)
+    outflow = Decimal(credited_outflow(snapshot))
     target = Decimal(objective["target_outflow"])
     with ui.column().classes("scenario-goal"):
         ui.label("Цель исходящих операций").classes("text-xs muted")
@@ -43,6 +66,7 @@ def scenario_resources(snapshot):
 
 def scenario_resource_tiles(snapshot):
     values = snapshot["resources_after"]
+    timeline_summary(snapshot)
     with ui.element("div").classes("resource-grid"):
         for label, key, icon in [
             ("Баланс, ₽", "balance", "account_balance_wallet"),
@@ -75,8 +99,7 @@ def submission_conditions(preview, *, current=True):
         ui.label("Условия отправки").classes("text-sm font-semibold")
         objective = snapshot["objective"]
         remaining = max(
-            Decimal(objective["target_outflow"])
-            - Decimal(snapshot["totals"]["gross_outflow"]),
+            Decimal(objective["target_outflow"]) - Decimal(credited_outflow(snapshot)),
             0,
         )
         condition(
@@ -145,6 +168,7 @@ def scoring_wait_panel(state, cards):
                 with ui.row().classes("items-center gap-1 text-xs muted"):
                     ui.icon("lock_outline").classes("text-sm")
                     ui.label("Только просмотр")
+            turnover_summary(snapshot)
             with ui.row().classes("submitted-target"):
                 ui.icon("check_circle").classes("text-base")
                 ui.label(
@@ -153,7 +177,7 @@ def scoring_wait_panel(state, cards):
                     else "Исходящие операции"
                 )
                 ui.label(
-                    f"{display_number(snapshot['totals']['gross_outflow'])} / {display_number(snapshot['objective']['target_outflow'])} ₽"
+                    f"{display_number(credited_outflow(snapshot))} / {display_number(snapshot['objective']['target_outflow'])} ₽"
                 ).classes("submitted-target-value")
             with ui.column().classes("resource-overview"):
                 scenario_resource_tiles(snapshot)
@@ -178,9 +202,13 @@ def scoring_wait_panel(state, cards):
                         ui.label(f"{display_number(step['amount'])} ₽").classes(
                             "submitted-operation-amount"
                         )
+                    config = state["round"].get("game_config")
+                    if config and expanded(config):
+                        party_readonly(config, step)
 
 
 def resources(snapshot):
+    turnover_summary(snapshot)
     with ui.row().classes("w-full gap-6"):
         values = snapshot["resources_after"]
         for label, value in [
@@ -193,7 +221,7 @@ def resources(snapshot):
                 ui.label(label).classes("text-xs muted")
                 ui.label(str(value)).classes("text-xl font-semibold")
     ui.label(
-        f"Исходящие операции: {snapshot['totals']['gross_outflow']} / цель {snapshot['objective']['target_outflow']}"
+        f"Исходящие операции: {credited_outflow(snapshot)} / цель {snapshot['objective']['target_outflow']}"
     )
     for limit in snapshot.get("limits", []):
         ui.label(f"{limit['label']}: {limit['used']} / {limit['limit']}").classes(
@@ -202,10 +230,23 @@ def resources(snapshot):
 
 
 def result_panel(
-    result, *, leaderboard=False, selected_tab="summary", on_tab_change=None
+    result,
+    *,
+    leaderboard=False,
+    selected_tab="summary",
+    on_tab_change=None,
+    explanation_expanded=False,
+    on_explanation_change=None,
+    round_config=None,
+    scenario_steps=None,
 ):
     scores = result["scores"]
     steps = result["resources"]["per_step"]
+    originals = {s["step_id"]: s for s in scenario_steps or []}
+    timing = {
+        s["step_id"]: s
+        for s in result["resources"].get("timeline", {}).get("steps", [])
+    }
     risk_labels = {
         "normal": ("Обычный риск", "Оценка ниже порога проверки."),
         "review": ("Требует проверки", "Оценка достигла порога проверки."),
@@ -274,6 +315,15 @@ def result_panel(
                                 ui.label(risk_title).classes(
                                     "risk-badge risk-" + scores["risk_label"]
                                 )
+                from src.aml_workshop_simulator.ui.nicegui.shap_result import (
+                    shap_result,
+                )
+
+                shap_result(
+                    result["explanation"],
+                    expanded=explanation_expanded,
+                    on_change=on_explanation_change,
+                )
             with ui.tab_panel("operations").classes("p-0"), ui.card().classes("panel"):
                 ui.label(f"Ваши операции · {len(steps)}").classes(
                     "text-lg font-semibold"
@@ -290,6 +340,17 @@ def result_panel(
                         ui.label(
                             f"Комиссия: {display_number(step['fee'])} ₽ · Энергия: {step['energy_cost']} · Время: {step['time_cost']}"
                         ).classes("text-xs muted")
+                        if (
+                            round_config
+                            and expanded(round_config)
+                            and step["step_id"] in originals
+                        ):
+                            party_readonly(round_config, originals[step["step_id"]])
+                        if step["step_id"] in timing:
+                            moment = timing[step["step_id"]]
+                            ui.label(
+                                f"Момент операции: {moment['occurred_at']} · ожидание {moment['waiting_time_cost']} времени"
+                            ).classes("text-xs muted")
                 ui.separator()
                 resources(result["resources"])
             if leaderboard:
@@ -312,10 +373,17 @@ def board_table(data, *, admin=False):
         ("risk_label", "Риск"),
     ]
     if admin:
-        columns += [("email", "Email"), ("is_blocked", "Заблокирован")]
+        columns += [
+            ("risk_score", "Риск, баллы"),
+            ("email", "Email"),
+            ("is_blocked", "Заблокирован"),
+        ]
     rows = deepcopy(data["rows"])
     for index, row in enumerate(rows):
         row["_row"] = index
+        if admin:
+            row["risk_score"] = display_number(row["risk_score"])
+            row["is_blocked"] = "Да" if row["is_blocked"] else "Нет"
         for score_key in ("game_score", "stealth_score", "resource_score"):
             row[score_key] = display_number(row[score_key])
         row["risk_label"] = {
@@ -352,6 +420,7 @@ class ParticipantScreen:
         self.render_key = None
         self.board_at = 0
         self.result_tab = "summary"
+        self.explanation_expanded = False
         self.resource_render_key = None
         self.status = status_label
         self.title = title_label
@@ -450,11 +519,18 @@ class ParticipantScreen:
                         "Экран обновится автоматически, когда организатор начнёт игру."
                     ).classes("muted text-center")
                 return
+            profile_history_panel(round_data)
             if state.get("result"):
                 self.board = result_panel(
                     state["result"],
                     leaderboard=state.get("can_view_leaderboard", False),
                     selected_tab=self.result_tab,
+                    explanation_expanded=self.explanation_expanded,
+                    on_explanation_change=lambda e: setattr(
+                        self, "explanation_expanded", e.value
+                    ),
+                    round_config=round_data["game_config"],
+                    scenario_steps=(state.get("scenario") or {}).get("steps", []),
                     on_tab_change=lambda e: setattr(self, "result_tab", e.value),
                 )
                 self.board_at = 0
@@ -560,7 +636,11 @@ class ParticipantScreen:
             "context": {},
             "action_details": {},
         }
-        for param in card["visible_params"]:
+        config = self.editor.state["round"]["game_config"]
+        if expanded(config):
+            step.update(sender_id=None, recipient_id=None, interval_minutes=None)
+            # Do not silently select a party on behalf of the participant.
+        for param in editable_params(card, config):
             target = (
                 step["action_details"]
                 if param["namespace"] == "action"
@@ -576,6 +656,16 @@ class ParticipantScreen:
 
     def render_chain(self):
         self.chain_box.clear()
+        config = self.editor.state["round"]["game_config"]
+        timing = []
+        if expanded(config):
+            from src.aml_workshop_simulator.domain.operation_timeline import (
+                operation_timeline,
+            )
+
+            timing = operation_timeline(
+                self.editor.steps, config["behavior"]["timeline"]
+            )
         with self.chain_box:
             if not self.editor.steps:
                 ui.label("Добавьте первую операцию из каталога.").classes("muted")
@@ -650,11 +740,15 @@ class ParticipantScreen:
                             self.render_chain()
 
                         ui.button(icon="content_copy", on_click=duplicate).props(
-                            "flat dense"
+                            'flat dense aria-label="Копировать операцию"'
                         ).tooltip("Копировать операцию")
                         ui.button(icon="delete_outline", on_click=remove).props(
-                            "flat dense"
+                            'flat dense aria-label="Удалить операцию"'
                         ).tooltip("Удалить операцию")
+                    if card["code"] == "purchase":
+                        ui.label(
+                            "Покупка не засчитывается в цель · 1 000–20 000 ₽ · до 3 покупок, всего до 30 000 ₽"
+                        ).classes("text-sm muted")
                     with ui.expansion("Об операции").classes("operation-description"):
                         ui.label(card["description"]).classes("text-sm muted")
                     with ui.element("div").classes("operation-fields"):
@@ -689,7 +783,33 @@ class ParticipantScreen:
                         ).props(
                             "outlined dense hide-bottom-space inputmode=decimal"
                         ).classes("operation-parameter")
-                        for param in card["visible_params"]:
+                        config = self.editor.state["round"]["game_config"]
+                        if expanded(config):
+
+                            def select_party(role, identity, step_id=step["step_id"]):
+                                if not self.submitting and self.editor.editable:
+                                    self.current_step(step_id)[role] = identity
+                                    self.changed()
+
+                            party_selector(config, step, select_party)
+
+                            def change_interval(value, step_id=step["step_id"]):
+                                if not self.submitting and self.editor.editable:
+                                    self.current_step(step_id)["interval_minutes"] = (
+                                        value
+                                    )
+                                    self.changed()
+                                    self.render_chain()
+
+                            timeline_control(timing[index], config, change_interval)
+                        for param in editable_params(card, config):
+                            if (
+                                card["code"] == "incoming_transfer"
+                                and param["namespace"] == "channel"
+                                and len(param["options"]) == 1
+                            ):
+                                # The channel default is still stored when adding a step.
+                                continue
                             target = (
                                 step["action_details"]
                                 if param["namespace"] == "action"
@@ -770,7 +890,16 @@ class ParticipantScreen:
             self.error_box.set_text(
                 "Введите положительную сумму с точностью до копейки."
             )
-        self.retry_button.set_visibility(bool(error))
+        self.retry_button.set_visibility(
+            bool(
+                error
+                and (
+                    error.status == 0
+                    or error.status in (408, 429)
+                    or error.status >= 500
+                )
+            )
+        )
         resource_key = (editor.version, editor.preview_version, id(editor.preview))
         if resource_key == self.resource_render_key:
             return
@@ -794,9 +923,19 @@ class ParticipantScreen:
                     editor.preview, current=editor.preview_version == editor.version
                 )
             else:
-                ui.label("Ресурсы будут рассчитаны после проверки цепочки.").classes(
-                    "muted"
-                )
+                config = (editor.state.get("round") or {}).get("game_config", {})
+                if config:
+                    start = config["resources"]
+                    objective = config["objectives"]
+                    ui.label(
+                        f"Цель: {display_number(objective['target_outflow'])} ₽ исходящих операций"
+                    ).classes("text-lg font-semibold")
+                    ui.label(
+                        f"На старте: {display_number(start['initial_balance'])} ₽ · Энергия: {start['initial_energy']} · Время: {start['initial_time']} · До {objective['max_actions']} шагов"
+                    )
+                    ui.label(
+                        "Покупки не засчитываются в цель. Остатки появятся после заполнения карточек."
+                    ).classes("text-sm muted")
 
     async def tick(self):
         if self.ticking or not self.editor or self.submitting:

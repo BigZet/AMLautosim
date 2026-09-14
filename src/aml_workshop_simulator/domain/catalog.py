@@ -47,6 +47,21 @@ CARD_CATALOG: tuple[dict[str, Any], ...] = tuple(
 )
 
 
+# Kept separate from the default v7 editor vocabulary.
+EXPANDED_CARD_CATALOG = tuple(
+    {
+        **entry,
+        **{
+            key: Decimal(entry[key])
+            for key in ("risk_weight", "fee_rate", "min_amount", "max_amount")
+        },
+        "channels": tuple(entry["channels"]),
+    }
+    for entry in load_config("expanded_operations.json")["cards"]
+)
+SEED_CARD_CATALOG = CARD_CATALOG + EXPANDED_CARD_CATALOG
+
+
 def default_visible_params(code: str) -> tuple[str, ...]:
     return tuple(catalog_entry(code)["default_visible_params"])
 
@@ -71,7 +86,7 @@ def build_parameter_schema(entry: dict[str, Any]) -> dict[str, Any]:
 
 
 def catalog_entry(code: str, version: int = 1) -> dict[str, Any]:
-    for entry in CARD_CATALOG:
+    for entry in SEED_CARD_CATALOG:
         if entry["code"] == code and entry["version"] == version:
             return entry
     raise KeyError(f"unknown card version {code} v{version}")

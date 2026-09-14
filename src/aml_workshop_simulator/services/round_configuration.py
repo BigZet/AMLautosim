@@ -11,6 +11,7 @@ from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.domain.rules import card_spec_from_row
 from src.aml_workshop_simulator.schemas.admin import RoundAdminOut
+from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 from src.aml_workshop_simulator.schemas.game_config_validation import (
     validate_config_against_catalog,
 )
@@ -22,7 +23,7 @@ def round_out(round_obj: Round) -> RoundAdminOut:
         title=round_obj.title,
         status=round_obj.status,
         config_revision=round_obj.config_revision,
-        game_config=round_obj.game_config or {},
+        game_config=parse_game_config(round_obj.game_config or {}, stored=True),
         scoring_summary=round_obj.scoring_summary,
         created_at=round_obj.created_at,
         activated_at=round_obj.activated_at,

@@ -5,17 +5,19 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field
 
+from src.aml_workshop_simulator.schemas.history_summary import RoundContextOut
 from src.aml_workshop_simulator.core.enums import RoundStatus
+from src.aml_workshop_simulator.domain.contract_versions import is_playable_contract
 from src.aml_workshop_simulator.schemas.card_contract import (
     CardCostsOut,
     OptionOut,
     ParameterOut,
     ParameterValue,
 )
-from src.aml_workshop_simulator.schemas.round_config import GameConfigOut
+from src.aml_workshop_simulator.schemas.round_config import RoundConfigOutput
 
 
-class RoundPublicOut(BaseModel):
+class RoundPublicOut(RoundContextOut):
     """Non-secret round configuration for the participant UI."""
 
     id: int
@@ -26,12 +28,14 @@ class RoundPublicOut(BaseModel):
     closed_at: datetime | None = None
     scoring_started_at: datetime | None = None
     completed_at: datetime | None = None
-    game_config: GameConfigOut
+    game_config: RoundConfigOutput
 
     @computed_field
     @property
     def accepts_changes(self) -> bool:
-        return self.status == "active"
+        return self.status == "active" and is_playable_contract(
+            self.game_config.model_dump(mode="json")
+        )
 
 
 class VisibleParamOut(BaseModel):

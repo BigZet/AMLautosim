@@ -1,0 +1,10 @@
+{
+  "generator": "expanded-review-v2-final-1",
+  "extractor": "aml-observable-v2.6",
+  "seed": 20260914,
+  "config_hash": "e8ad78cb72aa0682706f810fdda502aba6408dca3e96e34488ba337f352609b1",
+  "rubric_hash": "681236bc0b384182cd9b8262c97a54d9eb6178c4e99effa4cfb3501600a63fea",
+  "package_hash": "3a230fcf5df7adebaf1f79c169be88bcff7333d459c21943fa693996e87d25f1",
+  "status": "pending_joint_review",
+  "mass_generation_enabled": false
+}

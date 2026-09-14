@@ -1,0 +1,12 @@
+{
+  "counterparties": [
+    {"id": "A", "name": "Контрагент A", "kind": "person", "information_status": "sufficient", "personal_relationship": "known", "category": null},
+    {"id": "shop", "name": "Магазин", "kind": "merchant", "information_status": "sufficient", "personal_relationship": "unknown", "category": "groceries"}
+  ],
+  "profile": {"id": "test-client", "title": "Тестовый профиль", "description": "Контрактный пример; не шаблон баланса или AML-разметки."},
+  "history": {"window_days": 30, "operations": [
+    {"id": "h1", "occurred_at": "2026-09-01T09:00:00+03:00", "operation_code": "incoming_transfer", "amount": "25000.50", "counterparty_id": "A", "category": null}
+  ]},
+  "timeline": {"starts_at": "2026-09-13T09:00:00+03:00", "timezone": "Europe/Moscow", "waiting_costs": {"1": 0, "10": 1, "60": 2, "1440": 4}},
+  "turnover": {"target_operation_codes": ["card_transfer", "cash_withdrawal"]}
+}

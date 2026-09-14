@@ -1,0 +1,8 @@
+{
+  "repeat_max_abs_diff": 0.0,
+  "reload_max_abs_diff": 0.0,
+  "reorder_max_abs_diff": 0.0,
+  "missing_feature_rejected": true,
+  "tolerance": 1e-08,
+  "passed": true
+}

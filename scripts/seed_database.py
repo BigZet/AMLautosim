@@ -36,10 +36,9 @@ from src.aml_workshop_simulator.db.session import (  # noqa: E402
     async_engine,
 )
 from src.aml_workshop_simulator.domain.catalog import (  # noqa: E402
-    CARD_CATALOG,
+    SEED_CARD_CATALOG as CARD_CATALOG,
     build_parameter_schema,
 )
-from src.aml_workshop_simulator.domain.rules import REFERENCE_GAME_CONFIG  # noqa: E402
 from src.aml_workshop_simulator.services.configuration import (  # noqa: E402
     freeze_game_config,
 )
@@ -170,12 +169,15 @@ async def seed_admin(db: AsyncSession) -> User:
 
 def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
     """Build the initial snapshot from the current base configuration."""
-    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
     from src.aml_workshop_simulator.services.round_configuration import config_version
 
-    config = freeze_game_config(
-        GameConfigIn.model_validate(REFERENCE_GAME_CONFIG).dump(), cards
-    )
+    config = freeze_game_config(expanded_game_config(), cards)
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    scorer = get_model_scorer()
+    scorer.check_config(config)
+    config["risk_model"] = scorer.identity.copy()
     config["config_version"] = config_version(config)
     return config
 
@@ -185,6 +187,9 @@ async def seed_demo_round(
 ) -> Round:
     round_obj = (await db.execute(select(Round))).scalars().first()
     if round_obj is not None:
+        from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+        get_model_scorer().check_config(round_obj.game_config, require_pin=True)
         return round_obj
     now = datetime.now(UTC)
     round_obj = Round(

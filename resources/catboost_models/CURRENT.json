@@ -1,0 +1,9 @@
+{
+  "package": "integration-v2-final",
+  "model_version": "aml-catboost-behavior-v2",
+  "ready_for_integration": true,
+  "integrated_into_game": true,
+  "report": "../../docs/verification/catboost-behavior-v2.md",
+  "explanation_version": 3,
+  "integration_report": "../../docs/verification/catboost-shap-integration.md"
+}

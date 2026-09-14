@@ -29,6 +29,7 @@ COPY migrations ./migrations
 COPY scripts ./scripts
 COPY src ./src
 COPY config ./config
+COPY resources/catboost_models/integration-v2-final ./resources/catboost_models/integration-v2-final
 
 # The application only reads its own code; it never writes into /app.
 # NiceGUI persists browser sessions in its private writable volume.

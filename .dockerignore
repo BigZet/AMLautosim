@@ -29,7 +29,10 @@ htmlcov/
 # Not part of the runtime image
 tests/
 docs/
-resources/
+resources/*
+!resources/catboost_models/
+resources/catboost_models/*
+!resources/catboost_models/integration-v2-final/
 README.md
 requirements-dev.txt
 

@@ -62,7 +62,9 @@ def test_incoming_form_exposes_sources_and_sender_without_legacy_frequency():
             inputs = list(user.find(ui.number).elements)
             selects = list(user.find(ui.select).elements)
             assert len(inputs) == 1
-            assert len(selects) == 5
+            # Единственный банковский канал хранится как default, без лишнего select.
+            assert len(selects) == 4
+            assert not any(set(control.options) == {"bank"} for control in selects)
             await user.should_not_see(ui.switch)
             source = next(s for s in selects if "crypto_exchange" in s.options)
             sender = next(

@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "package_hash": "7e95fec98234c4d923ddc312491eb0ec2a28fd66b5a159c306f93d9b979468a8",
+  "rubric_hash": "95522ad9fa4fd0db56870655eced40e93d171efd06dc8d42cd1feaf5c9fb4238",
+  "reviewer": "User approval; delegated technical audit by Codex",
+  "reviewed_at": "2026-09-13T23:49:39.218484+00:00",
+  "user_decision_evidence": "User: remaining noncritical cases accepted; last review requested; both final changes accepted. Subsequent instruction: continue development. See docs/verification/aml-pilot-stage07.md.",
+  "rubric_accepted": true,
+  "rubric_approval_evidence": "docs/verification/aml-rubric-consolidated-review.md; DISCUSSION-FINAL: final user approval of both proposed changes",
+  "review_mode": "joint_examples_and_delegated_remainder"
+}

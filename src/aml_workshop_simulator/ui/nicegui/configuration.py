@@ -4,10 +4,40 @@ from copy import deepcopy
 
 from nicegui import ui
 
+from .profile_history import ProfileHistoryForm
+from .counterparties import catalog_form
+
+
+def configuration_violation(violation):
+    parts = (violation.get("field") or "").split(".")
+    labels = {
+        "name": "название",
+        "kind": "тип",
+        "category": "категория",
+        "information_status": "доступные сведения",
+        "personal_relationship": "знакомство",
+        "occurred_at": "дата",
+        "amount": "сумма",
+        "counterparty_id": "сторона",
+        "starts_at": "начало сценария",
+        "timezone": "часовой пояс",
+    }
+    prefix = ""
+    for section, title in (("counterparties", "Сторона"), ("operations", "Операция")):
+        if section in parts:
+            index = parts.index(section) + 1
+            if index < len(parts) and parts[index].isdigit():
+                prefix = f"{title} {int(parts[index]) + 1}"
+                break
+    label = labels.get(parts[-1], "")
+    subject = ", ".join(p for p in (prefix, label) if p)
+    return (subject + ": " if subject else "") + violation["message"]
+
 
 class ConfigForm:
     def __init__(self, config, catalog, metadata, on_change):
         self.config = deepcopy(config)
+        self.model_identity = self.config.pop("risk_model", None)
         self.config.pop("config_version", None)
         snapshots = self.config.pop("card_snapshots", [])
         self.catalog = {(c["code"], c["version"]): c for c in catalog}
@@ -32,7 +62,10 @@ class ConfigForm:
                 value=str(target[key]),
                 on_change=update,
             )
-            .props("outlined dense inputmode=decimal")
+            .props(
+                "outlined dense inputmode=decimal"
+                + (" readonly" if self.config.get("schema_version") == 8 else "")
+            )
             .classes("min-w-48 flex-1")
         )
 
@@ -45,6 +78,30 @@ class ConfigForm:
                 self.text_number(values, key, integer=isinstance(value, int))
 
     def render(self):
+        is_expanded = self.config.get("schema_version") == 8
+        if is_expanded:
+            ui.label(
+                "Финансовые правила закреплены за моделью: ресурсы, цель, лимиты и стоимость операций доступны только для просмотра."
+            ).classes("text-sm muted")
+            catalog_form(self.config["behavior"], self.on_change)
+            with ui.expansion("Начало сценария и время").classes("w-full"):
+                timeline = self.config["behavior"]["timeline"]
+                for key, label in [
+                    ("starts_at", "Начало сценария с часовым смещением"),
+                    ("timezone", "Часовой пояс"),
+                ]:
+                    ui.input(
+                        label,
+                        value=timeline[key],
+                        on_change=lambda e, k=key: (
+                            timeline.__setitem__(k, e.value),
+                            self.on_change(),
+                        ),
+                    )
+                ui.label(
+                    "Ожидание 1 / 10 / 60 / 1440 минут стоит 0 / 1 / 2 / 4 времени; базовая стоимость операции учитывается отдельно."
+                )
+            ProfileHistoryForm(self.config["behavior"], self.on_change)
         for key, title in [
             ("resources", "Начальные ресурсы"),
             ("objectives", "Цель и число шагов"),
@@ -84,15 +141,21 @@ class ConfigForm:
                         ),
                     )
                     field.props("outlined dense").bind_enabled_from(toggle, "value")
+                    if is_expanded:
+                        toggle.disable()
+                        field.props("readonly")
         with ui.expansion("Карточки и параметры", value=True).classes("w-full"):
             self.operations_box = ui.column().classes("w-full")
             self.operations()
+        if is_expanded:
+            if self.model_identity:
+                ui.label("Модель: " + self.model_identity["model_version"])
+            ui.label(
+                "Риск рассчитывает CatBoost. После завершения раунда участники увидят объяснение SHAP."
+            )
+            return
         with ui.expansion("Расчёт ресурсов").classes("w-full"):
             self.numeric_tree(self.config["resource_rules"])
-        with ui.expansion("Скоринг").classes("w-full"):
-            for field in ["review_threshold", "suspicious_threshold"]:
-                self.text_number(self.config["scoring"], field)
-            self.numeric_tree(self.config["scoring"]["rules"])
         with ui.expansion("Веса итоговой оценки").classes("w-full"):
             self.numeric_tree(self.config["leaderboard"]["weights"])
             with ui.expansion("Веса ресурсов").classes("w-full"):
@@ -100,22 +163,6 @@ class ConfigForm:
             ui.label("В каждой группе сумма весов должна равняться 1.").classes(
                 "text-sm muted"
             )
-        with ui.expansion("Версии правил").classes("w-full"):
-            for section in ("ruleset_version", "scoring", "leaderboard"):
-                target, key = (
-                    (self.config, section)
-                    if section == "ruleset_version"
-                    else (self.config[section], "version")
-                )
-                ui.select(
-                    self.metadata["supported_versions"][section],
-                    value=target[key],
-                    label=section,
-                    on_change=lambda e, t=target, k=key: (
-                        t.__setitem__(k, e.value),
-                        self.on_change(),
-                    ),
-                ).props("outlined dense")
 
     def operations(self):
         self.operations_box.clear()
@@ -153,9 +200,11 @@ class ConfigForm:
                         self.on_change()
                         self.operations()
 
-                    ui.switch(
+                    availability = ui.switch(
                         "Доступна в игре", value=entry is not None, on_change=enable
                     )
+                    if self.config.get("schema_version") == 8:
+                        availability.disable()
                     if entry is None:
                         continue
                     fields = (
@@ -182,9 +231,19 @@ class ConfigForm:
                         p["param"] for p in card.get("visible_params", [])
                     ]
                     fields = {key: fields[key] for key in order if key in fields}
+                    if self.config.get("schema_version") == 8:
+                        fields = {
+                            key: value
+                            for key, value in fields.items()
+                            if not key.startswith("context.")
+                            and key != "action.sender_relationship"
+                        }
                     entry["visible_params"] = list(fields)
                     entry.pop("defaults", None)
-                    self.config["schema_version"] = self.metadata["schema_version"]
+                    # Rendering must not downgrade an expanded saved contract.
+                    self.config.setdefault(
+                        "schema_version", self.metadata["schema_version"]
+                    )
                     ui.label("Все параметры доступны участнику").classes(
                         "text-xs muted"
                     )
@@ -193,6 +252,32 @@ class ConfigForm:
                             ui.label(field["label"]).classes(
                                 "text-xs rounded-md bg-blue-50 text-blue-900 px-2 py-1"
                             )
+                    if (
+                        self.config.get("schema_version") == 8
+                        and card["code"] == "purchase"
+                    ):
+                        ui.label(
+                            "Покупка: 1 000–20 000 ₽, до трёх и 30 000 ₽ суммарно; комиссия 0, энергия 1, время 1. Параметры фиксированы."
+                        )
+                        continue
+                    if self.config.get("schema_version") == 8:
+                        for rule in self.metadata["overrides"]:
+                            key = rule["key"]
+                            if key == "risk_weight":
+                                continue
+                            value = entry.get(key)
+                            if value is None:
+                                value = card.get(
+                                    key,
+                                    card.get("costs", {}).get(
+                                        key.removesuffix("_cost")
+                                    ),
+                                )
+                            if value is not None:
+                                ui.label(f"{rule['label']}: {value}").classes(
+                                    "text-sm muted"
+                                )
+                        continue
                     with ui.expansion("Переопределить стоимость и лимиты").classes(
                         "w-full"
                     ):

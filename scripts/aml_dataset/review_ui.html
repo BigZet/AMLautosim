@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проверка учебного AML-датасета</title>
+<style>
+body{font:16px/1.5 system-ui;margin:0;background:#f3f5f8;color:#162437}main{max-width:1150px;margin:auto;padding:24px}
+h1{font-size:26px}section,details{background:white;padding:20px;border-radius:12px;margin:16px 0}
+nav,.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}button,select,input,textarea{font:inherit;padding:9px;border:1px solid #b6c4d3;border-radius:6px}
+button{cursor:pointer;background:#ecf3fb}button.primary{background:#174c86;color:white}button:disabled{opacity:.45;cursor:default}textarea{display:block;width:95%;min-height:70px}
+.scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #dce3ed;vertical-align:top}pre{white-space:pre-wrap;font-size:13px}
+.muted{color:#516273}.status{font-weight:600;min-height:26px}label{display:block;margin:12px 0}#summary{font-weight:600}
+</style><main>
+<h1>Проверка учебного AML-датасета</h1>
+<p class="muted">Пилот: проверьте предложенный балл. Слепые цепочки: поставьте собственную оценку 0–100.
+Ответы сохраняются в этом браузере, если доступно локальное хранилище. Скачайте CSV для передачи результатов.</p>
+<nav><select id="mode" aria-label="Набор"><option value="pilot">Пилот — 120 примеров</option><option value="blind">Слепая проверка — 24 цепочки</option></select>
+<button id="prev">← Назад</button><select id="case" aria-label="Сценарий"></select><button id="next">Вперёд →</button><span id="progress"></span></nav>
+<section><h2 id="heading"></h2><p id="summary"></p><p id="context"></p><div class="scroll"><table id="steps"></table></div></section>
+<details><summary>Профиль, стороны и история</summary><pre id="history"></pre></details>
+<details id="explanation"><summary>Вклады в предложенную оценку</summary><div id="terms"></div></details>
+<section><label>Ваша оценка 0–100 <input id="score" type="number" min="0" max="100" step="0.0001"></label>
+<label>Короткая причина или замечание<textarea id="reason" placeholder="Почему оценка подходит или что нужно изменить"></textarea></label>
+<div class="controls"><button class="primary" id="save">Сохранить ответ</button><button id="download">Скачать ответы CSV</button></div>
+<p class="status" id="status" role="status"></p></section>
+</main><script type="application/json" id="data">__REVIEW_DATA__</script><script>
+const data=JSON.parse(document.getElementById('data').textContent), $=id=>document.getElementById(id);
+let mode='pilot', index=0, answers={}, dirty=false, storageOK=true;
+const storageKey='aml-review:'+data.key;
+try{answers=JSON.parse(localStorage.getItem(storageKey)||'{}')}catch(e){storageOK=false}
+const names={salary:'Зарплата',incoming_transfer:'Поступление',card_transfer:'Перевод',cash_withdrawal:'Наличные',purchase:'Покупка'};
+function row(){return data[mode][index]}function answerKey(r){return mode+':'+r.id+':'+r.observable_hash}
+function cell(tr,text,header=false){const el=document.createElement(header?'th':'td');el.textContent=text;tr.append(el)}
+function status(text){$('status').textContent=text}
+function render(){
+ const rows=data[mode],r=row();$('case').replaceChildren(); rows.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+v.id+(answers[mode+':'+v.id+':'+v.observable_hash]?' ✓':'');$('case').append(o)});$('case').value=index;
+ $('progress').textContent=rows.filter(v=>answers[mode+':'+v.id+':'+v.observable_hash]).length+' / '+rows.length+' ответов';
+ $('prev').disabled=index===0;$('next').disabled=index===rows.length-1;$('heading').textContent=r.id;
+ $('summary').textContent=mode==='pilot'?'Предложенный риск: '+r.target:'Слепая оценка: расчётный балл не показан';
+ $('context').textContent='Целевой оборот: '+r.totals.target_outflow+' ₽. Остаток: '+r.resources.balance+' ₽, время '+r.resources.time+', энергия '+r.resources.energy+'.';
+ const table=$('steps');table.replaceChildren();const head=document.createElement('tr');['Шаг','Операция','Сумма, ₽','Сторона','Время','Детали'].forEach(v=>cell(head,v,true));table.append(head);
+ const parties=Object.fromEntries(r.behavior.counterparties.map(p=>[p.id,p.name]));r.steps.forEach((s,i)=>{const tr=document.createElement('tr');[i+1,names[s.card.code]||s.card.code,s.amount,parties[s.sender_id||s.recipient_id]||'—',r.timeline[i].occurred_at,JSON.stringify({channel:s.context,...s.action_details})].forEach(v=>cell(tr,v));table.append(tr)});
+ $('history').textContent=JSON.stringify({initial_resources:r.initial_resources,profile:r.behavior.profile,counterparties:r.behavior.counterparties,history:r.behavior.history},null,2);
+ $('explanation').hidden=mode==='blind';$('explanation').open=false;$('terms').replaceChildren();if(mode==='pilot')r.explanation.forEach(t=>{const p=document.createElement('p');p.textContent=t.name+': '+Number(t.contribution).toFixed(3);$('terms').append(p)});
+ const saved=answers[answerKey(r)];$('score').value=saved?saved.reviewed_score:(mode==='pilot'?r.target:'');$('reason').value=saved?saved.reason:'';dirty=false;
+ status(storageOK?'': 'Локальное сохранение недоступно. Скачайте CSV до закрытия страницы.');
+}
+function canLeave(){return !dirty||confirm('Несохранённый ответ будет потерян. Продолжить?')}
+$('mode').onchange=()=>{if(!canLeave()){$('mode').value=mode;return}mode=$('mode').value;index=0;render()};
+$('case').onchange=()=>{if(!canLeave()){$('case').value=index;return}index=Number($('case').value);render()};
+$('prev').onclick=()=>{if(canLeave()){index--;render()}};$('next').onclick=()=>{if(canLeave()){index++;render()}};
+$('score').oninput=$('reason').oninput=()=>{dirty=true};
+$('save').onclick=()=>{const r=row(),raw=$('score').value,score=Number(raw),reason=$('reason').value.trim();if(!raw||!Number.isFinite(score)||score<0||score>100||!reason){status('Укажите балл от 0 до 100 и короткую причину.');return}
+ answers[answerKey(r)]={id:r.id,observable_hash:r.observable_hash,decision:mode==='blind'?'independent':score===r.target?'accept':'revise',reviewed_score:score,reason};
+ try{localStorage.setItem(storageKey,JSON.stringify(answers))}catch(e){storageOK=false}render();status(storageOK?'Ответ сохранён.':'Ответ сохранён в памяти. Скачайте CSV до закрытия страницы.');};
+$('download').onclick=()=>{const fields=['id','observable_hash','decision','reviewed_score','reason'];const quote=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+ const rows=data[mode].map(r=>answers[answerKey(r)]||{id:r.id,observable_hash:r.observable_hash});
+ const csv=[fields,...rows.map(r=>fields.map(f=>r[f]))].map(v=>v.map(quote).join(',')).join('\r\n')+'\r\n';
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=mode==='pilot'?'pilot-decisions.csv':'blind-decisions.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ status('CSV скачан. Незаполненные ответы остаются пустыми; экспорт не утверждает выпуск.');};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});render();
+</script></html>

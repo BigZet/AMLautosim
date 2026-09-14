@@ -5,9 +5,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
+from src.aml_workshop_simulator.schemas.history_summary import RoundContextOut
 from src.aml_workshop_simulator.core.enums import RoundStatus
 from src.aml_workshop_simulator.schemas.leaderboard import ResultOut
-from src.aml_workshop_simulator.schemas.round_config import GameConfigIn, GameConfigOut
+from src.aml_workshop_simulator.schemas.round_config import (
+    RoundConfigInput,
+    RoundConfigOutput,
+)
 from src.aml_workshop_simulator.schemas.scenarios import ScenarioOut
 from src.aml_workshop_simulator.schemas.scoring import ScoringCountsOut, ScoringErrorOut
 
@@ -20,7 +24,7 @@ class RoundCreateIn(BaseModel):
     model_config = STRICT
 
     title: str = Field(min_length=3, max_length=160)
-    game_config: GameConfigIn | None = None
+    game_config: RoundConfigInput | None = None
 
 
 class RoundUpdateIn(BaseModel):
@@ -28,15 +32,15 @@ class RoundUpdateIn(BaseModel):
 
     expected_config_revision: int = Field(ge=1)
     title: str | None = Field(default=None, min_length=3, max_length=160)
-    game_config: GameConfigIn | None = None
+    game_config: RoundConfigInput | None = None
 
 
-class RoundAdminOut(BaseModel):
+class RoundAdminOut(RoundContextOut):
     id: int
     title: str
     status: RoundStatus
     config_revision: int
-    game_config: GameConfigOut
+    game_config: RoundConfigOutput
     scoring_summary: ScoringCountsOut | None = None
     closed_at: datetime | None = None
     scoring_started_at: datetime | None = None

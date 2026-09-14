@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+from .counterparties import expanded, party_readonly
+from .operation_timeline import timeline_summary
+
 from copy import deepcopy
 
 from nicegui import ui
 
 from .client import APIError
-from .configuration import ConfigForm
+from .profile_history import profile_history_panel
+from .configuration import ConfigForm, configuration_violation
 from .participant import STATUS, board_table, result_panel
 
 
@@ -204,7 +208,7 @@ class OrganizerScreen:
             if status == "draft":
                 ui.button("Начать игру", on_click=lambda: self.command("start")).props(
                     "no-caps"
-                ).bind_enabled_from(self, "dirty", backward=lambda v: not v)
+                ).bind_enabled_from(self, "can_start")
             if status in {"active", "closed", "scoring"}:
                 ui.button(
                     "Запустить скоринг" if status == "active" else "Повторить скоринг",
@@ -229,9 +233,21 @@ class OrganizerScreen:
                     .props("outlined")
                     .classes("w-full")
                 )
+                self.new_game_mode = ui.select(
+                    {
+                        v: ("Базовая игра" if v == 7 else "Расширенная игра")
+                        for v in [8]
+                    },
+                    value=8,
+                    label="Правила новой игры",
+                )
                 ui.button("Создать игру", on_click=self.create).props("no-caps")
                 return
             if status != "draft":
+                ui.label(
+                    "Модель: " + current["game_config"]["risk_model"]["model_version"]
+                )
+                profile_history_panel(current)
                 ui.label("Настройки зафиксированы до следующей игры.").classes("muted")
                 with ui.expansion("Настройки текущей игры").classes("w-full"):
                     ui.json_editor(
@@ -274,7 +290,9 @@ class OrganizerScreen:
                     self.config_conflict.set_visibility(True)
             self.persist()
             with ui.row():
-                ui.button("Сохранить настройки", on_click=self.save).props("no-caps")
+                ui.button("Сохранить настройки", on_click=self.save).props(
+                    "no-caps"
+                ).bind_enabled_from(self, "command_ready")
                 ui.button("Загрузить актуальные", on_click=self.reload_config).props(
                     "flat no-caps"
                 )
@@ -305,7 +323,10 @@ class OrganizerScreen:
             return
 
         async def work():
-            config = await self.request("GET", "admin/game-config/default")
+            config = await self.request(
+                "GET",
+                f"admin/game-config/default?schema_version={self.round['game_config']['schema_version']}",
+            )
             self.settings_box.clear()
             with self.settings_box, ui.card().classes("panel"):
                 self.title_input = (
@@ -320,7 +341,9 @@ class OrganizerScreen:
                 self.config_form = ConfigForm(
                     config, self.catalog, self.metadata, self.changed
                 )
-                ui.button("Сохранить настройки", on_click=self.save).props("no-caps")
+                ui.button("Сохранить настройки", on_click=self.save).props(
+                    "no-caps"
+                ).bind_enabled_from(self, "command_ready")
                 ui.button("Загрузить актуальные", on_click=self.reload_config).props(
                     "flat no-caps"
                 )
@@ -334,9 +357,12 @@ class OrganizerScreen:
         self.busy = True
 
         async def work():
-            await self.request(
-                "POST", "admin/rounds", {"title": self.title_input.value}
-            )
+            payload = {"title": self.title_input.value}
+            if self.new_game_mode.value == 8:
+                payload["game_config"] = await self.request(
+                    "GET", "admin/game-config/default?schema_version=8"
+                )
+            await self.request("POST", "admin/rounds", payload)
             self.loaded = False
             await self.poll()
 
@@ -344,6 +370,14 @@ class OrganizerScreen:
             await self.guarded(work)
         finally:
             self.busy = False
+
+    @property
+    def command_ready(self):
+        return not self.busy
+
+    @property
+    def can_start(self):
+        return not self.busy and not self.dirty
 
     async def save(self):
         if self.busy:
@@ -364,7 +398,7 @@ class OrganizerScreen:
                 violations = (exc.details or {}).get("violations", [])
                 if violations:
                     exc.message += "\n" + "\n".join(
-                        f"{v.get('field') or ''}: {v['message']}" for v in violations
+                        configuration_violation(v) for v in violations
                     )
                 raise
             if not self.round or self.round["id"] != round_id:
@@ -384,9 +418,29 @@ class OrganizerScreen:
         finally:
             self.busy = False
 
-    async def confirm(self, message, *, reason=False):
+    async def confirm(self, message, *, reason=False, versions=False):
+        if versions:
+            self.metadata = await self.request(
+                "GET", "admin/game-config/editor-metadata"
+            )
         with ui.dialog() as dialog, ui.card().classes("max-w-lg"):
             ui.label(message).classes("text-lg")
+            mode = (
+                ui.select(
+                    {
+                        v: (
+                            "Базовая игра"
+                            if v == 7
+                            else "Расширенная игра: стороны, время, покупки и история"
+                        )
+                        for v in [8]
+                    },
+                    value=8,
+                    label="Правила новой игры",
+                )
+                if versions
+                else None
+            )
             field = (
                 ui.textarea("Причина (10–500 символов)")
                 .props("outlined maxlength=500")
@@ -400,7 +454,9 @@ class OrganizerScreen:
                 )
                 button = ui.button(
                     "Подтвердить",
-                    on_click=lambda: dialog.submit(field.value if field else True),
+                    on_click=lambda: dialog.submit(
+                        mode.value if mode else field.value if field else True
+                    ),
                 ).props("no-caps")
                 if field:
                     button.bind_enabled_from(
@@ -421,14 +477,18 @@ class OrganizerScreen:
         }
         self.busy = True
         try:
-            if not await self.confirm(messages[command]):
+            choice = await self.confirm(
+                messages[command], versions=command == "restart"
+            )
+            if not choice:
                 return
 
             async def work():
                 try:
                     await self.request(
                         "POST",
-                        f"admin/rounds/{round_id}/{command}",
+                        f"admin/rounds/{round_id}/{command}"
+                        + (f"?schema_version={choice}" if command == "restart" else ""),
                         timeout=120 if command == "score" else 15,
                     )
                 finally:
@@ -544,6 +604,10 @@ class OrganizerScreen:
                 if data["result"]:
                     result_panel(data["result"])
                 if data["scenario"]:
+                    from .participant import turnover_summary
+
+                    turnover_summary(data["scenario"]["resources"])
+                    timeline_summary(data["scenario"]["resources"])
                     snapshots = (
                         self.round["game_config"]["card_snapshots"]
                         if self.round and self.round["id"] == round_id
@@ -562,6 +626,8 @@ class OrganizerScreen:
                         ui.label(
                             f"{index}. {card.get('title', step['card']['code'])} — {step['amount']}"
                         ).classes("font-semibold")
+                        if self.round and expanded(self.round["game_config"]):
+                            party_readonly(self.round["game_config"], step)
                         for section, declarations in [
                             ("context", card.get("context_fields", [])),
                             ("action_details", card.get("fields", [])),

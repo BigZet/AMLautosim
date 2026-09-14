@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-14",
+  "tests": {
+    "passed": 428,
+    "failed": 0,
+    "errors": 0,
+    "seconds": 182.273
+  },
+  "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b",
+  "runtime_archive": {
+    "files": 194,
+    "sha256": "56210c3ddfe9e676d2427532e3c5c701d4e0397f3aac5a5c85ef5721460d3583"
+  },
+  "manual_ui": {
+    "fixed_balance": true,
+    "blank_name_rejected": true,
+    "empty_draft_context": true,
+    "no_retry_for_missing_party": true,
+    "submit_and_score": true,
+    "admin_numeric_risk": true,
+    "shap_russian_numbers": true,
+    "mobile_390x844": true,
+    "restored_ui_session_and_shap": true,
+    "risk": "45.25",
+    "raw_score": "45.253226"
+  },
+  "source_archive_matches_worktree": true,
+  "runtime_image_id": "sha256:647365b39f3fd0c05943856f4cb72f2f63eabb307656e9e89782f6e8442be755"
+}

@@ -1,0 +1,11 @@
+{
+  "stage": "release",
+  "generator": "expanded-review-v2-final-1",
+  "extractor": "aml-observable-v2.6",
+  "seed": 20260914,
+  "count": 20000,
+  "requested": 20000,
+  "rows_hash": "430e5a4bfc7afdcbdba4c186eab076d7ac4a571fedf92f36d3f03a36ec3c4629",
+  "rubric_hash": "681236bc0b384182cd9b8262c97a54d9eb6178c4e99effa4cfb3501600a63fea",
+  "reference_package_hash": "3a230fcf5df7adebaf1f79c169be88bcff7333d459c21943fa693996e87d25f1"
+}

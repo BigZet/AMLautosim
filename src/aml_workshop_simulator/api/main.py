@@ -21,6 +21,9 @@ from src.aml_workshop_simulator.schemas.common import ErrorEnvelope
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     validate_configuration_files()
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    get_model_scorer()
     try:
         yield
     finally:

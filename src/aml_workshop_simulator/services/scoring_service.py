@@ -11,12 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_playable_contract,
+)
 from src.aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
-    SCORING_VERSION,
     leaderboard_scores,
     resource_score,
-    score_scenario,
 )
 from src.aml_workshop_simulator.services.audit import record_event
 from src.aml_workshop_simulator.services.scenario_service import (
@@ -37,6 +38,7 @@ async def score_round(
     Admission is already closed. The caller discards partial results on failure.
     An empty game also completes.
     """
+    require_playable_contract(round_obj.game_config)
     started = time.perf_counter()
     scenarios = (
         (
@@ -54,6 +56,11 @@ async def score_round(
     specs = load_round_card_specs(round_obj)
     policy = round_policy(round_obj, specs)
     now = datetime.now(UTC)
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    scorer = get_model_scorer()
+    scorer.check_config(round_obj.game_config, require_pin=True)
+    scoring_version = scorer.identity["model_version"]
     for scenario in scenarios:
         # CPU work receives plain data; the database session stays on this loop.
         snapshot, values = await asyncio.to_thread(
@@ -63,7 +70,7 @@ async def score_round(
             ScoringResult(
                 scenario_id=scenario.id,
                 **values,
-                scoring_version=SCORING_VERSION,
+                scoring_version=scoring_version,
                 leaderboard_version=LEADERBOARD_VERSION,
                 created_at=now,
             )
@@ -74,7 +81,7 @@ async def score_round(
         submitted_count=len(scenarios),
         scored_count=len(scenarios),
         duration_ms=int((time.perf_counter() - started) * 1000),
-        scoring_version=SCORING_VERSION,
+        scoring_version=scoring_version,
         leaderboard_version=LEADERBOARD_VERSION,
     )
     round_obj.status = "completed"
@@ -93,13 +100,15 @@ async def score_round(
 
 def _evaluate(steps, specs, config, policy) -> tuple[dict[str, Any], dict[str, Any]]:
     snapshot = build_snapshot(steps, specs, config, policy)
-    scoring = score_scenario(steps, specs, config)
+    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+
+    scoring = get_model_scorer().score(steps, config)
     board = leaderboard_scores(
         scoring["risk_score"], resource_score(snapshot, config), config
     )
     return snapshot, {
         **board,
         "risk_score": scoring["risk_score"],
-        "risk_label": scoring["risk_label"].value,
+        "risk_label": scoring["risk_label"],
         "explanation": scoring["explanation"],
     }

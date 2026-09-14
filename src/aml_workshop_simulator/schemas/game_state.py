@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer
 
 
 class ViolationOut(BaseModel):
@@ -29,6 +29,12 @@ class TotalsOut(BaseModel):
     gross_inflow: str
     gross_outflow: str
     fees: str
+    target_outflow: str | None = None
+    purchase_outflow: str | None = None
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler):
+        return {key: value for key, value in handler(self).items() if value is not None}
 
 
 class ObjectiveOut(BaseModel):
@@ -58,8 +64,11 @@ class DetailFactorOut(BaseModel):
     field_label: str
     value: str | bool | int
     value_label: str
-    risk_points: str
-    description: str
+
+
+class PurchaseImpactOut(BaseModel):
+    merchant_id: str
+    category: str | None
 
 
 class StepImpactOut(BaseModel):
@@ -76,6 +85,32 @@ class StepImpactOut(BaseModel):
     energy_cost: int
     time_cost: int
     detail_factors: list[DetailFactorOut]
+    purchase: PurchaseImpactOut | None = None
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler):
+        result = handler(self)
+        if self.purchase is None:
+            result.pop("purchase", None)
+        return result
+
+
+class TimelineStepOut(BaseModel):
+    step_id: str
+    step_index: int
+    occurred_at: str
+    elapsed_minutes: int
+    interval_minutes: int | None
+    waiting_time_cost: int
+    operation_time_cost: int
+    time_of_day: Literal["night", "day", "evening"]
+    pace: Literal["rapid", "normal", "spaced"] | None
+
+
+class TimelineOut(BaseModel):
+    version: str
+    timezone: str
+    steps: list[TimelineStepOut]
 
 
 class ResourceSnapshotOut(BaseModel):
@@ -89,3 +124,12 @@ class ResourceSnapshotOut(BaseModel):
     limits: list[LimitOut]
     violations: list[ViolationOut]
     per_step: list[StepImpactOut]
+
+    timeline: TimelineOut | None = None
+
+    @model_serializer(mode="wrap")
+    def serialize(self, handler):
+        result = handler(self)
+        if self.timeline is None:
+            result.pop("timeline", None)
+        return result

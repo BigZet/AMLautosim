@@ -1,0 +1,82 @@
+[
+  {
+    "seed": 20260915,
+    "trees": 90,
+    "validation": {
+      "raw": {
+        "n": 2934,
+        "mae": 1.2916683554952924,
+        "rmse": 1.638047897575496,
+        "median_abs_error": 1.0730810885186202,
+        "p90_abs_error": 2.7330062158302226,
+        "bias_prediction_minus_target": -0.7565054741449561,
+        "high_n": 402,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "clipped": {
+        "n": 2934,
+        "mae": 1.2916683554952924,
+        "rmse": 1.638047897575496,
+        "median_abs_error": 1.0730810885186202,
+        "p90_abs_error": 2.7330062158302226,
+        "bias_prediction_minus_target": -0.7565054741449561,
+        "high_n": 402,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "gate": {
+        "passed": true,
+        "checks": {
+          "mae": true,
+          "high_under_rate": true,
+          "no_high_below_50": true,
+          "beats_train_median": true
+        }
+      },
+      "clipped_count": 0
+    }
+  },
+  {
+    "seed": 20260916,
+    "trees": 154,
+    "validation": {
+      "raw": {
+        "n": 2934,
+        "mae": 0.9315638804489877,
+        "rmse": 1.1676597323417512,
+        "median_abs_error": 0.8254323075383532,
+        "p90_abs_error": 1.6839306958691358,
+        "bias_prediction_minus_target": -0.1371299795156753,
+        "high_n": 402,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "clipped": {
+        "n": 2934,
+        "mae": 0.9315638804489877,
+        "rmse": 1.1676597323417512,
+        "median_abs_error": 0.8254323075383532,
+        "p90_abs_error": 1.6839306958691358,
+        "bias_prediction_minus_target": -0.1371299795156753,
+        "high_n": 402,
+        "high_under_15_count": 0,
+        "high_under_15_rate": 0.0,
+        "high_below_50_count": 0
+      },
+      "gate": {
+        "passed": true,
+        "checks": {
+          "mae": true,
+          "high_under_rate": true,
+          "no_high_below_50": true,
+          "beats_train_median": true
+        }
+      },
+      "clipped_count": 0
+    }
+  }
+]

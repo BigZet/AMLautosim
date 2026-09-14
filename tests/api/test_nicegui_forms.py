@@ -114,6 +114,7 @@ def test_registration_login_and_full_workshop(
                 "GET", "admin/rounds/current", session_id=admin_token
             )
             config = dict(current["game_config"])
+            config.pop("risk_model", None)
             config.pop("config_version", None)
             config.pop("card_snapshots", None)
             await front.api.request(
@@ -180,6 +181,20 @@ def test_registration_login_and_full_workshop(
                         key=lambda e: e.id,
                     )
                     amount.set_value(float(step["amount"]))
+                    for key, label in (
+                        ("sender_id", "Отправитель"),
+                        ("recipient_id", "Получатель"),
+                    ):
+                        if step.get(key):
+                            selector = max(
+                                (
+                                    e
+                                    for e in user.find(ui.select).elements
+                                    if e.label == label
+                                ),
+                                key=lambda e: e.id,
+                            )
+                            selector.set_value(step[key])
             await asyncio.sleep(1.8)
             await user.should_see("Сохранено", retries=40)
             await user.should_see("Условия отправки")

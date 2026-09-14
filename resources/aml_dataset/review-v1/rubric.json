@@ -1,0 +1,89 @@
+{
+  "version": "educational-risk-v1-draft",
+  "status": "pending_user_review",
+  "anchors": {
+    "0": "Нет выраженных сигналов",
+    "25": "Слабые сигналы",
+    "50": "Неоднозначное сочетание",
+    "75": "Выраженное сочетание",
+    "100": "Максимальное сочетание"
+  },
+  "terms": [
+    {
+      "feature": "unknown_sender_ratio",
+      "weight": 12,
+      "reason": "Доля поступлений от неизвестных отправителей",
+      "sources": [
+        "S6",
+        "S7"
+      ]
+    },
+    {
+      "feature": "anonymous_recipient_ratio",
+      "weight": 12,
+      "reason": "Доля исходящих переводов анонимному получателю",
+      "sources": [
+        "S7"
+      ]
+    },
+    {
+      "feature": "new_recipient_ratio",
+      "weight": 6,
+      "reason": "Доля исходящих переводов новым контрагентам",
+      "sources": [
+        "S7"
+      ]
+    },
+    {
+      "feature": "rapid_debit_ratio",
+      "weight": 10,
+      "reason": "Быстрый темп исходящих операций",
+      "sources": [
+        "S1"
+      ]
+    },
+    {
+      "feature": "rapid_credit_debit_ratio",
+      "weight": 16,
+      "reason": "Соседство поступления и быстрого списания",
+      "sources": [
+        "S1",
+        "S7"
+      ]
+    },
+    {
+      "feature": "rapid_cash_after_credit_ratio",
+      "weight": 12,
+      "reason": "Снятие наличных сразу после поступления с быстрым темпом",
+      "sources": [
+        "S2",
+        "S7"
+      ]
+    },
+    {
+      "feature": "repeated_debit_ratio",
+      "multiply_by": "rapid_debit_ratio",
+      "weight": 12,
+      "reason": "Повторяемость сумм вместе с быстрым темпом",
+      "sources": [
+        "S7"
+      ]
+    },
+    {
+      "feature": "unknown_sender_ratio",
+      "multiply_by": "rapid_credit_debit_ratio",
+      "weight": 20,
+      "reason": "Неизвестные отправители вместе с быстрыми переходами к списанию",
+      "sources": [
+        "S1",
+        "S6"
+      ]
+    }
+  ],
+  "exceptions": [
+    "Источник, страна, ночь, наличные и отсутствие зарплаты отдельно не дают баллы.",
+    "Зарплата и заявленное основание дохода не вычитают баллы.",
+    "Оборот, три входящих перевода и достижение цели не дают баллы.",
+    "Сумма вкладов ограничивается диапазоном 0–100; веса являются предложением автора, а не требованиями регуляторов."
+  ]
+}

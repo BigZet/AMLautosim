@@ -11,9 +11,9 @@ import pytest
         product(
             ["domestic_bank", "foreign_bank_kg", "crypto_exchange", "payment_service"],
             [
-                "anonymous_new_account",
-                "anonymous_established_account",
-                "regular_sender",
+                "A",
+                "B",
+                "C",
             ],
         )
     ),
@@ -27,26 +27,22 @@ def test_incoming_profiles_complete_game(
     incoming = next(c for c in cards if c["code"] == "incoming_transfer")
     assert [p["key"] for p in incoming["visible_params"]] == [
         "channel",
-        "velocity",
-        "sender_relationship",
         "transfer_source",
-        "time_of_day",
     ]
     assert {c["code"] for c in cards} == {
         "salary",
         "incoming_transfer",
         "card_transfer",
         "cash_withdrawal",
+        "purchase",
     }
     steps = chain()
     for step in steps:
         if step["card"]["code"] == "incoming_transfer":
             step["action_details"] = {
                 "transfer_source": source,
-                "sender_relationship": sender,
             }
-        else:
-            step["context"] = {"velocity": "rapid"}
+            step["sender_id"] = sender
     preview = request_api("POST", path + "/scenario/preview", headers, {"steps": steps})
     assert preview["can_submit"]
     assert preview["resources"]["limit_usage"]["cash"] == "10000.00"

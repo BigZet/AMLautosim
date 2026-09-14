@@ -1,0 +1,43 @@
+{
+  "count": 20000,
+  "unique_observations": 20000,
+  "pilot_prefix_reproduced": 2000,
+  "split": {
+    "train": 13195,
+    "validation": 2934,
+    "test": 3871
+  },
+  "parent_groups": {
+    "five-transfers": 13195,
+    "six-transfers": 2934,
+    "eight-transfers": 3871
+  },
+  "salary_basis": {
+    "absent": 19136,
+    "payroll_registry": 312,
+    "service_contract": 315,
+    "no_reference": 237
+  },
+  "purchases": {
+    "0": 12578,
+    "1": 2813,
+    "3": 2206,
+    "2": 2403
+  },
+  "turnovers": [
+    400000.0
+  ],
+  "risk_quantiles": {
+    "0": 32.4844,
+    "0.25": 46.3249,
+    "0.5": 52.3533,
+    "0.75": 59.8475,
+    "1": 91.19
+  },
+  "risk_bands": {
+    "1": 8131,
+    "2": 9293,
+    "3": 2576
+  },
+  "independent_blind_evaluation": false
+}

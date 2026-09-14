@@ -44,6 +44,11 @@ def test_parameters_and_amount_remain_editable_after_autosave(
             card = next(c for c in cards if c["code"] == "incoming_transfer")
             user.find(kind=ui.button, content=card["title"]).click()
             await asyncio.sleep(1.6)
+            with user:
+                sender = next(
+                    e for e in user.find(ui.select).elements if e.label == "Отправитель"
+                )
+                sender.set_value("A")
             source = next(
                 e
                 for e in user.find(ui.select).elements

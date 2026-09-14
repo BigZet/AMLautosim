@@ -1,0 +1,509 @@
+{
+  "version": "shap-ru-v1",
+  "features": {
+    "amount_mean": {
+      "title": "Средняя сумма операции",
+      "description": "Среднее арифметическое сумм всех операций",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "amount_std": {
+      "title": "Разброс сумм операций",
+      "description": "Стандартное отклонение сумм операций",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "cash_share": {
+      "title": "Доля наличных",
+      "description": "Доля снятий наличных в целевых списаниях",
+      "unit": "",
+      "format": "percent"
+    },
+    "channel_atm_count": {
+      "title": "Канал: банкомат",
+      "description": "Количество операций через указанный канал",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "channel_branch_count": {
+      "title": "Канал: отделение",
+      "description": "Количество операций через указанный канал",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "channel_mobile_count": {
+      "title": "Канал: мобильное приложение",
+      "description": "Количество операций через указанный канал",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "channel_web_count": {
+      "title": "Канал: веб-банк",
+      "description": "Количество операций через указанный канал",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "comparable_historical_recipient_share": {
+      "title": "Переводы, сопоставимые с историей",
+      "description": "Доля переводов сторонам с повторявшимися ранее сопоставимыми суммами",
+      "unit": "",
+      "format": "percent"
+    },
+    "count_cash_withdrawal": {
+      "title": "Количество: снятие наличных",
+      "description": "Число операций указанного типа в текущей цепочке",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "count_purchase": {
+      "title": "Количество: покупка",
+      "description": "Число операций указанного типа в текущей цепочке",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "count_salary": {
+      "title": "Количество: получение дохода",
+      "description": "Число операций указанного типа в текущей цепочке",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "credit_cash_links": {
+      "title": "Поступление перед наличными",
+      "description": "Число переходов от поступления к снятию в финансовой последовательности",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "credit_debit_gap_10_60_excess_mean": {
+      "title": "Ожидание после первых 10 минут",
+      "description": "Среднее превышение задержки над 10 минутами, ограниченное 50 минутами на переход",
+      "unit": "мин.",
+      "format": "number"
+    },
+    "credit_debit_gap_mean": {
+      "title": "Задержка от поступления до списания",
+      "description": "Средняя наблюдаемая задержка между связанными операциями",
+      "unit": "мин.",
+      "format": "number"
+    },
+    "credit_debit_links": {
+      "title": "Поступление перед списанием",
+      "description": "Число переходов от поступления к списанию без учёта покупок",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "debit_mean_history_ratio": {
+      "title": "Списания относительно истории",
+      "description": "Отношение средней суммы финансового списания к исторической; 0 при отсутствии базы сравнения",
+      "unit": "раз",
+      "format": "number"
+    },
+    "elapsed_minutes": {
+      "title": "Длительность цепочки",
+      "description": "Календарное время между первым и последним шагами",
+      "unit": "мин.",
+      "format": "number"
+    },
+    "fast_credit_debit_share": {
+      "title": "Быстрые поступления и списания",
+      "description": "Доля переходов от поступления к списанию с задержкой до 10 минут",
+      "unit": "",
+      "format": "percent"
+    },
+    "fees": {
+      "title": "Комиссии",
+      "description": "Суммарные комиссии цепочки",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "gross_outflow": {
+      "title": "Общие списания",
+      "description": "Общий объём списаний согласно снимку ресурсов",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "historical_recipient_overlap_share": {
+      "title": "Знакомые по истории получатели",
+      "description": "Доля получателей, встречавшихся в доступной истории",
+      "unit": "",
+      "format": "percent"
+    },
+    "history_card_transfer_amount": {
+      "title": "История: перевод получателю — сумма",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "history_card_transfer_count": {
+      "title": "История: перевод получателю — количество",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "history_count": {
+      "title": "Операции в истории",
+      "description": "Количество наблюдаемых исторических операций",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "history_debit_mean": {
+      "title": "Среднее историческое списание",
+      "description": "Средняя сумма переводов и снятий в истории; 0 при отсутствии таких операций",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "history_empty": {
+      "title": "Наблюдаемое отсутствие истории",
+      "description": "История доступна, но операций в ней нет",
+      "unit": "",
+      "format": "boolean"
+    },
+    "history_has_debits": {
+      "title": "Списания в истории",
+      "description": "В наблюдаемой истории есть перевод или снятие",
+      "unit": "",
+      "format": "boolean"
+    },
+    "history_incoming_transfer_amount": {
+      "title": "История: входящий перевод — сумма",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "history_incoming_transfer_count": {
+      "title": "История: входящий перевод — количество",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "history_known": {
+      "title": "Доступность истории",
+      "description": "Предыстория операций доступна",
+      "unit": "",
+      "format": "boolean"
+    },
+    "history_purchase_amount": {
+      "title": "История: покупка — сумма",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "history_purchase_count": {
+      "title": "История: покупка — количество",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "history_salary_amount": {
+      "title": "История: получение дохода — сумма",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "history_salary_count": {
+      "title": "История: получение дохода — количество",
+      "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "history_stable_background": {
+      "title": "Фоновая активность в истории",
+      "description": "Зарплата или покупки наблюдались минимум в два разных дня",
+      "unit": "",
+      "format": "boolean"
+    },
+    "income_basis": {
+      "title": "Основание дохода",
+      "description": "Основание операции получения дохода в текущей цепочке",
+      "unit": "",
+      "format": "category"
+    },
+    "interval_10_count": {
+      "title": "Ожидание 10 минут",
+      "description": "Количество интервалов указанной продолжительности",
+      "unit": "интервалов",
+      "format": "integer"
+    },
+    "interval_1440_count": {
+      "title": "Ожидание 1440 минут",
+      "description": "Количество интервалов указанной продолжительности",
+      "unit": "интервалов",
+      "format": "integer"
+    },
+    "interval_1_count": {
+      "title": "Ожидание 1 минут",
+      "description": "Количество интервалов указанной продолжительности",
+      "unit": "интервалов",
+      "format": "integer"
+    },
+    "interval_60_count": {
+      "title": "Ожидание 60 минут",
+      "description": "Количество интервалов указанной продолжительности",
+      "unit": "интервалов",
+      "format": "integer"
+    },
+    "interval_max": {
+      "title": "Максимальное ожидание",
+      "description": "Наибольший интервал между шагами",
+      "unit": "мин.",
+      "format": "number"
+    },
+    "interval_mean": {
+      "title": "Среднее ожидание",
+      "description": "Средний интервал между шагами",
+      "unit": "мин.",
+      "format": "number"
+    },
+    "known_relationship_share": {
+      "title": "Известные отношения со сторонами",
+      "description": "Доля переводов с известными личными отношениями со стороной",
+      "unit": "",
+      "format": "percent"
+    },
+    "limited_information_amount_share": {
+      "title": "Объём переводов с неполными сведениями",
+      "description": "Доля суммы переводов со сторонами, сведения о которых ограничены или неизвестны",
+      "unit": "",
+      "format": "percent"
+    },
+    "limited_information_share": {
+      "title": "Переводы с неполными сведениями",
+      "description": "Доля переводов со сторонами без достаточных сведений",
+      "unit": "",
+      "format": "percent"
+    },
+    "limited_information_total_amount": {
+      "title": "Сумма переводов с неполными сведениями",
+      "description": "Объём переводов со сторонами без достаточных сведений",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "matched_large_episode_count": {
+      "title": "Крупные эпизоды сопоставимого входа и выхода",
+      "description": "Количество наблюдаемых эпизодов с почти совпадающими крупными входом и выходом",
+      "unit": "эпизодов",
+      "format": "integer"
+    },
+    "matched_large_tempo_mean": {
+      "title": "Темп крупных сопоставимых эпизодов",
+      "description": "Средний индекс быстроты: от 0 для задержки 60 минут до 1 для задержки не более 10 минут",
+      "unit": "",
+      "format": "number"
+    },
+    "max_financial_debit_run": {
+      "title": "Самая длинная серия списаний",
+      "description": "Максимальное число последовательных финансовых списаний",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "night_share": {
+      "title": "Ночные операции",
+      "description": "Доля шагов в ночное время по временной шкале",
+      "unit": "",
+      "format": "percent"
+    },
+    "num_steps": {
+      "title": "Длина цепочки",
+      "description": "Количество операций в цепочке",
+      "unit": "операций",
+      "format": "integer"
+    },
+    "observed_return_cycle_count": {
+      "title": "Наблюдаемые возвратные эпизоды",
+      "description": "Количество эпизодов возврата средств ранее наблюдавшейся стороне",
+      "unit": "эпизодов",
+      "format": "integer"
+    },
+    "pace_reference_matched_large_episode_count": {
+      "title": "Крупные эпизоды сопоставимого входа и выхода при минутных интервалах",
+      "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+      "unit": "эпизодов",
+      "format": "integer"
+    },
+    "pace_reference_matched_large_tempo_mean": {
+      "title": "Темп крупных сопоставимых эпизодов при минутных интервалах",
+      "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+      "unit": "",
+      "format": "number"
+    },
+    "pace_reference_observed_return_cycle_count": {
+      "title": "Наблюдаемые возвратные эпизоды при минутных интервалах",
+      "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+      "unit": "эпизодов",
+      "format": "integer"
+    },
+    "party_information_limited_share": {
+      "title": "Сведения о сторонах: ограничены",
+      "description": "Доля переводов со сторонами с указанной доступностью сведений",
+      "unit": "",
+      "format": "percent"
+    },
+    "party_information_sufficient_share": {
+      "title": "Сведения о сторонах: достаточны",
+      "description": "Доля переводов со сторонами с указанной доступностью сведений",
+      "unit": "",
+      "format": "percent"
+    },
+    "party_information_unknown_share": {
+      "title": "Сведения о сторонах: неизвестны",
+      "description": "Доля переводов со сторонами с указанной доступностью сведений",
+      "unit": "",
+      "format": "percent"
+    },
+    "party_institution_share": {
+      "title": "Тип стороны: организации",
+      "description": "Доля связанных операций со сторонами указанного типа",
+      "unit": "",
+      "format": "percent"
+    },
+    "party_merchant_share": {
+      "title": "Тип стороны: торговые организации",
+      "description": "Доля связанных операций со сторонами указанного типа",
+      "unit": "",
+      "format": "percent"
+    },
+    "party_person_share": {
+      "title": "Тип стороны: физические лица",
+      "description": "Доля связанных операций со сторонами указанного типа",
+      "unit": "",
+      "format": "percent"
+    },
+    "purchase_total": {
+      "title": "Сумма покупок",
+      "description": "Расходы на товары и услуги, исключённые из целевого оборота",
+      "unit": "руб.",
+      "format": "number"
+    },
+    "recipient_hhi": {
+      "title": "Концентрация получателей",
+      "description": "Индекс концентрации переводов по получателям; больше означает большую концентрацию",
+      "unit": "",
+      "format": "number"
+    },
+    "repeated_debit_share": {
+      "title": "Повторяющиеся суммы списаний",
+      "description": "Доля финансовых списаний сверх числа уникальных сумм",
+      "unit": "",
+      "format": "percent"
+    },
+    "return_to_sender_count": {
+      "title": "Переводы прежнему отправителю",
+      "description": "Число переводов стороне, ранее отправлявшей средства",
+      "unit": "переводов",
+      "format": "integer"
+    },
+    "source_crypto_exchange_count": {
+      "title": "Источник: криптобиржа",
+      "description": "Количество поступлений из указанного источника",
+      "unit": "поступлений",
+      "format": "integer"
+    },
+    "source_domestic_bank_count": {
+      "title": "Источник: российский банк",
+      "description": "Количество поступлений из указанного источника",
+      "unit": "поступлений",
+      "format": "integer"
+    },
+    "source_foreign_bank_kg_count": {
+      "title": "Источник: банк Кыргызстана",
+      "description": "Количество поступлений из указанного источника",
+      "unit": "поступлений",
+      "format": "integer"
+    },
+    "source_payment_service_count": {
+      "title": "Источник: платёжный сервис",
+      "description": "Количество поступлений из указанного источника",
+      "unit": "поступлений",
+      "format": "integer"
+    },
+    "transition_card_transfer_card_transfer": {
+      "title": "Перевод получателю → перевод получателю",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_card_transfer_incoming_transfer": {
+      "title": "Перевод получателю → входящий перевод",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_card_transfer_purchase": {
+      "title": "Перевод получателю → покупка",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_card_transfer_salary": {
+      "title": "Перевод получателю → получение дохода",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_cash_withdrawal_card_transfer": {
+      "title": "Снятие наличных → перевод получателю",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_incoming_transfer_card_transfer": {
+      "title": "Входящий перевод → перевод получателю",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_incoming_transfer_cash_withdrawal": {
+      "title": "Входящий перевод → снятие наличных",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_incoming_transfer_incoming_transfer": {
+      "title": "Входящий перевод → входящий перевод",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_incoming_transfer_purchase": {
+      "title": "Входящий перевод → покупка",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_purchase_card_transfer": {
+      "title": "Покупка → перевод получателю",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_purchase_incoming_transfer": {
+      "title": "Покупка → входящий перевод",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_purchase_purchase": {
+      "title": "Покупка → покупка",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "transition_salary_card_transfer": {
+      "title": "Получение дохода → перевод получателю",
+      "description": "Число соседних пар операций указанного типа",
+      "unit": "переходов",
+      "format": "integer"
+    },
+    "unique_recipients": {
+      "title": "Разные получатели",
+      "description": "Число уникальных получателей переводов",
+      "unit": "получателей",
+      "format": "integer"
+    },
+    "unobserved_recipient_share": {
+      "title": "Получатели вне доступной истории",
+      "description": "Доля переводов получателям без наблюдений в истории; 0 при недоступной истории",
+      "unit": "",
+      "format": "percent"
+    }
+  }
+}

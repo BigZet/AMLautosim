@@ -11,6 +11,9 @@ from collections.abc import Sequence
 from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_legacy_contract,
+)
 from src.aml_workshop_simulator.core.enums import RiskLabel
 from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
 from src.aml_workshop_simulator.domain.rules import (
@@ -71,6 +74,11 @@ def score_scenario(
     game_config: dict[str, Any] | None,
 ) -> dict[str, Any]:
     """Risk score, label and explanation for one canonical chain."""
+    require_legacy_contract(game_config)
+    return _score_validated(steps, card_specs, game_config)
+
+
+def _score_validated(steps, card_specs, game_config, *, timeline=None):
     config = game_config or {}
     scoring_cfg = config["scoring"]
     rules = scoring_cfg["rules"]
@@ -80,14 +88,14 @@ def score_scenario(
 
     factors: list[dict[str, Any]] = []
 
-    for step in steps:
+    for index, step in enumerate(steps):
         step_id = str(step["step_id"])
         spec = card_specs[(step["card"]["code"], int(step["card"]["version"]))]
         operation = policy.for_card(spec.key)
         spec = spec.with_overrides(operation.overrides if operation else None)
         amount = money(step["amount"])
         gross = amount
-        context = step["context"]
+        context = dict(step["context"])
         details = dict(step.get("action_details") or {})
 
         factors.append(
@@ -121,6 +129,13 @@ def score_scenario(
             "channel": ("channel", "channel_points", "Канал операции"),
         }
         applicable = {f["key"] for f in spec.context_fields}
+        if timeline is not None:
+            timing = timeline[index]
+            applicable = {"time_of_day"}
+            context["time_of_day"] = timing["time_of_day"]
+            if timing["pace"] is not None:
+                applicable.add("velocity")
+                context["velocity"] = timing["pace"]
         if spec.channels:
             applicable.add("channel")
         for key, (code, rule, description) in context_rules.items():
@@ -165,7 +180,9 @@ def score_scenario(
                 )
             )
 
-    sequence_factors = _sequence_factors(steps, card_specs, rules["sequence"])
+    sequence_factors = _sequence_factors(
+        steps, card_specs, rules["sequence"], timed=timeline is not None
+    )
     factors.extend(sequence_factors)
 
     raw = sum((_points(item) for item in factors), ZERO)
@@ -204,6 +221,9 @@ def score_scenario(
         },
         "disclaimer": DISCLAIMER,
     }
+    if timeline is not None:
+        explanation["scoring_version"] = "expanded-scoring-stage03-v1"
+        explanation["timeline_version"] = "operation-timeline-v1"
     return {
         "risk_score": normalized,
         "risk_label": label,
@@ -215,6 +235,8 @@ def _sequence_factors(
     steps: Sequence[dict[str, Any]],
     card_specs: dict[tuple[str, int], CardSpec],
     rules: dict[str, Any],
+    *,
+    timed=False,
 ) -> list[dict[str, Any]]:
     factors: list[dict[str, Any]] = []
 
@@ -248,7 +270,8 @@ def _sequence_factors(
         previous_gross = money(money(previous["amount"]))
         current_gross = money(money(current["amount"]))
         if (
-            previous_spec.flow == CREDIT_FLOW
+            (not timed or current.get("interval_minutes") == 1)
+            and previous_spec.flow == CREDIT_FLOW
             and current_spec.flow == DEBIT_FLOW
             and previous_gross > ZERO
             and current_gross >= previous_gross * Decimal(str(rules["turnover_ratio"]))
@@ -288,7 +311,7 @@ def resource_score(
             return ONE
         return _clamp(value / maximum, ZERO, ONE)
 
-    outflow = money(totals.get("gross_outflow", "0"))
+    outflow = money(totals.get("target_outflow", totals.get("gross_outflow", "0")))
     fees = money(totals.get("fees", "0"))
     fee_ratio = ONE - _clamp(fees / max(outflow, ONE), ZERO, ONE)
 

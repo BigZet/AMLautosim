@@ -68,9 +68,15 @@ async def validation_exception_handler(
     for error in exc.errors():
         # loc обычно вида ("body", "email"); отбрасываем первый элемент
         # ("body"/"query"/...), оставляя только путь до конкретного поля.
-        field = ".".join(str(part) for part in error.get("loc", ())[1:]) or "body"
+        parts = list(error.get("loc", ())[1:])
+        # Discriminated configuration unions add the schema tag, not a field.
+        if len(parts) > 1 and parts[0] == "game_config" and parts[1] in (7, 8):
+            parts.pop(1)
+        field = ".".join(str(part) for part in parts) or "body"
         reason = error.get("type", "value_error")
-        message = error.get("msg", "Некорректное значение")
+        message = error.get("msg", "Некорректное значение").removeprefix(
+            "Value error, "
+        )
         if field == "password" and reason == "string_too_short":
             minimum = (error.get("ctx") or {}).get("min_length", 10)
             message = f"Пароль должен содержать не менее {minimum} символов."

@@ -61,10 +61,10 @@ def validate_config_against_catalog(
 
     from pydantic import ValidationError
 
-    from src.aml_workshop_simulator.schemas.round_config import GameConfigIn
+    from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
     try:
-        GameConfigIn.model_validate(game_config)
+        parse_game_config(game_config)
     except ValidationError as error:
         raise ValueError(str(error)) from error
     operations = game_config.get("operations") or []

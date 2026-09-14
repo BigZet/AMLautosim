@@ -134,24 +134,16 @@ def active_round(request_api, admin, round_id):
 
 
 @pytest.fixture
-def chain(request_api, round_id):
-    cards = {c["code"]: c for c in request_api("GET", f"/rounds/{round_id}/cards")}
-    from scripts.check_game_balance import ROUTES
+def chain(request_api, admin, round_id):
+    from scripts.check_expanded_balance import demo_steps
 
-    route = [(code, f"{amount:.2f}") for code, amount in ROUTES["incoming_funding"]]
+    config = request_api("GET", "/admin/rounds/current", admin)["game_config"]
 
     def build(count=9):
-        return [
-            {
-                "step_id": str(uuid4()),
-                "card": {key: cards[code][key] for key in ("id", "code", "version")},
-                "amount": amount,
-                "action_details": {
-                    field["key"]: field["default"] for field in cards[code]["fields"]
-                },
-            }
-            for code, amount in route[:count]
-        ]
+        steps = demo_steps(config)[:count]
+        for step in steps:
+            step["step_id"] = str(uuid4())
+        return steps
 
     return build
 
@@ -175,7 +167,9 @@ def invalid_game_config(request):
     from src.aml_workshop_simulator.core.game_config import base_game_config
 
     config = base_game_config()
-    operation = next(o for o in config["operations"] if o["code"] == "incoming_transfer")
+    operation = next(
+        o for o in config["operations"] if o["code"] == "incoming_transfer"
+    )
     if request.param == "removed_field":
         operation["visible_params"] = ["action.funds_source"]
         message = "не объявлен"
@@ -186,4 +180,25 @@ def invalid_game_config(request):
     else:
         operation["min_amount"] = "90000.00"
         message = "минимальная сумма больше максимальной"
+    return config, message
+
+
+@pytest.fixture
+def invalid_expanded_game_config(invalid_game_config):
+    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+
+    invalid, message = invalid_game_config
+    config = expanded_game_config()
+    for operation in invalid["operations"]:
+        if (
+            operation.get("visible_params") in (["action.funds_source"], ["channel"])
+            and operation["code"] in ("incoming_transfer", "salary")
+        ) or operation.get("min_amount") == "90000.00":
+            target = next(
+                o for o in config["operations"] if o["code"] == operation["code"]
+            )
+            if operation.get("min_amount") == "90000.00":
+                target["min_amount"] = "90000.00"
+            else:
+                target["visible_params"] = operation["visible_params"]
     return config, message

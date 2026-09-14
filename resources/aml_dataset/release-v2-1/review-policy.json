@@ -1,0 +1,7 @@
+{
+  "version": "human-12-no-blind-v1",
+  "user_evidence": "docs/verification/aml-dataset-stage07-final.md",
+  "independent_blind_review_required": false,
+  "review_mode": "delegated_feedback_resolution",
+  "original_user_cases": 12
+}

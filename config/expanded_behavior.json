@@ -1,0 +1,109 @@
+{
+  "counterparties": [
+    {
+      "id": "A",
+      "name": "Алексей — постоянный отправитель",
+      "kind": "person",
+      "information_status": "sufficient",
+      "personal_relationship": "known",
+      "category": null
+    },
+    {
+      "id": "B",
+      "name": "Борис — известный новый контрагент",
+      "kind": "person",
+      "information_status": "sufficient",
+      "personal_relationship": "known",
+      "category": null
+    },
+    {
+      "id": "C",
+      "name": "Контрагент с ограниченными сведениями",
+      "kind": "person",
+      "information_status": "limited",
+      "personal_relationship": "unknown",
+      "category": null
+    },
+    {
+      "id": "D",
+      "name": "Контрагент без доступных сведений",
+      "kind": "person",
+      "information_status": "unknown",
+      "personal_relationship": "unknown",
+      "category": null
+    },
+    {
+      "id": "employer",
+      "name": "Работодатель",
+      "kind": "institution",
+      "information_status": "sufficient",
+      "personal_relationship": "unknown",
+      "category": "employer"
+    },
+    {
+      "id": "shop",
+      "name": "Магазин",
+      "kind": "merchant",
+      "information_status": "sufficient",
+      "personal_relationship": "unknown",
+      "category": "groceries"
+    }
+  ],
+  "profile": {
+    "id": "employed-client",
+    "title": "Наёмный сотрудник",
+    "description": "Получает зарплату и переводы от знакомых, оплачивает повседневные покупки. Другие доходы неизвестны."
+  },
+  "history": {
+    "window_days": 30,
+    "operations": [
+      {
+        "id": "h1",
+        "occurred_at": "2026-08-14T09:00:00+03:00",
+        "operation_code": "salary",
+        "amount": "80000.00",
+        "counterparty_id": "employer",
+        "category": null
+      },
+      {
+        "id": "h2",
+        "occurred_at": "2026-09-01T09:00:00+03:00",
+        "operation_code": "incoming_transfer",
+        "amount": "25000.50",
+        "counterparty_id": "A",
+        "category": null
+      },
+      {
+        "id": "h3",
+        "occurred_at": "2026-09-03T18:00:00+03:00",
+        "operation_code": "purchase",
+        "amount": "3500.25",
+        "counterparty_id": "shop",
+        "category": null
+      }
+    ],
+    "version": "observed-history-v1"
+  },
+  "timeline": {
+    "starts_at": "2026-09-13T09:00:00+03:00",
+    "timezone": "Europe/Moscow",
+    "waiting_costs": {
+      "1": 0,
+      "10": 1,
+      "60": 2,
+      "1440": 4
+    }
+  },
+  "turnover": {
+    "target_operation_codes": [
+      "card_transfer",
+      "cash_withdrawal"
+    ]
+  },
+  "purchases": {
+    "version": "purchase-policy-v1",
+    "max_total": "30000.00"
+  },
+  "release": "expanded-game-v1",
+  "sender_policy": "separate-employer-v1"
+}

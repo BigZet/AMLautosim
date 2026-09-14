@@ -15,7 +15,6 @@ from src.aml_workshop_simulator.schemas.game_config_validation import (
     SUPPORTED_SCORING,
 )
 from src.aml_workshop_simulator.schemas.round_config import (
-    CONFIG_SCHEMA_VERSION,
     RESOURCE_WEIGHT_KEYS,
     OperationIn,
 )
@@ -75,9 +74,12 @@ def editor_metadata() -> EditorMetadataOut:
     for name, field in CONTEXT_FIELDS.items():
         if field.get("options"):
             dictionary_keys[name] = [o["value"] for o in field["options"]]
+    from src.aml_workshop_simulator.core.config import settings
+
     return EditorMetadataOut(
+        available_contracts=[8] if settings.EXPANDED_ROUNDS_ENABLED else [],
         version=1,
-        schema_version=CONFIG_SCHEMA_VERSION,
+        schema_version=8,
         limits=LIMITS,
         labels=labels,
         quotas=QUOTA_LABELS,

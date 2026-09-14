@@ -1,0 +1,4222 @@
+{
+  "captured_from": "be4cb32 with existing workspace changes, before contract stage 01",
+  "config": {
+    "schema_version": 7,
+    "operations": [
+      {
+        "code": "salary",
+        "version": 1,
+        "visible_params": [
+          "action.income_basis"
+        ]
+      },
+      {
+        "code": "incoming_transfer",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.velocity",
+          "action.sender_relationship",
+          "action.transfer_source",
+          "context.time_of_day"
+        ]
+      },
+      {
+        "code": "card_transfer",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.recipient_type",
+          "context.velocity"
+        ]
+      },
+      {
+        "code": "cash_withdrawal",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.velocity"
+        ]
+      }
+    ],
+    "resources": {
+      "initial_balance": "180000.00",
+      "initial_energy": 30,
+      "initial_time": 30
+    },
+    "objectives": {
+      "target_outflow": "400000.00",
+      "max_actions": 14
+    },
+    "constraints": {
+      "max_identical_steps": 2,
+      "max_night_operations": 2,
+      "max_anonymous_operations": 2,
+      "category_limits": {
+        "cash": "120000.00",
+        "anonymous": "60000.00"
+      }
+    },
+    "ruleset_version": "game-rules-v5",
+    "scoring": {
+      "version": "risk-rules-v3",
+      "review_threshold": "20.00",
+      "suspicious_threshold": "35.00",
+      "rules": {
+        "recipient_points": {
+          "known_counterparty": "0",
+          "new_counterparty": "12",
+          "anonymous_wallet": "25"
+        },
+        "time_of_day_points": {
+          "day": "0",
+          "evening": "3",
+          "night": "9"
+        },
+        "velocity_points": {
+          "spaced": "-5",
+          "normal": "0",
+          "rapid": "12"
+        },
+        "channel_points": {
+          "bank": "-2",
+          "branch": "-3",
+          "mobile": "0",
+          "web": "2",
+          "atm": "3"
+        },
+        "amount_divisor": "10000",
+        "amount_max_points": "12",
+        "sequence": {
+          "repeated_min_amount": "10000.00",
+          "repeated_points": "8",
+          "repeated_max_points": "16",
+          "turnover_ratio": "0.7",
+          "turnover_points": "10"
+        },
+        "explanation_factor_limit": 5,
+        "amount_adjustment": {
+          "minimum_gross": "60000.00",
+          "risk_points": "-5"
+        }
+      }
+    },
+    "leaderboard": {
+      "version": "leaderboard-v2",
+      "weights": {
+        "stealth": "0.65",
+        "resources": "0.35"
+      },
+      "resource_weights": {
+        "balance": "0.10",
+        "energy": "0.25",
+        "time": "0.40",
+        "fees": "0.05",
+        "available_steps": "0.20"
+      }
+    },
+    "resource_rules": {
+      "minimum_time_cost": 1,
+      "channel_time": {
+        "bank": 0,
+        "branch": 2,
+        "mobile": 0,
+        "web": 0,
+        "atm": 0
+      },
+      "velocity_time": {
+        "spaced": {
+          "time_cost": 2
+        },
+        "normal": {
+          "time_cost": 1
+        },
+        "rapid": {
+          "time_cost": 0
+        }
+      },
+      "amount_adjustment": {
+        "minimum_gross": "60000.00",
+        "time_cost": 1
+      }
+    },
+    "card_snapshots": [
+      {
+        "id": 1,
+        "code": "salary",
+        "version": 1,
+        "title": "Получить зарплату",
+        "description": "Регулярное поступление от известного работодателя.",
+        "category": "Поступление",
+        "flow": "credit",
+        "risk_weight": "3.00",
+        "energy_cost": 8,
+        "time_cost": 8,
+        "fee_rate": "0.000000",
+        "min_amount": "20000.00",
+        "max_amount": "30000.00",
+        "max_occurrences": 1,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [],
+        "context_fields": [],
+        "fields": [
+          {
+            "key": "income_basis",
+            "label": "Основание дохода",
+            "kind": "select",
+            "default": "payroll_registry",
+            "options": [
+              {
+                "value": "payroll_registry",
+                "label": "Зарплатный реестр",
+                "risk_points": -3,
+                "time_cost": 1,
+                "description": "Назначение и реестр подтверждают регулярность выплаты"
+              },
+              {
+                "value": "service_contract",
+                "label": "Договор услуг",
+                "risk_points": 2,
+                "description": "Нерегулярный договор требует дополнительного контекста"
+              },
+              {
+                "value": "no_reference",
+                "label": "Без назначения",
+                "risk_points": 8,
+                "description": "Отсутствие назначения затрудняет проверку источника дохода"
+              }
+            ]
+          }
+        ],
+        "default_visible_params": [
+          "action.income_basis"
+        ]
+      },
+      {
+        "id": 2,
+        "code": "incoming_transfer",
+        "version": 1,
+        "title": "Получить входящий перевод",
+        "description": "Зачисление от банка, криптобиржи или платежного сервиса. Источник и связь с отправителем влияют на затраты и учебный риск.",
+        "category": "Поступление",
+        "flow": "credit",
+        "risk_weight": "18.00",
+        "energy_cost": 3,
+        "time_cost": 1,
+        "fee_rate": "0.000000",
+        "min_amount": "10000.00",
+        "max_amount": "80000.00",
+        "max_occurrences": 3,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [
+          "bank"
+        ],
+        "context_fields": [
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами"
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп"
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд"
+              }
+            ]
+          },
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "options": [
+              {
+                "value": "day",
+                "label": "День"
+              },
+              {
+                "value": "evening",
+                "label": "Вечер"
+              },
+              {
+                "value": "night",
+                "label": "Ночь"
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "key": "transfer_source",
+            "label": "Источник перевода",
+            "kind": "select",
+            "default": "domestic_bank",
+            "help": "Откуда поступают деньги. Все суммы — в рублевом эквиваленте; это учебные профили источников.",
+            "options": [
+              {
+                "value": "domestic_bank",
+                "label": "Российский банк",
+                "risk_points": -2,
+                "time_cost": 1,
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "value": "foreign_bank_kg",
+                "label": "Зарубежный банк — Кыргызстан (Киргизия)",
+                "risk_points": 4,
+                "time_cost": 2,
+                "energy_cost": 1,
+                "description": "Учебный международный перевод требует дополнительной сверки реквизитов и происхождения средств"
+              },
+              {
+                "value": "crypto_exchange",
+                "label": "Криптобиржа",
+                "risk_points": 9,
+                "energy_cost": 1,
+                "description": "Зачисление после продажи криптоактивов: в учебном профиле меньше контекста о предшествующих операциях"
+              },
+              {
+                "value": "payment_service",
+                "label": "Платежный сервис",
+                "risk_points": 5,
+                "description": "Посредник ускоряет зачисление, но в учебном профиле дает меньше сведений о первоначальном отправителе"
+              }
+            ]
+          },
+          {
+            "key": "sender_relationship",
+            "label": "Связь с отправителем",
+            "kind": "select",
+            "default": "regular_sender",
+            "help": "Профиль владельца исходного счета. Прогретый аккаунт в игре означает аккаунт с историей операций; отправитель при этом остается анонимным.",
+            "options": [
+              {
+                "value": "anonymous_new_account",
+                "label": "Анонимный отправитель — новый аккаунт",
+                "risk_points": 12,
+                "description": "В учебном профиле отправитель неизвестен и история операций отсутствует"
+              },
+              {
+                "value": "anonymous_established_account",
+                "label": "Анонимный отправитель — прогретый аккаунт",
+                "risk_points": 6,
+                "time_cost": 1,
+                "description": "В учебном профиле есть история операций, ее просмотр требует времени; личность отправителя не подтверждена"
+              },
+              {
+                "value": "regular_sender",
+                "label": "Постоянный отправитель",
+                "risk_points": -1,
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          }
+        ],
+        "default_visible_params": [
+          "channel",
+          "context.velocity",
+          "action.sender_relationship",
+          "action.transfer_source",
+          "context.time_of_day"
+        ]
+      },
+      {
+        "id": 3,
+        "code": "card_transfer",
+        "version": 1,
+        "title": "Перевести по карте",
+        "description": "Перевод другому клиенту банка.",
+        "category": "Перевод",
+        "flow": "debit",
+        "risk_weight": "12.00",
+        "energy_cost": 2,
+        "time_cost": 1,
+        "fee_rate": "0.005000",
+        "min_amount": "10000.00",
+        "max_amount": "80000.00",
+        "max_occurrences": 8,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [
+          "mobile",
+          "web",
+          "branch"
+        ],
+        "context_fields": [
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "options": [
+              {
+                "value": "day",
+                "label": "День"
+              },
+              {
+                "value": "evening",
+                "label": "Вечер"
+              },
+              {
+                "value": "night",
+                "label": "Ночь"
+              }
+            ]
+          },
+          {
+            "key": "recipient_type",
+            "label": "Получатель",
+            "kind": "select",
+            "default": "known_counterparty",
+            "help": "Насколько хорошо клиенту известна принимающая сторона.",
+            "options": [
+              {
+                "value": "known_counterparty",
+                "label": "Знакомый контрагент"
+              },
+              {
+                "value": "new_counterparty",
+                "label": "Новый контрагент"
+              },
+              {
+                "value": "anonymous_wallet",
+                "label": "Анонимный кошелек"
+              }
+            ]
+          },
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами"
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп"
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд"
+              }
+            ]
+          }
+        ],
+        "fields": [],
+        "default_visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.recipient_type",
+          "context.velocity"
+        ]
+      },
+      {
+        "id": 4,
+        "code": "cash_withdrawal",
+        "version": 1,
+        "title": "Снять наличные",
+        "description": "Получение наличных в банкомате или отделении.",
+        "category": "Наличные",
+        "flow": "debit",
+        "risk_weight": "18.00",
+        "energy_cost": 2,
+        "time_cost": 1,
+        "fee_rate": "0.010000",
+        "min_amount": "10000.00",
+        "max_amount": "100000.00",
+        "max_occurrences": 4,
+        "requires_card_code": null,
+        "quota_category": "cash",
+        "channels": [
+          "atm",
+          "branch"
+        ],
+        "context_fields": [
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "options": [
+              {
+                "value": "day",
+                "label": "День"
+              },
+              {
+                "value": "evening",
+                "label": "Вечер"
+              },
+              {
+                "value": "night",
+                "label": "Ночь"
+              }
+            ]
+          },
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами"
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп"
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд"
+              }
+            ]
+          }
+        ],
+        "fields": [],
+        "default_visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.velocity"
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "transfers",
+      "steps": [
+        {
+          "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        }
+      ],
+      "snapshot": {
+        "schema_version": 5,
+        "ruleset_version": "game-rules-v5",
+        "valid": true,
+        "resources_after": {
+          "balance": "8000.00",
+          "energy": 11,
+          "time": 3,
+          "available_steps": 6
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2000.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 8
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "anonymous",
+            "label": "Анонимные получатели",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "60000.00",
+            "remaining": "60000.00"
+          },
+          {
+            "code": "night_operations",
+            "label": "Ночные операции",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "anonymous_operations",
+            "label": "Анонимные получатели",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "8",
+            "limit": "14",
+            "remaining": "6"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 26
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 26
+            },
+            "resources_after": {
+              "balance": "179600.00",
+              "energy": 25,
+              "time": 23
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "179600.00",
+              "energy": 25,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "99200.00",
+              "energy": 23,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "99200.00",
+              "energy": 23,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "179200.00",
+              "energy": 20,
+              "time": 16
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "179200.00",
+              "energy": 20,
+              "time": 16
+            },
+            "resources_after": {
+              "balance": "98800.00",
+              "energy": 18,
+              "time": 13
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+            "step_index": 6,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "98800.00",
+              "energy": 18,
+              "time": 13
+            },
+            "resources_after": {
+              "balance": "18400.00",
+              "energy": 16,
+              "time": 10
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "18400.00",
+              "energy": 16,
+              "time": 10
+            },
+            "resources_after": {
+              "balance": "88400.00",
+              "energy": 13,
+              "time": 6
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "88400.00",
+              "energy": 13,
+              "time": 6
+            },
+            "resources_after": {
+              "balance": "8000.00",
+              "energy": 11,
+              "time": 3
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          }
+        ]
+      },
+      "scoring": {
+        "risk_score": "20.00",
+        "risk_label": "review",
+        "explanation": {
+          "schema_version": 2,
+          "scoring_version": "risk-rules-v3",
+          "top_risk_factors": [
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            }
+          ],
+          "protective_factors": [
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            }
+          ],
+          "sequence_factors": [
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "8.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 1
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "all_factors": [
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "b9885cc9-9e4f-50b7-b595-39c4aa36e76d",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7bc40406-88a1-55e6-97e9-1f4db29d0bad",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "b35a48e3-19bf-5065-928d-fabd75cd2611",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "e983ad09-2720-530c-bea4-890cc685e0b7",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "70000.00"
+              }
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "a157dbc6-621d-577a-8f87-4494b6c974c1",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "8.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 1
+              }
+            },
+            {
+              "step_id": "51de9f4c-abc0-56c0-bb72-7f1467124438",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "55b54a44-d196-541f-9848-d6ee7b352f9f",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "49150b3c-ebec-533f-9903-ad34255bc2ec",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "raw_score": "160.00",
+          "normalized_score": "20.00",
+          "step_count": 8,
+          "thresholds": {
+            "review": "20.00",
+            "suspicious": "35.00"
+          },
+          "disclaimer": "Учебная модель; результат не является AML-решением"
+        }
+      },
+      "blockers": [],
+      "leaderboard": {
+        "stealth_score": "80.00",
+        "resource_score": "27.16",
+        "game_score": "61.51"
+      }
+    },
+    {
+      "name": "mixed",
+      "steps": [
+        {
+          "step_id": "58e0c844-a2d0-57aa-9954-8d393c28fea8",
+          "card": {
+            "id": 1,
+            "code": "salary",
+            "version": 1
+          },
+          "amount": "30000.00",
+          "context": {},
+          "action_details": {
+            "income_basis": "payroll_registry"
+          }
+        },
+        {
+          "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "55000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "rapid",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        }
+      ],
+      "snapshot": {
+        "schema_version": 5,
+        "ruleset_version": "game-rules-v5",
+        "valid": true,
+        "resources_after": {
+          "balance": "3000.00",
+          "energy": 3,
+          "time": 3,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "225000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2000.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "anonymous",
+            "label": "Анонимные получатели",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "60000.00",
+            "remaining": "60000.00"
+          },
+          {
+            "code": "night_operations",
+            "label": "Ночные операции",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "anonymous_operations",
+            "label": "Анонимные получатели",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "58e0c844-a2d0-57aa-9954-8d393c28fea8",
+            "step_index": 1,
+            "card_code": "salary",
+            "card_version": 1,
+            "card_title": "Получить зарплату",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "210000.00",
+              "energy": 22,
+              "time": 21
+            },
+            "gross": "30000.00",
+            "fee": "0.00",
+            "money_delta": "30000.00",
+            "energy_cost": 8,
+            "time_cost": 9,
+            "detail_factors": [
+              {
+                "field_key": "income_basis",
+                "field_label": "Основание дохода",
+                "value": "payroll_registry",
+                "value_label": "Зарплатный реестр",
+                "risk_points": "-3",
+                "description": "Назначение и реестр подтверждают регулярность выплаты"
+              }
+            ]
+          },
+          {
+            "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "210000.00",
+              "energy": 22,
+              "time": 21
+            },
+            "resources_after": {
+              "balance": "129600.00",
+              "energy": 20,
+              "time": 19
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "129600.00",
+              "energy": 20,
+              "time": 19
+            },
+            "resources_after": {
+              "balance": "49200.00",
+              "energy": 18,
+              "time": 17
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "49200.00",
+              "energy": 18,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "119200.00",
+              "energy": 15,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "119200.00",
+              "energy": 15,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "38800.00",
+              "energy": 13,
+              "time": 12
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+            "step_index": 6,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "38800.00",
+              "energy": 13,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "108800.00",
+              "energy": 10,
+              "time": 9
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "108800.00",
+              "energy": 10,
+              "time": 9
+            },
+            "resources_after": {
+              "balance": "163800.00",
+              "energy": 7,
+              "time": 7
+            },
+            "gross": "55000.00",
+            "fee": "0.00",
+            "money_delta": "55000.00",
+            "energy_cost": 3,
+            "time_cost": 2,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "163800.00",
+              "energy": 7,
+              "time": 7
+            },
+            "resources_after": {
+              "balance": "83400.00",
+              "energy": 5,
+              "time": 5
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "83400.00",
+              "energy": 5,
+              "time": 5
+            },
+            "resources_after": {
+              "balance": "3000.00",
+              "energy": 3,
+              "time": 3
+            },
+            "gross": "80000.00",
+            "fee": "400.00",
+            "money_delta": "-80400.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          }
+        ]
+      },
+      "scoring": {
+        "risk_score": "29.83",
+        "risk_label": "review",
+        "explanation": {
+          "schema_version": 2,
+          "scoring_version": "risk-rules-v3",
+          "top_risk_factors": [
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            }
+          ],
+          "protective_factors": [
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            }
+          ],
+          "sequence_factors": [
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "all_factors": [
+            {
+              "step_id": "58e0c844-a2d0-57aa-9954-8d393c28fea8",
+              "code": "card:salary",
+              "category": "card",
+              "points": "3.00",
+              "description": "Базовый риск операции «Получить зарплату»",
+              "evidence": {
+                "card_code": "salary",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "58e0c844-a2d0-57aa-9954-8d393c28fea8",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "3.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "30000.00"
+              }
+            },
+            {
+              "step_id": "58e0c844-a2d0-57aa-9954-8d393c28fea8",
+              "code": "detail:salary:income_basis:payroll_registry",
+              "category": "action_detail",
+              "points": "-3.00",
+              "description": "Назначение и реестр подтверждают регулярность выплаты",
+              "evidence": {}
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "4ad65091-95a0-522a-afc3-490fd7ccba73",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "70000.00"
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "8e505e5a-8caf-503c-9777-0d555998e29d",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "70000.00"
+              }
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "d6dab247-0a1e-53af-813e-dfcf2bbc0b06",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "5.50",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "55000.00"
+              }
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "7f284fc4-ed23-5dfc-b91c-49fbed02e27f",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "velocity:rapid",
+              "category": "context",
+              "points": "12.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "6304fcac-c11e-5617-933f-8480184cd1b9",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            },
+            {
+              "step_id": "46d9777d-3577-5666-8c89-085dc98115f8",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "913f4eea-9c39-5373-ae64-b2e220487c3e",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "2ba9f447-ac14-50e6-8e2c-45a0276c9a7d",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "raw_score": "268.50",
+          "normalized_score": "29.83",
+          "step_count": 9,
+          "thresholds": {
+            "review": "20.00",
+            "suspicious": "35.00"
+          },
+          "disclaimer": "Учебная модель; результат не является AML-решением"
+        }
+      },
+      "blockers": [],
+      "leaderboard": {
+        "stealth_score": "70.17",
+        "resource_score": "18.78",
+        "game_score": "52.18"
+      }
+    },
+    {
+      "name": "incoming_funding",
+      "steps": [
+        {
+          "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "atm"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "channel": "bank"
+          },
+          "action_details": {
+            "sender_relationship": "regular_sender",
+            "transfer_source": "domestic_bank"
+          }
+        },
+        {
+          "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        },
+        {
+          "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "velocity": "normal",
+            "time_of_day": "day",
+            "recipient_type": "known_counterparty",
+            "channel": "mobile"
+          },
+          "action_details": {}
+        }
+      ],
+      "snapshot": {
+        "schema_version": 5,
+        "ruleset_version": "game-rules-v5",
+        "valid": true,
+        "resources_after": {
+          "balance": "7950.00",
+          "energy": 9,
+          "time": 1,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2050.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "10000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "10000.00",
+            "limit": "120000.00",
+            "remaining": "110000.00"
+          },
+          {
+            "code": "anonymous",
+            "label": "Анонимные получатели",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "60000.00",
+            "remaining": "60000.00"
+          },
+          {
+            "code": "night_operations",
+            "label": "Ночные операции",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "anonymous_operations",
+            "label": "Анонимные получатели",
+            "kind": "count",
+            "used": "0",
+            "limit": "2",
+            "remaining": "2"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 26
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 26
+            },
+            "resources_after": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 20
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 16
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 16
+            },
+            "resources_after": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 13
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 13
+            },
+            "resources_after": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 11
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 11
+            },
+            "resources_after": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 7
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 4,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "field_key": "sender_relationship",
+                "field_label": "Связь с отправителем",
+                "value": "regular_sender",
+                "value_label": "Постоянный отправитель",
+                "risk_points": "-1",
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          },
+          {
+            "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 7
+            },
+            "resources_after": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 4
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          },
+          {
+            "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 4
+            },
+            "resources_after": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 1
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 3,
+            "detail_factors": []
+          }
+        ]
+      },
+      "scoring": {
+        "risk_score": "21.00",
+        "risk_label": "review",
+        "explanation": {
+          "schema_version": 2,
+          "scoring_version": "risk-rules-v3",
+          "top_risk_factors": [
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "card:cash_withdrawal",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Снять наличные»",
+              "evidence": {
+                "card_code": "cash_withdrawal",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            }
+          ],
+          "protective_factors": [
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            }
+          ],
+          "sequence_factors": [
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "all_factors": [
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "ff4dc5b6-7199-5c05-8d20-3844d69ed097",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.80",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "78000.00"
+              }
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.80",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "78000.00"
+              }
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "933545e4-79de-5fa9-8583-aa53ed145eae",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "8.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "80000.00"
+              }
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "80000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "a52db969-3dc0-5e30-8659-0c16793ecf1a",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.80",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "78000.00"
+              }
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "card:cash_withdrawal",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Снять наличные»",
+              "evidence": {
+                "card_code": "cash_withdrawal",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "1.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "10000.00"
+              }
+            },
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "554ee09f-1b28-5c2d-9ea7-f17aed5d8ae0",
+              "code": "channel:atm",
+              "category": "context",
+              "points": "3.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "card:incoming_transfer",
+              "category": "card",
+              "points": "18.00",
+              "description": "Базовый риск операции «Получить входящий перевод»",
+              "evidence": {
+                "card_code": "incoming_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.00",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "70000.00"
+              }
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "channel:bank",
+              "category": "context",
+              "points": "-2.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "70000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "detail:incoming_transfer:transfer_source:domestic_bank",
+              "category": "action_detail",
+              "points": "-2.00",
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "evidence": {}
+            },
+            {
+              "step_id": "322eb4c1-2e18-5b26-a5d0-a58488e2be16",
+              "code": "detail:incoming_transfer:sender_relationship:regular_sender",
+              "category": "action_detail",
+              "points": "-1.00",
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.80",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "78000.00"
+              }
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "card:card_transfer",
+              "category": "card",
+              "points": "12.00",
+              "description": "Базовый риск операции «Перевести по карте»",
+              "evidence": {
+                "card_code": "card_transfer",
+                "card_version": 1
+              }
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "amount:absolute",
+              "category": "amount",
+              "points": "7.80",
+              "description": "Крупные суммы повышают приоритет проверки",
+              "evidence": {
+                "amount": "78000.00"
+              }
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "recipient:known_counterparty",
+              "category": "context",
+              "points": "0.00",
+              "description": "Профиль получателя",
+              "evidence": {}
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "time_of_day:day",
+              "category": "context",
+              "points": "0.00",
+              "description": "Время операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "velocity:normal",
+              "category": "context",
+              "points": "0.00",
+              "description": "Темп операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "channel:mobile",
+              "category": "context",
+              "points": "0.00",
+              "description": "Канал операции",
+              "evidence": {}
+            },
+            {
+              "step_id": "24b16f62-3939-54c7-9c7d-43eafdc0d9a7",
+              "code": "amount:adjustment",
+              "category": "amount",
+              "points": "-5.00",
+              "description": "Балансировочная поправка для суммы от 60000.00 ₽",
+              "evidence": {
+                "amount": "78000.00",
+                "minimum_gross": "60000.00"
+              }
+            },
+            {
+              "step_id": null,
+              "code": "sequence:repeated_amounts",
+              "category": "sequence",
+              "points": "16.00",
+              "description": "Одинаковые суммы в разных шагах похожи на шаблонную цепочку",
+              "evidence": {
+                "repeated_amount_groups": 2
+              }
+            },
+            {
+              "step_id": "643f2c1d-42e2-59f2-b58f-82680092b865",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "a4698e65-c2c6-5e2c-a439-3ffdd752d361",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            },
+            {
+              "step_id": "dce3e638-247a-5ece-8aa1-0e7bd801ce63",
+              "code": "sequence:rapid_turnover",
+              "category": "sequence",
+              "points": "10.00",
+              "description": "Большая часть поступления быстро уходит следующим действием",
+              "evidence": {}
+            }
+          ],
+          "raw_score": "189.00",
+          "normalized_score": "21.00",
+          "step_count": 9,
+          "thresholds": {
+            "review": "20.00",
+            "suspicious": "35.00"
+          },
+          "disclaimer": "Учебная модель; результат не является AML-решением"
+        }
+      },
+      "blockers": [],
+      "leaderboard": {
+        "stealth_score": "79.00",
+        "resource_score": "21.39",
+        "game_score": "58.84"
+      }
+    }
+  ]
+}

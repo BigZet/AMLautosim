@@ -11,6 +11,11 @@ python -m scripts.check_game_balance
 python -m pytest -q tests/unit
 ```
 
+При объединении unit и API в одном запуске используйте
+`python -m pytest -q --import-mode=importlib tests/unit tests/api`:
+в каталогах есть одноимённые модули тестов. Обычный режим импорта pytest
+выдаёт `import file mismatch`; это не основание исключать тесты.
+
 Для API и нагрузочных тестов задайте `TEST_ADMIN_DATABASE_URL` пользователя
 PostgreSQL с правом CREATEDB, направленный на служебную базу `postgres`.
 Пароль со специальными символами в URL должен быть percent-encoded.
@@ -56,3 +61,13 @@ python scripts/check_nicegui_transport.py --url http://127.0.0.1:8080
 Сборка, первый запуск, повторный seed и восстановление резервной копии входят
 в контейнерную проверку. Инструкции: [deployment](../docs/deployment.md) и
 [operations](../docs/operations.md). Результаты фиксируются в `docs/verification/`.
+
+## Офлайн CatBoost
+
+Тесты `tests/ml` выполняются отдельно в образе `deploy/Dockerfile.ml` с
+`requirements-ml.txt`. Они не требуют БД. Команды и отдельная интеграционная
+проверка оценки без вызова fit: [обучение CatBoost](../docs/catboost-training.md).
+
+## Интеграция CatBoost и SHAP
+
+Для нового выпуска: `tests/ml/test_model_scoring.py`, `tests/api/test_model_integration.py`, `tests/unit/test_expanded_result_ui.py`. Нужны CatBoost 1.2.10 и отдельная PostgreSQL. Проверка всех 4413 прогнозов и SHAP — `python -m scripts.verify_model_integration`; параметры приведены в [отчёте](../docs/verification/catboost-shap-integration.md). Старые v7 API-сценарии описывают снятый с эксплуатации пилот и не подтверждают новый контракт.

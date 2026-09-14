@@ -1,0 +1,12 @@
+{
+  "MODEL_CARD.md": "f33ddd32ed177fe2c44339962f45a7aa4b450940bcb53b6f0a993ec3f8497d79",
+  "evaluation-code.json": "7aef29fd3118e3c2aca3ba5e6ed75509cf8898ec2f56f33f992c1c112d15450f",
+  "feature-importance.csv": "577d6ec86559a8195496491a1d0e65b38421d22fe1adcd3be5f0fee300f2911f",
+  "feature-importance.png": "4a3c44abbaa7b8a1749c30773efba5df1cdda6d489ca62bc328433c6ce86535e",
+  "largest-errors.json": "ff99729f506d4966514d1ffc203bdcb33ff89314cedf007a0c26c87ee0e56cc5",
+  "metrics.json": "3cca50283943cdab2c2d21994bc3297acdda95ca283d329dda01d342ac5bf190",
+  "pairs.json": "81cd0cdeb9b7df1e68638719670c0f8b043f848d1af3b1d69aa06325565eee50",
+  "predictions.csv": "854795c10cc4eade3c7023a598595a09d5c10ec0b23d1b125ac59f8f4748c799",
+  "slices.csv": "f9cf65cf15ec84d5f91344fb4a58550ccffe1e50cb5fa6d2c9b5c0b93213f744",
+  "test-errors.png": "ea306aaf14fba575ea6d44b54a4feeaaa055dd92655de19b6193c0df05f1d07c"
+}

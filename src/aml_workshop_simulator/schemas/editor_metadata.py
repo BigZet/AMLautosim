@@ -14,6 +14,7 @@ class NumericOverrideOut(BaseModel):
 
 
 class EditorMetadataOut(BaseModel):
+    available_contracts: list[int] = [7]
     version: int
     schema_version: int
     limits: dict[str, int]

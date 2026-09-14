@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "restart_preserves_data": true,
+  "independent_restore_preserves_data": true,
+  "table_hashes": {
+    "rounds": "3a171711cad6bb872d44205e73689cef",
+    "scenarios": "076a3c20852628c52fd3a1a5af895e69",
+    "scoring_results": "4e4277bb9c14e34444aeec82700f79e6",
+    "audit_events": "c2b5531421140d35e689acdae43e55d0"
+  }
+}

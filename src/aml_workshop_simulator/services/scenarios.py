@@ -15,6 +15,9 @@ from src.aml_workshop_simulator.domain.lifecycle import (
     require_revision,
 )
 from src.aml_workshop_simulator.domain.rules import submit_blockers
+from src.aml_workshop_simulator.domain.contract_versions import (
+    require_playable_contract,
+)
 from src.aml_workshop_simulator.schemas.scenarios import (
     ScenarioOut,
     ScenarioPreviewIn,
@@ -26,7 +29,7 @@ from src.aml_workshop_simulator.services import participant_state
 from src.aml_workshop_simulator.services.audit import record_event
 from src.aml_workshop_simulator.services.projections import scenario_out
 from src.aml_workshop_simulator.services.scenario_service import (
-    canonical_steps,
+    canonical_round_steps,
     load_round_card_specs,
     payload_hash,
     prepare_scenario,
@@ -98,9 +101,12 @@ async def submit(
 ) -> ScenarioOut:
     round_obj = await get_round(db, round_id, lock="share")
     scenario = await get_scenario(db, round_id, participant_id, lock=True)
+    require_playable_contract(round_obj.game_config)
     if scenario is not None and scenario.status in {"submitted", "scored"}:
         specs = load_round_card_specs(round_obj)
-        steps = canonical_steps(payload.steps, specs, round_policy(round_obj, specs))
+        steps = canonical_round_steps(
+            round_obj, payload.steps, specs, round_policy(round_obj, specs)
+        )
         if (
             scenario.last_client_mutation_id == payload.client_mutation_id
             and scenario.payload_hash == payload_hash(steps)

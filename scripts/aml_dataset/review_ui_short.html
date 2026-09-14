@@ -1,0 +1,40 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>12 сценариев для проверки</title><style>
+body{font:16px/1.5 system-ui;color:#182c42;background:#f1f4f8;margin:0}main{max-width:1050px;margin:auto;padding:24px}
+article{background:white;padding:22px;border-radius:12px;margin:20px 0}header{position:sticky;top:0;background:#f1f4f8;padding:10px 0;z-index:1}
+button,input,textarea{font:inherit;padding:9px;border:1px solid #b2c1d1;border-radius:6px}button{background:#e4effc;cursor:pointer;margin:4px}input{width:100px}textarea{display:block;width:95%;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:7px;border-bottom:1px solid #dfe6ef;text-align:left}.scroll{overflow:auto}pre{white-space:pre-wrap;font-size:13px}
+.status{color:#205c3d}p{margin:10px 0}h1{font-size:26px}h2{font-size:21px}.dirty{color:#994810}
+</style><main><h1>Последняя проверка: 12 сценариев</h1>
+<p>Все примеры показаны ниже сразу, вместе с расчётным риском. Слепой проверки нет.
+Нажмите «Оценка подходит» или измените балл и поясните замечание.</p>
+<header><span id="progress"></span> <button id="export">Скачать ответы CSV</button><span id="notice" role="status"></span></header>
+<div id="cases"></div></main><script id="data" type="application/json">__REVIEW_DATA__</script><script>
+const data=JSON.parse(document.getElementById('data').textContent),key='aml-review:'+data.key;
+let answers={},storageOK=true;const dirty=new Set();try{answers=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){storageOK=false}
+const names={incoming_transfer:'Поступление',card_transfer:'Перевод',cash_withdrawal:'Наличные',purchase:'Покупка',salary:'Зарплата'};
+const groups={risk_range:'Разные уровни риска',boundary:'Пограничный случай',baseline_disagreement:'Расхождение с прежним скорингом'};
+const byId=id=>document.getElementById(id),token=r=>r.id+':'+r.observable_hash;
+function el(tag,text,parent){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(parent)parent.append(e);return e}
+function progress(){byId('progress').textContent=data.pilot.filter(r=>answers[token(r)]).length+' / '+data.pilot.length+' сохранено. ';}
+function save(r,score,reason,state){answers[token(r)]={id:r.id,observable_hash:r.observable_hash,decision:score===r.target?'accept':'revise',reviewed_score:score,reason};dirty.delete(r.id);
+try{localStorage.setItem(key,JSON.stringify(answers))}catch(e){storageOK=false}state.textContent=storageOK?'Ответ сохранён':'Сохранено в памяти: скачайте CSV до закрытия';state.className='status';progress()}
+data.pilot.forEach((r,i)=>{const card=el('article',undefined,byId('cases'));card.dataset.case=r.id;const a=answers[token(r)];
+el('h2',(i+1)+'. '+r.id+' — риск '+Number(r.target).toFixed(2),card);el('p',groups[r.selection]||'',card);
+const history=r.behavior.history.operations;el('p',history===null?'История недоступна':history.length?'В истории '+history.length+' операций':'История доступна: операций не было',card);
+el('p','Оборот '+r.totals.target_outflow+' ₽. Остаток '+r.resources.balance+' ₽, время '+r.resources.time+', энергия '+r.resources.energy+'.',card);
+const table=el('table',undefined,el('div',undefined,card));table.parentElement.className='scroll';const tr=el('tr',undefined,table);['№','Операция','Сумма, ₽','Сторона','Время'].forEach(v=>el('th',v,tr));
+const parties=Object.fromEntries(r.behavior.counterparties.map(p=>[p.id,p.name]));r.steps.forEach((s,j)=>{const row=el('tr',undefined,table);[j+1,names[s.card.code],s.amount,parties[s.sender_id||s.recipient_id]||'—',r.timeline[j].occurred_at.slice(0,16).replace('T',' ')].forEach(v=>el('td',v,row))});
+const details=el('details',undefined,card);el('summary','История, профиль, сведения о сторонах и объяснение балла',details);el('pre',JSON.stringify({profile:r.behavior.profile,initial_resources:r.initial_resources,history:r.behavior.history,parties:r.behavior.counterparties,details:r.steps.map(s=>({context:s.context,...s.action_details})),explanation:r.explanation},null,2),details);
+const label=el('label','Ваша оценка: ',card),score=el('input',undefined,label);score.type='number';score.min=0;score.max=100;score.step='.0001';score.value=a?a.reviewed_score:r.target;score.setAttribute('aria-label','Оценка '+r.id);
+const reason=el('textarea',undefined,card);reason.placeholder='Замечание, если хотите изменить оценку';reason.value=a?a.reason:'';reason.setAttribute('aria-label','Замечание '+r.id);
+const accept=el('button','Оценка подходит',card),revise=el('button','Сохранить исправление',card),state=el('p',a?'Ответ сохранён':'Ответ ещё не сохранён',card);state.className='status';
+score.oninput=reason.oninput=()=>{dirty.add(r.id);state.textContent='Есть несохранённые изменения';state.className='dirty'};
+accept.onclick=()=>{score.value=r.target;save(r,r.target,reason.value.trim()||'Предложенная оценка принята пользователем.',state)};
+revise.onclick=()=>{const n=Number(score.value);if(!score.value||!Number.isFinite(n)||n<0||n>100||!reason.value.trim()){state.textContent='Укажите балл 0–100 и причину изменения.';return}save(r,n,reason.value.trim(),state)};
+});progress();if(!storageOK)byId('notice').textContent='Локальное хранилище недоступно: скачайте CSV перед закрытием.';
+byId('export').onclick=()=>{const fields=['id','observable_hash','decision','reviewed_score','reason'],q=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+const rows=data.pilot.map(r=>answers[token(r)]||{id:r.id,observable_hash:r.observable_hash});const csv=[fields,...rows.map(r=>fields.map(f=>r[f]))].map(row=>row.map(q).join(',')).join('\r\n')+'\r\n';
+const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=el('a');a.href=url;a.download=data.decisions_filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);byId('notice').textContent='CSV скачан; незаполненные ответы остались пустыми.'};
+window.addEventListener('beforeunload',e=>{if(dirty.size){e.preventDefault();e.returnValue=''}});
+</script></html>
