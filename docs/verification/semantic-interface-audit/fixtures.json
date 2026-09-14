@@ -1,0 +1,2828 @@
+{
+  "config": {
+    "schema_version": 8,
+    "resources": {
+      "initial_balance": "180000.00",
+      "initial_energy": 30,
+      "initial_time": 30
+    },
+    "objectives": {
+      "target_outflow": "400000.00",
+      "max_actions": 14
+    },
+    "constraints": {
+      "max_identical_steps": 2,
+      "max_night_operations": 2,
+      "max_anonymous_operations": 2,
+      "category_limits": {
+        "anonymous": "60000.00",
+        "cash": "120000.00"
+      }
+    },
+    "operations": [
+      {
+        "code": "salary",
+        "version": 1,
+        "visible_params": [
+          "action.income_basis"
+        ],
+        "min_amount": null,
+        "max_amount": null,
+        "max_occurrences": null,
+        "energy_cost": null,
+        "time_cost": null,
+        "fee_rate": null,
+        "risk_weight": null
+      },
+      {
+        "code": "incoming_transfer",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.velocity",
+          "action.sender_relationship",
+          "action.transfer_source",
+          "context.time_of_day"
+        ],
+        "min_amount": null,
+        "max_amount": null,
+        "max_occurrences": null,
+        "energy_cost": null,
+        "time_cost": null,
+        "fee_rate": null,
+        "risk_weight": null
+      },
+      {
+        "code": "card_transfer",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.recipient_type",
+          "context.velocity"
+        ],
+        "min_amount": null,
+        "max_amount": null,
+        "max_occurrences": null,
+        "energy_cost": null,
+        "time_cost": null,
+        "fee_rate": null,
+        "risk_weight": null
+      },
+      {
+        "code": "cash_withdrawal",
+        "version": 1,
+        "visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.velocity"
+        ],
+        "min_amount": null,
+        "max_amount": null,
+        "max_occurrences": null,
+        "energy_cost": null,
+        "time_cost": null,
+        "fee_rate": null,
+        "risk_weight": null
+      },
+      {
+        "code": "purchase",
+        "version": 1,
+        "visible_params": [],
+        "min_amount": null,
+        "max_amount": null,
+        "max_occurrences": null,
+        "energy_cost": null,
+        "time_cost": null,
+        "fee_rate": null,
+        "risk_weight": null
+      }
+    ],
+    "resource_rules": {
+      "minimum_time_cost": 1,
+      "channel_time": {
+        "bank": 0,
+        "branch": 2,
+        "mobile": 0,
+        "web": 0,
+        "atm": 0
+      },
+      "velocity_time": {
+        "spaced": {
+          "time_cost": 2
+        },
+        "normal": {
+          "time_cost": 1
+        },
+        "rapid": {
+          "time_cost": 0
+        }
+      },
+      "amount_adjustment": {
+        "minimum_gross": "60000.00",
+        "time_cost": 1
+      }
+    },
+    "ruleset_version": "game-rules-v5",
+    "scoring": {
+      "version": "risk-rules-v3",
+      "rules": {
+        "recipient_points": {
+          "known_counterparty": "0",
+          "new_counterparty": "12",
+          "anonymous_wallet": "25"
+        },
+        "time_of_day_points": {
+          "day": "0",
+          "evening": "3",
+          "night": "9"
+        },
+        "velocity_points": {
+          "spaced": "-5",
+          "normal": "0",
+          "rapid": "12"
+        },
+        "channel_points": {
+          "bank": "-2",
+          "branch": "-3",
+          "mobile": "0",
+          "web": "2",
+          "atm": "3"
+        },
+        "amount_divisor": "10000",
+        "amount_max_points": "12",
+        "amount_adjustment": {
+          "minimum_gross": "60000.00",
+          "risk_points": "-5"
+        },
+        "sequence": {
+          "repeated_min_amount": "10000.00",
+          "repeated_points": "8",
+          "repeated_max_points": "16",
+          "turnover_ratio": "0.7",
+          "turnover_points": "10"
+        },
+        "explanation_factor_limit": 5
+      },
+      "review_threshold": "20.00",
+      "suspicious_threshold": "35.00"
+    },
+    "leaderboard": {
+      "version": "leaderboard-v2",
+      "weights": {
+        "resources": "0.35",
+        "stealth": "0.65"
+      },
+      "resource_weights": {
+        "available_steps": "0.20",
+        "balance": "0.10",
+        "energy": "0.25",
+        "fees": "0.05",
+        "time": "0.40"
+      }
+    },
+    "behavior": {
+      "sender_policy": "separate-employer-v1",
+      "release": "expanded-game-v1",
+      "counterparties": [
+        {
+          "id": "A",
+          "name": "Алексей — постоянный отправитель",
+          "kind": "person",
+          "information_status": "sufficient",
+          "personal_relationship": "known",
+          "category": null
+        },
+        {
+          "id": "B",
+          "name": "Борис — известный новый контрагент",
+          "kind": "person",
+          "information_status": "sufficient",
+          "personal_relationship": "known",
+          "category": null
+        },
+        {
+          "id": "C",
+          "name": "Контрагент с ограниченными сведениями",
+          "kind": "person",
+          "information_status": "limited",
+          "personal_relationship": "unknown",
+          "category": null
+        },
+        {
+          "id": "D",
+          "name": "Контрагент без доступных сведений",
+          "kind": "person",
+          "information_status": "unknown",
+          "personal_relationship": "unknown",
+          "category": null
+        },
+        {
+          "id": "employer",
+          "name": "Работодатель",
+          "kind": "institution",
+          "information_status": "sufficient",
+          "personal_relationship": "unknown",
+          "category": "employer"
+        },
+        {
+          "id": "shop",
+          "name": "Магазин",
+          "kind": "merchant",
+          "information_status": "sufficient",
+          "personal_relationship": "unknown",
+          "category": "groceries"
+        }
+      ],
+      "profile": {
+        "id": "employed-client",
+        "title": "Наёмный сотрудник",
+        "description": "Получает зарплату и переводы от знакомых, оплачивает повседневные покупки. Другие доходы неизвестны."
+      },
+      "history": {
+        "version": "observed-history-v1",
+        "window_days": 30,
+        "operations": [
+          {
+            "id": "h1",
+            "occurred_at": "2026-08-15T09:00:00+03:00",
+            "operation_code": "salary",
+            "amount": "80000.00",
+            "counterparty_id": "employer",
+            "category": null
+          },
+          {
+            "id": "h2",
+            "occurred_at": "2026-09-02T09:00:00+03:00",
+            "operation_code": "incoming_transfer",
+            "amount": "25000.50",
+            "counterparty_id": "A",
+            "category": null
+          },
+          {
+            "id": "h3",
+            "occurred_at": "2026-09-04T18:00:00+03:00",
+            "operation_code": "purchase",
+            "amount": "3500.25",
+            "counterparty_id": "shop",
+            "category": null
+          }
+        ]
+      },
+      "timeline": {
+        "version": "operation-timeline-v1",
+        "starts_at": "2026-09-14T09:00:00+03:00",
+        "timezone": "Europe/Moscow",
+        "waiting_costs": {
+          "1": 0,
+          "10": 1,
+          "60": 2,
+          "1440": 4
+        }
+      },
+      "turnover": {
+        "target_operation_codes": [
+          "card_transfer",
+          "cash_withdrawal"
+        ]
+      },
+      "purchases": {
+        "version": "purchase-policy-v1",
+        "max_total": "30000.00"
+      }
+    },
+    "risk_model": {
+      "model_version": "aml-catboost-behavior-v2",
+      "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b",
+      "extractor": "aml-observable-v3.0",
+      "explanation_version": 3,
+      "dictionary_sha256": "d620259fc5e87f1a8685ee0dc7bbc9293c00255f54722ba44c842054376c502d"
+    },
+    "config_version": "round-config-v8:sha256:76fa8a3392569126daecb1cedca9927be1ff69db36fc216908110fd6e3ca3392",
+    "card_snapshots": [
+      {
+        "id": 3,
+        "code": "card_transfer",
+        "version": 1,
+        "title": "Перевести по карте",
+        "description": "Перевод другому клиенту банка.",
+        "category": "Перевод",
+        "flow": "debit",
+        "risk_weight": "12.00",
+        "energy_cost": 2,
+        "time_cost": 1,
+        "fee_rate": "0.005000",
+        "min_amount": "10000.00",
+        "max_amount": "80000.00",
+        "max_occurrences": 8,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [
+          "mobile",
+          "web",
+          "branch"
+        ],
+        "context_fields": [
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "required": true,
+            "options": [
+              {
+                "value": "day",
+                "label": "День",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "evening",
+                "label": "Вечер",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "night",
+                "label": "Ночь",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          },
+          {
+            "key": "recipient_type",
+            "label": "Получатель",
+            "kind": "select",
+            "default": "known_counterparty",
+            "help": "Насколько хорошо клиенту известна принимающая сторона.",
+            "required": true,
+            "options": [
+              {
+                "value": "known_counterparty",
+                "label": "Знакомый контрагент",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "new_counterparty",
+                "label": "Новый контрагент",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "anonymous_wallet",
+                "label": "Анонимный кошелек",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          },
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "required": true,
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          }
+        ],
+        "fields": [],
+        "default_visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.recipient_type",
+          "context.velocity"
+        ]
+      },
+      {
+        "id": 4,
+        "code": "cash_withdrawal",
+        "version": 1,
+        "title": "Снять наличные",
+        "description": "Получение наличных в банкомате или отделении.",
+        "category": "Наличные",
+        "flow": "debit",
+        "risk_weight": "18.00",
+        "energy_cost": 2,
+        "time_cost": 1,
+        "fee_rate": "0.010000",
+        "min_amount": "10000.00",
+        "max_amount": "100000.00",
+        "max_occurrences": 4,
+        "requires_card_code": null,
+        "quota_category": "cash",
+        "channels": [
+          "atm",
+          "branch"
+        ],
+        "context_fields": [
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "required": true,
+            "options": [
+              {
+                "value": "day",
+                "label": "День",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "evening",
+                "label": "Вечер",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "night",
+                "label": "Ночь",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          },
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "required": true,
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          }
+        ],
+        "fields": [],
+        "default_visible_params": [
+          "channel",
+          "context.time_of_day",
+          "context.velocity"
+        ]
+      },
+      {
+        "id": 2,
+        "code": "incoming_transfer",
+        "version": 1,
+        "title": "Получить входящий перевод",
+        "description": "Зачисление от банка, криптобиржи или платежного сервиса. Источник и связь с отправителем влияют на затраты и учебный риск.",
+        "category": "Поступление",
+        "flow": "credit",
+        "risk_weight": "18.00",
+        "energy_cost": 3,
+        "time_cost": 1,
+        "fee_rate": "0.000000",
+        "min_amount": "10000.00",
+        "max_amount": "80000.00",
+        "max_occurrences": 3,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [
+          "bank"
+        ],
+        "context_fields": [
+          {
+            "key": "velocity",
+            "label": "Темп операции",
+            "kind": "select",
+            "default": "normal",
+            "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+            "required": true,
+            "options": [
+              {
+                "value": "spaced",
+                "label": "С интервалами",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "normal",
+                "label": "Обычный темп",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "rapid",
+                "label": "Быстро подряд",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          },
+          {
+            "key": "time_of_day",
+            "label": "Время операции",
+            "kind": "select",
+            "default": "day",
+            "help": "Нетипичное время может усилить сигнал модели.",
+            "required": true,
+            "options": [
+              {
+                "value": "day",
+                "label": "День",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "evening",
+                "label": "Вечер",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              },
+              {
+                "value": "night",
+                "label": "Ночь",
+                "risk_points": 0.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": ""
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "key": "transfer_source",
+            "label": "Источник перевода",
+            "kind": "select",
+            "default": "domestic_bank",
+            "help": "Откуда поступают деньги. Все суммы — в рублевом эквиваленте; это учебные профили источников.",
+            "required": true,
+            "options": [
+              {
+                "value": "domestic_bank",
+                "label": "Российский банк",
+                "risk_points": -2.0,
+                "time_cost": 1,
+                "energy_cost": 0,
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              },
+              {
+                "value": "foreign_bank_kg",
+                "label": "Зарубежный банк — Кыргызстан (Киргизия)",
+                "risk_points": 4.0,
+                "time_cost": 2,
+                "energy_cost": 1,
+                "description": "Учебный международный перевод требует дополнительной сверки реквизитов и происхождения средств"
+              },
+              {
+                "value": "crypto_exchange",
+                "label": "Криптобиржа",
+                "risk_points": 9.0,
+                "time_cost": 0,
+                "energy_cost": 1,
+                "description": "Зачисление после продажи криптоактивов: в учебном профиле меньше контекста о предшествующих операциях"
+              },
+              {
+                "value": "payment_service",
+                "label": "Платежный сервис",
+                "risk_points": 5.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": "Посредник ускоряет зачисление, но в учебном профиле дает меньше сведений о первоначальном отправителе"
+              }
+            ]
+          },
+          {
+            "key": "sender_relationship",
+            "label": "Связь с отправителем",
+            "kind": "select",
+            "default": "regular_sender",
+            "help": "Профиль владельца исходного счета. Прогретый аккаунт в игре означает аккаунт с историей операций; отправитель при этом остается анонимным.",
+            "required": true,
+            "options": [
+              {
+                "value": "anonymous_new_account",
+                "label": "Анонимный отправитель — новый аккаунт",
+                "risk_points": 12.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": "В учебном профиле отправитель неизвестен и история операций отсутствует"
+              },
+              {
+                "value": "anonymous_established_account",
+                "label": "Анонимный отправитель — прогретый аккаунт",
+                "risk_points": 6.0,
+                "time_cost": 1,
+                "energy_cost": 0,
+                "description": "В учебном профиле есть история операций, ее просмотр требует времени; личность отправителя не подтверждена"
+              },
+              {
+                "value": "regular_sender",
+                "label": "Постоянный отправитель",
+                "risk_points": -1.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели"
+              }
+            ]
+          }
+        ],
+        "default_visible_params": [
+          "channel",
+          "context.velocity",
+          "action.sender_relationship",
+          "action.transfer_source",
+          "context.time_of_day"
+        ]
+      },
+      {
+        "id": 5,
+        "code": "purchase",
+        "version": 1,
+        "title": "Оплатить товары или услуги",
+        "description": "Покупка у торговой организации: 1 000–20 000 ₽, до трёх покупок и не более 30 000 ₽ суммарно. Расходует ресурсы, не засчитывается в цель.",
+        "category": "Покупка",
+        "flow": "debit",
+        "risk_weight": "0.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "fee_rate": "0.000000",
+        "min_amount": "1000.00",
+        "max_amount": "20000.00",
+        "max_occurrences": 3,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [],
+        "context_fields": [],
+        "fields": [],
+        "default_visible_params": []
+      },
+      {
+        "id": 1,
+        "code": "salary",
+        "version": 1,
+        "title": "Получить зарплату",
+        "description": "Регулярное поступление от известного работодателя.",
+        "category": "Поступление",
+        "flow": "credit",
+        "risk_weight": "3.00",
+        "energy_cost": 8,
+        "time_cost": 8,
+        "fee_rate": "0.000000",
+        "min_amount": "20000.00",
+        "max_amount": "30000.00",
+        "max_occurrences": 1,
+        "requires_card_code": null,
+        "quota_category": null,
+        "channels": [],
+        "context_fields": [],
+        "fields": [
+          {
+            "key": "income_basis",
+            "label": "Основание дохода",
+            "kind": "select",
+            "default": "payroll_registry",
+            "help": null,
+            "required": true,
+            "options": [
+              {
+                "value": "payroll_registry",
+                "label": "Зарплатный реестр",
+                "risk_points": -3.0,
+                "time_cost": 1,
+                "energy_cost": 0,
+                "description": "Назначение и реестр подтверждают регулярность выплаты"
+              },
+              {
+                "value": "service_contract",
+                "label": "Договор услуг",
+                "risk_points": 2.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": "Нерегулярный договор требует дополнительного контекста"
+              },
+              {
+                "value": "no_reference",
+                "label": "Без назначения",
+                "risk_points": 8.0,
+                "time_cost": 0,
+                "energy_cost": 0,
+                "description": "Отсутствие назначения затрудняет проверку источника дохода"
+              }
+            ]
+          }
+        ],
+        "default_visible_params": [
+          "action.income_basis"
+        ]
+      }
+    ]
+  },
+  "strategies": [
+    {
+      "number": 1,
+      "name": "01 — Сначала поступления",
+      "steps": [
+        {
+          "step_id": "98a6ea29-5dfe-4eda-8cd0-a46aca29cf8b",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": null,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "7e18bce8-96b9-4d51-8546-225496f0939c",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "4ff2d847-aed4-4aa3-a2a2-6f57d2227ecf",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "e3960150-92bf-4fc4-8d8e-6cac931229d9",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "c8252946-0357-4f0e-b2f0-29dc6ce464f1",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "bcb6d5d9-1553-4ae5-8e98-754014cbf565",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "4ddd19d9-b367-4130-939d-69a9cbb388dd",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "4327edf8-325b-4d7c-95cf-279fb85aa4c8",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "1644109c-4100-4650-b854-b22f31a41d1d",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "02 — Сначала свои средства",
+      "steps": [
+        {
+          "step_id": "e8b7d8bc-50e1-4901-a23e-3bea67d27d41",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "1288d677-4f4d-4001-8c6f-ca272b1484ce",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "e2563d47-cd37-435b-bf43-20f6263d89a5",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "c92d7be8-8c48-4b6c-a056-c789a4462107",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "b78cce8c-24df-4b10-8b56-8734b08e7ed1",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "13350457-16fe-4b86-96dd-f2a78c9c05a4",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "9ecd486e-68e6-44e4-ad16-522d89ca633c",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "3a272118-0ca8-45f4-8037-0718160ad72a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "586d0819-2264-4fb5-b355-dc3ad49a74d5",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "03 — Чередование переводов",
+      "steps": [
+        {
+          "step_id": "c7c4c65e-37b8-46c9-83d4-a2b49242dd06",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": null,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "fc027b4c-6d46-4360-a45a-9e7146ef8285",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "28607b1f-d7df-47c1-ab83-8e4fef927894",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "ea8d3f36-76be-4e76-b904-637d959c1920",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "c704e180-53e3-487e-b155-5de807e528a9",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "c399198f-a1da-405b-b7d4-a1b68125143c",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "bacd0b15-9a1c-4469-a364-aa11d4da8cd9",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "d25736f9-4d6a-4d9e-972f-e85e303be194",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "ed0874b1-7c0f-4e12-8969-5864a6779fe3",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "04 — Наличные двумя снятиями",
+      "steps": [
+        {
+          "step_id": "49365571-fe30-45b4-a534-04ce6a8a7034",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": null,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "aac615e9-dbc8-44f7-8f34-6348dfe20c82",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "bd554745-87f9-4138-bd94-5c80615f34aa",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "68841d9e-d062-457e-81b5-8b9bd5a4864e",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "d3b655a7-053a-4f95-8207-4d90cb3c77fd",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "4228f120-f032-4a14-ae92-246eeaccda04",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "55d6eb3b-4332-410f-a094-6f9d9a58eaab",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "1788640c-09aa-4305-adf1-09a396359087",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "542e4f32-ee13-4b73-b6fa-c5d2289daf51",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "name": "05 — Одно крупное снятие",
+      "steps": [
+        {
+          "step_id": "6b38bc75-018b-4eb2-b637-6948fd80313f",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "75000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "a94d55a5-75be-4b2d-ac91-665a95c981cb",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "100000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "88b00704-a4a5-412d-8de9-ca51cbffc679",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "62cb36d0-d844-4419-b9d5-b7aadfcb435b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "75000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "3a4eb959-d6cd-478b-b1ed-93a531e5acf1",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "168290f2-6c5c-45e9-8f87-5e085fb7ab9d",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "75000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "c930fa9d-a514-4d58-908c-c7638bc71f5e",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "cb7d0aba-aac6-4db5-b953-1a9d762d6f98",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "75000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "06 — Только переводы",
+      "steps": [
+        {
+          "step_id": "22987bfa-6286-4e9a-87bb-15da3608a1d4",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "ff3ed18b-95d5-4ff4-bb86-076de884f5a7",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "9fe43a43-b2a2-4a2d-b0bb-a9c0505fa97f",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "32878a42-9585-4b29-b987-ede3b8e3c1cf",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "42eb22f4-1b70-4db5-989d-59207a545136",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "11f0c407-1d03-4634-8884-3217600a7ab8",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "00f20398-6841-4307-a233-cd5f0b5c075e",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "aa632503-1112-4bcc-b328-efcaa56fc6c8",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "name": "07 — Восемь небольших переводов",
+      "steps": [
+        {
+          "step_id": "5e2bbfa8-de4f-4e3e-9b15-28a2ec11c8b2",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "11031164-8064-43f9-b4cf-86d7cdabb1e9",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "7d100f1a-8fd2-41b0-8833-ae834b2484a2",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "35afd0f6-dabc-456e-a83f-b6e00854c138",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "d00a1a53-1f82-43a3-95a9-15ca2d4725a4",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "fccdf166-a181-4b36-9e02-e536070390c3",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "6a7a0deb-dc76-478f-b183-6afc615458de",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "41ea6903-975a-46f0-be4c-941824621267",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "bd6b3d5a-cad6-4245-ad2f-861a6fe6a85a",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "9c45eca9-b90c-4138-8dad-97313d9dc5b4",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "bc957eee-6d91-4a7c-a6b5-141adeb8e3c8",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "name": "08 — Неравные суммы",
+      "steps": [
+        {
+          "step_id": "338814eb-9397-4bbb-bab3-edc5d26bd15b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "29a71087-1514-44db-bb70-6b0e5674a7f2",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "7b679052-ba15-4205-8e1d-66a9cbc63baf",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "77544b08-c5c5-4c19-8402-6d1cd2a7935a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "8b90b53c-4304-4f6f-ab49-5025445c5a30",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "2c8ca681-39c3-4f1b-8f5a-d1994deb5c2e",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "5e05fa89-bb0f-4968-b4d4-b4167b377f1f",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "1797a757-0930-4c9b-bc90-4c4a184fbf80",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "a14203fe-02fa-49a0-86b5-61a7cf9298db",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "name": "09 — Зарплата в начале",
+      "steps": [
+        {
+          "step_id": "7c9ea415-caee-420d-805a-d7bc9917508a",
+          "card": {
+            "id": 1,
+            "code": "salary",
+            "version": 1
+          },
+          "amount": "30000",
+          "context": {},
+          "action_details": {
+            "income_basis": "payroll_registry"
+          },
+          "interval_minutes": null,
+          "sender_id": "employer"
+        },
+        {
+          "step_id": "8636f25c-0c78-4b01-b207-961df105a91a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "f72df849-3982-488d-8a01-5828525b47bc",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "b72e48f8-b5b3-4ebe-ad55-9d033a34b933",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "d4657e51-3c7e-4d74-a4bf-20181285e027",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "81f3580b-5f92-452d-a4fb-27963883b59e",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "c3d9ccf8-e8f9-4c11-8a25-b8e3f4681e1d",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "d69fefaf-c01a-472a-8f46-3569ebb3cd8c",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "924124e6-262c-4b03-9597-b843af7e0e75",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "name": "10 — Зарплата в конце",
+      "steps": [
+        {
+          "step_id": "dbf3702d-af25-4030-acda-35a56834973a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "9e2900b8-bede-428a-9563-b5c5e8074d3a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "9b0fe2a7-a22a-4bb7-9636-e1bb34f8a923",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "2fc0d912-49ba-41ef-8996-75d957db734e",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "6dc4d2ed-3e41-4c2e-a7ed-d6f5e94f039d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "b4ab4625-3f43-4c2b-8c64-1f2168c18972",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "b5c2a555-7dfb-49de-84c2-08d63efc108d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "8e9546cb-3d9f-4bf5-860e-5d283048ed8b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "4d700df5-d21f-43c1-90b2-6caf7381801d",
+          "card": {
+            "id": 1,
+            "code": "salary",
+            "version": 1
+          },
+          "amount": "30000",
+          "context": {},
+          "action_details": {
+            "income_basis": "payroll_registry"
+          },
+          "interval_minutes": 1,
+          "sender_id": "employer"
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "name": "11 — Три покупки в цепочке",
+      "steps": [
+        {
+          "step_id": "04f3ef9b-9932-479c-96b9-2714a8699dc6",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "324104f7-6eda-483d-a49e-b6319662b060",
+          "card": {
+            "id": 5,
+            "code": "purchase",
+            "version": 1
+          },
+          "amount": "5000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "shop"
+        },
+        {
+          "step_id": "907e3020-eff6-438b-b503-792f76ebcd83",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "0d478f7f-1893-466b-b817-fda13477297a",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "49f881e6-2f67-4f3c-a8fb-54a813b75740",
+          "card": {
+            "id": 5,
+            "code": "purchase",
+            "version": 1
+          },
+          "amount": "5000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "shop"
+        },
+        {
+          "step_id": "1b6916a6-8090-413b-a4b7-98e35f8fdc0d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "ee196d11-5308-4cf9-bbf4-738ff74ac8f5",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "785b3360-bd85-458d-8d02-bc8281b4ce3f",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "1fa21770-2607-4940-862b-849409c8e009",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "028bece8-51fe-4565-a28b-e4a868d373d5",
+          "card": {
+            "id": 5,
+            "code": "purchase",
+            "version": 1
+          },
+          "amount": "5000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "shop"
+        },
+        {
+          "step_id": "b968c19d-f7ea-4943-bd9f-ca943cf4c1bd",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "name": "12 — Разные источники и стороны",
+      "steps": [
+        {
+          "step_id": "d560543c-f4e9-4d07-b615-33a9b14e50b6",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "2d8e4853-4a17-48e3-9101-25439c1f7139",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "d8de68a5-4c36-477e-a5a6-119a434a3210",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "28fcedc0-5b42-46b2-90e9-c073656547a3",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "50000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "4388b0ae-6171-4c7f-a692-6b923f9f20ba",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "payment_service"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "f24c8f17-eee0-4d0c-9e43-676283453d26",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "8779a90e-d1b5-4826-aa5d-19bc5aff21c6",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "crypto_exchange"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "f2c6b0d9-4d4b-4b8f-86b6-9d7fc2b39c42",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "60000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "de4f9ac2-5367-4686-ac0e-c4e3455d02dc",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "name": "13 — Переводы в разные дни",
+      "steps": [
+        {
+          "step_id": "5166f585-ceca-47f7-a594-86764f6432f3",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": null,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "b1c19c26-c379-4bd2-a658-b8f803196592",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "af845366-a173-4cb5-b01b-5020cce74c55",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1440,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "35370609-a15a-4162-a0ca-39b4352aa7bb",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "12100c0b-4207-4b4c-947d-0f5db791d549",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "069dc2c9-f1f9-438e-b12f-822ae260a777",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1440
+        },
+        {
+          "step_id": "55266b0f-0d82-4c5e-8d8b-377f624ecdca",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "33a2e8f3-2988-49c2-a4c0-7e623c5c3573",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "db3095e4-d925-45af-8665-328e12108be0",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "name": "14 — Серии с часовыми паузами",
+      "steps": [
+        {
+          "step_id": "1d6bb310-7fce-4c25-838f-13f9554f059b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "d03d1575-8734-4033-914d-e9e3176a3cd2",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "072e51c6-c83f-45ba-899b-0a83b10f9e23",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 60,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "2a8e53df-ed13-4e1e-8beb-215dedc1f1c3",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "a98d0fde-c09b-4964-bea9-4c3f7b078884",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "720c46c4-aff9-4b6e-b74e-d5fddf716019",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 60,
+          "recipient_id": "A"
+        },
+        {
+          "step_id": "83d8bcc4-ba07-4620-879f-cb7c595ab422",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "1c6fd382-6a45-4d7a-8ec7-f5845457d261",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 60,
+          "recipient_id": "B"
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "name": "15 — Три снятия с переводами",
+      "steps": [
+        {
+          "step_id": "ae203c45-0498-4ce6-a86a-76f11e600dce",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": null,
+          "recipient_id": "B"
+        },
+        {
+          "step_id": "df3cb848-bf9c-4980-8e22-3a4b38f7e183",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "40000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "27bc4caf-50a6-472b-9220-c50590957c9c",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "A"
+        },
+        {
+          "step_id": "fcac396b-2970-4c62-be97-78cd7c2077da",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "C"
+        },
+        {
+          "step_id": "05eb6f6a-bf88-470d-bdf2-05d423beedbd",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "40000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "4898b2a6-5354-4233-995b-d6f61e10eec9",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "B"
+        },
+        {
+          "step_id": "5dd7b5bb-ad2e-4b94-b7e5-6322be3fe80b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "D"
+        },
+        {
+          "step_id": "c344dd3c-f3ef-4903-8c30-199e5679f0b7",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "40000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "b1084cc7-e640-45e7-9a8c-6c5da4e791be",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000",
+          "context": {},
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "interval_minutes": 1,
+          "sender_id": "C"
+        },
+        {
+          "step_id": "5cb182e3-a244-4381-af4e-d55d4c96796b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "70000",
+          "context": {},
+          "action_details": {},
+          "interval_minutes": 1,
+          "recipient_id": "A"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "strategy": "10 — Зарплата в конце",
+      "risk_score": 33.74,
+      "game_score": 50.05
+    },
+    {
+      "strategy": "09 — Зарплата в начале",
+      "risk_score": 33.68,
+      "game_score": 49.51
+    },
+    {
+      "strategy": "06 — Только переводы",
+      "risk_score": 45.34,
+      "game_score": 48.96
+    },
+    {
+      "strategy": "05 — Одно крупное снятие",
+      "risk_score": 46.46,
+      "game_score": 48.22
+    },
+    {
+      "strategy": "01 — Сначала поступления",
+      "risk_score": 45.03,
+      "game_score": 47.61
+    },
+    {
+      "strategy": "03 — Чередование переводов",
+      "risk_score": 45.38,
+      "game_score": 47.39
+    },
+    {
+      "strategy": "08 — Неравные суммы",
+      "risk_score": 45.56,
+      "game_score": 47.27
+    },
+    {
+      "strategy": "12 — Разные источники и стороны",
+      "risk_score": 46.79,
+      "game_score": 47.11
+    },
+    {
+      "strategy": "14 — Серии с часовыми паузами",
+      "risk_score": 44.24,
+      "game_score": 46.88
+    },
+    {
+      "strategy": "04 — Наличные двумя снятиями",
+      "risk_score": 46.76,
+      "game_score": 46.01
+    },
+    {
+      "strategy": "07 — Восемь небольших переводов",
+      "risk_score": 46.79,
+      "game_score": 45.7
+    },
+    {
+      "strategy": "15 — Три снятия с переводами",
+      "risk_score": 46.7,
+      "game_score": 45.43
+    },
+    {
+      "strategy": "02 — Сначала свои средства",
+      "risk_score": 49.34,
+      "game_score": 44.81
+    },
+    {
+      "strategy": "13 — Переводы в разные дни",
+      "risk_score": 45.76,
+      "game_score": 43.4
+    },
+    {
+      "strategy": "11 — Три покупки в цепочке",
+      "risk_score": 48.9,
+      "game_score": 42.58
+    }
+  ]
+}

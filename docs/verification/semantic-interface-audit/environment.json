@@ -1,0 +1,9 @@
+{
+  "image_id": "sha256:f60d72d0e87da810c06b7a5f5f963ee0da2baf5f4be5ef8d2679485f3d14c2dc",
+  "architecture": "arm64",
+  "os": "linux",
+  "execution_exit_code": 0,
+  "network": "none",
+  "python": "3.13.15",
+  "catboost": "1.2.10"
+}

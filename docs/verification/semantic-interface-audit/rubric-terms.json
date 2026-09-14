@@ -1,0 +1,1913 @@
+[
+  {
+    "name": "01 — Сначала поступления",
+    "target": 45.0,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6666666666666666,
+        "interaction": 1.0,
+        "contribution": 5.333333,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.9506249999999999,
+        "interaction": 1.0,
+        "contribution": 15.21,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.025,
+        "interaction": 1.0,
+        "contribution": 0.3,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 1.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 17.656667,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "02 — Сначала свои средства",
+    "target": 49.081,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6666666666666666,
+        "interaction": 1.0,
+        "contribution": 5.333333,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.3746031746031746,
+        "interaction": 1.0,
+        "contribution": 10.488889,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.26617500000000005,
+        "interaction": 1.0,
+        "contribution": 4.2588,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 7.2,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.025,
+        "interaction": 1.0,
+        "contribution": 0.3,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "03 — Чередование переводов",
+    "target": 45.0,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6666666666666666,
+        "interaction": 1.0,
+        "contribution": 5.333333,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.9506249999999999,
+        "interaction": 1.0,
+        "contribution": 15.21,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.025,
+        "interaction": 1.0,
+        "contribution": 0.3,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 14.156667,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "04 — Наличные двумя снятиями",
+    "target": 45.9895,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6666666666666666,
+        "interaction": 1.0,
+        "contribution": 5.333333,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.4230769230769231,
+        "interaction": 1.0,
+        "contribution": 11.846154,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.12249999999999998,
+        "interaction": 1.0,
+        "contribution": 1.96,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.75,
+        "interaction": 1.0,
+        "contribution": 6.75,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.3,
+        "interaction": 1.0,
+        "contribution": 3.6,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "05 — Одно крупное снятие",
+    "target": 45.2259,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6,
+        "interaction": 1.0,
+        "contribution": 4.8,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.42592592592592593,
+        "interaction": 1.0,
+        "contribution": 11.925926,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.140625,
+        "interaction": 1.0,
+        "contribution": 2.25,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.75,
+        "interaction": 1.0,
+        "contribution": 6.75,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.25,
+        "interaction": 1.0,
+        "contribution": 3.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "06 — Только переводы",
+    "target": 45.0,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 6.4,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 1.0,
+        "interaction": 1.0,
+        "contribution": 16.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 12.6,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "07 — Восемь небольших переводов",
+    "target": 46.5,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.875,
+        "interaction": 1.0,
+        "contribution": 7.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.4375,
+        "interaction": 1.0,
+        "contribution": 12.25,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.25,
+        "interaction": 1.0,
+        "contribution": 4.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.75,
+        "interaction": 1.0,
+        "contribution": 6.75,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "08 — Неравные суммы",
+    "target": 45.0,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.3333333333333333,
+        "interaction": 1.0,
+        "contribution": 2.666667,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.421875,
+        "interaction": 1.0,
+        "contribution": 11.8125,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.30375,
+        "interaction": 1.0,
+        "contribution": 4.86,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.8333333333333334,
+        "interaction": 1.0,
+        "contribution": 7.5,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 11.660833,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "09 — Зарплата в начале",
+    "target": 33.75,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 6.4,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 1.0,
+        "interaction": 1.0,
+        "contribution": 16.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 17.6,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Снижение за текущую зарплату",
+        "signal": 0.25,
+        "interaction": 45.0,
+        "contribution": -11.25,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "10 — Зарплата в конце",
+    "target": 33.75,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 6.4,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 1.0,
+        "interaction": 1.0,
+        "contribution": 16.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 12.6,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Снижение за текущую зарплату",
+        "signal": 0.25,
+        "interaction": 45.0,
+        "contribution": -11.25,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "11 — Три покупки в цепочке",
+    "target": 47.83,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 6.4,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.375,
+        "interaction": 1.0,
+        "contribution": 10.5,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.28,
+        "interaction": 1.0,
+        "contribution": 4.48,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 7.2,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой эффект текущих покупок",
+        "signal": 1.0,
+        "interaction": 0.75,
+        "contribution": -2.25,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "12 — Разные источники и стороны",
+    "target": 45.5942,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.3333333333333333,
+        "interaction": 1.0,
+        "contribution": 2.666667,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.453125,
+        "interaction": 1.0,
+        "contribution": 12.6875,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.29625,
+        "interaction": 1.0,
+        "contribution": 4.74,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.8333333333333334,
+        "interaction": 1.0,
+        "contribution": 7.5,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 1.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "13 — Переводы в разные дни",
+    "target": 45.0,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.6666666666666666,
+        "interaction": 1.0,
+        "contribution": 5.333333,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.9506249999999999,
+        "interaction": 1.0,
+        "contribution": 15.21,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.025,
+        "interaction": 1.0,
+        "contribution": 0.3,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 14.156667,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "14 — Серии с часовыми паузами",
+    "target": 42.7387,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 6.4,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.375,
+        "interaction": 1.0,
+        "contribution": 10.5,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.28,
+        "interaction": 1.0,
+        "contribution": 4.48,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.8,
+        "interaction": 1.0,
+        "contribution": 7.2,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 5.0,
+        "interaction": 1,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Ограниченный эффект ожидания",
+        "signal": 0.6666666666666667,
+        "interaction": 0.15,
+        "contribution": -7.341333333333333,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "15 — Три снятия с переводами",
+    "target": 46.3704,
+    "terms": [
+      {
+        "name": "Сопоставимые исторические переводы",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": -0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Небольшой рост сумм",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Более трёх получателей",
+        "signal": 0.5,
+        "interaction": 1,
+        "contribution": 1.5,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Повторяемость существенных списаний",
+        "signal": 0.7142857142857143,
+        "interaction": 1.0,
+        "contribution": 5.714286,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Недостаток сведений при интенсивном транзите",
+        "signal": 0.4230769230769231,
+        "interaction": 1.0,
+        "contribution": 11.846154,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Концентрация получателей при интенсивном транзите",
+        "signal": 0.12249999999999998,
+        "interaction": 1.0,
+        "contribution": 1.96,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Ненаблюдавшиеся получатели при интенсивном транзите",
+        "signal": 0.75,
+        "interaction": 1.0,
+        "contribution": 6.75,
+        "sources": [
+          "https://www.fincen.gov/system/files/2025-08/FinCEN-Advisory-CMLN-508.pdf",
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Наличные при интенсивном транзите",
+        "signal": 0.3,
+        "interaction": 1.0,
+        "contribution": 3.6,
+        "sources": [
+          "https://bsaaml.ffiec.gov/manual/Appendices/07"
+        ]
+      },
+      {
+        "name": "Всплеск транзита после наблюдаемого отсутствия операций",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Транзит без наблюдаемой фоновой активности",
+        "signal": 0.5,
+        "interaction": 1.0,
+        "contribution": 5.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Неопределённость предыстории при интенсивном транзите",
+        "signal": 0,
+        "interaction": 1.0,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Matched flow and returns",
+        "signal": 0.0,
+        "interaction": 1,
+        "contribution": 0.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      },
+      {
+        "name": "Интенсивная транзакционная активность",
+        "signal": 1.0,
+        "interaction": 1,
+        "contribution": 10.0,
+        "sources": [
+          "../../../docs/verification/aml-rubric-feedback-2026-09-14.md"
+        ]
+      }
+    ]
+  }
+]
