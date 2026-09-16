@@ -226,7 +226,7 @@ async def admin_login():
     return await auth_page("admin")
 
 
-async def protected_page(audience):
+async def protected_page(audience, section="auto"):
     storage = app.storage.user
     try:
         identity = await auth.verify(api, storage, audience)
@@ -327,7 +327,7 @@ async def protected_page(audience):
             from .participant import ParticipantScreen
 
             screen = ParticipantScreen(
-                api, storage, token, guarded, game_status, game_title
+                api, storage, token, guarded, game_status, game_title, section=section
             )
         else:
             from .organizer import OrganizerScreen
@@ -344,6 +344,16 @@ async def play():
 @ui.page("/admin")
 async def admin():
     return await protected_page("admin")
+
+
+@ui.page("/play/profile")
+async def play_profile():
+    return await protected_page("play", section="profile")
+
+
+@ui.page("/play/results")
+async def play_results():
+    return await protected_page("play", section="results")
 
 
 @ui.page("/about")

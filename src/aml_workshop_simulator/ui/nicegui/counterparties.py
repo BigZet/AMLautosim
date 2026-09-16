@@ -14,6 +14,7 @@ INFO = {
 }
 CATEGORIES = {
     "employer": "Работодатель",
+    "crypto_exchange": "Криптобиржа",
     "groceries": "Продукты",
     "clothing": "Одежда",
     "services": "Услуги",
@@ -32,7 +33,7 @@ KINDS = {
 
 
 def expanded(config):
-    return config.get("schema_version", 7) == 8
+    return config.get("schema_version", 7) in (8, 9)
 
 
 def editable_params(card, config):
@@ -49,8 +50,16 @@ def editable_params(card, config):
     ]
 
 
-def party_options(config, code):
+def party_options(config, code, details=None):
     role, kinds = PARTY_ROLES.get(code, (None, ()))
+    if config.get("schema_version") == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import allowed_party
+
+        return role, {
+            p["id"]: p["name"]
+            for p in config["behavior"]["counterparties"]
+            if allowed_party(code, p, details or {})
+        }
     return role, {
         p["id"]: p["name"]
         for p in config["behavior"]["counterparties"]
@@ -77,9 +86,16 @@ def party_description(config, identity):
             party["name"],
             KINDS[party["kind"]],
             INFO[party["information_status"]],
-            "Личное знакомство есть"
-            if party["personal_relationship"] == "known"
-            else "Личное знакомство неизвестно",
+            (
+                "Личное знакомство есть"
+                if party["personal_relationship"] == "known"
+                else "Личное знакомство неизвестно"
+            )
+            if party["kind"] == "person"
+            else "Роль: "
+            + CATEGORIES.get(
+                party.get("category"), party.get("category") or "Организация"
+            ),
             history,
             *(
                 ["Категория: " + category_label(party.get("category"))]
@@ -91,7 +107,9 @@ def party_description(config, identity):
 
 
 def party_selector(config, step, on_change):
-    role, options = party_options(config, step["card"]["code"])
+    role, options = party_options(
+        config, step["card"]["code"], step.get("action_details")
+    )
     if role is None:
         return
     label = "Отправитель" if role == "sender_id" else "Получатель"

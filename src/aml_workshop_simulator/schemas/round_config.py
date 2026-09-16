@@ -33,6 +33,8 @@ from src.aml_workshop_simulator.domain.contract_versions import (
 )
 from src.aml_workshop_simulator.schemas.expanded_contract import ExpandedBehavior
 
+from src.aml_workshop_simulator.services.semantic_contract import BehaviorV9
+
 STRICT = ConfigDict(extra="forbid")
 
 CONFIG_SCHEMA_VERSION = LEGACY_CONTRACT_VERSION
@@ -356,10 +358,24 @@ class ExpandedGameConfigOut(ExpandedGameConfigIn):
 
 
 # V7 keeps its default for existing clients which omit schema_version.
+
+
+class SemanticGameConfigIn(ExpandedGameConfigIn):
+    schema_version: Literal[9]
+    behavior: BehaviorV9
+
+
+class SemanticGameConfigOut(SemanticGameConfigIn):
+    risk_model: dict[str, Any] | None = None
+    config_version: str
+    card_snapshots: list[CardSnapshotOut]
+
+
 RoundConfigInput = Annotated[
-    GameConfigIn | ExpandedGameConfigIn, Field(discriminator="schema_version")
+    GameConfigIn | ExpandedGameConfigIn | SemanticGameConfigIn,
+    Field(discriminator="schema_version"),
 ]
-RoundConfigOutput = GameConfigOut | ExpandedGameConfigOut
+RoundConfigOutput = GameConfigOut | ExpandedGameConfigOut | SemanticGameConfigOut
 
 
 def parse_game_config(
@@ -369,6 +385,8 @@ def parse_game_config(
     version = contract_version(value)
     if version == 7:
         model = GameConfigOut if stored else GameConfigIn
+    elif version == 9:
+        model = SemanticGameConfigOut if stored else SemanticGameConfigIn
     else:
         model = ExpandedGameConfigOut if stored else ExpandedGameConfigIn
     return model.model_validate(value)

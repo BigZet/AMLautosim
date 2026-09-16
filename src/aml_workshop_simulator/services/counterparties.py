@@ -21,6 +21,9 @@ from src.aml_workshop_simulator.domain.counterparty_roles import (
 
 
 def behavior_for(config):
+    if contract_version(config) == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import BehaviorV9
+        return BehaviorV9.model_validate(config["behavior"])
     if contract_version(config) != 8:
         raise ValidationFailed("Каталог сторон доступен только в контракте v8.")
     return ExpandedBehavior.model_validate(config["behavior"])
@@ -40,6 +43,12 @@ def canonical_expanded_steps(steps, config):
     Derived properties are deliberately not stored in steps or trusted on replay.
     Resource sufficiency and whole-chain limits belong to the future v8 engine.
     """
+    if contract_version(config) == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import canonical_steps
+        try:
+            return canonical_steps(steps, config)
+        except ValueError as error:
+            raise ValidationFailed(str(error), code="semantic_contract_invalid") from error
     behavior = behavior_for(config)
     parties = {party.id: party for party in behavior.counterparties}
     specs = snapshot_specs(config)

@@ -168,11 +168,12 @@ def test_registration_login_and_full_workshop(
                 for c in await front.api.request("GET", f"rounds/{round_id}/cards")
             }
             for step in chain():
+                user.find(kind=ui.button, content="Добавить операцию").click()
                 user.find(
                     kind=ui.button, content=cards[step["card"]["code"]]["title"]
                 ).click()
                 with user:
-                    amount = max(
+                    amount = min(
                         (
                             e
                             for e in user.find(ui.number).elements
@@ -186,7 +187,7 @@ def test_registration_login_and_full_workshop(
                         ("recipient_id", "Получатель"),
                     ):
                         if step.get(key):
-                            selector = max(
+                            selector = min(
                                 (
                                     e
                                     for e in user.find(ui.select).elements
@@ -197,6 +198,7 @@ def test_registration_login_and_full_workshop(
                             selector.set_value(step[key])
             await asyncio.sleep(1.8)
             await user.should_see("Сохранено", retries=40)
+            user.find("Лимиты и условия отправки").click()
             await user.should_see("Условия отправки")
             await user.should_see("Всё готово к отправке")
             user.find("Отправить сценарий").click()

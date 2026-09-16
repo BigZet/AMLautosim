@@ -29,6 +29,7 @@ class OrganizerScreen:
         self.edit_revision = None
         self.polling = False
         self.loaded = False
+        self.results_opened_for = None
         self.tab_id = None
         self.restored = False
         self.read_versions = {}
@@ -177,6 +178,9 @@ class OrganizerScreen:
                 )
                 self.catalog = await self.request("GET", "admin/action-cards")
             await self.render()
+            if current and current["status"] == "completed" and self.results_opened_for != current["id"]:
+                self.results_opened_for = current["id"]
+                self.tabs.set_value("results")
             self.loaded = True
 
         try:
@@ -191,6 +195,9 @@ class OrganizerScreen:
             self.game_title.set_visibility(bool(current))
         status = current["status"] if current else "none"
         self.status.set_text(STATUS[status])
+        if current and current.get("scoring_summary"):
+            summary = current["scoring_summary"]
+            self.status.set_text(f"{STATUS[status]} · Отправлено: {summary['submitted_count']} · Рассчитано: {summary['scored_count']}")
         if current and current.get("scoring_error"):
             self.status.set_text(
                 "Ошибка расчёта. Приём закрыт; скоринг можно повторить."

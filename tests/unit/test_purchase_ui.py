@@ -31,6 +31,7 @@ def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
     ]
     screen = ParticipantScreen.__new__(ParticipantScreen)
     screen.submitting = False
+    screen.open_steps = set()
     screen.editor = SimpleNamespace(
         editable=True,
         steps=[step(config, "card_transfer")],
@@ -45,6 +46,7 @@ def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
             @ui.page("/purchase-ui")
             def page():
                 screen.chain_box = ui.column()
+                screen.open_steps = {s["step_id"] for s in screen.editor.steps}
                 screen.render_chain()
 
             await user.open("/purchase-ui")

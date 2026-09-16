@@ -42,7 +42,7 @@ def profile_history_panel(round_data):
         ui.label(f"Роль клиента: {profile['title']}").classes("font-semibold")
         ui.label(profile["description"])
         ui.label(
-            f"30 дней: {summary['starts_at']} — до {summary['ends_before']} · {summary['timezone']}"
+            f"30 дней: {datetime.fromisoformat(summary['starts_at']).strftime('%d.%m.%Y, %H:%M')} — до {datetime.fromisoformat(summary['ends_before']).strftime('%d.%m.%Y, %H:%M')} · {summary['timezone']}"
         )
         ui.label("История не меняет начальные ресурсы и не засчитывается в цель.")
         if summary["status"] == "unknown":
@@ -83,7 +83,7 @@ def profile_history_panel(round_data):
                 rows=[
                     {
                         "id": e["id"],
-                        "time": e["occurred_at"],
+                        "time": datetime.fromisoformat(e["occurred_at"]).strftime("%d.%m.%Y, %H:%M"),
                         "operation": OPERATION_LABELS[e["operation_code"]],
                         "amount": money(e["amount"]),
                         "party": parties[e["counterparty_id"]]["name"]

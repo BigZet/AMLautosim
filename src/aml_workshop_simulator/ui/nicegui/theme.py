@@ -171,6 +171,11 @@ a.header-action .q-icon { order:-1; }
  .workspace { padding:20px 14px; }
  .app-header { padding:14px 18px; }
 }
+
+.resource-overview { position:sticky; top:0; z-index:5; background:var(--paper); padding:12px; border-bottom:1px solid var(--line); }
+.operation-card .q-expansion-item__content { padding:12px; }
+.operation-card .q-item__label { overflow-wrap:anywhere; }
+@media (max-width:600px) { .resource-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 """
 
 

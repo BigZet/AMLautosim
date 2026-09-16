@@ -44,6 +44,7 @@ def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch
 
     screen = ParticipantScreen.__new__(ParticipantScreen)
     screen.submitting = False
+    screen.open_steps = set()
     screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
     screen.changed = screen.editor.changed
 
@@ -54,6 +55,7 @@ def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch
             @ui.page("/stage02-ui")
             def page():
                 screen.chain_box = ui.column()
+                screen.open_steps = {s["step_id"] for s in screen.editor.steps}
                 screen.render_chain()
 
             await user.open("/stage02-ui")
@@ -84,7 +86,7 @@ def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch
             )
             assert [s.value for s in parties] == ["A", "A"]
             with user:
-                parties[1].set_value("B")
+                parties[0].set_value("B")
             assert await screen.editor.write()
             assert state["scenario"]["steps"][1]["recipient_id"] == "B"
             await user.should_see("Операций в предыстории: 0")

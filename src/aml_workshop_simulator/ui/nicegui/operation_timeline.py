@@ -1,21 +1,26 @@
 """Calendar time is distinct from the remaining game-time resource."""
 
 from nicegui import ui
+from datetime import datetime
+
+
+def moment(value):
+    return datetime.fromisoformat(value).strftime("%d.%m.%Y, %H:%M")
 
 
 def timeline_control(timing, config, on_change):
     ui.label(
-        f"Момент операции: {timing['occurred_at']} · {config['behavior']['timeline']['timezone']}"
+        f"Момент операции: {moment(timing['occurred_at'])} · {config['behavior']['timeline']['timezone']}"
     ).classes("text-xs muted")
     if timing["step_index"] == 1:
         ui.label("Начало сценария · ожидание 0").classes("text-xs muted")
     else:
         ui.select(
             {
-                1: "1 минута · 0 времени",
-                10: "10 минут · 1 времени",
-                60: "1 час · 2 времени",
-                1440: "1 сутки · 4 времени",
+                1: "1 минута · 0 ед. ресурса",
+                10: "10 минут · 1 ед. ресурса",
+                60: "1 час · 2 ед. ресурса",
+                1440: "1 сутки · 4 ед. ресурса",
             },
             value=timing["interval_minutes"],
             label="Ожидание перед операцией",
@@ -32,6 +37,6 @@ def timeline_summary(snapshot):
     )
     for step in timeline["steps"]:
         ui.label(
-            f"Шаг {step['step_index']}: {step['occurred_at']} · "
+            f"Шаг {step['step_index']}: {moment(step['occurred_at'])} · "
             f"операция {step['operation_time_cost']} + ожидание {step['waiting_time_cost']} времени"
         ).classes("text-xs muted")

@@ -11,6 +11,9 @@ from src.aml_workshop_simulator.services.counterparties import (
 
 
 def evaluate_expanded_scenario(steps, config):
+    if config.get("schema_version") == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import evaluate
+        return evaluate(steps, config)
     canonical = canonical_expanded_steps(steps, config)
     specs = snapshot_specs(config)
     timeline = operation_timeline(canonical, config["behavior"]["timeline"])

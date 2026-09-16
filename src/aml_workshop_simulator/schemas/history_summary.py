@@ -30,6 +30,10 @@ class HistoryEventOut(BaseModel):
     amount: Decimal
     counterparty_id: str | None
     category: str | None
+    incoming_kind: str | None = None
+    bank_country: str | None = None
+    channel: str | None = None
+    income_basis: str | None = None
 
 
 class HistorySummaryOut(BaseModel):
@@ -54,7 +58,7 @@ class RoundContextOut(BaseModel):
     def context_summary(self) -> HistorySummaryOut | None:
         from src.aml_workshop_simulator.services.profile_history import history_summary
 
-        if self.game_config.schema_version != 8:
+        if self.game_config.schema_version not in (8, 9):
             return None
         return history_summary(self.game_config.behavior)
 

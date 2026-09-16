@@ -53,6 +53,7 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
 
     screen = ParticipantScreen.__new__(ParticipantScreen)
     screen.submitting = False
+    screen.open_steps = set()
     screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
     screen.changed = screen.editor.changed
 
@@ -63,6 +64,7 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
             @ui.page("/timeline-test")
             def page():
                 screen.chain_box = ui.column()
+                screen.open_steps = {s["step_id"] for s in screen.editor.steps}
                 screen.render_chain()
 
             await user.open("/timeline-test")
@@ -74,11 +76,12 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
                 )
 
             with user:
-                intervals()[0].set_value(60)
+                intervals()[1].set_value(60)
             with user:
-                intervals()[1].set_value(1440)
-            await user.should_see("2026-09-15T00:30:00+03:00")
+                intervals()[0].set_value(1440)
+            await user.should_see("15.09.2026, 00:30")
             with user:
+                screen.show_order()
                 buttons = sorted(
                     (
                         b
@@ -111,6 +114,6 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
             await user.open("/timeline-test")
             assert screen.editor.steps == expected
             assert evaluate_expanded_scenario(expected, config) == expected_resources
-            await user.should_see("2026-09-14T23:30:00+03:00")
+            await user.should_see("14.09.2026, 23:30")
 
     asyncio.run(run())

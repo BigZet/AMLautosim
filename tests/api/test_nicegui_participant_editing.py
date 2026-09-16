@@ -42,6 +42,7 @@ def test_parameters_and_amount_remain_editable_after_autosave(
             await user.should_see("Добавить операцию", retries=40)
             cards = await front.api.request("GET", f"rounds/{active_round}/cards")
             card = next(c for c in cards if c["code"] == "incoming_transfer")
+            user.find(kind=ui.button, content="Добавить операцию").click()
             user.find(kind=ui.button, content=card["title"]).click()
             await asyncio.sleep(1.6)
             with user:
@@ -96,6 +97,14 @@ def test_parameters_and_amount_remain_editable_after_autosave(
                 if "crypto_exchange" in e.options
             )
             assert restored.value == "crypto_exchange"
+            before_profile = await front.api.request("GET", f"rounds/{active_round}/scenario", session_id=token)
+            await user.open("/play/profile")
+            await user.should_see("Профиль и предыстория", retries=40)
+            await user.should_not_see("Добавить операцию")
+            await user.open("/play")
+            await user.should_see("Добавить операцию", retries=40)
+            after_profile = await front.api.request("GET", f"rounds/{active_round}/scenario", session_id=token)
+            assert after_profile["steps"] == before_profile["steps"]
             await front.api.close()
 
     asyncio.run(run())

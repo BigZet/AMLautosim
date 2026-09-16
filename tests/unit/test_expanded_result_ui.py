@@ -44,7 +44,7 @@ def test_result_preserves_counterparties_and_calendar_time(tmp_path, monkeypatch
                 )
 
             await user.open("/expanded-result")
-            await user.should_see("Момент операции: 2026-09-14")
+            await user.should_see("14.09.2026,")
             await user.should_see("Магазин")
             await user.should_see("Борис — известный новый контрагент")
             await user.should_see("Засчитано в цель: 400 000,00 ₽")

@@ -83,7 +83,7 @@ def test_incomplete_expanded_config_rejected(field):
         parse_game_config(config)
 
 
-@pytest.mark.parametrize("version", [6, 9, "8", None, True])
+@pytest.mark.parametrize("version", [6, 10, "8", None, True])
 def test_unknown_versions_never_fall_back(version):
     config = deepcopy(GOLDEN["config"])
     config["schema_version"] = version

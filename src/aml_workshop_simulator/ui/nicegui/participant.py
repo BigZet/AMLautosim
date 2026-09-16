@@ -5,13 +5,14 @@ from __future__ import annotations
 import time
 from copy import deepcopy
 from decimal import Decimal
+from datetime import datetime
 from uuid import uuid4
 
 from nicegui import ui
 
 from .profile_history import profile_history_panel
 from .game import GameEditor
-from .operation_timeline import timeline_control, timeline_summary
+from .operation_timeline import timeline_control
 from .counterparties import editable_params, expanded, party_selector, party_readonly
 
 STATUS = {
@@ -26,6 +27,10 @@ STATUS = {
 
 def display_number(value):
     return f"{Decimal(str(value)):,f}".replace(",", " ").replace(".", ",")
+
+
+def display_moment(value):
+    return datetime.fromisoformat(value).strftime("%d.%m.%Y, %H:%M")
 
 
 def credited_outflow(snapshot):
@@ -66,13 +71,14 @@ def scenario_resources(snapshot):
 
 def scenario_resource_tiles(snapshot):
     values = snapshot["resources_after"]
-    timeline_summary(snapshot)
+    ui.label(
+        f"В цель: {display_number(credited_outflow(snapshot))} / {display_number(snapshot['objective']['target_outflow'])} ₽"
+    ).classes("font-semibold")
     with ui.element("div").classes("resource-grid"):
         for label, key, icon in [
             ("Баланс, ₽", "balance", "account_balance_wallet"),
             ("Энергия", "energy", "bolt"),
             ("Время", "time", "schedule"),
-            ("Осталось шагов", "available_steps", "format_list_numbered"),
         ]:
             with ui.column().classes("resource-tile"):
                 with ui.row().classes("items-center gap-1"):
@@ -219,14 +225,14 @@ def resources(snapshot):
         ]:
             with ui.column().classes("gap-1"):
                 ui.label(label).classes("text-xs muted")
-                ui.label(str(value)).classes("text-xl font-semibold")
+                ui.label(display_number(value)).classes("text-xl font-semibold")
     ui.label(
         f"Исходящие операции: {credited_outflow(snapshot)} / цель {snapshot['objective']['target_outflow']}"
     )
     for limit in snapshot.get("limits", []):
-        ui.label(f"{limit['label']}: {limit['used']} / {limit['limit']}").classes(
-            "text-sm muted"
-        )
+        ui.label(
+            f"{limit['label']}: {display_number(limit['used'])} / {display_number(limit['limit'])}"
+        ).classes("text-sm muted")
 
 
 def result_panel(
@@ -319,6 +325,16 @@ def result_panel(
                     shap_result,
                 )
 
+                with ui.expansion("Как рассчитан итоговый балл").classes("w-full"):
+                    weights = (
+                        (round_config or {})
+                        .get("leaderboard", {})
+                        .get("weights", {"stealth": "0.65", "resources": "0.35"})
+                    )
+                    ui.label(
+                        f"{display_number(weights['stealth'])} × (100 − {display_number(scores['risk_score'])}) + {display_number(weights['resources'])} × {display_number(scores['resource_score'])} = {display_number(scores['game_score'])}"
+                    )
+
                 shap_result(
                     result["explanation"],
                     expanded=explanation_expanded,
@@ -349,7 +365,7 @@ def result_panel(
                         if step["step_id"] in timing:
                             moment = timing[step["step_id"]]
                             ui.label(
-                                f"Момент операции: {moment['occurred_at']} · ожидание {moment['waiting_time_cost']} времени"
+                                f"{display_moment(moment['occurred_at'])} · интервал {moment['interval_minutes'] or 0} мин · ожидание: {moment['waiting_time_cost']} ед. ресурса"
                             ).classes("text-xs muted")
                 ui.separator()
                 resources(result["resources"])
@@ -367,22 +383,23 @@ def board_table(data, *, admin=False):
     columns = [
         ("rank", "Место"),
         ("display_name", "Участник"),
-        ("game_score", "Баллы"),
-        ("stealth_score", "Скрытность"),
-        ("resource_score", "Ресурсы"),
+        ("game_score", "Итоговый балл ↑"),
+        ("risk_score", "Риск модели ↓"),
+        ("resource_score", "Сбережённые ресурсы ↑"),
         ("risk_label", "Риск"),
     ]
     if admin:
         columns += [
-            ("risk_score", "Риск, баллы"),
             ("email", "Email"),
             ("is_blocked", "Заблокирован"),
         ]
     rows = deepcopy(data["rows"])
     for index, row in enumerate(rows):
         row["_row"] = index
+        row["risk_score"] = display_number(
+            row.get("risk_score", 100 - Decimal(str(row["stealth_score"])))
+        )
         if admin:
-            row["risk_score"] = display_number(row["risk_score"])
             row["is_blocked"] = "Да" if row["is_blocked"] else "Нет"
         for score_key in ("game_score", "stealth_score", "resource_score"):
             row[score_key] = display_number(row[score_key])
@@ -407,7 +424,11 @@ def board_table(data, *, admin=False):
 
 
 class ParticipantScreen:
-    def __init__(self, api, storage, token, guarded, status_label, title_label):
+    def __init__(
+        self, api, storage, token, guarded, status_label, title_label, section="auto"
+    ):
+        self.section = section
+        self.open_steps = set()
         self.api, self.storage, self.token, self.guarded = api, storage, token, guarded
         self.editor = None
         self.save_status = self.submit_button = self.resource_box = self.error_box = (
@@ -459,6 +480,7 @@ class ParticipantScreen:
             self.render(force=version != self.editor.render_revision)
             if (
                 self.editor.state.get("can_view_leaderboard")
+                and self.section != "profile"
                 and time.monotonic() - self.board_at > 3
             ):
                 self.board_at = time.monotonic()
@@ -519,7 +541,17 @@ class ParticipantScreen:
                         "Экран обновится автоматически, когда организатор начнёт игру."
                     ).classes("muted text-center")
                 return
-            profile_history_panel(round_data)
+            with ui.row().classes("w-full gap-4"):
+                ui.link("Сценарий", "/play")
+                ui.link("Профиль и история", "/play/profile")
+                if state.get("can_view_leaderboard"):
+                    ui.link("Результаты", "/play/results")
+            if self.section == "profile":
+                profile_history_panel(round_data)
+                ui.label(
+                    "Модель учитывает структурированные операции и доступные сведения; текст профиля описывает персонажа."
+                ).classes("text-sm muted")
+                return
             if state.get("result"):
                 self.board = result_panel(
                     state["result"],
@@ -559,8 +591,13 @@ class ParticipantScreen:
                         self.resource_overview = ui.column().classes(
                             "resource-overview"
                         )
-                        ui.label("Добавить операцию").classes("text-lg font-semibold")
-                        with ui.row().classes("operation-picker"):
+                        with (
+                            ui.dialog() as picker,
+                            ui.card().classes("w-full max-w-lg"),
+                        ):
+                            ui.label("Добавить операцию").classes(
+                                "text-lg font-semibold"
+                            )
                             for card in editor.cards:
                                 icon = {
                                     "salary": "account_balance_wallet",
@@ -571,12 +608,27 @@ class ParticipantScreen:
                                 (
                                     ui.button(
                                         card["title"],
-                                        on_click=lambda c=card: self.add(c),
+                                        on_click=lambda c=card: (
+                                            self.add(c),
+                                            picker.close(),
+                                        ),
                                         icon=icon,
                                     )
                                     .props("flat no-caps align=center")
                                     .classes("operation-choice")
                                 )
+                        with ui.row():
+                            ui.button(
+                                "Добавить операцию", icon="add", on_click=picker.open
+                            ).props("no-caps")
+                            ui.button(
+                                "Порядок выполнения",
+                                icon="format_list_numbered",
+                                on_click=self.show_order,
+                            ).props("outline no-caps")
+                        ui.label(
+                            "Последние операции сверху · выполнение по номерам шагов"
+                        ).classes("text-xs muted")
                         self.chain_box = ui.column().classes("w-full gap-3")
                         self.render_chain()
                     with ui.card().classes("panel scenario-summary"):
@@ -648,11 +700,56 @@ class ParticipantScreen:
             )
             target[param["key"]] = param["default"]
         self.editor.steps.append(step)
+        self.open_steps = {step["step_id"]}
         self.changed()
         self.render_chain()
 
     def current_step(self, step_id):
         return next(step for step in self.editor.steps if step["step_id"] == step_id)
+
+    def show_order(self):
+        with ui.dialog() as dialog, ui.card().classes("w-full max-w-2xl"):
+            ui.label("Порядок выполнения: от первого шага к последнему")
+            box = ui.column().classes("w-full")
+
+            def render():
+                box.clear()
+                with box:
+                    for index, step in enumerate(self.editor.steps):
+                        title = next(
+                            c["title"]
+                            for c in self.editor.cards
+                            if c["code"] == step["card"]["code"]
+                        )
+                        with ui.row().classes("w-full items-center"):
+                            ui.label(
+                                f"{index + 1}. {title} · {step['amount']} ₽"
+                            ).classes("flex-1")
+
+                            def move(delta, i=index):
+                                if self.submitting or not self.editor.editable:
+                                    return
+                                j = i + delta
+                                self.editor.steps[i], self.editor.steps[j] = (
+                                    self.editor.steps[j],
+                                    self.editor.steps[i],
+                                )
+                                self.changed()
+                                self.render_chain()
+                                render()
+
+                            ui.button(
+                                icon="arrow_upward", on_click=lambda m=move: m(-1)
+                            ).props('flat aria-label="Раньше"').set_enabled(index > 0)
+                            ui.button(
+                                icon="arrow_downward", on_click=lambda m=move: m(1)
+                            ).props('flat aria-label="Позже"').set_enabled(
+                                index < len(self.editor.steps) - 1
+                            )
+
+            render()
+            ui.button("Готово", on_click=dialog.close)
+        dialog.open()
 
     def render_chain(self):
         self.chain_box.clear()
@@ -669,7 +766,8 @@ class ParticipantScreen:
         with self.chain_box:
             if not self.editor.steps:
                 ui.label("Добавьте первую операцию из каталога.").classes("muted")
-            for index, step in enumerate(self.editor.steps):
+            for index in reversed(range(len(self.editor.steps))):
+                step = self.editor.steps[index]
                 card = next(
                     (
                         c
@@ -685,35 +783,36 @@ class ParticipantScreen:
                         "error-box"
                     )
                     continue
-                with ui.card().classes("operation-card"):
+                identity = step.get("sender_id") or step.get("recipient_id")
+                party = next(
+                    (
+                        p["name"]
+                        for p in config.get("behavior", {}).get("counterparties", [])
+                        if p["id"] == identity
+                    ),
+                    "Сторона не выбрана"
+                    if card["code"] != "cash_withdrawal"
+                    else "Наличные",
+                )
+                moment = display_moment(timing[index]["occurred_at"]) if timing else ""
+                summary = f"{index + 1}. {card['title']} · {step['amount'] or '—'} ₽ · {party} · {moment}"
+
+                def remember(e, step_id=step["step_id"]):
+                    if e.value:
+                        self.open_steps.add(step_id)
+                    else:
+                        self.open_steps.discard(step_id)
+
+                with ui.expansion(
+                    summary,
+                    value=step["step_id"] in self.open_steps,
+                    on_value_change=remember,
+                ).classes("operation-card w-full"):
                     with ui.row().classes("operation-header"):
                         ui.label(f"{index + 1}. {card['title']}").classes(
                             "operation-title font-semibold"
                         )
                         ui.space()
-
-                        def move(delta, i=index):
-                            if self.submitting:
-                                return
-                            j = i + delta
-                            if 0 <= j < len(self.editor.steps):
-                                self.editor.steps[i], self.editor.steps[j] = (
-                                    self.editor.steps[j],
-                                    self.editor.steps[i],
-                                )
-                                self.changed()
-                                self.render_chain()
-
-                        ui.button(
-                            icon="arrow_upward", on_click=lambda m=move: m(-1)
-                        ).props('flat dense aria-label="Переместить выше"').tooltip(
-                            "Выше"
-                        ).set_enabled(index > 0)
-                        ui.button(
-                            icon="arrow_downward", on_click=lambda m=move: m(1)
-                        ).props('flat dense aria-label="Переместить ниже"').tooltip(
-                            "Ниже"
-                        ).set_enabled(index < len(self.editor.steps) - 1)
 
                         def remove(i=index):
                             if not self.submitting:
@@ -803,6 +902,18 @@ class ParticipantScreen:
 
                             timeline_control(timing[index], config, change_interval)
                         for param in editable_params(card, config):
+                            if config.get("schema_version") == 9 and (
+                                (
+                                    param["key"] == "bank_country"
+                                    and step["action_details"].get("incoming_kind")
+                                    != "bank_transfer"
+                                )
+                                or (
+                                    card["code"] == "salary"
+                                    and param["key"] == "income_basis"
+                                )
+                            ):
+                                continue
                             if (
                                 card["code"] == "incoming_transfer"
                                 and param["namespace"] == "channel"
@@ -829,7 +940,38 @@ class ParticipantScreen:
                                         if namespace == "action"
                                         else "context"
                                     ][k] = e.value
+                                    if (
+                                        config.get("schema_version") == 9
+                                        and k == "incoming_kind"
+                                    ):
+                                        current["action_details"] = {
+                                            "incoming_kind": e.value
+                                        }
+                                        if e.value == "bank_transfer":
+                                            current["action_details"][
+                                                "bank_country"
+                                            ] = "RU"
+                                        current["sender_id"] = (
+                                            next(
+                                                (
+                                                    p["id"]
+                                                    for p in config["behavior"][
+                                                        "counterparties"
+                                                    ]
+                                                    if p.get("category")
+                                                    == "crypto_exchange"
+                                                ),
+                                                None,
+                                            )
+                                            if e.value == "exchange_withdrawal"
+                                            else None
+                                        )
                                     self.changed()
+                                    if (
+                                        config.get("schema_version") == 9
+                                        and k == "incoming_kind"
+                                    ):
+                                        self.render_chain()
 
                             value = target.get(param["key"], param["default"])
                             if param["kind"] == "toggle":
@@ -919,9 +1061,10 @@ class ParticipantScreen:
                         if not editor.error and editor.transport_valid()
                         else "Расчёт не обновлён"
                     ).classes("text-xs muted")
-                submission_conditions(
-                    editor.preview, current=editor.preview_version == editor.version
-                )
+                with ui.expansion("Лимиты и условия отправки").classes("w-full"):
+                    submission_conditions(
+                        editor.preview, current=editor.preview_version == editor.version
+                    )
             else:
                 config = (editor.state.get("round") or {}).get("game_config", {})
                 if config:

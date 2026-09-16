@@ -58,7 +58,7 @@ def card_out(
     ]
     fields = list(spec.fields)
     context_fields = list(spec.context_fields)
-    if schema_version == 8:
+    if schema_version in (8, 9):
         fields = [f for f in fields if f["key"] != "sender_relationship"]
         context_fields = []
         visible = [
@@ -66,6 +66,12 @@ def card_out(
             for p in visible
             if p.namespace == "channel"
             or (p.namespace == "action" and p.key != "sender_relationship")
+        ]
+    if schema_version == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import fields_for
+        fields = fields_for(spec.code)
+        visible = [p for p in visible if p.namespace == "channel"] + [
+            VisibleParamOut(param="action."+f["key"], namespace="action", **{k: v for k, v in f.items() if k != "required"}) for f in fields
         ]
     return ActionCardOut(
         id=spec.id,

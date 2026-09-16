@@ -51,7 +51,7 @@ class GameEditor:
 
     def changed(self):
         config = (self.state.get("round") or {}).get("game_config", {})
-        if config.get("schema_version") == 8:
+        if config.get("schema_version") in (8, 9):
             from src.aml_workshop_simulator.domain.operation_timeline import (
                 canonical_intervals,
             )

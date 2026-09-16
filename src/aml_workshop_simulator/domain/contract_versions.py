@@ -17,6 +17,7 @@ def contract_version(config: dict | None) -> int:
     if type(version) is not int or version not in (
         LEGACY_CONTRACT_VERSION,
         EXPANDED_CONTRACT_VERSION,
+        9,
     ):
         raise ValidationFailed(
             "Версия контракта раунда не поддерживается.",
@@ -49,6 +50,8 @@ def require_legacy_contract(config):
 
 
 def require_new_round_allowed(config):
+    if contract_version(config) == 9:
+        raise Conflict("Контракт v9 ожидает согласования рубрики и проверки новой модели.", code="round_contract_not_ready")
     require_playable_contract(config)
     if contract_version(config) == EXPANDED_CONTRACT_VERSION:
         from src.aml_workshop_simulator.core.config import settings

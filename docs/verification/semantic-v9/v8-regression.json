@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "rows": 4413,
+  "max_prediction_error": 0.0,
+  "max_shap_additivity_error": 2.2737367544323206e-13,
+  "seconds": 181.57439220800006,
+  "first_100_seconds": 3.9479471689846832,
+  "p95_seconds": 0.04339966698898934,
+  "model": {
+    "model_version": "aml-catboost-behavior-v2",
+    "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b",
+    "extractor": "aml-observable-v3.0",
+    "explanation_version": 3,
+    "dictionary_sha256": "d620259fc5e87f1a8685ee0dc7bbc9293c00255f54722ba44c842054376c502d"
+  }
+}

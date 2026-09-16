@@ -10,6 +10,7 @@
 - [Поэтапное расширение AML-поведения](plans/aml-behavior/README.md).
 - [Новый цикл: аудит смысла операций, интерфейса и диапазона оценок](plans/aml-behavior/09-semantic-and-interface-audit.md).
 - [Результаты аудита: 79 сочетаний операций и диагностика близких оценок](verification/semantic-interface-audit/README.md).
+- [Исправления v9: интерфейс, контракт и восемь оценок для согласования](verification/semantic-v9/README.md).
 - [Новый датасет: подготовка и совместный разбор](verification/aml-dataset-stage07-review-ready.md).
 - [Пилот: 2000 сценариев и страница проверки](verification/aml-pilot-stage07.md).
 - [Этап 08 завершён: совместимость, Python 3.13 и восстановление](verification/aml-release-stage08.md).

@@ -15,8 +15,8 @@ def shap_result(explanation, *, expanded=False, on_change=None):
         )
         ui.label(explanation["disclaimer"]).classes("text-sm muted")
         for title, key in [
-            ("Повысило оценку", "top_positive"),
-            ("Снизило оценку", "top_negative"),
+            ("Повысило риск", "top_positive"),
+            ("Снизило риск", "top_negative"),
         ]:
             ui.label(title).classes("font-semibold mt-3")
             if not explanation[key]:
@@ -60,8 +60,17 @@ def factor_row(factor, detailed=False):
                 if detailed
                 else f"{number(factor['contribution'], 2, True)} балла"
             ).classes("font-semibold")
-        ui.label(
-            f"Значение: {str(factor['display_value']).replace('.', ',')} {factor['unit']}"
-        ).classes("text-sm")
+        value = factor["display_value"]
+        if factor["code"] == "income_basis" and factor.get("value") == "absent":
+            value = "В текущей цепочке нет получения дохода"
+        ui.label(f"Значение: {str(value).replace('.', ',')} {factor['unit']}").classes(
+            "text-sm"
+        )
+        if not detailed:
+            ui.linear_progress(
+                value=min(abs(factor["contribution"]) / 100, 1),
+                show_value=False,
+                color="orange" if factor["contribution"] > 0 else "teal",
+            ).props("rounded").classes("w-full")
         if detailed:
             ui.label(factor["description"]).classes("text-sm muted break-words")
