@@ -8,6 +8,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.db.models.users import User
+from src.aml_workshop_simulator.schemas.scoring import (
+    AMLProbabilityExplanationOut,
+    GamePatternExplanationOut,
+)
+from src.aml_workshop_simulator.domain.scoring import (
+    AML_LEADERBOARD_VERSION,
+    LEADERBOARD_VERSION,
+)
+
+
+def saved_score_semantics(explanation):
+    """Project stored probability; never load a model or infer p from rounded scores."""
+    if explanation.get("schema_version") in (4, 5):
+        saved = (
+            GamePatternExplanationOut
+            if explanation["schema_version"] == 5
+            else AMLProbabilityExplanationOut
+        ).model_validate(explanation)
+        return dict(
+            score_kind=saved.score_kind,
+            aml_probability=saved.aml_probability,
+            category=saved.category,
+            leaderboard_version=AML_LEADERBOARD_VERSION,
+        )
+    return dict(
+        score_kind="legacy_risk",
+        aml_probability=None,
+        category=None,
+        leaderboard_version=LEADERBOARD_VERSION,
+    )
 
 
 def ranked_scenarios(round_id: int | None = None):
@@ -80,6 +110,7 @@ async def build_leaderboard(
                 resource_score=f"{result.resource_score:.2f}",
                 stealth_score=f"{result.stealth_score:.2f}",
                 risk_label=result.risk_label,
+                **saved_score_semantics(result.explanation),
             )
         )
     return sorted(rows, key=lambda row: row["is_blocked"])

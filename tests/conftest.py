@@ -62,11 +62,38 @@ def database():
 
 
 @pytest.fixture
-def api(database):
+def seeded_game_version():
+    """Existing contract-v8 regression tests keep an explicitly legacy round."""
+    return 8
+
+
+@pytest.fixture
+def api(database, seeded_game_version):
     asyncio.run(
         execute("TRUNCATE action_cards, users, rounds RESTART IDENTITY CASCADE")
     )
-    asyncio.run(seed())
+    if seeded_game_version == 8:
+        from unittest.mock import patch
+        from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+        from src.aml_workshop_simulator.services.configuration import freeze_game_config
+        from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+        from src.aml_workshop_simulator.services.round_configuration import (
+            config_version,
+        )
+
+        def legacy_config(cards):
+            config = freeze_game_config(expanded_game_config(), cards)
+            scorer = get_model_scorer()
+            scorer.check_config(config)
+            config["risk_model"] = scorer.identity.copy()
+            config["config_version"] = config_version(config)
+            return config
+
+        with patch("scripts.seed_database.reference_game_config", legacy_config):
+            asyncio.run(seed())
+    else:
+        assert seeded_game_version == 10
+        asyncio.run(seed())
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
 
@@ -140,7 +167,23 @@ def chain(request_api, admin, round_id):
     config = request_api("GET", "/admin/rounds/current", admin)["game_config"]
 
     def build(count=9):
-        steps = demo_steps(config)[:count]
+        if config["schema_version"] == 10:
+            import json
+
+            steps = json.loads(
+                (ROOT / "tests/fixtures/game_classifier_chain.json").read_text(
+                    encoding="utf-8"
+                )
+            )[:count]
+            cards = {
+                (c["code"], c["version"]): c["id"] for c in config["card_snapshots"]
+            }
+            for step in steps:
+                step["card"]["id"] = cards[
+                    (step["card"]["code"], step["card"]["version"])
+                ]
+        else:
+            steps = demo_steps(config)[:count]
         for step in steps:
             step["step_id"] = str(uuid4())
         return steps

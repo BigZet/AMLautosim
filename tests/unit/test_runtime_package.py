@@ -32,6 +32,22 @@ def test_release_is_reproducible_and_excludes_local_data(tmp_path):
         )
     with pytest.raises(FileExistsError):
         package(source, first)
-    (source / "src/leak.txt").symlink_to(source / ".env")
+
+
+def test_release_rejects_symlinks(tmp_path):
+    source = tmp_path / "source"
+    for name in FILES:
+        path = source / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(name)
+    for name in DIRECTORIES:
+        (source / name).mkdir(parents=True, exist_ok=True)
+    (source / ".env").write_text("secret")
+    try:
+        (source / "src/leak.txt").symlink_to(source / ".env")
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows requires Developer Mode or symlink privileges")
+        raise
     with pytest.raises(ValueError, match="Symlink"):
         package(source, tmp_path / "unsafe.tar.gz")

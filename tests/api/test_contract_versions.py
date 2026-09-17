@@ -39,7 +39,7 @@ def state(sql):
 def test_snapshot_roundtrip_in_postgresql(
     version, api, request_api, admin, player, round_id, sql
 ):
-    config = request_api("GET", "/admin/game-config/default", admin)
+    config = request_api("GET", "/admin/game-config/default?schema_version=8", admin)
     if version == 7:
         from src.aml_workshop_simulator.core.game_config import base_game_config
 

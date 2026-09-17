@@ -1,4 +1,5 @@
 from copy import deepcopy
+import json
 import subprocess
 import sys
 
@@ -42,6 +43,78 @@ def test_duplicate_and_forged_label_fail(package):
     modified["references"][0]["target_risk_score"] += 1
     with pytest.raises(AssertionError):
         validate(modified)
+
+
+@pytest.mark.parametrize("tamper", ["label", "features"])
+def test_optimized_package_validation_rejects_tampering(package, tmp_path, tamper):
+    modified = deepcopy(package)
+    row = modified["references"][0]
+    if tamper == "label":
+        row["target_risk_score"] += 1
+    else:
+        row["features"]["num_steps"] += 1
+    source = tmp_path / "package.json"
+    source.write_text(stable(modified), encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-O",
+            "-c",
+            "import json, sys; from pathlib import Path; "
+            "from scripts.aml_dataset.expanded import validate; "
+            "validate(json.loads(Path(sys.argv[1]).read_text(encoding='utf-8')))",
+            str(source),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode != 0, result.stdout
+    assert "AssertionError" in result.stderr
+
+
+@pytest.mark.parametrize("tamper", [None, "package_hash", "csv_label"])
+def test_optimized_directory_validation_checks_saved_artifacts(
+    package, tmp_path, tamper
+):
+    destination = tmp_path / "review"
+    write_package(package, destination)
+    if tamper == "package_hash":
+        manifest_path = destination / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["package_hash"] = "forged-hash"
+        manifest_path.write_text(json.dumps(manifest))
+    elif tamper == "csv_label":
+        import csv
+
+        csv_path = destination / "features.csv"
+        with csv_path.open(newline="") as file:
+            reader = csv.DictReader(file)
+            fields = reader.fieldnames
+            rows = list(reader)
+        rows[0]["target_risk_score"] = str(float(rows[0]["target_risk_score"]) + 1)
+        with csv_path.open("w", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(rows)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-O",
+            "-m",
+            "scripts.validate_expanded_aml_dataset",
+            str(destination),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if tamper is None:
+        assert result.returncode == 0, result.stderr
+        assert "technical_review_passed_not_approved" in result.stdout
+    else:
+        assert result.returncode != 0, result.stdout
+        assert "AssertionError" in result.stderr
 
 
 def test_final_recipient_novelty_weight_is_nine(package):

@@ -1,0 +1,18 @@
+verified 250
+verified 500
+verified 750
+verified 1000
+verified 1250
+verified 1500
+verified 1750
+verified 2000
+verified 2250
+verified 2500
+verified 2750
+verified 3000
+verified 3250
+verified 3500
+verified 3750
+verified 4000
+verified 4250
+{'passed': True, 'rows': 4413, 'max_prediction_error': 0.0, 'max_shap_additivity_error': 2.2737367544323206e-13, 'seconds': 482.817850499996, 'first_100_seconds': 10.43265859989333, 'p95_seconds': 0.13656600000103936, 'model': {'model_version': 'aml-catboost-behavior-v2', 'model_sha256': 'b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b', 'extractor': 'aml-observable-v3.0', 'explanation_version': 3, 'dictionary_sha256': 'd620259fc5e87f1a8685ee0dc7bbc9293c00255f54722ba44c842054376c502d'}}

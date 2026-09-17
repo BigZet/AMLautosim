@@ -1,0 +1,128 @@
+[
+  {
+    "feature_sha256": "7b7b1101de4fc65e97a3951c564becfac82eea8bc0104b6c2021c1bcb930c823",
+    "scenario_ids": [
+      "cash_mobile_repair-schedule-0-unavailable-0",
+      "cash_mobile_repair-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "c0f09499a588305b642fa35cbf3a10c263501a4e5c3f4b3715e6f3156e72221e",
+    "scenario_ids": [
+      "cash_mobile_repair-schedule-1-unavailable-0",
+      "cash_mobile_repair-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "333b9f0b7db7e1966c9825aa91ff8e36407be74c9370588d647e14765915d425",
+    "scenario_ids": [
+      "cash_mobile_repair-schedule-2-unavailable-0",
+      "cash_mobile_repair-schedule-2-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "a7234224abfe7d52811208a5e59cf470bb350bc0e5eadd9be5fa63830927a247",
+    "scenario_ids": [
+      "cash_market_stall-schedule-0-unavailable-0",
+      "cash_market_stall-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "9bb869522ab2f03f9404c5bf5774bcbced2c2e652eb1e6437122bec7b9c38aa8",
+    "scenario_ids": [
+      "cash_market_stall-schedule-1-unavailable-0",
+      "cash_market_stall-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "4414fc1b1e99f2ca4d0c39f95ad4be43188953cba3fd3a65a3541c2e26923ac8",
+    "scenario_ids": [
+      "cash_market_stall-schedule-2-unavailable-0",
+      "cash_market_stall-schedule-2-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "ceaa9503318e053b23625dfa531157eaebb60ad445a08d505009854343065503",
+    "scenario_ids": [
+      "foreign_estate_distribution-schedule-0-unavailable-0",
+      "foreign_estate_distribution-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "f2a7ff6e10c203a66465dc6b56d287a7d430019fa27ee9e44e0cc11ec0102007",
+    "scenario_ids": [
+      "foreign_estate_distribution-schedule-1-unavailable-0",
+      "foreign_estate_distribution-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "b1e95650e3b1e414a20749cab3a0b735fc90d98b8df0a0b92524ca6278065130",
+    "scenario_ids": [
+      "foreign_estate_distribution-schedule-2-unavailable-0",
+      "foreign_estate_distribution-schedule-2-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "266792b2a1f705c59c73f4569c137ac9ba9bfa279dda9439445850bebadf1c2e",
+    "scenario_ids": [
+      "crypto_self_custody_disposal-schedule-0-unavailable-0",
+      "crypto_self_custody_disposal-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "fed49f1fcdd770994b37cfd3c29984701d844592a576a3880bfeb77fc744d015",
+    "scenario_ids": [
+      "crypto_self_custody_disposal-schedule-1-unavailable-0",
+      "crypto_self_custody_disposal-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "a8b334c7710cbad426ce3c2882b2589b272d4e66fb2486e5c5bff391f9377b28",
+    "scenario_ids": [
+      "crypto_self_custody_disposal-schedule-2-unavailable-0",
+      "crypto_self_custody_disposal-schedule-2-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "981962477143a5b6d0509665eb8e7554000c2eadb620e64d4762a6d3e6441a54",
+    "scenario_ids": [
+      "dormant_land_compensation-schedule-0-unavailable-0",
+      "dormant_land_compensation-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "12772a5dca45f21a572e4c88862edfc9a1a560f0794be0bf8fe4c72559b8d00e",
+    "scenario_ids": [
+      "dormant_land_compensation-schedule-1-unavailable-0",
+      "dormant_land_compensation-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "c14b280b6d25d5d8b2935c95ec1c2d339951ea3c406e19446e9caee96e8ae6b2",
+    "scenario_ids": [
+      "dormant_land_compensation-schedule-2-unavailable-0",
+      "dormant_land_compensation-schedule-2-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "18a09438b7dd1dfcf80602162dcb77bf36aedf5ee8b71ab5e4167059dee18b0a",
+    "scenario_ids": [
+      "mixed_household_transition-schedule-0-unavailable-0",
+      "mixed_household_transition-schedule-0-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "571eacf40b33f492ad63736bd15e81beda13934b521d367608a6c91a8f0212c2",
+    "scenario_ids": [
+      "mixed_household_transition-schedule-1-unavailable-0",
+      "mixed_household_transition-schedule-1-unavailable-1"
+    ]
+  },
+  {
+    "feature_sha256": "3cfe23640fe7e37ea154e2a396f3232b62439e15ea0b84c133c4759109899ff6",
+    "scenario_ids": [
+      "mixed_household_transition-schedule-2-unavailable-0",
+      "mixed_household_transition-schedule-2-unavailable-1"
+    ]
+  }
+]

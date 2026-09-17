@@ -1,0 +1,13 @@
+{
+  "class_counts": {
+    "0": 10,
+    "1": 10,
+    "None": 5
+  },
+  "release_ready": false,
+  "review_sha256": "77015eb2965f32365c488b1f4df1b61b77648940ada950b2d510039edd8f7aba",
+  "reviewed_rows": 25,
+  "scope": "Exact synthetic case review; automated independent AI, not human AML expertise or probability acceptance",
+  "source_records_sha256": "a80c2e4227763ab2feaec77faecab7ae8f7f18ec974e2144bee266ff0370819a",
+  "source_wrapper_sha256": "cb57c9623bdea42288f083f12e330a7d7546e08460e9f509b30a3087a1a134b7"
+}

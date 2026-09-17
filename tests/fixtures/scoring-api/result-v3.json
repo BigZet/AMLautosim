@@ -1,0 +1,1222 @@
+{
+  "scenario_id": 1,
+  "scores": {
+    "risk_score": "45.30",
+    "risk_label": "suspicious",
+    "stealth_score": "54.70",
+    "resource_score": "33.39",
+    "game_score": "47.24"
+  },
+  "rank": 1,
+  "explanation": {
+    "schema_version": 3,
+    "method": "catboost-tree-shap",
+    "model": {
+      "extractor": "aml-observable-v3.0",
+      "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b",
+      "model_version": "aml-catboost-behavior-v2",
+      "dictionary_sha256": "d620259fc5e87f1a8685ee0dc7bbc9293c00255f54722ba44c842054376c502d",
+      "explanation_version": 3
+    },
+    "reference": "training leaf statistics; no reference_data",
+    "base_value": 58.32288181588041,
+    "raw_score": 45.30404170563584,
+    "normalized_score": "45.30",
+    "clipping_adjustment": 0.0,
+    "rounding_adjustment": -0.004041705635842163,
+    "additivity_error": 7.105427357601002e-15,
+    "factors": [
+      {
+        "code": "amount_mean",
+        "title": "Средняя сумма операции",
+        "description": "Среднее арифметическое сумм всех операций",
+        "unit": "руб.",
+        "value": 70000.0,
+        "display_value": "70000.00",
+        "contribution": -0.048741566712337196
+      },
+      {
+        "code": "amount_std",
+        "title": "Разброс сумм операций",
+        "description": "Стандартное отклонение сумм операций",
+        "unit": "руб.",
+        "value": 21395.742047841617,
+        "display_value": "21395.74",
+        "contribution": 0.005401070252829201
+      },
+      {
+        "code": "cash_share",
+        "title": "Доля наличных",
+        "description": "Доля снятий наличных в целевых списаниях",
+        "unit": "",
+        "value": 0.025,
+        "display_value": "2.50%",
+        "contribution": 0.04359658476755958
+      },
+      {
+        "code": "channel_atm_count",
+        "title": "Канал: банкомат",
+        "description": "Количество операций через указанный канал",
+        "unit": "операций",
+        "value": 1,
+        "display_value": "1",
+        "contribution": 0.000984599587150695
+      },
+      {
+        "code": "channel_branch_count",
+        "title": "Канал: отделение",
+        "description": "Количество операций через указанный канал",
+        "unit": "операций",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.013087741468000695
+      },
+      {
+        "code": "channel_mobile_count",
+        "title": "Канал: мобильное приложение",
+        "description": "Количество операций через указанный канал",
+        "unit": "операций",
+        "value": 5,
+        "display_value": "5",
+        "contribution": -0.0023785537370846176
+      },
+      {
+        "code": "channel_web_count",
+        "title": "Канал: веб-банк",
+        "description": "Количество операций через указанный канал",
+        "unit": "операций",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.003879947467605505
+      },
+      {
+        "code": "comparable_historical_recipient_share",
+        "title": "Переводы, сопоставимые с историей",
+        "description": "Доля переводов сторонам с повторявшимися ранее сопоставимыми суммами",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -0.0033579696498156216
+      },
+      {
+        "code": "count_cash_withdrawal",
+        "title": "Количество: снятие наличных",
+        "description": "Число операций указанного типа в текущей цепочке",
+        "unit": "операций",
+        "value": 1,
+        "display_value": "1",
+        "contribution": -0.009213071151944164
+      },
+      {
+        "code": "count_purchase",
+        "title": "Количество: покупка",
+        "description": "Число операций указанного типа в текущей цепочке",
+        "unit": "операций",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.004541049777389545
+      },
+      {
+        "code": "count_salary",
+        "title": "Количество: получение дохода",
+        "description": "Число операций указанного типа в текущей цепочке",
+        "unit": "операций",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.5921708361469448
+      },
+      {
+        "code": "credit_cash_links",
+        "title": "Поступление перед наличными",
+        "description": "Число переходов от поступления к снятию в финансовой последовательности",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.0007634587695854714
+      },
+      {
+        "code": "credit_debit_gap_10_60_excess_mean",
+        "title": "Ожидание после первых 10 минут",
+        "description": "Среднее превышение задержки над 10 минутами, ограниченное 50 минутами на переход",
+        "unit": "мин.",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": 0.14707901811507754
+      },
+      {
+        "code": "credit_debit_gap_mean",
+        "title": "Задержка от поступления до списания",
+        "description": "Средняя наблюдаемая задержка между связанными операциями",
+        "unit": "мин.",
+        "value": 1,
+        "display_value": "1.00",
+        "contribution": 0.07579262224843354
+      },
+      {
+        "code": "credit_debit_links",
+        "title": "Поступление перед списанием",
+        "description": "Число переходов от поступления к списанию без учёта покупок",
+        "unit": "переходов",
+        "value": 3,
+        "display_value": "3",
+        "contribution": -0.0014338712165323103
+      },
+      {
+        "code": "debit_mean_history_ratio",
+        "title": "Списания относительно истории",
+        "description": "Отношение средней суммы финансового списания к исторической; 0 при отсутствии базы сравнения",
+        "unit": "раз",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": -0.18289120618623733
+      },
+      {
+        "code": "elapsed_minutes",
+        "title": "Длительность цепочки",
+        "description": "Календарное время между первым и последним шагами",
+        "unit": "мин.",
+        "value": 8,
+        "display_value": "8.00",
+        "contribution": -0.04358640276466771
+      },
+      {
+        "code": "fast_credit_debit_share",
+        "title": "Быстрые поступления и списания",
+        "description": "Доля переходов от поступления к списанию с задержкой до 10 минут",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "100.00%",
+        "contribution": 0.04107865867902188
+      },
+      {
+        "code": "fees",
+        "title": "Комиссии",
+        "description": "Суммарные комиссии цепочки",
+        "unit": "руб.",
+        "value": 2050.0,
+        "display_value": "2050.00",
+        "contribution": 0.022356912543616398
+      },
+      {
+        "code": "gross_outflow",
+        "title": "Общие списания",
+        "description": "Общий объём списаний согласно снимку ресурсов",
+        "unit": "руб.",
+        "value": 400000.0,
+        "display_value": "400000.00",
+        "contribution": 0.020786157096028064
+      },
+      {
+        "code": "historical_recipient_overlap_share",
+        "title": "Знакомые по истории получатели",
+        "description": "Доля получателей, встречавшихся в доступной истории",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": 0.04038510276611471
+      },
+      {
+        "code": "history_card_transfer_amount",
+        "title": "История: перевод получателю — сумма",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "руб.",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": 0.06839542065584864
+      },
+      {
+        "code": "history_card_transfer_count",
+        "title": "История: перевод получателю — количество",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "операций",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.015273457262818464
+      },
+      {
+        "code": "history_count",
+        "title": "Операции в истории",
+        "description": "Количество наблюдаемых исторических операций",
+        "unit": "операций",
+        "value": 3,
+        "display_value": "3",
+        "contribution": -1.0495157128200465
+      },
+      {
+        "code": "history_debit_mean",
+        "title": "Среднее историческое списание",
+        "description": "Средняя сумма переводов и снятий в истории; 0 при отсутствии таких операций",
+        "unit": "руб.",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": 0.024067324038467206
+      },
+      {
+        "code": "history_empty",
+        "title": "Наблюдаемое отсутствие истории",
+        "description": "История доступна, но операций в ней нет",
+        "unit": "",
+        "value": 0,
+        "display_value": "Нет",
+        "contribution": -1.839923024856127
+      },
+      {
+        "code": "history_has_debits",
+        "title": "Списания в истории",
+        "description": "В наблюдаемой истории есть перевод или снятие",
+        "unit": "",
+        "value": 0,
+        "display_value": "Нет",
+        "contribution": -0.018083673320585605
+      },
+      {
+        "code": "history_incoming_transfer_amount",
+        "title": "История: входящий перевод — сумма",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "руб.",
+        "value": 25000.5,
+        "display_value": "25000.50",
+        "contribution": -0.22798577294871866
+      },
+      {
+        "code": "history_incoming_transfer_count",
+        "title": "История: входящий перевод — количество",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "операций",
+        "value": 1,
+        "display_value": "1",
+        "contribution": -0.33952565991990075
+      },
+      {
+        "code": "history_known",
+        "title": "Доступность истории",
+        "description": "Предыстория операций доступна",
+        "unit": "",
+        "value": 1,
+        "display_value": "Да",
+        "contribution": -0.04378364877632549
+      },
+      {
+        "code": "history_purchase_amount",
+        "title": "История: покупка — сумма",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "руб.",
+        "value": 3500.25,
+        "display_value": "3500.25",
+        "contribution": -0.2823113326888955
+      },
+      {
+        "code": "history_purchase_count",
+        "title": "История: покупка — количество",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "операций",
+        "value": 1,
+        "display_value": "1",
+        "contribution": -0.0902392827117325
+      },
+      {
+        "code": "history_salary_amount",
+        "title": "История: получение дохода — сумма",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "руб.",
+        "value": 80000.0,
+        "display_value": "80000.00",
+        "contribution": -0.3237578162842326
+      },
+      {
+        "code": "history_salary_count",
+        "title": "История: получение дохода — количество",
+        "description": "Наблюдаемый показатель за историческое окно; 0 при отсутствии наблюдений",
+        "unit": "операций",
+        "value": 1,
+        "display_value": "1",
+        "contribution": -0.298299248359967
+      },
+      {
+        "code": "history_stable_background",
+        "title": "Фоновая активность в истории",
+        "description": "Зарплата или покупки наблюдались минимум в два разных дня",
+        "unit": "",
+        "value": 1,
+        "display_value": "Да",
+        "contribution": -0.403815791230606
+      },
+      {
+        "code": "income_basis",
+        "title": "Основание дохода",
+        "description": "Основание операции получения дохода в текущей цепочке",
+        "unit": "",
+        "value": "absent",
+        "display_value": "Дохода нет",
+        "contribution": 1.3259065903109126
+      },
+      {
+        "code": "interval_10_count",
+        "title": "Ожидание 10 минут",
+        "description": "Количество интервалов указанной продолжительности",
+        "unit": "интервалов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.003078317054243221
+      },
+      {
+        "code": "interval_1440_count",
+        "title": "Ожидание 1440 минут",
+        "description": "Количество интервалов указанной продолжительности",
+        "unit": "интервалов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -2.7624671206465945e-05
+      },
+      {
+        "code": "interval_1_count",
+        "title": "Ожидание 1 минут",
+        "description": "Количество интервалов указанной продолжительности",
+        "unit": "интервалов",
+        "value": 8,
+        "display_value": "8",
+        "contribution": -0.0008214073249179402
+      },
+      {
+        "code": "interval_60_count",
+        "title": "Ожидание 60 минут",
+        "description": "Количество интервалов указанной продолжительности",
+        "unit": "интервалов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.0002170488524781658
+      },
+      {
+        "code": "interval_max",
+        "title": "Максимальное ожидание",
+        "description": "Наибольший интервал между шагами",
+        "unit": "мин.",
+        "value": 1,
+        "display_value": "1.00",
+        "contribution": 0.0
+      },
+      {
+        "code": "interval_mean",
+        "title": "Среднее ожидание",
+        "description": "Средний интервал между шагами",
+        "unit": "мин.",
+        "value": 1,
+        "display_value": "1.00",
+        "contribution": -0.001659486053118736
+      },
+      {
+        "code": "known_relationship_share",
+        "title": "Известные отношения со сторонами",
+        "description": "Доля переводов с известными личными отношениями со стороной",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "100.00%",
+        "contribution": -1.480897615523677
+      },
+      {
+        "code": "limited_information_amount_share",
+        "title": "Объём переводов с неполными сведениями",
+        "description": "Доля суммы переводов со сторонами, сведения о которых ограничены или неизвестны",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -3.658438892646502
+      },
+      {
+        "code": "limited_information_share",
+        "title": "Переводы с неполными сведениями",
+        "description": "Доля переводов со сторонами без достаточных сведений",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -1.1279689832707656
+      },
+      {
+        "code": "limited_information_total_amount",
+        "title": "Сумма переводов с неполными сведениями",
+        "description": "Объём переводов со сторонами без достаточных сведений",
+        "unit": "руб.",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": -3.0461246178050447
+      },
+      {
+        "code": "matched_large_episode_count",
+        "title": "Крупные эпизоды сопоставимого входа и выхода",
+        "description": "Количество наблюдаемых эпизодов с почти совпадающими крупными входом и выходом",
+        "unit": "эпизодов",
+        "value": 2,
+        "display_value": "2",
+        "contribution": 0.3289409709754709
+      },
+      {
+        "code": "matched_large_tempo_mean",
+        "title": "Темп крупных сопоставимых эпизодов",
+        "description": "Средний индекс быстроты: от 0 для задержки 60 минут до 1 для задержки не более 10 минут",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "1.00",
+        "contribution": 0.2920449297833322
+      },
+      {
+        "code": "max_financial_debit_run",
+        "title": "Самая длинная серия списаний",
+        "description": "Максимальное число последовательных финансовых списаний",
+        "unit": "операций",
+        "value": 2,
+        "display_value": "2",
+        "contribution": 0.006260480893705152
+      },
+      {
+        "code": "night_share",
+        "title": "Ночные операции",
+        "description": "Доля шагов в ночное время по временной шкале",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -2.8287388697671914e-05
+      },
+      {
+        "code": "num_steps",
+        "title": "Длина цепочки",
+        "description": "Количество операций в цепочке",
+        "unit": "операций",
+        "value": 9,
+        "display_value": "9",
+        "contribution": 0.029303571742404035
+      },
+      {
+        "code": "observed_return_cycle_count",
+        "title": "Наблюдаемые возвратные эпизоды",
+        "description": "Количество эпизодов возврата средств ранее наблюдавшейся стороне",
+        "unit": "эпизодов",
+        "value": 2,
+        "display_value": "2",
+        "contribution": 0.5695020923336346
+      },
+      {
+        "code": "pace_reference_matched_large_episode_count",
+        "title": "Крупные эпизоды сопоставимого входа и выхода при минутных интервалах",
+        "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+        "unit": "эпизодов",
+        "value": 2,
+        "display_value": "2",
+        "contribution": -0.04212717219603164
+      },
+      {
+        "code": "pace_reference_matched_large_tempo_mean",
+        "title": "Темп крупных сопоставимых эпизодов при минутных интервалах",
+        "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "1.00",
+        "contribution": 0.0032201118657918123
+      },
+      {
+        "code": "pace_reference_observed_return_cycle_count",
+        "title": "Наблюдаемые возвратные эпизоды при минутных интервалах",
+        "description": "Наблюдаемый показатель той же цепочки, пересчитанный с интервалами по одной минуте",
+        "unit": "эпизодов",
+        "value": 2,
+        "display_value": "2",
+        "contribution": 0.3056759879472655
+      },
+      {
+        "code": "party_information_limited_share",
+        "title": "Сведения о сторонах: ограничены",
+        "description": "Доля переводов со сторонами с указанной доступностью сведений",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -0.09404280532406604
+      },
+      {
+        "code": "party_information_sufficient_share",
+        "title": "Сведения о сторонах: достаточны",
+        "description": "Доля переводов со сторонами с указанной доступностью сведений",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "100.00%",
+        "contribution": -3.1944579277705163
+      },
+      {
+        "code": "party_information_unknown_share",
+        "title": "Сведения о сторонах: неизвестны",
+        "description": "Доля переводов со сторонами с указанной доступностью сведений",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -0.040611672306108515
+      },
+      {
+        "code": "party_institution_share",
+        "title": "Тип стороны: организации",
+        "description": "Доля связанных операций со сторонами указанного типа",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": 0.44116341171195117
+      },
+      {
+        "code": "party_merchant_share",
+        "title": "Тип стороны: торговые организации",
+        "description": "Доля связанных операций со сторонами указанного типа",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": 0.009363931365908252
+      },
+      {
+        "code": "party_person_share",
+        "title": "Тип стороны: физические лица",
+        "description": "Доля связанных операций со сторонами указанного типа",
+        "unit": "",
+        "value": 1.0,
+        "display_value": "100.00%",
+        "contribution": 0.005718667116516189
+      },
+      {
+        "code": "purchase_total",
+        "title": "Сумма покупок",
+        "description": "Расходы на товары и услуги, исключённые из целевого оборота",
+        "unit": "руб.",
+        "value": 0,
+        "display_value": "0.00",
+        "contribution": 0.03955140398112559
+      },
+      {
+        "code": "recipient_hhi",
+        "title": "Концентрация получателей",
+        "description": "Индекс концентрации переводов по получателям; больше означает большую концентрацию",
+        "unit": "",
+        "value": 0.9506249999999999,
+        "display_value": "0.95",
+        "contribution": 0.727787733279809
+      },
+      {
+        "code": "repeated_debit_share",
+        "title": "Повторяющиеся суммы списаний",
+        "description": "Доля финансовых списаний сверх числа уникальных сумм",
+        "unit": "",
+        "value": 0.6666666666666666,
+        "display_value": "66.67%",
+        "contribution": 1.1584292638343714
+      },
+      {
+        "code": "return_to_sender_count",
+        "title": "Переводы прежнему отправителю",
+        "description": "Число переводов стороне, ранее отправлявшей средства",
+        "unit": "переводов",
+        "value": 5,
+        "display_value": "5",
+        "contribution": -0.020946309769875514
+      },
+      {
+        "code": "source_crypto_exchange_count",
+        "title": "Источник: криптобиржа",
+        "description": "Количество поступлений из указанного источника",
+        "unit": "поступлений",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.00802915405925428
+      },
+      {
+        "code": "source_domestic_bank_count",
+        "title": "Источник: российский банк",
+        "description": "Количество поступлений из указанного источника",
+        "unit": "поступлений",
+        "value": 3,
+        "display_value": "3",
+        "contribution": -0.029782336474783514
+      },
+      {
+        "code": "source_foreign_bank_kg_count",
+        "title": "Источник: банк Кыргызстана",
+        "description": "Количество поступлений из указанного источника",
+        "unit": "поступлений",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.001361459621280828
+      },
+      {
+        "code": "source_payment_service_count",
+        "title": "Источник: платёжный сервис",
+        "description": "Количество поступлений из указанного источника",
+        "unit": "поступлений",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.001997587092480241
+      },
+      {
+        "code": "transition_card_transfer_card_transfer",
+        "title": "Перевод получателю → перевод получателю",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 2,
+        "display_value": "2",
+        "contribution": -3.6985512571805207e-06
+      },
+      {
+        "code": "transition_card_transfer_incoming_transfer",
+        "title": "Перевод получателю → входящий перевод",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 1,
+        "display_value": "1",
+        "contribution": -0.0031888476783148937
+      },
+      {
+        "code": "transition_card_transfer_purchase",
+        "title": "Перевод получателю → покупка",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.0011066618544941047
+      },
+      {
+        "code": "transition_card_transfer_salary",
+        "title": "Перевод получателю → получение дохода",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.0009363702079432864
+      },
+      {
+        "code": "transition_cash_withdrawal_card_transfer",
+        "title": "Снятие наличных → перевод получателю",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.0049800897586876215
+      },
+      {
+        "code": "transition_incoming_transfer_card_transfer",
+        "title": "Входящий перевод → перевод получателю",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 3,
+        "display_value": "3",
+        "contribution": -0.0027450474412125123
+      },
+      {
+        "code": "transition_incoming_transfer_cash_withdrawal",
+        "title": "Входящий перевод → снятие наличных",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.0015257936073288926
+      },
+      {
+        "code": "transition_incoming_transfer_incoming_transfer",
+        "title": "Входящий перевод → входящий перевод",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.00012150290713882359
+      },
+      {
+        "code": "transition_incoming_transfer_purchase",
+        "title": "Входящий перевод → покупка",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 1.7775416576303392e-05
+      },
+      {
+        "code": "transition_purchase_card_transfer",
+        "title": "Покупка → перевод получателю",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.000488960353340556
+      },
+      {
+        "code": "transition_purchase_incoming_transfer",
+        "title": "Покупка → входящий перевод",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 0.0002475623724921755
+      },
+      {
+        "code": "transition_purchase_purchase",
+        "title": "Покупка → покупка",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": 6.957688344160518e-05
+      },
+      {
+        "code": "transition_salary_card_transfer",
+        "title": "Получение дохода → перевод получателю",
+        "description": "Число соседних пар операций указанного типа",
+        "unit": "переходов",
+        "value": 0,
+        "display_value": "0",
+        "contribution": -0.0013904584886654829
+      },
+      {
+        "code": "unique_recipients",
+        "title": "Разные получатели",
+        "description": "Число уникальных получателей переводов",
+        "unit": "получателей",
+        "value": 1,
+        "display_value": "1",
+        "contribution": 0.12004619871271725
+      },
+      {
+        "code": "unobserved_recipient_share",
+        "title": "Получатели вне доступной истории",
+        "description": "Доля переводов получателям без наблюдений в истории; 0 при недоступной истории",
+        "unit": "",
+        "value": 0.0,
+        "display_value": "0.00%",
+        "contribution": -1.512496020847834
+      }
+    ],
+    "top_positive": [
+      "income_basis",
+      "repeated_debit_share",
+      "recipient_hhi"
+    ],
+    "top_negative": [
+      "limited_information_amount_share",
+      "party_information_sufficient_share",
+      "limited_information_total_amount"
+    ],
+    "remaining_contribution": -6.331942259447603,
+    "disclaimer": "Вклады объясняют оценку модели относительно её базового значения; это не фиксированные штрафы и скидки."
+  },
+  "resources": {
+    "schema_version": 7,
+    "ruleset_version": "expanded-rules-stage04-v1",
+    "valid": true,
+    "resources_after": {
+      "balance": "7950.00",
+      "energy": 9,
+      "time": 10,
+      "available_steps": 5
+    },
+    "totals": {
+      "gross_inflow": "230000.00",
+      "gross_outflow": "400000.00",
+      "fees": "2050.00",
+      "target_outflow": "400000.00",
+      "purchase_outflow": "0.00"
+    },
+    "objective": {
+      "target_outflow": "400000.00",
+      "reached": true
+    },
+    "limit_usage": {
+      "cash": "10000.00",
+      "anonymous": "0.00",
+      "night_operations": 0,
+      "anonymous_operations": 0,
+      "actions": 9
+    },
+    "limits": [
+      {
+        "code": "cash",
+        "label": "Наличные операции",
+        "kind": "money",
+        "used": "10000.00",
+        "limit": "120000.00",
+        "remaining": "110000.00"
+      },
+      {
+        "code": "anonymous",
+        "label": "Анонимные получатели",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "60000.00",
+        "remaining": "60000.00"
+      },
+      {
+        "code": "night_operations",
+        "label": "Ночные операции",
+        "kind": "count",
+        "used": "0",
+        "limit": "2",
+        "remaining": "2"
+      },
+      {
+        "code": "anonymous_operations",
+        "label": "Анонимные получатели",
+        "kind": "count",
+        "used": "0",
+        "limit": "2",
+        "remaining": "2"
+      },
+      {
+        "code": "actions",
+        "label": "Действия в раунде",
+        "kind": "count",
+        "used": "9",
+        "limit": "14",
+        "remaining": "5"
+      },
+      {
+        "code": "purchase_total",
+        "label": "Сумма покупок",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "30000.00",
+        "remaining": "30000.00"
+      },
+      {
+        "code": "purchase_count",
+        "label": "Количество покупок",
+        "kind": "count",
+        "used": "0",
+        "limit": "3",
+        "remaining": "3"
+      }
+    ],
+    "violations": [],
+    "per_step": [
+      {
+        "step_id": "00000000-0000-0000-0000-000000000001",
+        "step_index": 1,
+        "card_code": "incoming_transfer",
+        "card_version": 1,
+        "card_title": "Получить входящий перевод",
+        "resources_before": {
+          "balance": "180000.00",
+          "energy": 30,
+          "time": 30
+        },
+        "resources_after": {
+          "balance": "260000.00",
+          "energy": 27,
+          "time": 27
+        },
+        "gross": "80000.00",
+        "fee": "0.00",
+        "money_delta": "80000.00",
+        "energy_cost": 3,
+        "time_cost": 3,
+        "detail_factors": [
+          {
+            "field_key": "transfer_source",
+            "field_label": "Источник перевода",
+            "value": "domestic_bank",
+            "value_label": "Российский банк"
+          }
+        ]
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000002",
+        "step_index": 2,
+        "card_code": "card_transfer",
+        "card_version": 1,
+        "card_title": "Перевести по карте",
+        "resources_before": {
+          "balance": "260000.00",
+          "energy": 27,
+          "time": 27
+        },
+        "resources_after": {
+          "balance": "181610.00",
+          "energy": 25,
+          "time": 25
+        },
+        "gross": "78000.00",
+        "fee": "390.00",
+        "money_delta": "-78390.00",
+        "energy_cost": 2,
+        "time_cost": 2,
+        "detail_factors": []
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000003",
+        "step_index": 3,
+        "card_code": "card_transfer",
+        "card_version": 1,
+        "card_title": "Перевести по карте",
+        "resources_before": {
+          "balance": "181610.00",
+          "energy": 25,
+          "time": 25
+        },
+        "resources_after": {
+          "balance": "103220.00",
+          "energy": 23,
+          "time": 23
+        },
+        "gross": "78000.00",
+        "fee": "390.00",
+        "money_delta": "-78390.00",
+        "energy_cost": 2,
+        "time_cost": 2,
+        "detail_factors": []
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000004",
+        "step_index": 4,
+        "card_code": "incoming_transfer",
+        "card_version": 1,
+        "card_title": "Получить входящий перевод",
+        "resources_before": {
+          "balance": "103220.00",
+          "energy": 23,
+          "time": 23
+        },
+        "resources_after": {
+          "balance": "183220.00",
+          "energy": 20,
+          "time": 20
+        },
+        "gross": "80000.00",
+        "fee": "0.00",
+        "money_delta": "80000.00",
+        "energy_cost": 3,
+        "time_cost": 3,
+        "detail_factors": [
+          {
+            "field_key": "transfer_source",
+            "field_label": "Источник перевода",
+            "value": "domestic_bank",
+            "value_label": "Российский банк"
+          }
+        ]
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000005",
+        "step_index": 5,
+        "card_code": "card_transfer",
+        "card_version": 1,
+        "card_title": "Перевести по карте",
+        "resources_before": {
+          "balance": "183220.00",
+          "energy": 20,
+          "time": 20
+        },
+        "resources_after": {
+          "balance": "104830.00",
+          "energy": 18,
+          "time": 18
+        },
+        "gross": "78000.00",
+        "fee": "390.00",
+        "money_delta": "-78390.00",
+        "energy_cost": 2,
+        "time_cost": 2,
+        "detail_factors": []
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000006",
+        "step_index": 6,
+        "card_code": "cash_withdrawal",
+        "card_version": 1,
+        "card_title": "Снять наличные",
+        "resources_before": {
+          "balance": "104830.00",
+          "energy": 18,
+          "time": 18
+        },
+        "resources_after": {
+          "balance": "94730.00",
+          "energy": 16,
+          "time": 17
+        },
+        "gross": "10000.00",
+        "fee": "100.00",
+        "money_delta": "-10100.00",
+        "energy_cost": 2,
+        "time_cost": 1,
+        "detail_factors": []
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000007",
+        "step_index": 7,
+        "card_code": "incoming_transfer",
+        "card_version": 1,
+        "card_title": "Получить входящий перевод",
+        "resources_before": {
+          "balance": "94730.00",
+          "energy": 16,
+          "time": 17
+        },
+        "resources_after": {
+          "balance": "164730.00",
+          "energy": 13,
+          "time": 14
+        },
+        "gross": "70000.00",
+        "fee": "0.00",
+        "money_delta": "70000.00",
+        "energy_cost": 3,
+        "time_cost": 3,
+        "detail_factors": [
+          {
+            "field_key": "transfer_source",
+            "field_label": "Источник перевода",
+            "value": "domestic_bank",
+            "value_label": "Российский банк"
+          }
+        ]
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000008",
+        "step_index": 8,
+        "card_code": "card_transfer",
+        "card_version": 1,
+        "card_title": "Перевести по карте",
+        "resources_before": {
+          "balance": "164730.00",
+          "energy": 13,
+          "time": 14
+        },
+        "resources_after": {
+          "balance": "86340.00",
+          "energy": 11,
+          "time": 12
+        },
+        "gross": "78000.00",
+        "fee": "390.00",
+        "money_delta": "-78390.00",
+        "energy_cost": 2,
+        "time_cost": 2,
+        "detail_factors": []
+      },
+      {
+        "step_id": "00000000-0000-0000-0000-000000000009",
+        "step_index": 9,
+        "card_code": "card_transfer",
+        "card_version": 1,
+        "card_title": "Перевести по карте",
+        "resources_before": {
+          "balance": "86340.00",
+          "energy": 11,
+          "time": 12
+        },
+        "resources_after": {
+          "balance": "7950.00",
+          "energy": 9,
+          "time": 10
+        },
+        "gross": "78000.00",
+        "fee": "390.00",
+        "money_delta": "-78390.00",
+        "energy_cost": 2,
+        "time_cost": 2,
+        "detail_factors": []
+      }
+    ],
+    "timeline": {
+      "version": "operation-timeline-v1",
+      "timezone": "Europe/Moscow",
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "step_index": 1,
+          "occurred_at": "2026-09-17T09:00:00+03:00",
+          "elapsed_minutes": 0,
+          "interval_minutes": null,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 3,
+          "time_of_day": "day",
+          "pace": null
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "step_index": 2,
+          "occurred_at": "2026-09-17T09:01:00+03:00",
+          "elapsed_minutes": 1,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 2,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "step_index": 3,
+          "occurred_at": "2026-09-17T09:02:00+03:00",
+          "elapsed_minutes": 2,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 2,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "step_index": 4,
+          "occurred_at": "2026-09-17T09:03:00+03:00",
+          "elapsed_minutes": 3,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 3,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "step_index": 5,
+          "occurred_at": "2026-09-17T09:04:00+03:00",
+          "elapsed_minutes": 4,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 2,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "step_index": 6,
+          "occurred_at": "2026-09-17T09:05:00+03:00",
+          "elapsed_minutes": 5,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "step_index": 7,
+          "occurred_at": "2026-09-17T09:06:00+03:00",
+          "elapsed_minutes": 6,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 3,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "step_index": 8,
+          "occurred_at": "2026-09-17T09:07:00+03:00",
+          "elapsed_minutes": 7,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 2,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "step_index": 9,
+          "occurred_at": "2026-09-17T09:08:00+03:00",
+          "elapsed_minutes": 8,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 2,
+          "time_of_day": "day",
+          "pace": "rapid"
+        }
+      ]
+    }
+  }
+}

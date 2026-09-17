@@ -104,7 +104,7 @@ def test_explicit_seed_reset_replaces_game_but_keeps_accounts_and_sessions(
     current = request_api("GET", "/admin/rounds/current", admin)
     assert current["id"] != active_round
     assert current["status"] == "draft"
-    assert current["game_config"]["schema_version"] == 8
+    assert current["game_config"]["schema_version"] == 10
     assert sql("SELECT id FROM scenarios") == []
     assert sql("SELECT id FROM scoring_results") == []
     assert sql("SELECT id, email FROM users ORDER BY id") == users

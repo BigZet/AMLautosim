@@ -388,7 +388,7 @@ if __name__ == "__main__":
         show=False,
         storage_secret=storage_secret(),
         session_middleware_kwargs={
-            "session_cookie": "aml_ui",
+            "session_cookie": os.environ.get("NICEGUI_SESSION_COOKIE", "aml_ui"),
             "same_site": "lax",
             "https_only": os.environ.get("COOKIE_SECURE", "false").lower() == "true",
         },

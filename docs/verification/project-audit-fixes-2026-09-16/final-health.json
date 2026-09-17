@@ -1,0 +1,25 @@
+{
+  "58400": {
+    "status": "ready",
+    "checks": {
+      "model": {
+        "model_version": "aml-catboost-behavior-v2",
+        "model_sha256": "b81c55805d1892bba4f6a1f85968811345466399abf56fb9c1093b453a0df77b",
+        "extractor": "aml-observable-v3.0",
+        "explanation_version": 3,
+        "dictionary_sha256": "d620259fc5e87f1a8685ee0dc7bbc9293c00255f54722ba44c842054376c502d"
+      },
+      "database": "connected",
+      "ruleset_versions": [
+        "aml-catboost-behavior-v2",
+        "game-rules-v5",
+        "leaderboard-v2"
+      ],
+      "migrations": "head"
+    }
+  },
+  "58480": {
+    "status": "ok",
+    "service": "nicegui"
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "scope": "Provenance only; actual train prefix with mocked loading/audit; no fitting",
+  "parent": {
+    "executable": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "base_executable": "C:\\Users\\bigze\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\python.exe",
+    "prefix": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv",
+    "python": "3.13.15"
+  },
+  "path_python": "C:\\Users\\bigze\\AppData\\Local\\Programs\\Python\\Python312\\python.EXE",
+  "active_dependencies": {
+    "catboost": "1.2.10",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5"
+  },
+  "child_interpreters": [
+    {
+      "requested_executable": "python",
+      "arguments": [
+        "-c",
+        "import sys,platform,json; print(json.dumps(dict(executable=sys.executable,prefix=sys.prefix,version=platform.python_version())))"
+      ],
+      "returncode": 0,
+      "stdout": "{\"executable\": \"C:\\\\Users\\\\bigze\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.13-windows-x86_64-none\\\\python.exe\", \"prefix\": \"C:\\\\Users\\\\bigze\\\\AppData\\\\Roaming\\\\uv\\\\python\\\\cpython-3.13-windows-x86_64-none\", \"version\": \"3.13.15\"}\n",
+      "stderr": ""
+    },
+    {
+      "requested_executable": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+      "arguments": [
+        "-c",
+        "import sys,platform,json; print(json.dumps(dict(executable=sys.executable,prefix=sys.prefix,version=platform.python_version())))"
+      ],
+      "returncode": 0,
+      "stdout": "{\"executable\": \"C:\\\\Users\\\\bigze\\\\Documents\\\\GH\\\\AMLautosim\\\\.venv\\\\Scripts\\\\python.exe\", \"prefix\": \"C:\\\\Users\\\\bigze\\\\Documents\\\\GH\\\\AMLautosim\\\\.venv\", \"version\": \"3.13.15\"}\n",
+      "stderr": ""
+    },
+    {
+      "requested_executable": "C:\\Users\\bigze\\AppData\\Local\\Programs\\Python\\Python312\\python.EXE",
+      "arguments": [
+        "-c",
+        "import sys,platform,json; print(json.dumps(dict(executable=sys.executable,prefix=sys.prefix,version=platform.python_version())))"
+      ],
+      "returncode": 0,
+      "stdout": "{\"executable\": \"C:\\\\Users\\\\bigze\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.EXE\", \"prefix\": \"C:\\\\Users\\\\bigze\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\", \"version\": \"3.12.10\"}\n",
+      "stderr": ""
+    }
+  ],
+  "freeze_probes": [
+    {
+      "requested_executable": "python",
+      "arguments": [
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "summary": {
+        "line_count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ml_dependencies": []
+      }
+    },
+    {
+      "requested_executable": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+      "arguments": [
+        "-m",
+        "pip",
+        "freeze"
+      ],
+      "returncode": 1,
+      "stderr": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe: No module named pip\n",
+      "summary": {
+        "line_count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ml_dependencies": []
+      }
+    }
+  ],
+  "train_probes": [
+    {
+      "exception": "StopAfterProvenance",
+      "message": "Stopped before any training",
+      "module": "scripts.behavior_model",
+      "scenario": "actual_freeze",
+      "files_left": [
+        "audit.json",
+        "environment.json",
+        "environment.txt",
+        "input-checksums.json",
+        "protocol.json",
+        "training-source.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "saved_freeze": {
+        "line_count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ml_dependencies": []
+      },
+      "saved_environment": {
+        "python": "3.13.15",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "source_sha256": "159f26f6a54772cae4de653e01238dddbe5626c2ace94e77d7ecb2a446a436ce"
+      },
+      "retry_exception": "ValueError",
+      "retry_message": "New experiment directory required"
+    },
+    {
+      "exception": "FileNotFoundError",
+      "message": "Injected missing python executable",
+      "module": "scripts.behavior_model",
+      "scenario": "missing_python",
+      "files_left": [
+        "audit.json",
+        "input-checksums.json",
+        "protocol.json",
+        "training-source.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "retry_exception": "ValueError",
+      "retry_message": "New experiment directory required"
+    },
+    {
+      "exception": "CalledProcessError",
+      "message": "Command '['python', '-m', 'pip', 'freeze']' returned non-zero exit status 1.",
+      "module": "scripts.behavior_model",
+      "scenario": "missing_pip",
+      "files_left": [
+        "audit.json",
+        "input-checksums.json",
+        "protocol.json",
+        "training-source.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "retry_exception": "ValueError",
+      "retry_message": "New experiment directory required"
+    },
+    {
+      "exception": "StopAfterProvenance",
+      "message": "Stopped before any training",
+      "module": "scripts.catboost_pipeline",
+      "scenario": "actual_freeze",
+      "files_left": [
+        "environment.json",
+        "environment.txt",
+        "feature-schema.json",
+        "input-checksums.json",
+        "raw-feature-check.json",
+        "training-pipeline.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "saved_freeze": {
+        "line_count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ml_dependencies": []
+      },
+      "saved_environment": {
+        "python": "3.13.15",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "pipeline": "aml-catboost-experiment-v1",
+        "pipeline_sha256": "f4fcde460ba4b62ea2dcd8f0d52d89cd3065e302e126bade9d673d67e76303ec"
+      },
+      "retry_exception": "ValueError",
+      "retry_message": "Training output must be new; existing experiment is immutable"
+    },
+    {
+      "exception": "FileNotFoundError",
+      "message": "Injected missing python executable",
+      "module": "scripts.catboost_pipeline",
+      "scenario": "missing_python",
+      "files_left": [
+        "feature-schema.json",
+        "input-checksums.json",
+        "raw-feature-check.json",
+        "training-pipeline.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "retry_exception": "ValueError",
+      "retry_message": "Training output must be new; existing experiment is immutable"
+    },
+    {
+      "exception": "CalledProcessError",
+      "message": "Command '['python', '-m', 'pip', 'freeze']' returned non-zero exit status 1.",
+      "module": "scripts.catboost_pipeline",
+      "scenario": "missing_pip",
+      "files_left": [
+        "feature-schema.json",
+        "input-checksums.json",
+        "raw-feature-check.json",
+        "training-pipeline.py"
+      ],
+      "fit_calls": 0,
+      "model_constructor_calls": 0,
+      "retry_exception": "ValueError",
+      "retry_message": "Training output must be new; existing experiment is immutable"
+    }
+  ],
+  "archived_environments": [
+    {
+      "path": "resources\\catboost_models\\experiment-v1\\environment.json",
+      "environment": {
+        "python": "3.13.15",
+        "platform": "Linux-7.0.12-linuxkit-aarch64-with-glibc2.41",
+        "pipeline": "aml-catboost-experiment-v1",
+        "pipeline_sha256": "2b05ed056d2d21ae1145a8a5ac30159affde07df2a9495dac3288f3ae7d49e4b"
+      },
+      "freeze": {
+        "line_count": 81,
+        "sha256": "345fb11bcb441660776c059cd36e885fc7bc2de1e6491a4168103c18459ee395",
+        "ml_dependencies": [
+          "catboost==1.2.10",
+          "numpy==2.5.3",
+          "pandas==3.0.5"
+        ]
+      }
+    },
+    {
+      "path": "resources\\catboost_models\\experiment-v2\\environment.json",
+      "environment": {
+        "python": "3.13.15",
+        "platform": "Linux-7.0.12-linuxkit-aarch64-with-glibc2.41",
+        "source_sha256": "3a44b81374f8257b96dcba6f83fa40cf4f600c379ebd3ef2fc76ee63195f23c7"
+      },
+      "freeze": {
+        "line_count": 81,
+        "sha256": "345fb11bcb441660776c059cd36e885fc7bc2de1e6491a4168103c18459ee395",
+        "ml_dependencies": [
+          "catboost==1.2.10",
+          "numpy==2.5.3",
+          "pandas==3.0.5"
+        ]
+      }
+    }
+  ],
+  "sources_before": {
+    "scripts/behavior_model.py": "159f26f6a54772cae4de653e01238dddbe5626c2ace94e77d7ecb2a446a436ce",
+    "scripts/catboost_pipeline.py": "f4fcde460ba4b62ea2dcd8f0d52d89cd3065e302e126bade9d673d67e76303ec"
+  },
+  "sources_after": {
+    "scripts/behavior_model.py": "159f26f6a54772cae4de653e01238dddbe5626c2ace94e77d7ecb2a446a436ce",
+    "scripts/catboost_pipeline.py": "f4fcde460ba4b62ea2dcd8f0d52d89cd3065e302e126bade9d673d67e76303ec"
+  }
+}

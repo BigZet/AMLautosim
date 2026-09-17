@@ -355,3 +355,23 @@ def weights_sum_to_one(game_config: dict[str, Any]) -> bool:
         (Decimal(str(value)) for value in resource_weights.values()), ZERO
     )
     return total == ONE and resource_total == ONE
+
+
+AML_LEADERBOARD_VERSION = "leaderboard-aml-probability-v1"
+
+
+def probability_leaderboard_scores(probability, resources, game_config):
+    """Apply existing resource weights with unrounded calibrated probability."""
+    probability = Decimal(str(probability))
+    if not probability.is_finite() or not ZERO <= probability <= ONE:
+        raise ValueError("AML probability must be finite and in [0, 1]")
+    weights = game_config["leaderboard"]["weights"]
+    stealth = HUNDRED * (ONE - probability)
+    game = stealth * Decimal(str(weights["stealth"])) + resources * Decimal(
+        str(weights["resources"])
+    )
+    return {
+        "stealth_score": _score(stealth),
+        "resource_score": resources,
+        "game_score": _score(_clamp(game, ZERO, HUNDRED)),
+    }

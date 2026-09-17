@@ -4,6 +4,7 @@ import argparse
 import csv
 import hashlib
 import math
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -173,10 +174,30 @@ def validate(directory):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("directory", type=Path)
+    parser.add_argument("directory", type=Path, nargs="?")
+    parser.add_argument("--dataset", type=Path)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     try:
-        print(validate(args.directory))
+        if args.dataset:
+            from scripts.aml_dataset.aml_training import audit_dataset
+
+            if args.directory or not args.output:
+                parser.error("--dataset requires --output and no positional directory")
+            if args.output.exists():
+                raise FileExistsError(f"Refusing existing output: {args.output}")
+            if args.output.resolve().is_relative_to(args.dataset.resolve()):
+                raise ValueError("Audit report must be outside the immutable dataset")
+            report = audit_dataset(args.dataset)
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            with args.output.open("x", encoding="utf-8") as handle:
+                json.dump(report, handle, ensure_ascii=False, indent=2)
+                handle.write("\n")
+            print(report)
+        elif args.directory and not args.output:
+            print(validate(args.directory))
+        else:
+            parser.error("Supply directory or --dataset DATASET --output REPORT")
     except (ValueError, KeyError, OSError) as exc:
         parser.error(str(exc))
 

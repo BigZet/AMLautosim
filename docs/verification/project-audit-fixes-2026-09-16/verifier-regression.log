@@ -1,0 +1,28 @@
+AUD-05 verifier regression, 2026-09-16
+
+Command (PowerShell, repository root):
+$env:PYTHONUTF8='1'
+.venv/Scripts/python.exe -m pytest --confcutdir=tests/unit tests/unit/test_verify_model_integration.py -q
+
+RED, original verifier:
+32 failed, 3 passed in 64.28s (0:01:04)
+The three passing cases were valid 4413-row runs in normal, -O and
+PYTHONOPTIMIZE=1 modes. Optimized runs erroneously accepted short data,
+prediction/SHAP errors, unmatched references and slow explanations.
+NaN measurements and duplicate prediction IDs could also produce success;
+an output created during inference was overwritten.
+
+GREEN command adds --tb=short; patched verifier:
+35 passed in 60.27s (0:01:00)
+Exit code: 0
+
+Tests use real CSV/JSONL files and the actual verifier/CLI. Only the scorer
+is substituted to avoid repeated model inference; the latency case also
+uses a deterministic clock. Each CLI acceptance gate is exercised in
+normal, -O and PYTHONOPTIMIZE=1 subprocesses. Additional cases cover
+NaN/+Infinity/-Infinity, duplicate/unknown/blank test IDs, and output races.
+
+git diff --check -- scripts/verify_model_integration.py tests/unit/test_verify_model_integration.py
+Exit code: 0 (only repository LF-to-CRLF advisory).
+
+Full real-model verification is recorded separately by the parent task.

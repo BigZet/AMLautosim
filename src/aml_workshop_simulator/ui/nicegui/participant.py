@@ -13,7 +13,22 @@ from nicegui import ui
 from .profile_history import profile_history_panel
 from .game import GameEditor
 from .operation_timeline import timeline_control
-from .counterparties import editable_params, expanded, party_selector, party_readonly
+from .counterparties import (
+    editable_params,
+    expanded,
+    party_selector,
+    party_readonly,
+    party_name,
+)
+from .aml_context import (
+    context_panel,
+    explanation_selector,
+    explanation_readonly,
+    purpose_options,
+)
+from .shap_result import aml_result_view_model, shap_result
+from src.aml_workshop_simulator.domain.operation_purposes import default_purpose
+from .counterparties import party_options
 
 STATUS = {
     "none": "Игра ещё не создана",
@@ -211,6 +226,7 @@ def scoring_wait_panel(state, cards):
                     config = state["round"].get("game_config")
                     if config and expanded(config):
                         party_readonly(config, step)
+                        explanation_readonly(config, step)
 
 
 def resources(snapshot):
@@ -261,7 +277,20 @@ def result_panel(
             "Оценка достигла порога подозрительности.",
         ),
     }
-    risk_title, risk_note = risk_labels[scores["risk_label"]]
+    aml_view = (
+        aml_result_view_model(result["explanation"])
+        if result["explanation"].get("schema_version") in (4, 5)
+        else None
+    )
+    if aml_view:
+        risk_title = aml_view["category_title"]
+        risk_note = aml_view["context_text"]
+        risk_badge = {"low": "normal", "review": "review", "high": "suspicious"}[
+            aml_view["category"]
+        ]
+    else:
+        risk_title, risk_note = risk_labels[scores["risk_label"]]
+        risk_badge = scores["risk_label"]
 
     board = None
     with ui.column().classes("result-workspace"):
@@ -301,7 +330,12 @@ def result_panel(
                         ).classes("text-xs")
                 with ui.element("div").classes("result-metrics"):
                     for title, key, note, icon in [
-                        ("Риск", "risk_score", "Ниже — лучше. " + risk_note, "policy"),
+                        (
+                            aml_view["title"] if aml_view else "Риск",
+                            "risk_score",
+                            risk_note if aml_view else "Ниже — лучше. " + risk_note,
+                            "policy",
+                        ),
                         (
                             "Сбережённые ресурсы",
                             "resource_score",
@@ -313,17 +347,16 @@ def result_panel(
                             with ui.row().classes("items-center gap-2"):
                                 ui.icon(icon).classes("text-blue-700")
                                 ui.label(title).classes("font-semibold")
-                            ui.label(display_number(scores[key]) + " / 100").classes(
-                                "text-2xl font-semibold"
-                            )
+                            ui.label(
+                                aml_view["probability_text"]
+                                if aml_view and key == "risk_score"
+                                else display_number(scores[key]) + " / 100"
+                            ).classes("text-2xl font-semibold")
                             ui.label(note).classes("text-xs muted")
                             if key == "risk_score":
                                 ui.label(risk_title).classes(
-                                    "risk-badge risk-" + scores["risk_label"]
+                                    "risk-badge risk-" + risk_badge
                                 )
-                from src.aml_workshop_simulator.ui.nicegui.shap_result import (
-                    shap_result,
-                )
 
                 with ui.expansion("Как рассчитан итоговый балл").classes("w-full"):
                     weights = (
@@ -331,9 +364,14 @@ def result_panel(
                         .get("leaderboard", {})
                         .get("weights", {"stealth": "0.65", "resources": "0.35"})
                     )
-                    ui.label(
-                        f"{display_number(weights['stealth'])} × (100 − {display_number(scores['risk_score'])}) + {display_number(weights['resources'])} × {display_number(scores['resource_score'])} = {display_number(scores['game_score'])}"
-                    )
+                    if aml_view:
+                        ui.label(
+                            f"{display_number(weights['stealth'])} × 100 × (1 − {display_number(aml_view['explanation']['aml_probability'])}) + {display_number(weights['resources'])} × {display_number(scores['resource_score'])} = {display_number(scores['game_score'])}"
+                        )
+                    else:
+                        ui.label(
+                            f"{display_number(weights['stealth'])} × (100 − {display_number(scores['risk_score'])}) + {display_number(weights['resources'])} × {display_number(scores['resource_score'])} = {display_number(scores['game_score'])}"
+                        )
 
                 shap_result(
                     result["explanation"],
@@ -362,6 +400,9 @@ def result_panel(
                             and step["step_id"] in originals
                         ):
                             party_readonly(round_config, originals[step["step_id"]])
+                            explanation_readonly(
+                                round_config, originals[step["step_id"]]
+                            )
                         if step["step_id"] in timing:
                             moment = timing[step["step_id"]]
                             ui.label(
@@ -380,13 +421,49 @@ def result_panel(
 
 
 def board_table(data, *, admin=False):
+    from src.aml_workshop_simulator.ui.nicegui.shap_result import (
+        aml_probability_display,
+    )
+
+    kinds = {row.get("score_kind", "legacy_risk") for row in data["rows"]}
+    if len(kinds) > 1 or not kinds <= {
+        "legacy_risk",
+        "aml_probability",
+        "educational_pattern_probability",
+    }:
+        raise ValueError("Leaderboard cannot mix score semantics")
+    probability_board = bool(kinds) and kinds <= {
+        "aml_probability",
+        "educational_pattern_probability",
+    }
+    pattern_board = kinds == {"educational_pattern_probability"}
+    if probability_board:
+        ui.label(
+            "Соответствие учебным AML-паттернам"
+            if pattern_board
+            else "Вероятность AML-сценария в учебной модели"
+        ).classes("text-sm muted")
     columns = [
         ("rank", "Место"),
         ("display_name", "Участник"),
         ("game_score", "Итоговый балл ↑"),
-        ("risk_score", "Риск модели ↓"),
+        (
+            "risk_score",
+            "Соответствие паттернам ↓"
+            if pattern_board
+            else "Вероятность AML ↓"
+            if probability_board
+            else "Риск модели ↓",
+        ),
         ("resource_score", "Сбережённые ресурсы ↑"),
-        ("risk_label", "Риск"),
+        (
+            "risk_label",
+            "Категория цепочки"
+            if pattern_board
+            else "Категория вероятности"
+            if probability_board
+            else "Риск",
+        ),
     ]
     if admin:
         columns += [
@@ -396,18 +473,26 @@ def board_table(data, *, admin=False):
     rows = deepcopy(data["rows"])
     for index, row in enumerate(rows):
         row["_row"] = index
-        row["risk_score"] = display_number(
-            row.get("risk_score", 100 - Decimal(str(row["stealth_score"])))
-        )
+        if probability_board:
+            view = aml_probability_display(
+                row["aml_probability"], row["category"], row["score_kind"]
+            )
+            row["risk_score"] = view["probability_text"]
+            row["risk_label"] = view["category_title"]
+        else:
+            row["risk_score"] = display_number(
+                row.get("risk_score", 100 - Decimal(str(row["stealth_score"])))
+            )
         if admin:
             row["is_blocked"] = "Да" if row["is_blocked"] else "Нет"
         for score_key in ("game_score", "stealth_score", "resource_score"):
             row[score_key] = display_number(row[score_key])
-        row["risk_label"] = {
-            "normal": "Обычный",
-            "review": "Проверка",
-            "suspicious": "Подозрительно",
-        }.get(row["risk_label"], row["risk_label"])
+        if not probability_board:
+            row["risk_label"] = {
+                "normal": "Обычный",
+                "review": "Проверка",
+                "suspicious": "Подозрительно",
+            }.get(row["risk_label"], row["risk_label"])
         if row.get("is_current_user"):
             row["display_name"] += " (вы)"
     if not rows:
@@ -548,10 +633,12 @@ class ParticipantScreen:
                     ui.link("Результаты", "/play/results")
             if self.section == "profile":
                 profile_history_panel(round_data)
+                context_panel(round_data["game_config"])
                 ui.label(
                     "Модель учитывает структурированные операции и доступные сведения; текст профиля описывает персонажа."
                 ).classes("text-sm muted")
                 return
+            context_panel(round_data["game_config"])
             if state.get("result"):
                 self.board = result_panel(
                     state["result"],
@@ -691,7 +778,11 @@ class ParticipantScreen:
         config = self.editor.state["round"]["game_config"]
         if expanded(config):
             step.update(sender_id=None, recipient_id=None, interval_minutes=None)
-            # Do not silently select a party on behalf of the participant.
+        if config.get("schema_version") == 10:
+            step.update(
+                purpose_code=default_purpose(step),
+                claim_id=None,
+            )
         for param in editable_params(card, config):
             target = (
                 step["action_details"]
@@ -699,6 +790,23 @@ class ParticipantScreen:
                 else step["context"]
             )
             target[param["key"]] = param["default"]
+        if config.get("schema_version") == 10:
+            preferred = {
+                "salary": "salary",
+                "incoming_transfer": "shared_expense",
+                "card_transfer": "shared_expense",
+                "purchase": "personal_spending",
+                "cash_withdrawal": "personal_spending",
+            }.get(card["code"])
+            choices = purpose_options(config, step)
+            step["purpose_code"] = (
+                preferred if preferred in choices else next(iter(choices), None)
+            )
+        if expanded(config):
+            role, options = party_options(config, card["code"], step["action_details"])
+            if role:
+                step[role] = next(iter(options), None)
+            step["interval_minutes"] = 1 if self.editor.steps else None
         self.editor.steps.append(step)
         self.open_steps = {step["step_id"]}
         self.changed()
@@ -786,7 +894,7 @@ class ParticipantScreen:
                 identity = step.get("sender_id") or step.get("recipient_id")
                 party = next(
                     (
-                        p["name"]
+                        party_name(p)
                         for p in config.get("behavior", {}).get("counterparties", [])
                         if p["id"] == identity
                     ),
@@ -891,6 +999,7 @@ class ParticipantScreen:
                                     self.changed()
 
                             party_selector(config, step, select_party)
+                            explanation_selector(config, step, select_party)
 
                             def change_interval(value, step_id=step["step_id"]):
                                 if not self.submitting and self.editor.editable:
@@ -902,7 +1011,7 @@ class ParticipantScreen:
 
                             timeline_control(timing[index], config, change_interval)
                         for param in editable_params(card, config):
-                            if config.get("schema_version") == 9 and (
+                            if config.get("schema_version") in (9, 10) and (
                                 (
                                     param["key"] == "bank_country"
                                     and step["action_details"].get("incoming_kind")
@@ -941,7 +1050,7 @@ class ParticipantScreen:
                                         else "context"
                                     ][k] = e.value
                                     if (
-                                        config.get("schema_version") == 9
+                                        config.get("schema_version") in (9, 10)
                                         and k == "incoming_kind"
                                     ):
                                         current["action_details"] = {
@@ -951,24 +1060,18 @@ class ParticipantScreen:
                                             current["action_details"][
                                                 "bank_country"
                                             ] = "RU"
-                                        current["sender_id"] = (
-                                            next(
-                                                (
-                                                    p["id"]
-                                                    for p in config["behavior"][
-                                                        "counterparties"
-                                                    ]
-                                                    if p.get("category")
-                                                    == "crypto_exchange"
-                                                ),
-                                                None,
-                                            )
-                                            if e.value == "exchange_withdrawal"
-                                            else None
+                                        _, options = party_options(
+                                            config,
+                                            current["card"]["code"],
+                                            current["action_details"],
                                         )
+                                        if current.get("sender_id") not in options:
+                                            current["sender_id"] = next(
+                                                iter(options), None
+                                            )
                                     self.changed()
                                     if (
-                                        config.get("schema_version") == 9
+                                        config.get("schema_version") in (9, 10)
                                         and k == "incoming_kind"
                                     ):
                                         self.render_chain()
@@ -980,6 +1083,14 @@ class ParticipantScreen:
                                 ).classes("operation-toggle").tooltip(
                                     param.get("help") or param["label"]
                                 )
+                            elif len(param["options"]) == 1:
+                                option = param["options"][0]
+                                if target.get(param["key"]) != option["value"]:
+                                    target[param["key"]] = option["value"]
+                                    self.changed()
+                                ui.label(
+                                    f"{param['label']}: {option['label']}"
+                                ).classes("text-sm muted")
                             else:
                                 ui.select(
                                     {o["value"]: o["label"] for o in param["options"]},

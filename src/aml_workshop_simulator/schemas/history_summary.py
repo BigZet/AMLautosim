@@ -48,6 +48,14 @@ class HistorySummaryOut(BaseModel):
     by_operation: dict[str, ActivitySummary] | None
     counterparties: list[PartyHistorySummary]
     events: list[HistoryEventOut] | None
+    coverage: Literal["complete", "partial", "unknown"] | None = None
+
+    @model_serializer(mode="wrap")
+    def legacy_shape(self, handler):
+        value = handler(self)
+        if self.coverage is None:
+            value.pop("coverage", None)
+        return value
 
 
 class RoundContextOut(BaseModel):
@@ -58,7 +66,7 @@ class RoundContextOut(BaseModel):
     def context_summary(self) -> HistorySummaryOut | None:
         from src.aml_workshop_simulator.services.profile_history import history_summary
 
-        if self.game_config.schema_version not in (8, 9):
+        if self.game_config.schema_version not in (8, 9, 10):
             return None
         return history_summary(self.game_config.behavior)
 

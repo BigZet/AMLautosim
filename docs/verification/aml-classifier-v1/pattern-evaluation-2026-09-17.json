@@ -1,0 +1,308 @@
+{
+  "calibration_check": {
+    "raw": {
+      "agreement": 1.0,
+      "brier": 9.838604682884007e-07,
+      "grey_share": 0.0,
+      "high_rows": 568,
+      "log_loss": 0.0004987071953288731,
+      "low_rows": 32,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "roc_auc": 1.0
+    },
+    "sigmoid": {
+      "agreement": 1.0,
+      "brier": 7.131539833588857e-08,
+      "grey_share": 0.0,
+      "high_rows": 568,
+      "log_loss": 0.00011118856833376292,
+      "low_rows": 32,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "roc_auc": 1.0
+    }
+  },
+  "controls": {
+    "cases": [
+      {
+        "matched_patterns": [],
+        "pattern_label": 0,
+        "probability": 0.0006221648929634632,
+        "scenario_id": "control-01",
+        "title": "Ремонт по этапам"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9994403530525319,
+        "scenario_id": "control-02",
+        "title": "Срочная оплата переезда"
+      },
+      {
+        "matched_patterns": [
+          "repeated_fanout",
+          "repeated_fragmentation"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9853980796920802,
+        "scenario_id": "control-03",
+        "title": "Равные возмещения расходов"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "cash_conversion"
+        ],
+        "pattern_label": 1,
+        "probability": 0.993221581776323,
+        "scenario_id": "control-04",
+        "title": "Наличные для ремонта"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "cash_conversion"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9971402090578709,
+        "scenario_id": "control-05",
+        "title": "Срочный наличный расчёт"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "consolidation"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9991881761782995,
+        "scenario_id": "control-06",
+        "title": "Возврат займа одному кредитору"
+      },
+      {
+        "matched_patterns": [
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9868639764554574,
+        "scenario_id": "control-07",
+        "title": "Исправление переплаты"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay"
+        ],
+        "pattern_label": 1,
+        "probability": 0.999879971906798,
+        "scenario_id": "control-08",
+        "title": "Расчёты из накоплений"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9948464137655207,
+        "scenario_id": "control-09",
+        "title": "Зарплата и домашние расходы"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9995957842529908,
+        "scenario_id": "control-10",
+        "title": "Неравные платежи за имущество"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9994403530525319,
+        "scenario_id": "control-11",
+        "title": "Передача присвоенного через счёт"
+      },
+      {
+        "matched_patterns": [
+          "repeated_fanout",
+          "repeated_fragmentation"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9854530646241614,
+        "scenario_id": "control-12",
+        "title": "Сокрытие среди равных платежей"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "cash_conversion"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9971402090578709,
+        "scenario_id": "control-13",
+        "title": "Конвертация присвоенного в наличные"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "consolidation"
+        ],
+        "pattern_label": 1,
+        "probability": 0.999653433195291,
+        "scenario_id": "control-14",
+        "title": "Консолидация у контролёра"
+      },
+      {
+        "matched_patterns": [
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9868639764554574,
+        "scenario_id": "control-15",
+        "title": "Возврат под видом исправления"
+      },
+      {
+        "matched_patterns": [],
+        "pattern_label": 0,
+        "probability": 0.0006221648929634632,
+        "scenario_id": "control-16",
+        "title": "Подготовленное сокрытие с ожиданием"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "cash_conversion"
+        ],
+        "pattern_label": 1,
+        "probability": 0.993221581776323,
+        "scenario_id": "control-17",
+        "title": "Наличные до и после присвоения"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.999583852078957,
+        "scenario_id": "control-18",
+        "title": "Бытовые операции как прикрытие"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9996034933938442,
+        "scenario_id": "control-19",
+        "title": "Неравные выплаты номиналам"
+      },
+      {
+        "matched_patterns": [],
+        "pattern_label": 0,
+        "probability": 0.06959412344660393,
+        "scenario_id": "control-20",
+        "title": "Рассредоточенные расчёты прикрытия"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9994403530525319,
+        "scenario_id": "control-21",
+        "title": "Неизвестное основание: relay"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "cash_conversion"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9971402090578709,
+        "scenario_id": "control-22",
+        "title": "Неизвестное основание: cash_relay"
+      },
+      {
+        "matched_patterns": [
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.9868639764554574,
+        "scenario_id": "control-23",
+        "title": "Неизвестное основание: refund"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "consolidation"
+        ],
+        "pattern_label": 1,
+        "probability": 0.999653433195291,
+        "scenario_id": "control-24",
+        "title": "Неизвестное основание: consolidate"
+      },
+      {
+        "matched_patterns": [
+          "repeated_matched_relay",
+          "repeated_fanout"
+        ],
+        "pattern_label": 1,
+        "probability": 0.999583852078957,
+        "scenario_id": "control-25",
+        "title": "Неизвестное основание: mixed_relay"
+      }
+    ],
+    "metrics": {
+      "agreement": 1.0,
+      "brier": 0.0002372847911492477,
+      "grey_share": 0.0,
+      "high_rows": 22,
+      "log_loss": 0.006988456049654804,
+      "low_rows": 3,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "roc_auc": 1.0
+    }
+  },
+  "interpretation": "Agreement with explicit educational rules; not validation against criminal outcomes",
+  "partitions": {
+    "test": {
+      "agreement": 1.0,
+      "brier": 1.1847558392327394e-07,
+      "grey_share": 0.0,
+      "high_rows": 1257,
+      "log_loss": 0.00013449401921174223,
+      "low_rows": 163,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "roc_auc": 1.0
+    },
+    "validation": {
+      "agreement": 1.0,
+      "brier": 2.867163604922443e-08,
+      "grey_share": 0.0,
+      "high_rows": 2458,
+      "log_loss": 7.363070624855543e-05,
+      "low_rows": 222,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "roc_auc": 1.0
+    }
+  },
+  "selected_calibration": {
+    "a": 1.205500101478686,
+    "b": 0.13993240063772683,
+    "method": "sigmoid"
+  },
+  "target": "observable_educational_pattern"
+}

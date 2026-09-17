@@ -1,0 +1,41 @@
+{
+  "ready_for_training": true,
+  "offline_release_accepted": true,
+  "live_game_switched": false,
+  "rows": 60000,
+  "source_manifest_sha256": "094a71f58fb6bd84ccad0be33834c9b6e863fdf988019bb234e765672e1f70c2",
+  "readback_sha256": "6f8a9a1936c2834775986c23971b27f8f7656be830291c7557a3e070c1a671d4",
+  "model_manifest_sha256": "7e8b672fe8e1fd2680f0174f8108b5e6d5653150a4e9b03ad65598f65fbb97e0",
+  "gameplay_audit_sha256": "3c852495561b07a9f1fe9a6fb1c301bd501a86cc6460d7f1a481ece9fb96a9d4",
+  "coverage_sha256": "3ed4095c199308a739129b88a917687fa7bdf3f82a71a8d745084df827bb30a5",
+  "coverage": {
+    "chains": 60000,
+    "four_receipts": 22260,
+    "over_eight_card_transfers": 6515,
+    "over_fourteen_actions": 325,
+    "incoming_over_80000": 20917,
+    "card_over_80000": 15593,
+    "cash_operation_over_100000": 132,
+    "total_cash_over_120000": 3442,
+    "newly_playable": 43663
+  },
+  "metrics": {
+    "agreement": 0.9978196233894946,
+    "expected_brier": 0.035104431826056125,
+    "expected_log_loss": 0.10650401191454467,
+    "grey_row_share": 0.155203171456888,
+    "high_row_share": 0.3819623389494549,
+    "low_row_share": 0.4628344895936571,
+    "mean_absolute_target_error": 0.002241797629319096,
+    "nonpattern_share_among_high": 0.0005189413596263622,
+    "pattern_share_among_low": 0.0,
+    "rows": 5045,
+    "target_mse": 0.00025419636268587216
+  },
+  "preset": "config/game_curriculum_defaults_v4.json",
+  "verifier_sha256": "ef8839ef63e1b98e374a1ef1efd8693e13d1378f854b22dd59cd10e0dd0df282",
+  "limitations": [
+    "Synthetic teaching interpretations; no independent human AML validation",
+    "Unseen-seed checks share authored route families with training"
+  ]
+}

@@ -121,11 +121,26 @@ class ExpandedScenarioStepIn(ScenarioStepIn):
         return value
 
 
+PurposeCode = Literal[
+    "salary", "service_payment", "family_support", "shared_expense", "asset_sale",
+    "refund", "loan", "personal_spending", "unknown",
+]
+
+
+class AMLScenarioStepIn(ExpandedScenarioStepIn):
+    """V10 selects a server-owned explanation; never accepts its verification."""
+
+    purpose_code: PurposeCode
+    claim_id: str | None = Field(default=None, min_length=1, max_length=80)
+
+
 ScenarioStepInput = Annotated[
-    ScenarioStepIn | ExpandedScenarioStepIn, Field(union_mode="left_to_right")
+    ScenarioStepIn | ExpandedScenarioStepIn | AMLScenarioStepIn,
+    Field(union_mode="left_to_right"),
 ]
 ScenarioStepStored = Annotated[
-    StoredStep | ExpandedScenarioStepIn, Field(union_mode="left_to_right")
+    StoredStep | ExpandedScenarioStepIn | AMLScenarioStepIn,
+    Field(union_mode="left_to_right"),
 ]
 
 

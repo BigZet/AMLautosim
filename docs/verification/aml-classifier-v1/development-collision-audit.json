@@ -1,0 +1,291 @@
+{
+  "scope": "development dataset exact-feature identifiability diagnostic; not model evaluation",
+  "source": ".local-run/aml-dataset-origins-reviewed-v2",
+  "dataset_manifest_sha256": "11f9e430563ef32d8ceeb7f18cf6cfcea2111333ae5c9ec222e17a9bc8174650",
+  "features_sha256": "82cde4719986f5fbd03a2b1516ef2ab7b4dd4fc95980f15df8bf1bccf6aadcff",
+  "scenarios_sha256": "b9ac7d9f4cd2c6889319c16c6e366992898ce144d6ec7283efed22627ecca610",
+  "main_rows": 250,
+  "exact_feature_patterns": 199,
+  "conflicting_patterns": 27,
+  "rows_in_conflicting_patterns": 60,
+  "minimum_errors_if_every_row_receives_a_binary_decision": 30,
+  "interpretation": "Deterministic inference must give identical output for identical X. Bound applies only to this finite development set, without abstention; it is not a deployment error estimate or a release criterion.",
+  "conflicts": [
+    {
+      "scenario_ids": [
+        "asset_portfolio-schedule-0-unavailable-0",
+        "asset_portfolio-schedule-0-unavailable-1",
+        "debt_collection-schedule-0-unavailable-0",
+        "debt_collection-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 2,
+        "1": 2
+      }
+    },
+    {
+      "scenario_ids": [
+        "asset_portfolio-schedule-1-unavailable-0",
+        "asset_portfolio-schedule-1-unavailable-1",
+        "debt_collection-schedule-1-unavailable-0",
+        "debt_collection-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 2,
+        "1": 2
+      }
+    },
+    {
+      "scenario_ids": [
+        "asset_portfolio-schedule-2-unavailable-0",
+        "asset_portfolio-schedule-2-unavailable-1",
+        "debt_collection-schedule-2-unavailable-0",
+        "debt_collection-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 2,
+        "1": 2
+      }
+    },
+    {
+      "scenario_ids": [
+        "asset_single-schedule-0-unavailable-0",
+        "asset_single-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "asset_single-schedule-1-unavailable-0",
+        "asset_single-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "asset_single-schedule-2-unavailable-0",
+        "asset_single-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_cost_return-schedule-0-unavailable-0",
+        "family_cost_return-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_cost_return-schedule-1-unavailable-0",
+        "family_cost_return-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_cost_return-schedule-2-unavailable-0",
+        "family_cost_return-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_pool-schedule-0-unavailable-0",
+        "family_pool-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_pool-schedule-1-unavailable-0",
+        "family_pool-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "family_pool-schedule-2-unavailable-0",
+        "family_pool-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "loan_consolidation-schedule-0-unavailable-0",
+        "loan_consolidation-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "loan_consolidation-schedule-1-unavailable-0",
+        "loan_consolidation-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "loan_consolidation-schedule-2-unavailable-0",
+        "loan_consolidation-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_jobs-schedule-0-unavailable-0",
+        "service_jobs-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_jobs-schedule-1-unavailable-0",
+        "service_jobs-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_jobs-schedule-2-unavailable-0",
+        "service_jobs-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_milestones-schedule-0-unavailable-0",
+        "service_milestones-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_milestones-schedule-1-unavailable-0",
+        "service_milestones-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "service_milestones-schedule-2-unavailable-0",
+        "service_milestones-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_cancellations-schedule-0-unavailable-0",
+        "supplier_cancellations-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_cancellations-schedule-1-unavailable-0",
+        "supplier_cancellations-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_cancellations-schedule-2-unavailable-0",
+        "supplier_cancellations-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_duplicate-schedule-0-unavailable-0",
+        "supplier_duplicate-schedule-0-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_duplicate-schedule-1-unavailable-0",
+        "supplier_duplicate-schedule-1-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    },
+    {
+      "scenario_ids": [
+        "supplier_duplicate-schedule-2-unavailable-0",
+        "supplier_duplicate-schedule-2-unavailable-1"
+      ],
+      "class_counts": {
+        "0": 1,
+        "1": 1
+      }
+    }
+  ]
+}

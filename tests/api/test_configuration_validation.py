@@ -53,7 +53,7 @@ def test_snapshot_and_seed_reference_reject_invalid_config(
 ):
     config, message = invalid_expanded_game_config
     monkeypatch.setattr(
-        "src.aml_workshop_simulator.core.expanded_game.expanded_game_config",
+        "src.aml_workshop_simulator.services.game_classifier.game_config",
         lambda: config,
     )
 

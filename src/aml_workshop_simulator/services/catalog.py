@@ -25,7 +25,9 @@ async def catalog_cards(
                 .where(
                     ActionCard.is_active,
                     ActionCard.code.in_(
-                        (*CARD_CODES, "purchase") if schema_version == 8 else CARD_CODES
+                        (*CARD_CODES, "purchase")
+                        if schema_version in (8, 9, 10)
+                        else CARD_CODES
                     ),
                 )
                 .order_by(ActionCard.id)

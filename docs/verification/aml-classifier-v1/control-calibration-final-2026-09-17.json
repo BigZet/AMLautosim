@@ -1,0 +1,326 @@
+{
+  "all_labeled_control": {
+    "calibrated": {
+      "brier": 0.2904697514500324,
+      "fraud_share_among_low": null,
+      "grey_share": 1.0,
+      "high_rows": 0,
+      "lawful_share_among_high": null,
+      "log_loss": 0.8102919896776607,
+      "low_rows": 0,
+      "roc_auc": 0.5449999999999999
+    },
+    "raw": {
+      "brier": 0.31021433241935065,
+      "fraud_share_among_low": 0.5,
+      "grey_share": 0.9,
+      "high_rows": 0,
+      "lawful_share_among_high": null,
+      "log_loss": 0.8984267801066574,
+      "low_rows": 2,
+      "roc_auc": 0.5449999999999999
+    },
+    "rows": 20
+  },
+  "calibration": {
+    "intercept": 0.19661714210783446,
+    "slope": 0.7579835634692963
+  },
+  "calibration_check": {
+    "calibrated": {
+      "brier": 0.13504954524141954,
+      "fraud_share_among_low": 0.0,
+      "grey_share": 0.8977272727272725,
+      "high_rows": 0,
+      "lawful_share_among_high": null,
+      "log_loss": 0.43685919538466467,
+      "low_rows": 60,
+      "roc_auc": 0.8582922979797984
+    },
+    "raw": {
+      "brier": 0.12367870353646358,
+      "fraud_share_among_low": 0.0,
+      "grey_share": 0.893181818181818,
+      "high_rows": 2,
+      "lawful_share_among_high": 0.0,
+      "log_loss": 0.405857168946781,
+      "low_rows": 60,
+      "roc_auc": 0.8582922979797984
+    }
+  },
+  "cases": [
+    {
+      "aml_label": 0,
+      "calibrated": 0.19110161223137379,
+      "exact_feature_overlaps": 0,
+      "raw": 0.10312671745645852,
+      "scenario_id": "control-01",
+      "shape_overlaps": 0,
+      "title": "Ремонт по этапам"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.7871776687866047,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8124838697319211,
+      "scenario_id": "control-02",
+      "shape_overlaps": 0,
+      "title": "Срочная оплата переезда"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.7012137633488333,
+      "exact_feature_overlaps": 0,
+      "raw": 0.7039274058729634,
+      "scenario_id": "control-03",
+      "shape_overlaps": 0,
+      "title": "Равные возмещения расходов"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.13714154752855715,
+      "exact_feature_overlaps": 0,
+      "raw": 0.0638116001133967,
+      "scenario_id": "control-04",
+      "shape_overlaps": 0,
+      "title": "Наличные для ремонта"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.8553669373242746,
+      "exact_feature_overlaps": 0,
+      "raw": 0.889477902838457,
+      "scenario_id": "control-05",
+      "shape_overlaps": 0,
+      "title": "Срочный наличный расчёт"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.2741023844214419,
+      "exact_feature_overlaps": 0,
+      "raw": 0.17591671124770433,
+      "scenario_id": "control-06",
+      "shape_overlaps": 0,
+      "title": "Возврат займа одному кредитору"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.8058999543028452,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8346195439215146,
+      "scenario_id": "control-07",
+      "shape_overlaps": 0,
+      "title": "Исправление переплаты"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.30609547861405934,
+      "exact_feature_overlaps": 0,
+      "raw": 0.20764971227326,
+      "scenario_id": "control-08",
+      "shape_overlaps": 0,
+      "title": "Расчёты из накоплений"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.36725808255767217,
+      "exact_feature_overlaps": 0,
+      "raw": 0.27347041554110324,
+      "scenario_id": "control-09",
+      "shape_overlaps": 0,
+      "title": "Зарплата и домашние расходы"
+    },
+    {
+      "aml_label": 0,
+      "calibrated": 0.7814305309603173,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8055593223633033,
+      "scenario_id": "control-10",
+      "shape_overlaps": 0,
+      "title": "Неравные платежи за имущество"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.7871776687866047,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8124838697319211,
+      "scenario_id": "control-11",
+      "shape_overlaps": 0,
+      "title": "Передача присвоенного через счёт"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.7121483652131615,
+      "exact_feature_overlaps": 0,
+      "raw": 0.7182245767386153,
+      "scenario_id": "control-12",
+      "shape_overlaps": 0,
+      "title": "Сокрытие среди равных платежей"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.8553669373242746,
+      "exact_feature_overlaps": 0,
+      "raw": 0.889477902838457,
+      "scenario_id": "control-13",
+      "shape_overlaps": 0,
+      "title": "Конвертация присвоенного в наличные"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.6737658451749365,
+      "exact_feature_overlaps": 0,
+      "raw": 0.6676205435795421,
+      "scenario_id": "control-14",
+      "shape_overlaps": 0,
+      "title": "Консолидация у контролёра"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.8058999543028452,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8346195439215146,
+      "scenario_id": "control-15",
+      "shape_overlaps": 0,
+      "title": "Возврат под видом исправления"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.19110161223137379,
+      "exact_feature_overlaps": 0,
+      "raw": 0.10312671745645852,
+      "scenario_id": "control-16",
+      "shape_overlaps": 0,
+      "title": "Подготовленное сокрытие с ожиданием"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.13714154752855715,
+      "exact_feature_overlaps": 0,
+      "raw": 0.0638116001133967,
+      "scenario_id": "control-17",
+      "shape_overlaps": 0,
+      "title": "Наличные до и после присвоения"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.6485524761897714,
+      "exact_feature_overlaps": 0,
+      "raw": 0.6338828530823534,
+      "scenario_id": "control-18",
+      "shape_overlaps": 0,
+      "title": "Бытовые операции как прикрытие"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.7919404088338359,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8181776036805073,
+      "scenario_id": "control-19",
+      "shape_overlaps": 0,
+      "title": "Неравные выплаты номиналам"
+    },
+    {
+      "aml_label": 1,
+      "calibrated": 0.3011207122534656,
+      "exact_feature_overlaps": 0,
+      "raw": 0.2025886273514208,
+      "scenario_id": "control-20",
+      "shape_overlaps": 0,
+      "title": "Рассредоточенные расчёты прикрытия"
+    },
+    {
+      "aml_label": null,
+      "calibrated": 0.7871776687866047,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8124838697319211,
+      "scenario_id": "control-21",
+      "shape_overlaps": 0,
+      "title": "Неизвестное основание: relay"
+    },
+    {
+      "aml_label": null,
+      "calibrated": 0.8553669373242746,
+      "exact_feature_overlaps": 0,
+      "raw": 0.889477902838457,
+      "scenario_id": "control-22",
+      "shape_overlaps": 0,
+      "title": "Неизвестное основание: cash_relay"
+    },
+    {
+      "aml_label": null,
+      "calibrated": 0.8058999543028452,
+      "exact_feature_overlaps": 0,
+      "raw": 0.8346195439215146,
+      "scenario_id": "control-23",
+      "shape_overlaps": 0,
+      "title": "Неизвестное основание: refund"
+    },
+    {
+      "aml_label": null,
+      "calibrated": 0.6737658451749365,
+      "exact_feature_overlaps": 0,
+      "raw": 0.6676205435795421,
+      "scenario_id": "control-24",
+      "shape_overlaps": 0,
+      "title": "Неизвестное основание: consolidate"
+    },
+    {
+      "aml_label": null,
+      "calibrated": 0.6485524761897714,
+      "exact_feature_overlaps": 0,
+      "raw": 0.6338828530823534,
+      "scenario_id": "control-25",
+      "shape_overlaps": 0,
+      "title": "Неизвестное основание: mixed_relay"
+    }
+  ],
+  "control_freeze_sha256": "8d0e0a565990501198a5ee500f6905ee4110ee591cefef44a6e058b4aaea685f",
+  "dataset_audit_sha256": "84e47c440645a4cf62fba44d5bc7af3431b117c4f5d8fc9bbbb64563e3eed8f2",
+  "limitations": [
+    "25 stress cases are not a representative prevalence estimate or independent expert review.",
+    "Calibration is measured, not assumed to improve quality; it cannot recover hidden ownership.",
+    "Control evaluation consumes this freeze for diagnosis; future tuning needs a new untouched acceptance set.",
+    "Unresolved cases are excluded from binary metrics; contrary private outcomes may share observations."
+  ],
+  "nonoverlapping_labeled_control": {
+    "calibrated": {
+      "brier": 0.2904697514500324,
+      "fraud_share_among_low": null,
+      "grey_share": 1.0,
+      "high_rows": 0,
+      "lawful_share_among_high": null,
+      "log_loss": 0.8102919896776607,
+      "low_rows": 0,
+      "roc_auc": 0.5449999999999999
+    },
+    "raw": {
+      "brier": 0.31021433241935065,
+      "fraud_share_among_low": 0.5,
+      "grey_share": 0.9,
+      "high_rows": 0,
+      "lawful_share_among_high": null,
+      "log_loss": 0.8984267801066574,
+      "low_rows": 2,
+      "roc_auc": 0.5449999999999999
+    },
+    "rows": 20
+  },
+  "parameters": {
+    "calibration": "Platt on logit, LogisticRegression C=1",
+    "depth": 4,
+    "iterations": 300,
+    "l2_leaf_reg": 10,
+    "learning_rate": 0.05,
+    "seed": 2026091701
+  },
+  "partitions_used": {
+    "calibrator_fit": "calibration-fit",
+    "model_fit": "train",
+    "quality_check": "calibration-check",
+    "test_predictions": false
+  },
+  "release_ready": false,
+  "source_sha256": "9eae19d11141f62f5026e6355f85888acd2eea08dd7f6ceda053cba0ea5f3865",
+  "status": "diagnostic_only"
+}

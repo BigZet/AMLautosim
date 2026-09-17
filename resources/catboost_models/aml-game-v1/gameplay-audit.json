@@ -1,0 +1,109 @@
+{
+  "context_sha256": "f8b7637802e83b0211e2a64716f79737f00f476987ae15906cea437b799e757d",
+  "counts": {
+    "cent_mutations_valid": 1161,
+    "funding_2incoming_1salary": 91,
+    "funding_3incoming_0salary": 1031,
+    "funding_3incoming_1salary": 62,
+    "low_funding_2incoming_1salary": 16,
+    "low_funding_3incoming_0salary": 337,
+    "low_funding_3incoming_1salary": 15,
+    "valid": 1184,
+    "waiting_still_high": 74,
+    "waiting_valid": 399
+  },
+  "distinct_low_game_scores": 264,
+  "distinct_low_resource_scores": 254,
+  "failures": [],
+  "largest_errors": [
+    {
+      "family": 6,
+      "probability": 0.6923476478355822,
+      "seed": 2040901374,
+      "target": 0.5024875621890548
+    },
+    {
+      "family": 14,
+      "probability": 0.39504364160327404,
+      "seed": 2040902054,
+      "target": 0.582089552238806
+    },
+    {
+      "family": 20,
+      "probability": 0.11451163595660983,
+      "seed": 2040902060,
+      "target": 0.2885572139303483
+    },
+    {
+      "family": 14,
+      "probability": 0.5325116793964065,
+      "seed": 2040900422,
+      "target": 0.6965174129353234
+    },
+    {
+      "family": 1,
+      "probability": 0.0590505355574372,
+      "seed": 2040901465,
+      "target": 0.20398009950248755
+    },
+    {
+      "family": 23,
+      "probability": 0.2717736013063068,
+      "seed": 2040900119,
+      "target": 0.3880597014925373
+    },
+    {
+      "family": 22,
+      "probability": 0.9094961987025668,
+      "seed": 2040902398,
+      "target": 0.8009950248756219
+    },
+    {
+      "family": 3,
+      "probability": 0.8777913538403651,
+      "seed": 2040901467,
+      "target": 0.7910447761194029
+    },
+    {
+      "family": 11,
+      "probability": 0.11955713905024885,
+      "seed": 2040900227,
+      "target": 0.03980099502487562
+    },
+    {
+      "family": 7,
+      "probability": 0.5170465774772537,
+      "seed": 2040901831,
+      "target": 0.4427860696517413
+    }
+  ],
+  "low_families": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    11,
+    12,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "max_cent_probability_shift": 0.0,
+  "max_target_error": 0.18986008564652745,
+  "mean_absolute_target_error": 0.005498997498030879,
+  "model_sha256": "ceaad4c391fa7094386662495405a9d3b5a49ab9d2b335c7b9bac2479b509fe7",
+  "note": "Unseen seeds within authored route families; not independent human AML validation",
+  "passed": true,
+  "script_sha256": "8948ea664c87afa12e1e028012cd1719df112ccb49a6816648a25104925a1241"
+}

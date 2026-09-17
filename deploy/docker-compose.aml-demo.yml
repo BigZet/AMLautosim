@@ -1,0 +1,22 @@
+# Combine with ../docker-compose.yml from the repository root. Use one private
+# environment file and a unique project/three ports for each isolated game.
+# The accepted v10 package is included in the image; no research disk mount.
+name: ${AML_DEMO_PROJECT:?set a distinct AML_DEMO_PROJECT for this game}
+
+services:
+  db:
+    ports: !override
+      - "127.0.0.1:${POSTGRES_PORT:?set a distinct POSTGRES_PORT}:5432"
+
+  api:
+    environment:
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-v1
+    command: >-
+      sh -c "python -m scripts.seed_database --wait-for-db --migrate --no-demo-round
+      && exec uvicorn src.aml_workshop_simulator.api.main:app --host 0.0.0.0 --port 8000"
+    ports: !override
+      - "127.0.0.1:${API_PORT:?set a distinct API_PORT}:8000"
+
+  ui:
+    ports: !override
+      - "127.0.0.1:${UI_PORT:?set a distinct UI_PORT}:8080"

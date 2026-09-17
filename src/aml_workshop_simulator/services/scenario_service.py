@@ -97,7 +97,7 @@ def build_snapshot(
     policy: RoundPolicy | None = None,
 ) -> dict[str, Any]:
     """Full resource snapshot for an already canonical chain."""
-    if contract_version(game_config) in (8, 9):
+    if contract_version(game_config) in (8, 9, 10):
         from src.aml_workshop_simulator.services.expanded_simulation import (
             evaluate_expanded_scenario,
         )
@@ -117,7 +117,7 @@ def prepare_scenario(
 
 
 def canonical_round_steps(round_obj, steps, specs, policy):
-    if contract_version(round_obj.game_config) in (8, 9):
+    if contract_version(round_obj.game_config) in (8, 9, 10):
         from src.aml_workshop_simulator.services.counterparties import (
             canonical_expanded_steps,
         )

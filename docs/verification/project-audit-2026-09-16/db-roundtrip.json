@@ -1,0 +1,25 @@
+{
+  "databases": [
+    "aml_audit_b662400db63e4570add3697d3e2cb9db",
+    "aml_audit_e33e440d8873415a9900a8fbb8a5c01f"
+  ],
+  "seed_runs": [
+    "seed complete: cards=5 admin_id=1 round_id=1 status=draft",
+    "seed complete: cards=5 admin_id=1 round_id=1 status=draft"
+  ],
+  "passed": true,
+  "migration": "0001_current_schema",
+  "counts": {
+    "action_cards": 5,
+    "alembic_version": 1,
+    "audit_events": 1,
+    "rounds": 1,
+    "scenarios": 0,
+    "scoring_results": 0,
+    "sessions": 0,
+    "users": 1
+  },
+  "snapshot_equal": true,
+  "repeat_seed_idempotent": true,
+  "temporary_databases_removed": true
+}

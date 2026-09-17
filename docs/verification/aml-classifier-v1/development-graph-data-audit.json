@@ -1,0 +1,69 @@
+{
+  "all_connected_groups": 25,
+  "challenge_rows": {},
+  "confirmed_rows": 1000,
+  "conflicting_feature_groups": 91,
+  "diagnostic_rows": {
+    "masked-context": 20,
+    "unresolved": 76
+  },
+  "excluded_rows": 0,
+  "feature_count": 146,
+  "groups": 25,
+  "release_ready": false,
+  "source_rows": 1096,
+  "split_counts": {
+    "calibration-check": {
+      "class_0": 0,
+      "class_1": 0,
+      "groups": 0,
+      "groups_with_class_0": 0,
+      "groups_with_class_1": 0,
+      "rows": 0
+    },
+    "calibration-fit": {
+      "class_0": 48,
+      "class_1": 47,
+      "groups": 3,
+      "groups_with_class_0": 3,
+      "groups_with_class_1": 3,
+      "rows": 95
+    },
+    "test": {
+      "class_0": 33,
+      "class_1": 32,
+      "groups": 2,
+      "groups_with_class_0": 2,
+      "groups_with_class_1": 2,
+      "rows": 65
+    },
+    "train": {
+      "class_0": 319,
+      "class_1": 321,
+      "groups": 15,
+      "groups_with_class_0": 15,
+      "groups_with_class_1": 15,
+      "rows": 640
+    },
+    "validation": {
+      "class_0": 100,
+      "class_1": 100,
+      "groups": 5,
+      "groups_with_class_0": 5,
+      "groups_with_class_1": 5,
+      "rows": 200
+    }
+  },
+  "status": "not-release-ready",
+  "unmet_gates": [
+    "minimum_confirmed_rows",
+    "minimum_independent_groups",
+    "equal_variants_per_group",
+    "split_allocation:validation",
+    "split_balance:calibration-check",
+    "split_allocation:calibration-check",
+    "coverage_both_classes",
+    "challenge_missing:new-combinations",
+    "challenge_missing:family-held-out"
+  ]
+}

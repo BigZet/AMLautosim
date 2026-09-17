@@ -1,0 +1,478 @@
+{
+  "status": "research_only_not_release_evidence",
+  "release_ready": false,
+  "partitions_evaluated": [
+    "validation"
+  ],
+  "sealed_partitions_evaluated": [],
+  "seed": 2026091701,
+  "train_rows": 23560,
+  "validation_rows": 2680,
+  "weighting": "equal total weight per connected group within each split",
+  "constant_features": [
+    "channel_branch_count",
+    "comparable_historical_recipient_share",
+    "count_incoming_transfer",
+    "has_recipient_transfers",
+    "historical_recipient_overlap_share",
+    "history_card_transfer_amount",
+    "history_card_transfer_count",
+    "history_count",
+    "history_debit_mean",
+    "history_empty",
+    "history_has_debits",
+    "history_incoming_bank_transfer_amount",
+    "history_incoming_bank_transfer_count",
+    "history_incoming_crypto_p2p_amount",
+    "history_incoming_crypto_p2p_count",
+    "history_incoming_exchange_withdrawal_amount",
+    "history_incoming_exchange_withdrawal_count",
+    "history_incoming_payment_service_amount",
+    "history_incoming_payment_service_count",
+    "history_incoming_transfer_amount",
+    "history_incoming_transfer_count",
+    "history_known",
+    "history_purchase_amount",
+    "history_purchase_count",
+    "history_salary_amount",
+    "history_salary_count",
+    "history_stable_background",
+    "incoming_exchange_withdrawal_amount",
+    "incoming_exchange_withdrawal_count",
+    "night_share",
+    "observed_return_cycle_count",
+    "relationship_applicable_share",
+    "transition_card_transfer_salary",
+    "transition_purchase_purchase",
+    "explained_credit_amount",
+    "explanation_credit_applicable",
+    "explanation_credit_share",
+    "unknown_credit_share",
+    "unverified_credit_share",
+    "contradicted_credit_share",
+    "mismatched_credit_share",
+    "explained_debit_amount",
+    "explanation_debit_applicable",
+    "explanation_debit_share",
+    "unknown_debit_share",
+    "unverified_debit_share",
+    "contradicted_debit_share",
+    "mismatched_debit_share",
+    "context_history_complete",
+    "context_history_partial",
+    "context_history_unknown",
+    "observed_inactivity",
+    "context_unknown_step_share",
+    "purpose_unknown_share",
+    "activity_purpose_mismatch_share",
+    "expected_volume_comparable",
+    "expected_credit_range_known",
+    "expected_credit_excess_ratio",
+    "expected_debit_range_known",
+    "expected_debit_excess_ratio",
+    "opening_balance_explanation_applicable",
+    "opening_balance_explained_share",
+    "balance_turnover_applicable",
+    "historical_recipient_comparison_applicable",
+    "card_transfer_history_comparable",
+    "card_transfer_mean_history_ratio",
+    "cash_withdrawal_history_comparable",
+    "cash_withdrawal_mean_history_ratio",
+    "activity_purpose_comparable_share",
+    "expected_credit_excess_ratio_applicable",
+    "expected_credit_excess_amount",
+    "expected_debit_excess_ratio_applicable",
+    "expected_debit_excess_amount"
+  ],
+  "proxy_features": [
+    "known_relationship_share",
+    "limited_information_amount_share",
+    "limited_information_share",
+    "limited_information_total_amount",
+    "party_information_limited_share",
+    "party_information_sufficient_share",
+    "party_information_unknown_share",
+    "party_institution_share",
+    "party_merchant_share",
+    "party_person_share",
+    "recipient_hhi",
+    "return_to_sender_count",
+    "unique_recipients",
+    "unobserved_recipient_share",
+    "episode_recipient_concentration_applicable",
+    "episode_recipient_hhi_mean"
+  ],
+  "baseline": {
+    "log_loss": 0.6931471805599452,
+    "roc_auc": 0.5,
+    "brier": 0.25,
+    "grey_share": 1.0,
+    "low_rows": 0,
+    "high_rows": 0,
+    "fraud_share_among_low": null,
+    "lawful_share_among_high": null
+  },
+  "runs": {
+    "full": {
+      "feature_count": 73,
+      "group_weighted": {
+        "log_loss": 0.4947737296653783,
+        "roc_auc": 0.8118808265516553,
+        "brier": 0.16106653392296666,
+        "grey_share": 0.8988040123456789,
+        "low_rows": 210,
+        "high_rows": 27,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.23674911660777387
+      },
+      "row_weighted": {
+        "log_loss": 0.45766704529921753,
+        "roc_auc": 0.8363332590777456,
+        "brier": 0.14515978003318067,
+        "grey_share": 0.9115671641791044,
+        "low_rows": 210,
+        "high_rows": 27,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.2222222222222222
+      },
+      "top_features": [
+        [
+          "interval_mean",
+          22.15683595636263
+        ],
+        [
+          "mean_balance_turnover_ratio",
+          12.542902986754756
+        ],
+        [
+          "elapsed_minutes",
+          10.500165531288085
+        ],
+        [
+          "recipient_hhi",
+          9.052193944016214
+        ],
+        [
+          "return_to_sender_count",
+          8.888011125910193
+        ],
+        [
+          "purchase_total",
+          5.916649000425099
+        ],
+        [
+          "transition_purchase_incoming_transfer",
+          2.3272673356927265
+        ],
+        [
+          "transition_card_transfer_card_transfer",
+          2.2705003400108303
+        ],
+        [
+          "interval_1_count",
+          2.1162369480844303
+        ],
+        [
+          "amount_mean",
+          2.0167472188901416
+        ]
+      ]
+    },
+    "party_attributes_only": {
+      "feature_count": 10,
+      "group_weighted": {
+        "log_loss": 0.6931471805599452,
+        "roc_auc": 0.5,
+        "brier": 0.25,
+        "grey_share": 1.0,
+        "low_rows": 0,
+        "high_rows": 0,
+        "fraud_share_among_low": null,
+        "lawful_share_among_high": null
+      },
+      "row_weighted": {
+        "log_loss": 0.6931471805599453,
+        "roc_auc": 0.5,
+        "brier": 0.25,
+        "grey_share": 1.0,
+        "low_rows": 0,
+        "high_rows": 0,
+        "fraud_share_among_low": null,
+        "lawful_share_among_high": null
+      },
+      "top_features": [
+        [
+          "known_relationship_share",
+          NaN
+        ],
+        [
+          "limited_information_amount_share",
+          NaN
+        ],
+        [
+          "limited_information_share",
+          NaN
+        ],
+        [
+          "limited_information_total_amount",
+          NaN
+        ],
+        [
+          "party_information_limited_share",
+          NaN
+        ],
+        [
+          "party_information_sufficient_share",
+          NaN
+        ],
+        [
+          "party_information_unknown_share",
+          NaN
+        ],
+        [
+          "party_institution_share",
+          NaN
+        ],
+        [
+          "party_merchant_share",
+          NaN
+        ],
+        [
+          "party_person_share",
+          NaN
+        ]
+      ]
+    },
+    "without_party_attributes": {
+      "feature_count": 63,
+      "group_weighted": {
+        "log_loss": 0.4918961336454231,
+        "roc_auc": 0.8152526128579134,
+        "brier": 0.16019300281986626,
+        "grey_share": 0.8963541666666666,
+        "low_rows": 210,
+        "high_rows": 25,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.20779220779220778
+      },
+      "row_weighted": {
+        "log_loss": 0.45519868962972976,
+        "roc_auc": 0.8400439964357318,
+        "brier": 0.14442374200687816,
+        "grey_share": 0.9123134328358209,
+        "low_rows": 210,
+        "high_rows": 25,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.16
+      },
+      "top_features": [
+        [
+          "interval_mean",
+          18.358430162746163
+        ],
+        [
+          "elapsed_minutes",
+          18.14511689311067
+        ],
+        [
+          "return_to_sender_count",
+          8.222810896173435
+        ],
+        [
+          "unique_recipients",
+          7.64800425519648
+        ],
+        [
+          "mean_balance_turnover_ratio",
+          7.199809146871372
+        ],
+        [
+          "recipient_hhi",
+          5.996604404978332
+        ],
+        [
+          "transition_card_transfer_incoming_transfer",
+          5.207649699112956
+        ],
+        [
+          "transition_card_transfer_purchase",
+          3.684069154190285
+        ],
+        [
+          "interval_max",
+          3.374057360027148
+        ],
+        [
+          "amount_mean",
+          3.278009432666564
+        ]
+      ]
+    },
+    "timing_only": {
+      "feature_count": 11,
+      "group_weighted": {
+        "log_loss": 0.50824213502119,
+        "roc_auc": 0.8019541743090225,
+        "brier": 0.16336240687399714,
+        "grey_share": 0.9902777777777777,
+        "low_rows": 14,
+        "high_rows": 0,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": null
+      },
+      "row_weighted": {
+        "log_loss": 0.4693560046269505,
+        "roc_auc": 0.8314724883047449,
+        "brier": 0.14690041229851689,
+        "grey_share": 0.994776119402985,
+        "low_rows": 14,
+        "high_rows": 0,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": null
+      },
+      "top_features": [
+        [
+          "interval_mean",
+          53.98601266209911
+        ],
+        [
+          "elapsed_minutes",
+          34.02495728816381
+        ],
+        [
+          "matched_large_tempo_mean",
+          4.328832271477682
+        ],
+        [
+          "credit_debit_gap_mean",
+          2.175770426141469
+        ],
+        [
+          "interval_max",
+          1.6954697359113078
+        ],
+        [
+          "interval_10_count",
+          1.4933020068867469
+        ],
+        [
+          "interval_1_count",
+          0.7419277683256215
+        ],
+        [
+          "interval_60_count",
+          0.6690367386259889
+        ],
+        [
+          "fast_credit_debit_share",
+          0.3900822905403629
+        ],
+        [
+          "interval_1440_count",
+          0.27477037827961875
+        ]
+      ]
+    },
+    "without_party_attributes_or_timing": {
+      "feature_count": 52,
+      "group_weighted": {
+        "log_loss": 0.4927704179467528,
+        "roc_auc": 0.8124651510760755,
+        "brier": 0.16055499824091074,
+        "grey_share": 0.89609375,
+        "low_rows": 210,
+        "high_rows": 28,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.15286624203821653
+      },
+      "row_weighted": {
+        "log_loss": 0.45616512439751733,
+        "roc_auc": 0.8365510135887726,
+        "brier": 0.14482675593178093,
+        "grey_share": 0.9111940298507463,
+        "low_rows": 210,
+        "high_rows": 28,
+        "fraud_share_among_low": 0.0,
+        "lawful_share_among_high": 0.10714285714285714
+      },
+      "top_features": [
+        [
+          "mean_balance_turnover_ratio",
+          43.59523021292663
+        ],
+        [
+          "unique_recipients",
+          9.80408955834294
+        ],
+        [
+          "return_to_sender_count",
+          8.172054172146543
+        ],
+        [
+          "recipient_hhi",
+          5.713568000732042
+        ],
+        [
+          "transition_card_transfer_card_transfer",
+          5.507554105097138
+        ],
+        [
+          "transition_purchase_incoming_transfer",
+          4.370998300137003
+        ],
+        [
+          "amount_mean",
+          3.5798443414840695
+        ],
+        [
+          "transition_card_transfer_incoming_transfer",
+          3.052448440520216
+        ],
+        [
+          "gross_outflow",
+          2.8850712151019935
+        ],
+        [
+          "purchase_total",
+          2.2100287262330975
+        ]
+      ]
+    }
+  },
+  "source_hashes": {
+    "features.csv": "413379116b501b3250892dd7fca6ffa3e0309c802fd3d35193dd546bf664c707",
+    "split.csv": "d9c3ef580f9f0cc1f1bdee065fbe81219bc7503d7f3b77a1e276541ebcce051d",
+    "policy.json": "22cc9e89453b8d6b071e6a4486c2807386647728065b9bda23650fbdcdac9b24"
+  },
+  "attribute_features": [
+    "known_relationship_share",
+    "limited_information_amount_share",
+    "limited_information_share",
+    "limited_information_total_amount",
+    "party_information_limited_share",
+    "party_information_sufficient_share",
+    "party_information_unknown_share",
+    "party_institution_share",
+    "party_merchant_share",
+    "party_person_share"
+  ],
+  "temporal_features": [
+    "credit_debit_gap_10_60_excess_mean",
+    "credit_debit_gap_mean",
+    "elapsed_minutes",
+    "fast_credit_debit_share",
+    "interval_10_count",
+    "interval_1440_count",
+    "interval_1_count",
+    "interval_60_count",
+    "interval_max",
+    "interval_mean",
+    "matched_large_tempo_mean"
+  ],
+  "limitations": [
+    "Labels and class-conditional sampling probabilities are authored assumptions.",
+    "Ablation is diagnostic, not causal proof: correlated proxies remain.",
+    "No calibration, model selection, deployment, or independent domain approval.",
+    "Validation shares generator/template distribution with training."
+  ]
+}

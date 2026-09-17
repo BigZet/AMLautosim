@@ -77,9 +77,9 @@ def editor_metadata() -> EditorMetadataOut:
     from src.aml_workshop_simulator.core.config import settings
 
     return EditorMetadataOut(
-        available_contracts=[8] if settings.EXPANDED_ROUNDS_ENABLED else [],
+        available_contracts=[10] if settings.EXPANDED_ROUNDS_ENABLED else [],
         version=1,
-        schema_version=8,
+        schema_version=10,
         limits=LIMITS,
         labels=labels,
         quotas=QUOTA_LABELS,

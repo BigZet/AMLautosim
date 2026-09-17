@@ -185,3 +185,95 @@ def format_value(value, kind):
 @lru_cache(maxsize=1)
 def get_model_scorer():
     return ModelScorer()
+
+
+class ProbabilityScorer:
+    """Online v10 adapter: only a release-validated package can be loaded."""
+
+    def __init__(self, package):
+        from src.aml_workshop_simulator.services.aml_probability_model import (
+            AMLProbabilityModel,
+        )
+
+        self.adapter = AMLProbabilityModel(Path(package))
+        self._model_identity = dict(self.adapter.model_identity)
+        self._identity = dict(
+            self._model_identity,
+            score_kind="aml_probability",
+            model_version="aml-probability:sha256:"
+            + self.adapter.model_identity["package_sha256"],
+            explanation_version=4,
+        )
+
+    @property
+    def identity(self):
+        return self._identity.copy()
+
+    def pin_identity(self, config):
+        from src.aml_workshop_simulator.services.aml_probability_model import (
+            canonical_hash,
+        )
+
+        return dict(self.identity, context_sha256=canonical_hash(config["behavior"]))
+
+    def check_config(self, config, *, require_pin=False):
+        try:
+            self.adapter.check_config(config)
+        except ValueError as exc:
+            raise Conflict(
+                "Конфигурация не поддерживается AML-классификатором.",
+                code="model_contract_mismatch",
+            ) from exc
+        if require_pin and config.get("risk_model") != self.pin_identity(config):
+            raise Conflict(
+                "Закреплённый пакет или контекст AML-классификатора недоступен.",
+                code="model_version_mismatch",
+            )
+
+    def score(self, steps, config, *, require_pin=True):
+        from src.aml_workshop_simulator.schemas.scoring import (
+            AMLProbabilityExplanationOut,
+        )
+
+        self.check_config(config, require_pin=require_pin)
+        explanation = self.adapter.predict(steps, config)
+        AMLProbabilityExplanationOut.model_validate(explanation)
+        if (
+            explanation["model_identity"] != self._model_identity
+            or explanation["context_sha256"]
+            != self.pin_identity(config)["context_sha256"]
+        ):
+            raise Conflict(
+                "Изменился пакет или контекст результата.",
+                code="model_version_mismatch",
+            )
+        probability = explanation["aml_probability"]
+        return dict(
+            risk_score=rounded(Decimal(str(probability)) * 100),
+            risk_label={"low": "normal", "review": "review", "high": "suspicious"}[
+                explanation["category"]
+            ],
+            explanation=explanation,
+        )
+
+
+@lru_cache(maxsize=4)
+def _probability_scorer(package):
+    return ProbabilityScorer(package)
+
+
+def get_round_scorer(config):
+    """Dispatch by saved contract; v9 and unavailable v10 never fall back."""
+    version = config.get("schema_version")
+    if type(version) is int and version == 8:
+        return get_model_scorer()
+    if type(version) is int and version == 10:
+        from src.aml_workshop_simulator.services.game_classifier import (
+            get_pinned_game_classifier,
+        )
+
+        return get_pinned_game_classifier(config)
+
+    raise Conflict(
+        "Контракт не поддерживается моделью.", code="model_contract_mismatch"
+    )

@@ -1,0 +1,10 @@
+{
+  "casebook_sha256": "d61b88723324d1b6115b1f4382839c1d328e2207f04ab2b71931de499192007c",
+  "closure_sha256": "8ef2edbd4bb5409ce06fa1de4444d59e31a558b39c5e180978f23628d678133c",
+  "demo_rows": 25,
+  "development_rows": 1096,
+  "development_sha256": "02cd80ab4b49a9c3e43ca6bc9f439244b6462cfa5ffd0eb075cc90e7a038b236",
+  "freeze_manifest_sha256": "e9b16b534bf569aeed87edc61512a81c29aa484c8cec37151b652091b9e500ac",
+  "independent": true,
+  "version": "aml-demo-training-binding-v1"
+}

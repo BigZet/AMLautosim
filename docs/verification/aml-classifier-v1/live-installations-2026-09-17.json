@@ -1,0 +1,14 @@
+{
+  "active": {
+    "status": "active",
+    "round_id": 2,
+    "schema_version": 10,
+    "ready": true
+  },
+  "demo": {
+    "status": "completed",
+    "round_id": 1,
+    "schema_version": 10,
+    "ready": true
+  }
+}

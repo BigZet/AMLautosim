@@ -1,0 +1,31 @@
+{
+  "quality_policy": {
+    "version": "pattern-quality-v2",
+    "grey_probability_low_inclusive": 0.1,
+    "grey_probability_high_exclusive": 0.9,
+    "population_grey_share_min": 0.1,
+    "population_grey_share_max": 0.2,
+    "minimum_agreement": 0.95,
+    "maximum_confident_error": 0.05,
+    "grey_denominator": "unweighted held-out chain rows, not selected demonstrations"
+  },
+  "test_rows": 1420,
+  "test_metrics": {
+    "agreement": 1.0,
+    "brier": 1.1847558392327394e-07,
+    "grey_share": 0.0,
+    "high_rows": 1257,
+    "log_loss": 0.00013449401921174223,
+    "low_rows": 163,
+    "nonpattern_share_among_high": 0.0,
+    "pattern_share_among_low": 0.0,
+    "roc_auc": 1.0,
+    "grey_row_share": 0.0
+  },
+  "accepted": false,
+  "failures": [
+    "population_grey_share_outside_10_to_20_percent"
+  ],
+  "runtime_rejection": "Pattern package uses obsolete quality criteria; grey share must be 10–20%",
+  "probabilities_modified": false
+}

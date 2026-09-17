@@ -1,0 +1,13 @@
+{
+  "class_counts": {
+    "0": 125,
+    "1": 125,
+    "None": 10
+  },
+  "release_ready": false,
+  "review_sha256": "46d920a477480f949777e42097fd9392f187805ec67a866da62f2b7f4f80b409",
+  "reviewed_rows": 260,
+  "reviewer_kind": "independent AI agent; not human domain expertise",
+  "scope": "Exact authored cases independently AI-reviewed; not human review, no model acceptance or independence-count certification.",
+  "source_casebook_sha256": "72ed8f6428e439f3bad4e0ec016539eb4132c34f6b9066c248ccdcefe1a9fc17"
+}

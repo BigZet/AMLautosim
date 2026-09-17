@@ -33,7 +33,19 @@ KINDS = {
 
 
 def expanded(config):
-    return config.get("schema_version", 7) in (8, 9)
+    return config.get("schema_version", 7) in (8, 9, 10)
+
+
+def party_name(party):
+    # Frozen catalogue titles once embedded a recipient role. The same identity
+    # can send and receive; correct only these known legacy display strings.
+    name = party["name"]
+    if name in {
+        "Получатель C — реквизиты различимы",
+        "Получатель D — реквизиты различимы",
+    }:
+        return name.replace("Получатель ", "Контрагент ", 1)
+    return name
 
 
 def editable_params(card, config):
@@ -52,16 +64,16 @@ def editable_params(card, config):
 
 def party_options(config, code, details=None):
     role, kinds = PARTY_ROLES.get(code, (None, ()))
-    if config.get("schema_version") == 9:
+    if config.get("schema_version") in (9, 10):
         from src.aml_workshop_simulator.services.semantic_contract import allowed_party
 
         return role, {
-            p["id"]: p["name"]
+            p["id"]: party_name(p)
             for p in config["behavior"]["counterparties"]
             if allowed_party(code, p, details or {})
         }
     return role, {
-        p["id"]: p["name"]
+        p["id"]: party_name(p)
         for p in config["behavior"]["counterparties"]
         if party_allowed(code, p, config["behavior"].get("sender_policy"))
     }
@@ -83,7 +95,7 @@ def party_description(config, identity):
     )
     return " · ".join(
         [
-            party["name"],
+            party_name(party),
             KINDS[party["kind"]],
             INFO[party["information_status"]],
             (
@@ -113,6 +125,12 @@ def party_selector(config, step, on_change):
     if role is None:
         return
     label = "Отправитель" if role == "sender_id" else "Получатель"
+    if len(options) == 1:
+        identity = next(iter(options))
+        if step.get(role) != identity:
+            on_change(role, identity)
+        ui.label(f"{label}: {options[identity]}").classes("text-sm muted")
+        return
     details = ui.label(party_description(config, step.get(role))).classes(
         "text-xs muted"
     )

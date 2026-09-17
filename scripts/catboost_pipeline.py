@@ -2,9 +2,7 @@
 
 import hashlib
 import json
-import platform
 import shutil
-import subprocess
 import time
 from itertools import product
 from pathlib import Path
@@ -12,6 +10,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
+
+from scripts.training_environment import collect_training_environment
 
 VERSION = "aml-catboost-experiment-v1"
 FEATURE_VERSION = "aml-observable-v2.6"
@@ -265,6 +265,7 @@ def train(directory, output, seed=20260914):
             "Training output must be new; existing experiment is immutable"
         )
     data = load_dataset(directory)
+    inventory, environment = collect_training_environment()
     output.mkdir(parents=True)
     shutil.copyfile(__file__, output / "training-pipeline.py")
     write(output / "input-checksums.json", data["checksums"])
@@ -277,14 +278,11 @@ def train(directory, output, seed=20260914):
         },
     )
     write(output / "raw-feature-check.json", verify_raw_features(data))
-    (output / "environment.txt").write_text(
-        subprocess.check_output(["python", "-m", "pip", "freeze"], text=True)
-    )
+    (output / "environment.txt").write_text(inventory, encoding="utf-8")
     write(
         output / "environment.json",
         {
-            "python": platform.python_version(),
-            "platform": platform.platform(),
+            **environment,
             "pipeline": VERSION,
             "pipeline_sha256": sha(__file__),
         },

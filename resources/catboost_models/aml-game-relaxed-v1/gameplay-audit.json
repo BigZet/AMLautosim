@@ -1,0 +1,106 @@
+{
+  "context_sha256": "0e95f8df274a02cf71300071a0033ab6bb7e5b9eba7066041174bddba259041f",
+  "counts": {
+    "cent_mutations_valid": 2378,
+    "valid": 2409,
+    "waiting_still_high": 233,
+    "waiting_valid": 1296
+  },
+  "distinct_low_game_scores": 558,
+  "distinct_low_resource_scores": 656,
+  "failures": [],
+  "largest_errors": [
+    {
+      "family": 23,
+      "probability": 0.7752299896703579,
+      "seed": 2041902911,
+      "target": 0.5522388059701493
+    },
+    {
+      "family": 12,
+      "probability": 0.6635768261750404,
+      "seed": 2041901748,
+      "target": 0.48258706467661694
+    },
+    {
+      "family": 22,
+      "probability": 0.2965377905008278,
+      "seed": 2041903510,
+      "target": 0.12437810945273632
+    },
+    {
+      "family": 21,
+      "probability": 0.9923322774853617,
+      "seed": 2041900749,
+      "target": 0.8308457711442786
+    },
+    {
+      "family": 5,
+      "probability": 0.22510420038030066,
+      "seed": 2041901381,
+      "target": 0.3582089552238806
+    },
+    {
+      "family": 22,
+      "probability": 0.46420027241361556,
+      "seed": 2041901206,
+      "target": 0.5771144278606966
+    },
+    {
+      "family": 7,
+      "probability": 0.60536083619122,
+      "seed": 2041900831,
+      "target": 0.4975124378109453
+    },
+    {
+      "family": 14,
+      "probability": 0.7649994481275219,
+      "seed": 2041901222,
+      "target": 0.6666666666666666
+    },
+    {
+      "family": 23,
+      "probability": 0.7641794891647772,
+      "seed": 2041900991,
+      "target": 0.6666666666666666
+    },
+    {
+      "family": 3,
+      "probability": 0.47464469760830447,
+      "seed": 2041904859,
+      "target": 0.5671641791044776
+    }
+  ],
+  "low_families": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "max_cent_probability_shift": 0.0,
+  "max_target_error": 0.22299118370020865,
+  "mean_absolute_target_error": 0.004107595893372836,
+  "note": "Unseen seeds within authored route families; not independent human AML validation",
+  "passed": true,
+  "script_sha256": "5050aade3e0729cd16fc0e086e3a9c3c0c214ea3196070945ad527572ef9146f"
+}

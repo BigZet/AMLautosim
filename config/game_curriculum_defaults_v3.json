@@ -1,0 +1,19 @@
+{
+  "preset_version": "aml-game-relaxed-v2",
+  "resources": {
+    "initial_balance": "180000.00",
+    "initial_energy": 34,
+    "initial_time": 34
+  },
+  "objectives": {
+    "target_outflow": "360000.00",
+    "max_actions": 16
+  },
+  "operation_limits": {
+    "incoming_transfer": 4,
+    "card_transfer": 10
+  },
+  "constraints": {
+    "max_identical_steps": 3
+  }
+}

@@ -30,6 +30,10 @@ COPY scripts ./scripts
 COPY src ./src
 COPY config ./config
 COPY resources/catboost_models/integration-v2-final ./resources/catboost_models/integration-v2-final
+COPY resources/catboost_models/aml-game-v1 ./resources/catboost_models/aml-game-v1
+COPY resources/catboost_models/aml-game-relaxed-v1 ./resources/catboost_models/aml-game-relaxed-v1
+COPY resources/catboost_models/aml-game-attributes-v1 ./resources/catboost_models/aml-game-attributes-v1
+COPY resources/catboost_models/aml-game-attribute-context-v1 ./resources/catboost_models/aml-game-attribute-context-v1
 
 # The application only reads its own code; it never writes into /app.
 # NiceGUI persists browser sessions in its private writable volume.

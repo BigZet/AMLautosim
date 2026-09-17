@@ -1,0 +1,14 @@
+Recorded execution summary (not a raw pytest transcript), 2026-09-16.
+
+Scope: scripts/aml_dataset/expanded.py validate; scripts/validate_expanded_aml_dataset.py validate_directory.
+New subprocess tests execute the real validators under python -O with actual package/files.
+Negative cases: forged package label, forged package features, forged manifest package_hash, forged CSV label.
+Positive case: pristine exported directory.
+
+Before implementation: 4 failed, 1 passed; all four negative subprocesses incorrectly exited 0.
+After replacing mandatory asserts with equivalent explicit AssertionError guards:
+.venv/Scripts/python.exe -m pytest -q tests/unit/test_aml_dataset_v2.py
+26 passed in 37.41s.
+Final optimized-only regression rerun: 5 passed.
+Ruff and scoped git diff --check passed.
+The entire test module was subsequently included in the complete Windows and Linux suites.

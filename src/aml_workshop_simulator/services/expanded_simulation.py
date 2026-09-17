@@ -11,6 +11,9 @@ from src.aml_workshop_simulator.services.counterparties import (
 
 
 def evaluate_expanded_scenario(steps, config):
+    if config.get("schema_version") == 10:
+        from src.aml_workshop_simulator.services.aml_context import evaluate
+        return evaluate(steps, config)
     if config.get("schema_version") == 9:
         from src.aml_workshop_simulator.services.semantic_contract import evaluate
         return evaluate(steps, config)
@@ -32,6 +35,8 @@ def evaluate_expanded_scenario(steps, config):
 
 def score_expanded_scenario(steps, config):
     """Temporary deterministic comparator; not a reviewed dataset rubric."""
+    if config.get("schema_version") == 10:
+        raise ValueError("The v10 contract requires its pinned AML classifier")
     from src.aml_workshop_simulator.domain.scoring import _score_validated
 
     canonical = canonical_expanded_steps(steps, config)

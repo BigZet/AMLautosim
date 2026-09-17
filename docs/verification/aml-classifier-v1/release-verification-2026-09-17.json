@@ -1,0 +1,94 @@
+{
+  "focused_checks": {
+    "tests": 83,
+    "passed": 82,
+    "failures": [],
+    "skipped": [
+      {
+        "test": "tests.unit.test_runtime_package::test_release_rejects_symlinks",
+        "message": "Windows requires Developer Mode or symlink privileges"
+      }
+    ]
+  },
+  "broad_diagnostic_run": {
+    "tests": 479,
+    "passed": 471,
+    "failures": [
+      {
+        "test": "tests.api.test_contract_versions::test_snapshot_roundtrip_in_postgresql[8]",
+        "message": "assert 10 == 8"
+      },
+      {
+        "test": "tests.api.test_editor_metadata::test_semantic_error_has_operation_path",
+        "message": "AssertionError: assert 'round_contract_immutable' == 'round_configuration_invalid'\n  \n  - round_configuration_invalid\n  + round_contract_immutable"
+      },
+      {
+        "test": "tests.api.test_profile_history::test_draft_freeze_two_players_reload_and_immutable_after_start",
+        "message": "AssertionError: {\"code\":\"validation_error\",\"message\":\"Запрос не соответствует контракту API\",\"details\":{\"violations\":[{\"field\":\"game_config.behavior\",\"reason\":\"value_error\",\"message\":\"Каталог v9 требует одну криптобиржу\"}]},\"request_id\":\"789fe936-8d62-440e-99bf-f471dd265ee5\"}\nassert 422 == 200\n +  where 422 = <Response [422 Unprocessable Entity]>.status_code"
+      },
+      {
+        "test": "tests.unit.test_aml_chain_dataset::test_compact_readback_rejects_wrong_context",
+        "message": "concurrent.futures.process.BrokenProcessPool: A process in the process pool was terminated abruptly while the future was running or pending."
+      },
+      {
+        "test": "tests.unit.test_aml_fixed_history_dataset::test_readback_checks_exact_history_even_if_file_checksum_is_updated",
+        "message": "concurrent.futures.process.BrokenProcessPool: A process in the process pool was terminated abruptly while the future was running or pending."
+      },
+      {
+        "test": "tests.unit.test_aml_population_author::test_nonbank_and_restart_coverage_have_bound_actual_settlement_records[foreign_bank]",
+        "message": "ValueError: unsupported authored coverage construction"
+      },
+      {
+        "test": "tests.unit.test_aml_population_author::test_nonbank_and_restart_coverage_have_bound_actual_settlement_records[payment_service]",
+        "message": "ValueError: unsupported authored coverage construction"
+      },
+      {
+        "test": "tests.unit.test_aml_population_author::test_nonbank_and_restart_coverage_have_bound_actual_settlement_records[crypto_p2p]",
+        "message": "ValueError: unsupported authored coverage construction"
+      }
+    ],
+    "skipped": []
+  },
+  "broad_failures_resolution": "Three legacy API fixtures now explicitly request v8; two multiprocessing checks passed from a file entry point. Three unsupported constructions remain in the unused research population author; no runtime fallback or dataset regeneration.",
+  "docker": {
+    "risk_score": "0.00",
+    "probability": 3.805084917781989e-05,
+    "windows": 3,
+    "model": {
+      "package_sha256": "b6c8864b575526948dcf0304c77182e8d3406327de59da412c159eb2295fd0bf",
+      "model_sha256": "ceaad4c391fa7094386662495405a9d3b5a49ab9d2b335c7b9bac2479b509fe7",
+      "context_sha256": "beeb4452c5efb30250f3e9b3554c0c78cfee2b6f8c4371f5df3576a68bde28f6",
+      "feature_schema_sha256": "98b504c5c54b1d4a9f6278bcef8850edc971f5599fae5967c0766d568c6dfee4",
+      "contract_version": 10,
+      "extractor_version": "aml-game-window-v2",
+      "score_kind": "educational_pattern_probability",
+      "model_version": "aml-game:sha256:b6c8864b575526948dcf0304c77182e8d3406327de59da412c159eb2295fd0bf",
+      "explanation_version": 5
+    },
+    "image_id": "sha256:707ccb7eae0fef5fa27182840b761f4c85c05eec46fae81a264f33842ad7577f"
+  },
+  "archive": {
+    "passed": true,
+    "files": 302,
+    "sha256": "c71ef0aabfb3153e221694accf94f17fd5dd03cc45e18e8a070ce791a9ad4ec2",
+    "package_sha256": "b6c8864b575526948dcf0304c77182e8d3406327de59da412c159eb2295fd0bf"
+  },
+  "restart_comparison": {
+    "participants": 15,
+    "identical_saved_results": 15
+  },
+  "browser_examples": {
+    "passed": true,
+    "count": 25,
+    "report": "published-examples-browser-2026-09-17.json"
+  },
+  "v10_concurrent_edits": {
+    "passed": true,
+    "requests": 2,
+    "statuses": [
+      200,
+      409
+    ],
+    "saved_revision": 1
+  }
+}

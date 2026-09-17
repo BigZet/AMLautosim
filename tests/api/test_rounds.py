@@ -1,3 +1,11 @@
+import pytest
+
+
+@pytest.fixture
+def seeded_game_version():
+    return 10
+
+
 def test_no_game_and_creation(request_api, player, admin, sql):
     sql("TRUNCATE rounds CASCADE")
     assert request_api("GET", "/rounds/current") is None

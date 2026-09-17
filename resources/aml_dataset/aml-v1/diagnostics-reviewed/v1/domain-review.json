@@ -1,0 +1,978 @@
+{
+  "reviewer": "review_aml_context",
+  "reviewer_kind": "independent AI agent; not human domain expertise",
+  "method": "independent_domain_review",
+  "date": "2026-09-17",
+  "review_round": 1,
+  "scope": "Independent substantive review of the exact twenty evidence-masked descendants from all ten roots, schedule-0-records, both confirmed outcomes. Re-examined hidden sources/obligations and each transformed case against its exact parent; verified the identical-observation counterfactuals and absence of public truth leakage. Approval concerns these non-independent diagnostics only, not twenty independent demo cases, requested score extremes, held-out performance or release.",
+  "casebook_path": "resources/aml_dataset/aml-v1/diagnostics-draft/v1/casebook.jsonl",
+  "casebook_sha256": "bb8c24bc52574d84e9e8cebbade88e6e678173dba71bfc56e4f02c914c9fe0b1",
+  "parent_casebook_path": "resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl",
+  "parent_casebook_sha256": "d822e7e7f3408e49f0c4ab6177fc791a6c64fda7688df3dc923d8ba2a6afbc8e",
+  "diagnostic_manifest_sha256": "01bee304af1702f04a9fa72472be021209ad1b898f4c6011bea8d83d715c0a7f",
+  "decision_counts": {
+    "approved": 20,
+    "rejected": 0
+  },
+  "selection_review": {
+    "rule": "Every one of the ten reviewed roots, schedule-0-records, both known outcomes; no score-based selection.",
+    "exact_parent_roster_matches_manifest": true,
+    "model_or_score_consulted": false,
+    "independent": false
+  },
+  "verification": {
+    "cases_substantively_reviewed": 20,
+    "opposite_truth_pairs": 10,
+    "public_and_feature_identical_pairs": 10,
+    "all_complete_chains_financially_valid": true,
+    "all_parent_hashes_verified": true,
+    "all_cases_match_pure_mask_generator": true,
+    "source_fact_removal_only_in_public_snapshot": true,
+    "truth_leakage_errors": [],
+    "targeted_tests_passed": 5,
+    "combined_derivation_confirmed_main_rows": 250,
+    "combined_derivation_connected_groups": 9,
+    "combined_derivation_diagnostics": {
+      "masked-context": 20,
+      "unresolved": 10
+    },
+    "independent_diagnostic_review_gate_closed_on_unreviewed_inputs": true,
+    "tests_role": "Corroboration of independently assessed case semantics, not a substitute for domain judgment."
+  },
+  "limitations": [
+    "These twenty cases retain their parents provenance and must not increase independent-group counts.",
+    "Ten opposite-truth pairs are observationally indistinguishable; no target probability, score-extreme requirement or observable certainty is prescribed.",
+    "The diagnostic parents are development material; these are not a separately frozen independent test set.",
+    "Removing evidence does not change known private truth and does not turn these confirmed cases into unresolved labels.",
+    "The ten-root source catalogue still has nine closure components, including the asset/debt merge, and remains far below release size/coverage requirements.",
+    "No casebook or review status was changed; importing these exact decisions is a separate action."
+  ],
+  "cases": [
+    {
+      "scenario_id": "service_jobs-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Three separately completed and accepted jobs create three 80000 receivables. Five different original payers are owed 78000 each for costs they already paid for the player; these are distinct reimbursements, not unexplained onward gifts. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "6f9ce3b4d97e384a1d53c1e65fd4f9bda3ad918d3269cffab4c3adba13c79db3",
+      "parent_scenario_id": "service_jobs-schedule-0-records-0",
+      "parent_record_sha256": "33c4de282f8253d4e7d5f655cb4d103750da15c5971d4470e41a5938205a1405",
+      "root_id": "service_jobs",
+      "opposite_truth_sibling": "service_jobs-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "service_payment",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "service_jobs-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The funding intermediaries obtain the second and third receipts from customers deceived about nonexistent work. Their custody accounts link those proceeds to the observed senders; knowing collector remittances replace settlement of the real reimbursement liabilities. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "315ec6cd775adafea873a9d63adf588cc0bc2a5bbe97e6230b381bc60ecee590",
+      "parent_scenario_id": "service_jobs-schedule-0-records-1",
+      "parent_record_sha256": "e2fb287b68bc4247095fb7586e6cc5fb8c3a2848aa5b44d99dcfc52e2b1efada",
+      "root_id": "service_jobs",
+      "opposite_truth_sibling": "service_jobs-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "service_payment",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "service_milestones-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Three accepted stages support one completed 240000 project, paid in three 80000 instalments. Five 78000 transfers discharge one real 390000 prior creditor; neither instalments nor repeated recipients create extra obligations. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "a7df0b091b24ab30db74555ad70bda4344037e7a2e9de1f7e513e09affe7ed32",
+      "parent_scenario_id": "service_milestones-schedule-0-records-0",
+      "parent_record_sha256": "634328ab87974015abf960b86d8c95bd30c960f6909906b00585a466f85d9fd3",
+      "root_id": "service_milestones",
+      "opposite_truth_sibling": "service_milestones-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending",
+          "service_payment"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "service_milestones-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The later two receipts come from separate fabricated acceptance invoices through the observed funding intermediary. The original legitimate project receivable remains unpaid for those amounts, while nominee remittances benefit the collector rather than the real prior creditor. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "b62d9a6a186e8f7eb8fcf9d1ca58ba8c16cc674ae44ba23a562c458edf61728f",
+      "parent_scenario_id": "service_milestones-schedule-0-records-1",
+      "parent_record_sha256": "6902a989cd7da928776dabd17ed7915500be0ee513a78527124aec0ed8c531c8",
+      "root_id": "service_milestones",
+      "opposite_truth_sibling": "service_milestones-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending",
+          "service_payment"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "asset_portfolio-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Three previously acquired player-owned assets are transferred to buyers, creating separate 80000 sale receivables. Proceeds and lawful opening funds pay a prior 390000 creditor; historical acquisition payments and title events support ownership. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "7877883b5307d337999ffacb79c409cfc05a3ba929a47f0f3942e14ee0078c2d",
+      "parent_scenario_id": "asset_portfolio-schedule-0-records-0",
+      "parent_record_sha256": "293a199970d70c9c7d61d0e7b327caf8af80a981a0c54b70bd843044f3858eba",
+      "root_id": "asset_portfolio",
+      "opposite_truth_sibling": "asset_portfolio-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "asset_sale",
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "asset_portfolio-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The second and third receipts instead derive from sales of distinct misappropriated goods. The harmed owners are separate from paying buyers; sale and custody events bridge each buyer payment to the observed sender account before knowing collector routing. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "c280c7ddfdfee20ac1c6c32f51fc7e20fb05e8af032389c603a4ae80abdeb3dd",
+      "parent_scenario_id": "asset_portfolio-schedule-0-records-1",
+      "parent_record_sha256": "ae1e750c65131e746b8cf80f77024f40dbff4e766ef5fae42e2699b98732625a",
+      "root_id": "asset_portfolio",
+      "opposite_truth_sibling": "asset_portfolio-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "asset_sale",
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "asset_single-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "One previously acquired asset is sold for 240000 and paid in three instalments; five personal providers are each owed 78000 for goods already delivered. Ownership, the single receivable and separate provider liabilities are consistent. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "43d4977f54b7513dff29a1a7f1b79416c24bf3ec73a72aeaa25df001a9dcb75f",
+      "parent_scenario_id": "asset_single-schedule-0-records-0",
+      "parent_record_sha256": "c717da631803928313cd9dc3d341695ad42077b6cb289a9bd00be3d3bcbb367d",
+      "root_id": "asset_single",
+      "opposite_truth_sibling": "asset_single-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "asset_sale",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "asset_single-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Later receipts are deposits fraudulently collected for a different vehicle the scheme could not sell. Explicit custody events place those deposits in the observed sender account; the lawful asset sale remains partly unpaid and provider claims are not settled by collector remittances. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "ef323b976cfb1302b67d201b044efc3d91f012f693783715d082aae9af80dfaf",
+      "parent_scenario_id": "asset_single-schedule-0-records-1",
+      "parent_record_sha256": "1105d37f1d3b6474a6de25a7045cbeab8b6f8e66b30ccb57e743ddfdda27a1ae",
+      "root_id": "asset_single",
+      "opposite_truth_sibling": "asset_single-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "asset_sale",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "supplier_cancellations-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Three earlier player-funded 80000 supplier advances become refundable after cancelled orders. Five customers previously advanced 78000 each and are separately owed cancellation refunds; historical flows establish the original direction of both sets of advances. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "9edaeb52827acad9da9193d4a3196abf06cc9ac590cfd3ef4a2ea2580cac918f",
+      "parent_scenario_id": "supplier_cancellations-schedule-0-records-0",
+      "parent_record_sha256": "929b558c130a05b683aa8fda1e712aacf380e110f91d741b124db779524083b2",
+      "root_id": "supplier_cancellations",
+      "opposite_truth_sibling": "supplier_cancellations-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "refund"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "supplier_cancellations-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Suppliers divert unrelated customers escrow for the second and third receipts. The actual custody entries distinguish diverted third-party funds from authorised refunds of player advances; outgoing nominee transfers knowingly route to the collector instead of refunding the original customers. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "13bf3385c28a0d27e95cc080022814bfc0fc84d5554065e5561b542f66941031",
+      "parent_scenario_id": "supplier_cancellations-schedule-0-records-1",
+      "parent_record_sha256": "c2fc8bb5b3a58aa2f22dcf98f6aac55ad0c4d75f907ca99dcfa889599d3ceab7",
+      "root_id": "supplier_cancellations",
+      "opposite_truth_sibling": "supplier_cancellations-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "refund"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "supplier_duplicate-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Two original 240000 supplier payments are recorded; only the duplicate becomes a 240000 return claim, repaid in three 80000 instalments. Five separately funded customer advances support the outgoing refund liabilities, without double-refunding the original supplier order. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "86026dee80ced2258eaf947554a61611e87d288ba0248f67c5715d398c3e51a4",
+      "parent_scenario_id": "supplier_duplicate-schedule-0-records-0",
+      "parent_record_sha256": "35eb2ad35165b80defe6a6518d34faa051eba99375bc27a8491c18bd1c5bc926",
+      "root_id": "supplier_duplicate",
+      "opposite_truth_sibling": "supplier_duplicate-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "refund"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "supplier_duplicate-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Later receipts come from unrelated businesses deceived by fabricated duplicate-payment demands, not repayment of the real duplicate advance. Custody/intermediary records link those receipts to the observed funding account; collector payments leave the asserted customer refunds outstanding. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "d6177633c91c30234d391d119dedb4282c8f86f9eeeef222ea59cee14046f476",
+      "parent_scenario_id": "supplier_duplicate-schedule-0-records-1",
+      "parent_record_sha256": "ca7199370eded0e958292c6202a4b6b57eece870db37051eb13845cf28997712",
+      "root_id": "supplier_duplicate",
+      "opposite_truth_sibling": "supplier_duplicate-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "refund"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "loan_consolidation-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "An executed new facility disburses 240000 in three instalments and creates a matching future repayment principal. Five prior creditors are each owed 78000; refinancing plus lawful opening funds pays those debts and the separate personal cash need. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "7704a8b6ed50464060a3d9185fe37b90dd00e8788c822b1367886bddca58e6db",
+      "parent_scenario_id": "loan_consolidation-schedule-0-records-0",
+      "parent_record_sha256": "2490f560500420e22d318ad4a0de5d0674799be8f0dc4304288c9ca7b25b0ff8",
+      "root_id": "loan_consolidation",
+      "opposite_truth_sibling": "loan_consolidation-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "loan_consolidation-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Two extorted victim payments reach the scheme-controlled funding intermediary and then the player, followed by knowing collector routing. Only the first 80000 is actually drawn from the lawful facility, so the future borrowing principal is 80000 and the undrawn commitment is not charged as debt. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "21176eeb0a71bfa5ab1b7038438462e2568f6ceb7fc58ab1ab98db3e95f00aef",
+      "parent_scenario_id": "loan_consolidation-schedule-0-records-1",
+      "parent_record_sha256": "9c18750be855b48a50ab51fa62c26e8e0677cec8f8eec0facee26e74c30da88b",
+      "root_id": "loan_consolidation",
+      "opposite_truth_sibling": "loan_consolidation-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "debt_collection-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The player previously lent 80000 to each of three borrowers; their repayments discharge those receivables. Five outgoing instalments repay one 390000 creditor of the player, preserving the opposite debtor/creditor roles rather than treating all transfers as the same debt. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "2b1bef9cc0f2d6e985d26f0c953c44a573f248eaf41ba972afb9aa4e6e3dc065",
+      "parent_scenario_id": "debt_collection-schedule-0-records-0",
+      "parent_record_sha256": "a3f18306e6320d65055db4d1f107fa8dd3cf797f92fce84e8f33f55aff942b42",
+      "root_id": "debt_collection",
+      "opposite_truth_sibling": "debt_collection-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "debt_collection-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The later borrowers divert their employers funds into their observed sender accounts and direct the receipts as pass-through funds rather than allocating them to their actual player-loan debts. Knowing nominee transfers benefit the collector and leave the asserted creditor liability unpaid. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "2a1550ccc0e73ca0cee8ec6b0affbedf5dddaee509fdcfe0258896fd80aeb962",
+      "parent_scenario_id": "debt_collection-schedule-0-records-1",
+      "parent_record_sha256": "6ec56df69d6b374e0c9465527638c9c17c3c0d037d0950b297530fc436d4234b",
+      "root_id": "debt_collection",
+      "opposite_truth_sibling": "debt_collection-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "loan",
+          "personal_spending"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "family_pool-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Three separately agreed 80000 family contributions and the players own 150000 share fund a real 390000 organiser liability. The organiser obligation depends on the cost allocations; the separate 10000 cash purchase is personal rather than another family contribution. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "c72ec8d49ce95ff114edafeeb8a94587e882ee2aaf0ead8b84932be47f130303",
+      "parent_scenario_id": "family_pool-schedule-0-records-0",
+      "parent_record_sha256": "6eff515ff178cc35365f09aad7077247b9f7a1e2095b26acfbd18106389f105f",
+      "root_id": "family_pool",
+      "opposite_truth_sibling": "family_pool-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "family_pool-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "Later receipts originate from donors deceived by a fictional charitable collection through family-member intermediaries, not the actual family cost allocations. The actor knowingly remits those proceeds to a collector through unauthorised nominee destinations instead of settling the organiser claim. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "63e2a82e4dfd1ec3fc4c1cdbdd760f34d88c66aa9abf1ece559d4aef2245b42f",
+      "parent_scenario_id": "family_pool-schedule-0-records-1",
+      "parent_record_sha256": "739b58594e25a6d099183ac3487647a9568b855d7e35b92128ffa4d7bfa5328a",
+      "root_id": "family_pool",
+      "opposite_truth_sibling": "family_pool-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "family_cost_return-schedule-0-records-0--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The player previously paid 80000 for each of three relatives and is owed reimbursement. Separately, five original payers each funded 78000 of the players costs and are owed repayment; these opposite reimbursement roles have distinct participants and causal bases. The genuine source receivables and outgoing liabilities still settle in the actual lawful world; no criminal episode is introduced by deleting documents. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "b653d0f472df697e730aa6ade5111c0ff11533c134eabec5a876b91e0d45cd52",
+      "parent_scenario_id": "family_cost_return-schedule-0-records-0",
+      "parent_record_sha256": "6ba2293d8e0b3fe546baa05da2dbf3556e13fabde48fbc2689236a7340b0b7f4",
+      "root_id": "family_cost_return",
+      "opposite_truth_sibling": "family_cost_return-schedule-0-records-1--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    },
+    {
+      "scenario_id": "family_cost_return-schedule-0-records-1--masked-evidence-v1",
+      "decision": "approved",
+      "reviewer": "review_aml_context",
+      "method": "independent_domain_review",
+      "date": "2026-09-17",
+      "rationale": "The second and third incoming amounts are obtained from care clients charged for fictional expenses, then held in the observed funding accounts. They are not allocated to the relatives real reimbursement debts; knowing outgoing collector remittances do not discharge the players genuine cost liabilities. The actual criminal-source receipts, intermediary account control and knowing collector routing remain present; lawful opening funds and the first receipt do not cancel that independent episode. Independently reviewed the masked descendant against this exact reviewed parent: only observable facts, opening-fact references and transaction claim references are removed. Its transactions, timing, purposes, history, original economic records, actual-world payments and remaining liabilities are unchanged. Those retained economic records are private author/reviewer material, not available model evidence. The opposite-truth sibling has an identical public snapshot and feature vector, so distinguishable=false is justified for this diagnostic pair; removing evidence is neither exculpation nor proof of crime. The complete nine-operation chain remains valid with zero verified credit/debit coverage. Approval is new and specific to this masked record, not inherited from the parent; it remains a non-independent masked-context diagnostic and prescribes no probability or score extreme.",
+      "required_fixes": [],
+      "record_sha256": "9e37b51de333cda0c1231656bebe2ee7bc360f04cb2980b1a56f7658e0061880",
+      "parent_scenario_id": "family_cost_return-schedule-0-records-1",
+      "parent_record_sha256": "6d6fffcfaa25bd0249a842d82ea1de210d274bbcc7d927da8717876a11b29bb6",
+      "root_id": "family_cost_return",
+      "opposite_truth_sibling": "family_cost_return-schedule-0-records-0--masked-evidence-v1",
+      "evidence_summary": {
+        "observable_fact_count": 0,
+        "opening_fact_references": 0,
+        "claim_references": 0,
+        "unknown_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "verified_credit_amount": "0.00",
+        "verified_debit_amount": "0.00",
+        "transaction_count": 9,
+        "retained_declared_purposes": [
+          "personal_spending",
+          "shared_expense"
+        ],
+        "public_snapshot_matches_opposite_truth": true,
+        "independent": false
+      },
+      "review_checks": {
+        "actual_truth_and_ledger_retained": true,
+        "new_approval_not_inherited": true,
+        "parent_hash_bound": true,
+        "parent_ancestry_retained": true,
+        "unknown_evidence_not_lawful_inference": true
+      }
+    }
+  ]
+}

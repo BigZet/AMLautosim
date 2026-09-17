@@ -1,0 +1,9 @@
+{
+  "archive": ".local-run\\classifier-release\\aml-classifier-attributes-v1.tar.gz",
+  "sha256": "fde4fd0792889734bb93a25c5186522913b60ebd57296a66215936ae45e24106",
+  "files": 343,
+  "checksums_verified": true,
+  "three_models_included": true,
+  "compose_default_verified": true,
+  "image": "aml-workshop:classifier-attributes-v1"
+}

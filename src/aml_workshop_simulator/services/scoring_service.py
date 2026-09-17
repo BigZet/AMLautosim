@@ -16,6 +16,8 @@ from src.aml_workshop_simulator.domain.contract_versions import (
 )
 from src.aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
+    AML_LEADERBOARD_VERSION,
+    probability_leaderboard_scores,
     leaderboard_scores,
     resource_score,
 )
@@ -56,22 +58,27 @@ async def score_round(
     specs = load_round_card_specs(round_obj)
     policy = round_policy(round_obj, specs)
     now = datetime.now(UTC)
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
 
-    scorer = get_model_scorer()
+    scorer = get_round_scorer(round_obj.game_config)
     scorer.check_config(round_obj.game_config, require_pin=True)
     scoring_version = scorer.identity["model_version"]
+    leaderboard_version = (
+        AML_LEADERBOARD_VERSION
+        if round_obj.game_config["schema_version"] == 10
+        else LEADERBOARD_VERSION
+    )
     for scenario in scenarios:
         # CPU work receives plain data; the database session stays on this loop.
         snapshot, values = await asyncio.to_thread(
-            _evaluate, scenario.steps, specs, round_obj.game_config, policy
+            _evaluate, scenario.steps, specs, round_obj.game_config, policy, scorer
         )
         db.add(
             ScoringResult(
                 scenario_id=scenario.id,
                 **values,
                 scoring_version=scoring_version,
-                leaderboard_version=LEADERBOARD_VERSION,
+                leaderboard_version=leaderboard_version,
                 created_at=now,
             )
         )
@@ -82,7 +89,7 @@ async def score_round(
         scored_count=len(scenarios),
         duration_ms=int((time.perf_counter() - started) * 1000),
         scoring_version=scoring_version,
-        leaderboard_version=LEADERBOARD_VERSION,
+        leaderboard_version=leaderboard_version,
     )
     round_obj.status = "completed"
     round_obj.completed_at = now
@@ -98,13 +105,20 @@ async def score_round(
     return summary
 
 
-def _evaluate(steps, specs, config, policy) -> tuple[dict[str, Any], dict[str, Any]]:
+def _evaluate(
+    steps, specs, config, policy, scorer=None
+) -> tuple[dict[str, Any], dict[str, Any]]:
     snapshot = build_snapshot(steps, specs, config, policy)
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
 
-    scoring = get_model_scorer().score(steps, config)
-    board = leaderboard_scores(
-        scoring["risk_score"], resource_score(snapshot, config), config
+    scoring = (scorer or get_round_scorer(config)).score(steps, config)
+    resources = resource_score(snapshot, config)
+    board = (
+        probability_leaderboard_scores(
+            scoring["explanation"]["aml_probability"], resources, config
+        )
+        if config["schema_version"] == 10
+        else leaderboard_scores(scoring["risk_score"], resources, config)
     )
     return snapshot, {
         **board,

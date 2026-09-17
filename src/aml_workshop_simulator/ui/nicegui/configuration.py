@@ -78,6 +78,22 @@ class ConfigForm:
                 self.text_number(values, key, integer=isinstance(value, int))
 
     def render(self):
+        if self.config.get("schema_version") == 10:
+            ui.label(
+                "История, цель и ограничения закреплены за проверенным классификатором и одинаковы для всех участников."
+            ).classes("text-sm muted")
+            with ui.row().classes("w-full gap-4"):
+                for section in ("resources", "objectives"):
+                    for key, value in self.config[section].items():
+                        ui.input(self.labels.get(key, key), value=str(value)).props(
+                            "outlined dense readonly"
+                        )
+            with ui.expansion("Общая неизменная предыстория").classes("w-full"):
+                for event in self.config["behavior"]["history"]["operations"]:
+                    ui.label(
+                        f"{event['occurred_at']} · {event['operation_code']} · {event['amount']}"
+                    )
+            return
         is_expanded = self.config.get("schema_version") == 8
         if is_expanded:
             ui.label(

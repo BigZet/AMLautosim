@@ -66,7 +66,7 @@ def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch
             parties = [s for s in selectors if "A" in s.options]
             assert len(parties) == 2
             assert all("shop" not in s.options for s in parties)
-            assert all(s.value is None for s in parties)
+            assert all(s.value == "A" for s in parties)
             assert not any(
                 "regular_sender" in s.options or "anonymous_wallet" in s.options
                 for s in selectors
