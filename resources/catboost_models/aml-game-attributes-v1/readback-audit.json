@@ -1,0 +1,44 @@
+{
+  "audit_script_sha256": "637aa56a1e37ce051ac46baf5ff93aa46321ae611fb110a983a5b57d0f224d33",
+  "checked": [
+    "all game constraints",
+    "immutable context",
+    "full feature replay",
+    "interpretation votes",
+    "actual leaderboard formula",
+    "source and artifact hashes",
+    "group and exact feature isolation",
+    "target consistency"
+  ],
+  "groups": 59712,
+  "independent_human_label_review": false,
+  "passed": true,
+  "rows": 62000,
+  "split_bands": {
+    "calibration-check": {
+      "grey": 439,
+      "high": 1316,
+      "low": 1330
+    },
+    "calibration-fit": {
+      "grey": 917,
+      "high": 2625,
+      "low": 2635
+    },
+    "test": {
+      "grey": 921,
+      "high": 2615,
+      "low": 2630
+    },
+    "train": {
+      "grey": 5638,
+      "high": 15834,
+      "low": 15785
+    },
+    "validation": {
+      "grey": 1385,
+      "high": 3960,
+      "low": 3970
+    }
+  }
+}

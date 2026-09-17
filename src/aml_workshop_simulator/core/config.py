@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
@@ -16,9 +17,9 @@ class Settings(BaseSettings):
 
     EXPANDED_ROUNDS_ENABLED: bool = True
 
-    SESSION_TTL_MINUTES: int = 240
-    LOGIN_MAX_FAILED_ATTEMPTS: int = 10
-    LOGIN_LOCKOUT_MINUTES: int = 5
+    SESSION_TTL_MINUTES: int = Field(default=240, gt=0)
+    LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=10, gt=0)
+    LOGIN_LOCKOUT_MINUTES: int = Field(default=5, gt=0)
 
     # Explicit URL takes precedence for local tooling and disposable test DBs.
     DATABASE_URL: str | None = None

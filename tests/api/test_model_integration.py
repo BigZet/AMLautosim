@@ -122,7 +122,7 @@ def test_new_starts_can_be_disabled_without_old_rule_mode(
     from src.aml_workshop_simulator.core.config import settings
 
     assert (
-        request_api("GET", "/admin/game-config/default", admin)["schema_version"] == 8
+        request_api("GET", "/admin/game-config/default", admin)["schema_version"] == 10
     )
     request_api("GET", "/admin/game-config/default?schema_version=7", admin, status=422)
     monkeypatch.setattr(settings, "EXPANDED_ROUNDS_ENABLED", False)
@@ -139,4 +139,5 @@ def test_new_starts_can_be_disabled_without_old_rule_mode(
 def test_readiness_exposes_loaded_model_identity(api):
     result = api.get("/health/ready")
     assert result.status_code == 200
-    assert result.json()["checks"]["model"] == get_model_scorer().identity
+    from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+    assert result.json()["checks"]["model"] == get_game_classifier().identity

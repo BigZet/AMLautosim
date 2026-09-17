@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "chains": 6166,
+  "max_absolute_error": 0.0,
+  "tolerance": 1e-10,
+  "grey_fraction": 0.1579630230295167,
+  "labeling_calls": 0,
+  "model_identity": {
+    "package_sha256": "eb686e2fede5f010f8e87f70785d600d477e508cabb72b154013e05b4200232b",
+    "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+    "context_sha256": "caaa2171afba2852c467871bf8b2a0e18631645e9e8ca6112ba7f59e5b7b3d8c",
+    "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+    "contract_version": 10,
+    "extractor_version": "aml-game-attributes-context-v1",
+    "score_kind": "educational_pattern_probability",
+    "model_version": "aml-game:sha256:eb686e2fede5f010f8e87f70785d600d477e508cabb72b154013e05b4200232b",
+    "explanation_version": 5
+  },
+  "predictions_sha256": "e308314b77fe5b368fb606d9c2a23b6890e3ce31b21c7bc4624d5e8358671b0b",
+  "casebook_sha256": "53bc8caa1a6677b208ee023d29b3b9e9569e80ab37203453d2ec42490dce00c0",
+  "elapsed_seconds": 120.19
+}

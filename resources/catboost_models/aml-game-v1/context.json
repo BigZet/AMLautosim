@@ -1,0 +1,864 @@
+{
+  "behavior": {
+    "aml_context": {
+      "as_of": "2026-10-13T09:00:00+03:00",
+      "expected_activity": {
+        "activity_kinds": [
+          "salary",
+          "shared_expense",
+          "personal_spending"
+        ],
+        "expected_credit_max": "270000.00",
+        "expected_credit_min": "0.00",
+        "expected_debit_max": "430000.00",
+        "expected_debit_min": "0.00",
+        "period_end": "2026-10-13T09:00:00+03:00",
+        "period_start": "2026-09-13T09:00:00+03:00"
+      },
+      "facts": [
+        {
+          "available_at": "2026-09-13T09:00:00+03:00",
+          "counterparty_ids": [],
+          "fact_type": "opening_balance",
+          "id": "opening",
+          "max_credit_amount": "180000.00",
+          "max_debit_amount": "180000.00",
+          "operation_codes": [],
+          "provenance": "scenario_record",
+          "purpose_code": "unknown",
+          "valid_from": "2026-09-13T09:00:00+03:00",
+          "valid_to": "2026-10-13T09:00:00+03:00",
+          "verification_status": "verified"
+        }
+      ],
+      "history_coverage": "complete",
+      "history_end": "2026-09-13T09:00:00+03:00",
+      "history_start": "2026-08-14T09:00:00+03:00",
+      "opening_balance_facts": [
+        "opening"
+      ],
+      "purpose_catalog": [
+        {
+          "code": "unknown",
+          "title": "unknown"
+        },
+        {
+          "code": "loan",
+          "title": "loan"
+        },
+        {
+          "code": "refund",
+          "title": "refund"
+        },
+        {
+          "code": "asset_sale",
+          "title": "asset sale"
+        },
+        {
+          "code": "shared_expense",
+          "title": "shared expense"
+        },
+        {
+          "code": "service_payment",
+          "title": "service payment"
+        },
+        {
+          "code": "salary",
+          "title": "salary"
+        },
+        {
+          "code": "personal_spending",
+          "title": "personal spending"
+        }
+      ],
+      "version": "aml-context-v1"
+    },
+    "counterparties": [
+      {
+        "category": null,
+        "id": "A",
+        "information_status": "sufficient",
+        "kind": "person",
+        "name": "Алексей",
+        "personal_relationship": "known"
+      },
+      {
+        "category": null,
+        "id": "B",
+        "information_status": "sufficient",
+        "kind": "person",
+        "name": "Борис",
+        "personal_relationship": "known"
+      },
+      {
+        "category": null,
+        "id": "C",
+        "information_status": "limited",
+        "kind": "person",
+        "name": "Получатель C — реквизиты различимы",
+        "personal_relationship": "unknown"
+      },
+      {
+        "category": null,
+        "id": "D",
+        "information_status": "unknown",
+        "kind": "person",
+        "name": "Получатель D — реквизиты различимы",
+        "personal_relationship": "unknown"
+      },
+      {
+        "category": "employer",
+        "id": "employer",
+        "information_status": "sufficient",
+        "kind": "institution",
+        "name": "Работодатель",
+        "personal_relationship": "unknown"
+      },
+      {
+        "category": "groceries",
+        "id": "shop",
+        "information_status": "sufficient",
+        "kind": "merchant",
+        "name": "Магазин",
+        "personal_relationship": "unknown"
+      },
+      {
+        "category": "crypto_exchange",
+        "id": "exchange",
+        "information_status": "sufficient",
+        "kind": "institution",
+        "name": "Криптобиржа",
+        "personal_relationship": "unknown"
+      }
+    ],
+    "history": {
+      "operations": [
+        {
+          "amount": "80000.00",
+          "category": null,
+          "counterparty_id": "employer",
+          "id": "h1",
+          "occurred_at": "2026-08-14T09:00:00+03:00",
+          "operation_code": "salary"
+        },
+        {
+          "amount": "25000.50",
+          "category": null,
+          "counterparty_id": "A",
+          "id": "h2",
+          "occurred_at": "2026-09-01T09:00:00+03:00",
+          "operation_code": "incoming_transfer"
+        },
+        {
+          "amount": "3500.25",
+          "category": null,
+          "counterparty_id": "shop",
+          "id": "h3",
+          "occurred_at": "2026-09-03T18:00:00+03:00",
+          "operation_code": "purchase"
+        }
+      ],
+      "version": "observed-history-v1",
+      "window_days": 30
+    },
+    "profile": {
+      "description": "Получает зарплату и переводы от знакомых, оплачивает повседневные покупки. Другие доходы неизвестны.",
+      "id": "employed-client",
+      "title": "Наёмный сотрудник"
+    },
+    "purchases": {
+      "max_total": "30000.00",
+      "version": "purchase-policy-v1"
+    },
+    "release": "expanded-game-v1",
+    "sender_policy": "separate-employer-v1",
+    "timeline": {
+      "starts_at": "2026-09-13T09:00:00+03:00",
+      "timezone": "Europe/Moscow",
+      "waiting_costs": {
+        "1": 0,
+        "10": 1,
+        "1440": 4,
+        "60": 2
+      }
+    },
+    "turnover": {
+      "target_operation_codes": [
+        "card_transfer",
+        "cash_withdrawal"
+      ]
+    }
+  },
+  "card_snapshots": [
+    {
+      "category": "Перевод",
+      "channels": [
+        "mobile",
+        "web",
+        "branch"
+      ],
+      "code": "card_transfer",
+      "context_fields": [
+        {
+          "default": "day",
+          "help": "Нетипичное время может усилить сигнал модели.",
+          "key": "time_of_day",
+          "kind": "select",
+          "label": "Время операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "День",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "day"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Вечер",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "evening"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Ночь",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "night"
+            }
+          ],
+          "required": true
+        },
+        {
+          "default": "known_counterparty",
+          "help": "Насколько хорошо клиенту известна принимающая сторона.",
+          "key": "recipient_type",
+          "kind": "select",
+          "label": "Получатель",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Знакомый контрагент",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "known_counterparty"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Новый контрагент",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "new_counterparty"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Анонимный кошелек",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "anonymous_wallet"
+            }
+          ],
+          "required": true
+        },
+        {
+          "default": "normal",
+          "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+          "key": "velocity",
+          "kind": "select",
+          "label": "Темп операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "С интервалами",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "spaced"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Обычный темп",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "normal"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Быстро подряд",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "rapid"
+            }
+          ],
+          "required": true
+        }
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.time_of_day",
+        "context.recipient_type",
+        "context.velocity"
+      ],
+      "description": "Перевод другому клиенту банка.",
+      "energy_cost": 2,
+      "fee_rate": "0.005000",
+      "fields": [],
+      "flow": "debit",
+      "id": 3,
+      "max_amount": "80000.00",
+      "max_occurrences": 8,
+      "min_amount": "10000.00",
+      "quota_category": null,
+      "requires_card_code": null,
+      "risk_weight": "12.00",
+      "time_cost": 1,
+      "title": "Перевести по карте",
+      "version": 1
+    },
+    {
+      "category": "Наличные",
+      "channels": [
+        "atm",
+        "branch"
+      ],
+      "code": "cash_withdrawal",
+      "context_fields": [
+        {
+          "default": "day",
+          "help": "Нетипичное время может усилить сигнал модели.",
+          "key": "time_of_day",
+          "kind": "select",
+          "label": "Время операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "День",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "day"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Вечер",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "evening"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Ночь",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "night"
+            }
+          ],
+          "required": true
+        },
+        {
+          "default": "normal",
+          "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+          "key": "velocity",
+          "kind": "select",
+          "label": "Темп операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "С интервалами",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "spaced"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Обычный темп",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "normal"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Быстро подряд",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "rapid"
+            }
+          ],
+          "required": true
+        }
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.time_of_day",
+        "context.velocity"
+      ],
+      "description": "Получение наличных в банкомате или отделении.",
+      "energy_cost": 2,
+      "fee_rate": "0.010000",
+      "fields": [],
+      "flow": "debit",
+      "id": 4,
+      "max_amount": "100000.00",
+      "max_occurrences": 4,
+      "min_amount": "10000.00",
+      "quota_category": "cash",
+      "requires_card_code": null,
+      "risk_weight": "18.00",
+      "time_cost": 1,
+      "title": "Снять наличные",
+      "version": 1
+    },
+    {
+      "category": "Поступление",
+      "channels": [
+        "bank"
+      ],
+      "code": "incoming_transfer",
+      "context_fields": [
+        {
+          "default": "normal",
+          "help": "С интервалами: +2 времени и −5 риска; обычный: +1 времени; быстро: без добавки времени и +12 риска.",
+          "key": "velocity",
+          "kind": "select",
+          "label": "Темп операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "С интервалами",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "spaced"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Обычный темп",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "normal"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Быстро подряд",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "rapid"
+            }
+          ],
+          "required": true
+        },
+        {
+          "default": "day",
+          "help": "Нетипичное время может усилить сигнал модели.",
+          "key": "time_of_day",
+          "kind": "select",
+          "label": "Время операции",
+          "options": [
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "День",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "day"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Вечер",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "evening"
+            },
+            {
+              "description": "",
+              "energy_cost": 0,
+              "label": "Ночь",
+              "risk_points": 0.0,
+              "time_cost": 0,
+              "value": "night"
+            }
+          ],
+          "required": true
+        }
+      ],
+      "default_visible_params": [
+        "channel",
+        "context.velocity",
+        "action.sender_relationship",
+        "action.transfer_source",
+        "context.time_of_day"
+      ],
+      "description": "Зачисление от банка, криптобиржи или платежного сервиса. Источник и связь с отправителем влияют на затраты и учебный риск.",
+      "energy_cost": 3,
+      "fee_rate": "0.000000",
+      "fields": [
+        {
+          "default": "domestic_bank",
+          "help": "Откуда поступают деньги. Все суммы — в рублевом эквиваленте; это учебные профили источников.",
+          "key": "transfer_source",
+          "kind": "select",
+          "label": "Источник перевода",
+          "options": [
+            {
+              "description": "Стандартный банковский источник: требуется время на сверку перевода",
+              "energy_cost": 0,
+              "label": "Российский банк",
+              "risk_points": -2.0,
+              "time_cost": 1,
+              "value": "domestic_bank"
+            },
+            {
+              "description": "Учебный международный перевод требует дополнительной сверки реквизитов и происхождения средств",
+              "energy_cost": 1,
+              "label": "Зарубежный банк — Кыргызстан (Киргизия)",
+              "risk_points": 4.0,
+              "time_cost": 2,
+              "value": "foreign_bank_kg"
+            },
+            {
+              "description": "Зачисление после продажи криптоактивов: в учебном профиле меньше контекста о предшествующих операциях",
+              "energy_cost": 1,
+              "label": "Криптобиржа",
+              "risk_points": 9.0,
+              "time_cost": 0,
+              "value": "crypto_exchange"
+            },
+            {
+              "description": "Посредник ускоряет зачисление, но в учебном профиле дает меньше сведений о первоначальном отправителе",
+              "energy_cost": 0,
+              "label": "Платежный сервис",
+              "risk_points": 5.0,
+              "time_cost": 0,
+              "value": "payment_service"
+            }
+          ],
+          "required": true
+        },
+        {
+          "default": "regular_sender",
+          "help": "Профиль владельца исходного счета. Прогретый аккаунт в игре означает аккаунт с историей операций; отправитель при этом остается анонимным.",
+          "key": "sender_relationship",
+          "kind": "select",
+          "label": "Связь с отправителем",
+          "options": [
+            {
+              "description": "В учебном профиле отправитель неизвестен и история операций отсутствует",
+              "energy_cost": 0,
+              "label": "Анонимный отправитель — новый аккаунт",
+              "risk_points": 12.0,
+              "time_cost": 0,
+              "value": "anonymous_new_account"
+            },
+            {
+              "description": "В учебном профиле есть история операций, ее просмотр требует времени; личность отправителя не подтверждена",
+              "energy_cost": 0,
+              "label": "Анонимный отправитель — прогретый аккаунт",
+              "risk_points": 6.0,
+              "time_cost": 1,
+              "value": "anonymous_established_account"
+            },
+            {
+              "description": "Повторяющиеся поступления от известного отправителя дают больше контекста в учебной модели",
+              "energy_cost": 0,
+              "label": "Постоянный отправитель",
+              "risk_points": -1.0,
+              "time_cost": 0,
+              "value": "regular_sender"
+            }
+          ],
+          "required": true
+        }
+      ],
+      "flow": "credit",
+      "id": 2,
+      "max_amount": "80000.00",
+      "max_occurrences": 3,
+      "min_amount": "10000.00",
+      "quota_category": null,
+      "requires_card_code": null,
+      "risk_weight": "18.00",
+      "time_cost": 1,
+      "title": "Получить входящий перевод",
+      "version": 1
+    },
+    {
+      "category": "Покупка",
+      "channels": [],
+      "code": "purchase",
+      "context_fields": [],
+      "default_visible_params": [],
+      "description": "Покупка у торговой организации: 1 000–20 000 ₽, до трёх покупок и не более 30 000 ₽ суммарно. Расходует ресурсы, не засчитывается в цель.",
+      "energy_cost": 1,
+      "fee_rate": "0.000000",
+      "fields": [],
+      "flow": "debit",
+      "id": 5,
+      "max_amount": "20000.00",
+      "max_occurrences": 3,
+      "min_amount": "1000.00",
+      "quota_category": null,
+      "requires_card_code": null,
+      "risk_weight": "0.00",
+      "time_cost": 1,
+      "title": "Оплатить товары или услуги",
+      "version": 1
+    },
+    {
+      "category": "Поступление",
+      "channels": [],
+      "code": "salary",
+      "context_fields": [],
+      "default_visible_params": [
+        "action.income_basis"
+      ],
+      "description": "Регулярное поступление от известного работодателя.",
+      "energy_cost": 8,
+      "fee_rate": "0.000000",
+      "fields": [
+        {
+          "default": "payroll_registry",
+          "help": null,
+          "key": "income_basis",
+          "kind": "select",
+          "label": "Основание дохода",
+          "options": [
+            {
+              "description": "Назначение и реестр подтверждают регулярность выплаты",
+              "energy_cost": 0,
+              "label": "Зарплатный реестр",
+              "risk_points": -3.0,
+              "time_cost": 1,
+              "value": "payroll_registry"
+            },
+            {
+              "description": "Нерегулярный договор требует дополнительного контекста",
+              "energy_cost": 0,
+              "label": "Договор услуг",
+              "risk_points": 2.0,
+              "time_cost": 0,
+              "value": "service_contract"
+            },
+            {
+              "description": "Отсутствие назначения затрудняет проверку источника дохода",
+              "energy_cost": 0,
+              "label": "Без назначения",
+              "risk_points": 8.0,
+              "time_cost": 0,
+              "value": "no_reference"
+            }
+          ],
+          "required": true
+        }
+      ],
+      "flow": "credit",
+      "id": 1,
+      "max_amount": "30000.00",
+      "max_occurrences": 1,
+      "min_amount": "20000.00",
+      "quota_category": null,
+      "requires_card_code": null,
+      "risk_weight": "3.00",
+      "time_cost": 8,
+      "title": "Получить зарплату",
+      "version": 1
+    }
+  ],
+  "constraints": {
+    "category_limits": {
+      "anonymous": "60000.00",
+      "cash": "120000.00"
+    },
+    "max_anonymous_operations": 2,
+    "max_identical_steps": 2,
+    "max_night_operations": 2
+  },
+  "leaderboard": {
+    "resource_weights": {
+      "available_steps": "0.20",
+      "balance": "0.10",
+      "energy": "0.25",
+      "fees": "0.05",
+      "time": "0.40"
+    },
+    "version": "leaderboard-v2",
+    "weights": {
+      "resources": "0.35",
+      "stealth": "0.65"
+    }
+  },
+  "objectives": {
+    "max_actions": 14,
+    "target_outflow": "360000.00"
+  },
+  "operations": [
+    {
+      "code": "salary",
+      "energy_cost": null,
+      "fee_rate": null,
+      "max_amount": null,
+      "max_occurrences": null,
+      "min_amount": null,
+      "risk_weight": null,
+      "time_cost": null,
+      "version": 1,
+      "visible_params": [
+        "action.income_basis"
+      ]
+    },
+    {
+      "code": "incoming_transfer",
+      "energy_cost": null,
+      "fee_rate": null,
+      "max_amount": null,
+      "max_occurrences": null,
+      "min_amount": null,
+      "risk_weight": null,
+      "time_cost": null,
+      "version": 1,
+      "visible_params": [
+        "channel",
+        "context.velocity",
+        "action.sender_relationship",
+        "action.transfer_source",
+        "context.time_of_day"
+      ]
+    },
+    {
+      "code": "card_transfer",
+      "energy_cost": null,
+      "fee_rate": null,
+      "max_amount": null,
+      "max_occurrences": null,
+      "min_amount": null,
+      "risk_weight": null,
+      "time_cost": null,
+      "version": 1,
+      "visible_params": [
+        "channel",
+        "context.time_of_day",
+        "context.recipient_type",
+        "context.velocity"
+      ]
+    },
+    {
+      "code": "cash_withdrawal",
+      "energy_cost": null,
+      "fee_rate": null,
+      "max_amount": null,
+      "max_occurrences": null,
+      "min_amount": null,
+      "risk_weight": null,
+      "time_cost": null,
+      "version": 1,
+      "visible_params": [
+        "channel",
+        "context.time_of_day",
+        "context.velocity"
+      ]
+    },
+    {
+      "code": "purchase",
+      "energy_cost": null,
+      "fee_rate": null,
+      "max_amount": null,
+      "max_occurrences": null,
+      "min_amount": null,
+      "risk_weight": null,
+      "time_cost": null,
+      "version": 1,
+      "visible_params": []
+    }
+  ],
+  "resource_rules": {
+    "amount_adjustment": {
+      "minimum_gross": "60000.00",
+      "time_cost": 1
+    },
+    "channel_time": {
+      "atm": 0,
+      "bank": 0,
+      "branch": 2,
+      "mobile": 0,
+      "web": 0
+    },
+    "minimum_time_cost": 1,
+    "velocity_time": {
+      "normal": {
+        "time_cost": 1
+      },
+      "rapid": {
+        "time_cost": 0
+      },
+      "spaced": {
+        "time_cost": 2
+      }
+    }
+  },
+  "resources": {
+    "initial_balance": "180000.00",
+    "initial_energy": 30,
+    "initial_time": 30
+  },
+  "ruleset_version": "game-rules-v5",
+  "schema_version": 10,
+  "scoring": {
+    "review_threshold": "20.00",
+    "rules": {
+      "amount_adjustment": {
+        "minimum_gross": "60000.00",
+        "risk_points": "-5"
+      },
+      "amount_divisor": "10000",
+      "amount_max_points": "12",
+      "channel_points": {
+        "atm": "3",
+        "bank": "-2",
+        "branch": "-3",
+        "mobile": "0",
+        "web": "2"
+      },
+      "explanation_factor_limit": 5,
+      "recipient_points": {
+        "anonymous_wallet": "25",
+        "known_counterparty": "0",
+        "new_counterparty": "12"
+      },
+      "sequence": {
+        "repeated_max_points": "16",
+        "repeated_min_amount": "10000.00",
+        "repeated_points": "8",
+        "turnover_points": "10",
+        "turnover_ratio": "0.7"
+      },
+      "time_of_day_points": {
+        "day": "0",
+        "evening": "3",
+        "night": "9"
+      },
+      "velocity_points": {
+        "normal": "0",
+        "rapid": "12",
+        "spaced": "-5"
+      }
+    },
+    "suspicious_threshold": "35.00",
+    "version": "risk-rules-v3"
+  }
+}

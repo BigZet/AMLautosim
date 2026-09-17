@@ -1,0 +1,19 @@
+{
+  "format": "aml-game-package-v1",
+  "files": {
+    "acceptance.json": "22aaafb51960bcb46a503d343887a90e5bc54ecb3dd11f7e20693cac462d196b",
+    "context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+    "features.json": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+    "gameplay-audit.json": "bdc2bfb906cbe4c9a703b03b4d06e6cfe3da2bbfd914235f982f3d19d609248d",
+    "manifest.json": "ce9802f4dae71c0f8282ba6d5aab4b8b2d2d62bc4020206b6dce6137370eb9fd",
+    "model.cbm": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+    "readback-audit.json": "3428ac6d74cefecfdf06aceccffe74c58118e62760ada865fdb5dae47f87cf35"
+  },
+  "inference_sources": {
+    "src/aml_workshop_simulator/services/aml_game_pattern_panel.py": "cc3fdf33bd5516b5747658673c1c14c55bfe6a0c7d3600b0a15324a8c4100dc4",
+    "src/aml_workshop_simulator/services/aml_game_pattern_panel_v2.py": "df68c71fd85bd9fa755e6435a20460952addf85ed5a94020cec51eea3ba97e03",
+    "src/aml_workshop_simulator/services/aml_game_window_model_v2.py": "26cd8086faa9216a27870a89cf3ac2246d3e911b2deada11f914bf78e29dbe5e",
+    "src/aml_workshop_simulator/services/aml_game_attribute_features_v1.py": "2c535fac4b94c3db01381c6616a48c064cad6d309795c934c6b2d7dc5de818f4"
+  },
+  "extractor_version": "aml-game-attributes-context-v1"
+}

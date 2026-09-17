@@ -51,7 +51,7 @@ class GameEditor:
 
     def changed(self):
         config = (self.state.get("round") or {}).get("game_config", {})
-        if config.get("schema_version") in (8, 9):
+        if config.get("schema_version") in (8, 9, 10):
             from src.aml_workshop_simulator.domain.operation_timeline import (
                 canonical_intervals,
             )
@@ -86,20 +86,25 @@ class GameEditor:
             return self.state
         round_data = state.get("round")
         key = [round_data["id"], round_data["config_version"]] if round_data else None
+        cards = self.cards
+        if key != self.record.get("key") or (key and not cards):
+            cards = (
+                await self.api.request("GET", f"rounds/{key[0]}/cards") if key else []
+            )
+        # Fetch the complete snapshot before changing any editor state. A newer
+        # poll or write can finish while the cards request is still in flight.
+        if sequence != self.poll_sequence or write_sequence != self.write_sequence:
+            return self.state
         if key != self.record.get("key"):
             self.generation += 1
             self.record.clear()
             self.record.update(key=key, steps=[], revision=0, dirty=False)
-            self.cards = (
-                await self.api.request("GET", f"rounds/{key[0]}/cards") if key else []
-            )
             self.conflict = False
             self.preview = None
             self.preview_version = -1
             self.version += 1
             self.render_revision += 1
-        elif key and not self.cards:
-            self.cards = await self.api.request("GET", f"rounds/{key[0]}/cards")
+        self.cards = cards
         self.state = state
         scenario = state.get("scenario")
         if not self.lock.locked():

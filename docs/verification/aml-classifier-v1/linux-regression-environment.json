@@ -1,0 +1,20 @@
+{
+  "scope": "api-load-regression-with-test-only-aml-adapter",
+  "run_id": "35f9530e16",
+  "image_id": "sha256:2a8292ccc2f300937da987bd0a3eb022fc87ff20679c802aec31151b1ed478d5",
+  "returncode": 0,
+  "passed": true,
+  "cleanup": {
+    "worker": 0,
+    "database": 0,
+    "network": 0
+  },
+  "seconds": 223.39608959999168,
+  "cpu_limit": 4,
+  "memory_limit_gib": 4,
+  "source_mount": "read-only",
+  "separate_postgresql": true,
+  "live_demo_stack_modified": false,
+  "requirements_ml_sha256": "adb198fda2a0c9f521eaf481512193efa590060becc622db2f1f2229d8f4529a",
+  "dockerfile_ml_sha256": "fd210b39102c793db97362dbb54d536ddc1bd248c2e84c14f98b8dc26b1105d2"
+}

@@ -11,10 +11,8 @@ python -m scripts.check_game_balance
 python -m pytest -q tests/unit
 ```
 
-При объединении unit и API в одном запуске используйте
-`python -m pytest -q --import-mode=importlib tests/unit tests/api`:
-в каталогах есть одноимённые модули тестов. Обычный режим импорта pytest
-выдаёт `import file mismatch`; это не основание исключать тесты.
+Режим `importlib` уже задан в `pytest.ini`, поэтому unit, ML и API можно
+объединять: `python -m pytest -q tests/unit tests/ml tests/api`.
 
 Для API и нагрузочных тестов задайте `TEST_ADMIN_DATABASE_URL` пользователя
 PostgreSQL с правом CREATEDB, направленный на служебную базу `postgres`.
@@ -36,7 +34,7 @@ conftest меняет настройки до импорта API. При ава�
 ## Покрытие
 
 - Unit: ресурсы, баланс, параметры операций, UI-клиент, контроллеры и формы NiceGUI,
-  настройки подключения, сохранённые признаки и генератор отложенного CatBoost.
+  настройки подключения и входа, сохранённые признаки, ML-tooling и гонки запросов редактора.
 - API: сессии и роли, блокировки, bootstrap, миграция и seed, конфигурация,
   preview/save/submit, ревизии и повторы, атомарность и восстановление скоринга.
 - NiceGUI: компоненты через user simulation и контроллеры с реальным API/БД,
@@ -70,4 +68,9 @@ python scripts/check_nicegui_transport.py --url http://127.0.0.1:8080
 
 ## Интеграция CatBoost и SHAP
 
-Для нового выпуска: `tests/ml/test_model_scoring.py`, `tests/api/test_model_integration.py`, `tests/unit/test_expanded_result_ui.py`. Нужны CatBoost 1.2.10 и отдельная PostgreSQL. Проверка всех 4413 прогнозов и SHAP — `python -m scripts.verify_model_integration`; параметры приведены в [отчёте](../docs/verification/catboost-shap-integration.md). Старые v7 API-сценарии описывают снятый с эксплуатации пилот и не подтверждают новый контракт.
+Для текущего выпуска: `tests/ml/test_model_scoring.py`, `tests/api/test_model_integration.py`, `tests/unit/test_expanded_result_ui.py`. Нужны CatBoost 1.2.10 и отдельная PostgreSQL. Проверка всех 4413 прогнозов и SHAP — `python -m scripts.verify_model_integration`; параметры приведены в [отчёте](../docs/verification/catboost-shap-integration.md).
+
+Регрессии ML-верификатора проверяют ошибки входных данных и обязательные пороги
+также в `python -O` и при `PYTHONOPTIMIZE=1`. Успешный отчёт записывается только
+после всех проверок, в новый файл. Сбор окружения обучения проверяется без `fit`
+и без зависимости от наличия `pip` или другого `python` в `PATH`.

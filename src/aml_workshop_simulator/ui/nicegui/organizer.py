@@ -178,7 +178,11 @@ class OrganizerScreen:
                 )
                 self.catalog = await self.request("GET", "admin/action-cards")
             await self.render()
-            if current and current["status"] == "completed" and self.results_opened_for != current["id"]:
+            if (
+                current
+                and current["status"] == "completed"
+                and self.results_opened_for != current["id"]
+            ):
                 self.results_opened_for = current["id"]
                 self.tabs.set_value("results")
             self.loaded = True
@@ -197,7 +201,9 @@ class OrganizerScreen:
         self.status.set_text(STATUS[status])
         if current and current.get("scoring_summary"):
             summary = current["scoring_summary"]
-            self.status.set_text(f"{STATUS[status]} · Отправлено: {summary['submitted_count']} · Рассчитано: {summary['scored_count']}")
+            self.status.set_text(
+                f"{STATUS[status]} · Отправлено: {summary['submitted_count']} · Рассчитано: {summary['scored_count']}"
+            )
         if current and current.get("scoring_error"):
             self.status.set_text(
                 "Ошибка расчёта. Приём закрыт; скоринг можно повторить."
@@ -243,9 +249,9 @@ class OrganizerScreen:
                 self.new_game_mode = ui.select(
                     {
                         v: ("Базовая игра" if v == 7 else "Расширенная игра")
-                        for v in [8]
+                        for v in [10]
                     },
-                    value=8,
+                    value=10,
                     label="Правила новой игры",
                 )
                 ui.button("Создать игру", on_click=self.create).props("no-caps")
@@ -365,9 +371,9 @@ class OrganizerScreen:
 
         async def work():
             payload = {"title": self.title_input.value}
-            if self.new_game_mode.value == 8:
+            if self.new_game_mode.value == 10:
                 payload["game_config"] = await self.request(
-                    "GET", "admin/game-config/default?schema_version=8"
+                    "GET", "admin/game-config/default?schema_version=10"
                 )
             await self.request("POST", "admin/rounds", payload)
             self.loaded = False
@@ -440,9 +446,9 @@ class OrganizerScreen:
                             if v == 7
                             else "Расширенная игра: стороны, время, покупки и история"
                         )
-                        for v in [8]
+                        for v in [10]
                     },
-                    value=8,
+                    value=10,
                     label="Правила новой игры",
                 )
                 if versions

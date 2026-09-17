@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from nicegui import ui
 
-from .counterparties import category_label
+from .counterparties import category_label, party_name
 from src.aml_workshop_simulator.domain.counterparty_roles import party_allowed
 
 from decimal import Decimal
@@ -38,14 +38,23 @@ def profile_history_panel(round_data):
     behavior = round_data["game_config"]["behavior"]
     profile = behavior["profile"]
     parties = {p["id"]: p for p in behavior["counterparties"]}
+    coverage = summary.get("coverage")
     with ui.expansion("Профиль и предыстория", value=True).classes("w-full"):
         ui.label(f"Роль клиента: {profile['title']}").classes("font-semibold")
         ui.label(profile["description"])
-        ui.label(
-            f"30 дней: {datetime.fromisoformat(summary['starts_at']).strftime('%d.%m.%Y, %H:%M')} — до {datetime.fromisoformat(summary['ends_before']).strftime('%d.%m.%Y, %H:%M')} · {summary['timezone']}"
-        )
+        if coverage != "unknown":
+            period_label = (
+                "Доступный фрагмент истории"
+                if coverage == "partial"
+                else "Период истории"
+                if coverage
+                else "30 дней"
+            )
+            ui.label(
+                f"{period_label}: {datetime.fromisoformat(summary['starts_at']).strftime('%d.%m.%Y, %H:%M')} — до {datetime.fromisoformat(summary['ends_before']).strftime('%d.%m.%Y, %H:%M')} · {summary['timezone']}"
+            )
         ui.label("История не меняет начальные ресурсы и не засчитывается в цель.")
-        if summary["status"] == "unknown":
+        if summary["status"] == "unknown" or coverage == "unknown":
             ui.label("История недоступна. Отсутствие операций не установлено.")
             return
         total = summary["activity"]
@@ -56,17 +65,24 @@ def profile_history_panel(round_data):
             f"Поступления: {money(total['inflow'])} · Списания: {money(total['outflow'])}"
         )
         if not total["count"]:
-            ui.label("За наблюдаемый период операций не было.")
+            ui.label(
+                "В доступном фрагменте истории операций не наблюдалось. Остальная история неизвестна."
+                if coverage == "partial"
+                else "За наблюдаемый период операций не было."
+            )
         with ui.expansion("Связи со сторонами").classes("w-full"):
             ui.label(
-                "Личное знакомство и операции за последние 30 дней — разные сведения."
+                "Личное знакомство и операции в доступной истории — разные сведения."
+                if coverage
+                else "Личное знакомство и операции за последние 30 дней — разные сведения."
             )
             for item in summary["counterparties"]:
-                relation = (
-                    "операций не наблюдалось"
-                    if item["observation"] == "absent"
-                    else f"операций: {item['activity']['count']}"
-                )
+                if item["observation"] == "unknown":
+                    relation = "сведения об операциях неполны; отсутствие операций не установлено"
+                elif item["observation"] == "absent":
+                    relation = "операций не наблюдалось"
+                else:
+                    relation = f"операций: {item['activity']['count']}"
                 ui.label(f"{parties[item['counterparty_id']]['name']} — {relation}")
         with ui.expansion("События предыстории").classes("w-full"):
             ui.table(
@@ -83,10 +99,12 @@ def profile_history_panel(round_data):
                 rows=[
                     {
                         "id": e["id"],
-                        "time": datetime.fromisoformat(e["occurred_at"]).strftime("%d.%m.%Y, %H:%M"),
+                        "time": datetime.fromisoformat(e["occurred_at"]).strftime(
+                            "%d.%m.%Y, %H:%M"
+                        ),
                         "operation": OPERATION_LABELS[e["operation_code"]],
                         "amount": money(e["amount"]),
-                        "party": parties[e["counterparty_id"]]["name"]
+                        "party": party_name(parties[e["counterparty_id"]])
                         if e["counterparty_id"]
                         else "—",
                         "category": category_label(e["category"])

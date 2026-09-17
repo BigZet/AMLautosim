@@ -9,6 +9,8 @@ from src.aml_workshop_simulator.services.aml_dataset_features_v2 import FEATURE_
 
 
 def validate_directory(path):
+    """Raise AssertionError for invalid exports, including under Python -O."""
+
     def read(name):
         return json.loads((path / name).read_text())
 
@@ -20,16 +22,22 @@ def validate_directory(path):
         ]
     manifest = read("manifest.json")
     package["seed"] = manifest["seed"]
-    assert manifest["package_hash"] == digest(package)
-    assert (
+    if not (manifest["package_hash"] == digest(package)):
+        raise AssertionError()
+    if not (
         manifest["status"] == "pending_joint_review"
         and not manifest["mass_generation_enabled"]
-    )
-    assert manifest["extractor"] == FEATURE_VERSION
-    assert manifest["config_hash"] == digest(package["config"])
-    assert manifest["rubric_hash"] == digest(read("rubric.json")) == digest(rubric())
+    ):
+        raise AssertionError()
+    if not (manifest["extractor"] == FEATURE_VERSION):
+        raise AssertionError()
+    if not (manifest["config_hash"] == digest(package["config"])):
+        raise AssertionError()
+    if not (manifest["rubric_hash"] == digest(read("rubric.json")) == digest(rubric())):
+        raise AssertionError()
     report = validate(package)
-    assert read("quality.json") == report
+    if not (read("quality.json") == report):
+        raise AssertionError()
     schema = read("feature-schema.json")
     expected_columns = [
         k
@@ -37,42 +45,53 @@ def validate_directory(path):
         if k not in report["constant_features"]
     ]
     # JSONL keys are sorted; schema order follows extractor, not JSON serialization.
-    assert set(schema["columns"]) == set(expected_columns)
-    assert schema["excluded_constants"] == report["constant_features"] or set(
-        schema["excluded_constants"]
-    ) == set(report["constant_features"])
+    if not (set(schema["columns"]) == set(expected_columns)):
+        raise AssertionError()
+    if not (
+        schema["excluded_constants"] == report["constant_features"]
+        or set(schema["excluded_constants"]) == set(report["constant_features"])
+    ):
+        raise AssertionError()
     with (path / "features.csv").open() as file:
         reader = csv.DictReader(file)
-        assert reader.fieldnames == schema["columns"] + ["target_risk_score"]
+        if not (reader.fieldnames == schema["columns"] + ["target_risk_score"]):
+            raise AssertionError()
         rows = list(reader)
-    assert len(rows) == 48
+    if not (len(rows) == 48):
+        raise AssertionError()
     with (path / "split.csv").open() as file:
         split = list(csv.DictReader(file))
-    assert len(split) == 48
+    if not (len(split) == 48):
+        raise AssertionError()
     groups = {}
     for i, (row, partition, reference) in enumerate(
         zip(rows, split, package["references"])
     ):
-        assert (
+        if not (
             partition["row_index"] == str(i)
             and partition["id"] == reference["id"]
             and partition["group"] == reference["group"]
-        )
-        assert (
+        ):
+            raise AssertionError()
+        if not (
             partition["split"]
             == {
                 "five-transfers": "train",
                 "six-transfers": "validation",
                 "eight-transfers": "test",
             }[reference["group"]]
-        )
-        assert (
+        ):
+            raise AssertionError()
+        if not (
             groups.setdefault(partition["group"], partition["split"])
             == partition["split"]
-        )
+        ):
+            raise AssertionError()
         for key in schema["columns"]:
-            assert row[key] == str(reference["features"][key])
-        assert float(row["target_risk_score"]) == reference["target_risk_score"]
+            if not (row[key] == str(reference["features"][key])):
+                raise AssertionError()
+        if not (float(row["target_risk_score"]) == reference["target_risk_score"]):
+            raise AssertionError()
     return report
 
 

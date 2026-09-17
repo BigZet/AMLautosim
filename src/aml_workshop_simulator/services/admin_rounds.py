@@ -6,7 +6,7 @@ from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict
-from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+from src.aml_workshop_simulator.services.game_classifier import game_config
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
 from src.aml_workshop_simulator.db.models.rounds import Round
@@ -38,7 +38,7 @@ from src.aml_workshop_simulator.services.round_configuration import (
 async def prepare_config(
     db: AsyncSession, config: RoundConfigInput | None = None, *, new_round: bool = True
 ) -> dict:
-    value = (config or parse_game_config(expanded_game_config())).dump()
+    value = (config or parse_game_config(game_config())).dump()
     require_playable_contract(value)
     if new_round and value.get("behavior", {}).get("release") is not None:
         require_new_round_allowed(value)
@@ -48,11 +48,15 @@ async def prepare_config(
         .all()
     )
     frozen = freeze_game_config(value, cards)
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
 
-    scorer = get_model_scorer()
+    scorer = get_round_scorer(frozen)
     scorer.check_config(frozen)
-    frozen["risk_model"] = scorer.identity.copy()
+    frozen["risk_model"] = (
+        scorer.pin_identity(frozen)
+        if frozen["schema_version"] == 10
+        else scorer.identity.copy()
+    )
     frozen["config_version"] = config_version(frozen)
     return frozen
 
@@ -155,9 +159,9 @@ async def start(
         return round_out(row)
     require_round_status(row.status, "draft")
     require_new_round_allowed(row.game_config)
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
 
-    get_model_scorer().check_config(row.game_config, require_pin=True)
+    get_round_scorer(row.game_config).check_config(row.game_config, require_pin=True)
     row.status = "active"
     row.activated_at = datetime.now(UTC)
     await record_event(
@@ -176,19 +180,17 @@ async def restart(
     round_id: int,
     actor_id: int,
     request_id: str | None,
-    schema_version: int = 8,
+    schema_version: int = 10,
 ) -> RoundAdminOut:
     await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
     row = await get_round(db, round_id, lock="update")
     from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
     from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
-    if schema_version != 8:
-        raise Conflict(
-            "Доступна только игра с CatBoost v8.", code="model_contract_mismatch"
-        )
-    selected = (
-        parse_game_config(expanded_game_config()) if schema_version == 8 else None
+    if schema_version not in (8, 10):
+        raise Conflict("Версия игры не поддерживается.", code="model_contract_mismatch")
+    selected = parse_game_config(
+        expanded_game_config() if schema_version == 8 else game_config()
     )
     config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.

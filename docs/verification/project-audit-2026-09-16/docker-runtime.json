@@ -1,0 +1,49 @@
+{
+  "services": [
+    {
+      "Service": "api",
+      "State": "running",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "URL": "127.0.0.1",
+          "TargetPort": 8000,
+          "PublishedPort": 58400,
+          "Protocol": "tcp"
+        }
+      ]
+    },
+    {
+      "Service": "db",
+      "State": "running",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "URL": "127.0.0.1",
+          "TargetPort": 5432,
+          "PublishedPort": 58439,
+          "Protocol": "tcp"
+        }
+      ]
+    },
+    {
+      "Service": "ui",
+      "State": "running",
+      "Health": "healthy",
+      "Publishers": [
+        {
+          "URL": "127.0.0.1",
+          "TargetPort": 8080,
+          "PublishedPort": 58480,
+          "Protocol": "tcp"
+        }
+      ]
+    }
+  ],
+  "runtime_permissions": {
+    "uid": 10001,
+    "app_writable": false,
+    "source_writable": false
+  },
+  "passed": true
+}

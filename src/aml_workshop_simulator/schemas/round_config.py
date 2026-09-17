@@ -34,6 +34,7 @@ from src.aml_workshop_simulator.domain.contract_versions import (
 from src.aml_workshop_simulator.schemas.expanded_contract import ExpandedBehavior
 
 from src.aml_workshop_simulator.services.semantic_contract import BehaviorV9
+from src.aml_workshop_simulator.services.aml_context import BehaviorV10, validate_context
 
 STRICT = ConfigDict(extra="forbid")
 
@@ -371,11 +372,27 @@ class SemanticGameConfigOut(SemanticGameConfigIn):
     card_snapshots: list[CardSnapshotOut]
 
 
+class AMLGameConfigIn(ExpandedGameConfigIn):
+    schema_version: Literal[10]
+    behavior: BehaviorV10
+
+    @model_validator(mode="after")
+    def evidence_references(self):
+        validate_context(self.behavior.aml_context.model_dump(mode="json"), self.dump())
+        return self
+
+
+class AMLGameConfigOut(AMLGameConfigIn):
+    risk_model: dict[str, Any] | None = None
+    config_version: str
+    card_snapshots: list[CardSnapshotOut]
+
+
 RoundConfigInput = Annotated[
-    GameConfigIn | ExpandedGameConfigIn | SemanticGameConfigIn,
+    GameConfigIn | ExpandedGameConfigIn | SemanticGameConfigIn | AMLGameConfigIn,
     Field(discriminator="schema_version"),
 ]
-RoundConfigOutput = GameConfigOut | ExpandedGameConfigOut | SemanticGameConfigOut
+RoundConfigOutput = GameConfigOut | ExpandedGameConfigOut | SemanticGameConfigOut | AMLGameConfigOut
 
 
 def parse_game_config(
@@ -387,6 +404,8 @@ def parse_game_config(
         model = GameConfigOut if stored else GameConfigIn
     elif version == 9:
         model = SemanticGameConfigOut if stored else SemanticGameConfigIn
+    elif version == 10:
+        model = AMLGameConfigOut if stored else AMLGameConfigIn
     else:
         model = ExpandedGameConfigOut if stored else ExpandedGameConfigIn
     return model.model_validate(value)

@@ -7,7 +7,7 @@ from tests.purchase_support import mixed_goal
 def test_draft_freeze_two_players_reload_and_immutable_after_start(
     monkeypatch, request_api, admin, round_id, player_factory, command, sql
 ):
-    config = request_api("GET", "/admin/game-config/default", admin)
+    config = request_api("GET", "/admin/game-config/default?schema_version=8", admin)
     history_config = profile_config()
     for key in ("counterparties", "profile", "history", "timeline"):
         config["behavior"][key] = history_config["behavior"][key]

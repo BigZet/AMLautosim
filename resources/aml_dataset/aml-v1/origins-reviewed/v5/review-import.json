@@ -1,0 +1,13 @@
+{
+  "class_counts": {
+    "0": 75,
+    "1": 75,
+    "None": 6
+  },
+  "release_ready": false,
+  "review_sha256": "474d13c1b53aec0850f8919553d1a71ef4e0c06b43ae5e4c20b88af0e2a41c8a",
+  "reviewed_rows": 156,
+  "reviewer_kind": "independent AI agent; automated AI review, not human AML domain expertise",
+  "scope": "Exact synthetic cases independently AI-reviewed; no human AML expertise, independence-count certification or model acceptance.",
+  "source_casebook_sha256": "8473ad66f70f5d8d96379ba3533fed160d39dbad416eed7486a2f17c1eaa1ffd"
+}

@@ -3,6 +3,7 @@
 Running it repeatedly leaves exactly one row per card version, one bootstrap
 administrator and one demo round draft. Nothing is duplicated and no existing
 participant data is touched unless --reset-game is explicitly requested.
+Use --no-demo-round for isolated instances whose game is created through the API.
 
     python -m scripts.seed_database --migrate
 """
@@ -169,13 +170,14 @@ async def seed_admin(db: AsyncSession) -> User:
 
 def reference_game_config(cards: list[ActionCard]) -> dict[str, Any]:
     """Build the initial snapshot from the current base configuration."""
-    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+    from src.aml_workshop_simulator.services.game_classifier import (
+        game_config,
+        get_game_classifier,
+    )
     from src.aml_workshop_simulator.services.round_configuration import config_version
 
-    config = freeze_game_config(expanded_game_config(), cards)
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
-
-    scorer = get_model_scorer()
+    config = freeze_game_config(game_config(), cards)
+    scorer = get_game_classifier()
     scorer.check_config(config)
     config["risk_model"] = scorer.identity.copy()
     config["config_version"] = config_version(config)
@@ -187,9 +189,11 @@ async def seed_demo_round(
 ) -> Round:
     round_obj = (await db.execute(select(Round))).scalars().first()
     if round_obj is not None:
-        from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+        from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
 
-        get_model_scorer().check_config(round_obj.game_config, require_pin=True)
+        get_round_scorer(round_obj.game_config).check_config(
+            round_obj.game_config, require_pin=True
+        )
         return round_obj
     now = datetime.now(UTC)
     round_obj = Round(
@@ -219,11 +223,15 @@ async def seed_demo_round(
     return round_obj
 
 
-async def seed(reset_game: bool = False) -> dict[str, Any]:
+async def seed(
+    reset_game: bool = False, *, create_demo_round: bool = True
+) -> dict[str, Any]:
     from src.aml_workshop_simulator.schemas.catalog_config import (
         validate_configuration_files,
     )
 
+    if reset_game and not create_demo_round:
+        raise ValueError("Cannot combine reset_game with create_demo_round=False")
     validate_configuration_files()
     async with AsyncSessionLocal() as db:
         cards = await seed_cards(db)
@@ -238,20 +246,25 @@ async def seed(reset_game: bool = False) -> dict[str, Any]:
             for model in (AuditEvent, ScoringResult, Scenario, Round):
                 await db.execute(delete(model))
             await db.flush()
-        round_obj = await seed_demo_round(db, admin, cards)
+        round_obj = (
+            await seed_demo_round(db, admin, cards) if create_demo_round else None
+        )
         await db.commit()
         return {
             "cards": len(cards),
             "admin_id": admin.id,
-            "round_id": round_obj.id,
-            "round_status": round_obj.status,
+            "round_id": round_obj.id if round_obj else None,
+            "round_status": round_obj.status if round_obj else None,
         }
 
 
-async def _seed_and_dispose(reset_game: bool = False) -> dict[str, Any]:
-    summary = await seed(reset_game=reset_game)
-    await async_engine.dispose()
-    return summary
+async def _seed_and_dispose(
+    reset_game: bool = False, *, create_demo_round: bool = True
+) -> dict[str, Any]:
+    try:
+        return await seed(reset_game=reset_game, create_demo_round=create_demo_round)
+    finally:
+        await async_engine.dispose()
 
 
 def main() -> None:
@@ -262,10 +275,16 @@ def main() -> None:
     parser.add_argument(
         "--wait-for-db", action="store_true", help="wait until PostgreSQL answers"
     )
-    parser.add_argument(
+    game = parser.add_mutually_exclusive_group()
+    game.add_argument(
         "--reset-game",
         action="store_true",
         help="discard game data and create a current draft; keep users and sessions",
+    )
+    game.add_argument(
+        "--no-demo-round",
+        action="store_true",
+        help="seed only cards and organizer; preserve all existing game data",
     )
     args = parser.parse_args()
     if args.wait_for_db:
@@ -273,7 +292,11 @@ def main() -> None:
     if args.migrate:
         # Alembic opens its own event loop, so migrations must run outside ours.
         run_migrations()
-    summary = asyncio.run(_seed_and_dispose(reset_game=args.reset_game))
+    summary = asyncio.run(
+        _seed_and_dispose(
+            reset_game=args.reset_game, create_demo_round=not args.no_demo_round
+        )
+    )
     print(
         "seed complete: "
         f"cards={summary['cards']} admin_id={summary['admin_id']} "

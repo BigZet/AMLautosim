@@ -1,0 +1,17 @@
+{
+  "casebook_sha256": "e3405009b31d132bc618fdf02933e34ec8217dd134a92e2d81b8191d7a082a48",
+  "closure_sha256": "8ef2edbd4bb5409ce06fa1de4444d59e31a558b39c5e180978f23628d678133c",
+  "demo_rows": 25,
+  "development_rows": 1096,
+  "development_sha256": "02cd80ab4b49a9c3e43ca6bc9f439244b6462cfa5ffd0eb075cc90e7a038b236",
+  "freeze_manifest_sha256": "4218879a13ff461eadab6602c44a6fe2bbacaf40d3dece50249da6619878f9fe",
+  "independent": true,
+  "required_profiles": [
+    "artisan_owner",
+    "collection_owner",
+    "equipment_pool_organizer",
+    "event_organizer",
+    "project_coordinator"
+  ],
+  "version": "aml-demo-training-binding-v1"
+}

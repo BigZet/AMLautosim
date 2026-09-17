@@ -70,7 +70,7 @@ async def validation_exception_handler(
         # ("body"/"query"/...), оставляя только путь до конкретного поля.
         parts = list(error.get("loc", ())[1:])
         # Discriminated configuration unions add the schema tag, not a field.
-        if len(parts) > 1 and parts[0] == "game_config" and parts[1] in (7, 8):
+        if len(parts) > 1 and parts[0] == "game_config" and parts[1] in (7, 8, 9, 10):
             parts.pop(1)
         field = ".".join(str(part) for part in parts) or "body"
         reason = error.get("type", "value_error")

@@ -1,0 +1,41 @@
+{
+  "counts": {
+    "chains": 60000,
+    "four_receipts": 20615,
+    "over_eight_card_transfers": 4526,
+    "over_fourteen_actions": 72,
+    "incoming_over_80000": 19831,
+    "card_over_80000": 15174,
+    "cash_operation_over_100000": 164,
+    "total_cash_over_120000": 4003,
+    "newly_playable": 43879
+  },
+  "newly_playable_bands": {
+    "low": 20059,
+    "high": 17732,
+    "grey": 6088
+  },
+  "examples": {
+    "four_receipts": "game-low-0-00000",
+    "incoming_over_80000": "game-low-0-00000",
+    "newly_playable": "game-low-0-00000",
+    "total_cash_over_120000": "game-low-0-00002",
+    "card_over_80000": "game-low-0-00003",
+    "over_eight_card_transfers": "game-low-0-00009",
+    "cash_operation_over_100000": "game-low-0-00323",
+    "over_fourteen_actions": "game-low-0-03560"
+  },
+  "purpose_counts": {
+    "service_payment": 69413,
+    "asset_sale": 115771,
+    "refund": 67284,
+    "shared_expense": 82549,
+    "unknown": 133374,
+    "salary": 8930,
+    "personal_spending": 67608,
+    "loan": 67539
+  },
+  "immutable_behavior": true,
+  "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-attributes-v1-60000",
+  "baseline": "resources\\catboost_models\\aml-game-v1\\context.json"
+}

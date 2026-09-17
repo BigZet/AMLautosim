@@ -13,6 +13,7 @@ from src.aml_workshop_simulator.services.expanded_simulation import (
 
 def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
     from nicegui import ui
+    from src.aml_workshop_simulator.ui.nicegui.counterparties import party_readonly
     from nicegui.storage import Storage
     from nicegui.testing.user_simulation import user_simulation
     from src.aml_workshop_simulator.ui.nicegui.participant import (
@@ -56,9 +57,8 @@ def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
             merchants = [
                 c for c in user.find(ui.select).elements if "shop" in c.options
             ]
-            assert len(merchants) == 1 and set(merchants[0].options) == {"shop"}
-            with user:
-                merchants[0].set_value("shop")
+            assert merchants == []  # The only merchant is selected without a dropdown.
+            assert screen.editor.steps[-1]["recipient_id"] == "shop"
             values = deepcopy(screen.editor.steps)
             snapshot = evaluate_expanded_scenario(values, config)
             with user:
@@ -77,6 +77,8 @@ def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
             await user.should_see("Всего потрачено (без комиссий): 11 000,00 ₽")
             await user.should_see("Засчитано в цель: 10 000,00 ₽")
             await user.should_see("Ещё 390 000,00 ₽")
+            with user:
+                party_readonly(config, values[-1])
             await user.should_see("Категория: Продукты")
 
     asyncio.run(run())

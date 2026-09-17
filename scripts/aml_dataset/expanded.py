@@ -530,84 +530,108 @@ def build(seed=20260914):
 
 
 def validate(package):
+    """Raise AssertionError for invalid material, including under Python -O."""
     config = package["config"]
     refs, blind = package["references"], package["challenges"]
-    assert len(refs) == 48 and len(blind) == 24
-    assert sorted(Counter(r["family"] for r in refs).values()) == [8] * 6
+    if not (len(refs) == 48 and len(blind) == 24):
+        raise AssertionError()
+    if not (sorted(Counter(r["family"] for r in refs).values()) == [8] * 6):
+        raise AssertionError()
     hashes = set()
     collisions = defaultdict(list)
     for row in refs + blind:
         row_config = row["config_snapshot"]
-        assert valid(row["steps"], row_config), row["id"]
-        assert row["config_hash"] == digest(row_config)
-        assert row["features"] == extract_features(row["steps"], row_config)
-        assert row["observable_hash"] == fingerprint(row["steps"], row_config)
+        if not (valid(row["steps"], row_config)):
+            raise AssertionError(row["id"])
+        if not (row["config_hash"] == digest(row_config)):
+            raise AssertionError()
+        if not (row["features"] == extract_features(row["steps"], row_config)):
+            raise AssertionError()
+        if not (row["observable_hash"] == fingerprint(row["steps"], row_config)):
+            raise AssertionError()
         snapshot = evaluate_expanded_scenario(row["steps"], row_config)
-        assert (
+        if not (
             row["totals"] == snapshot["totals"]
             and row["resources"] == snapshot["resources_after"]
-        )
-        assert row["observable_hash"] not in hashes, "duplicate observable chain"
+        ):
+            raise AssertionError()
+        if row["observable_hash"] in hashes:
+            raise AssertionError("duplicate observable chain")
         hashes.add(row["observable_hash"])
         for value in row["features"].values():
-            assert (
+            if not (
                 isinstance(value, str)
                 or isinstance(value, (int, float))
                 and math.isfinite(value)
-            )
+            ):
+                raise AssertionError()
         if row in refs:
-            assert (
+            if not (
                 row["group"]
                 == {5: "five-transfers", 6: "six-transfers", 8: "eight-transfers"}[
                     row["features"]["count_card_transfer"]
                 ]
-            )
+            ):
+                raise AssertionError()
             score, explanation = label(row["features"], rubric())
-            assert (
+            if not (
                 row["target_risk_score"] == score and row["explanation"] == explanation
-            )
+            ):
+                raise AssertionError()
             collisions[digest(row["features"])].append(row)
         else:
-            assert (
+            if not (
                 row["group"] == "blind-seven-transfers"
                 and row["features"]["count_card_transfer"] == 7
-            )
-            assert (
+            ):
+                raise AssertionError()
+            if not (
                 "target_risk_score" not in row
                 and "baseline" not in row
                 and "explanation" not in row
-            )
-    assert not {topology(r["steps"]) for r in refs} & {
-        topology(r["steps"]) for r in blind
-    }
-    assert len({topology(r["steps"]) for r in blind}) == 24
+            ):
+                raise AssertionError()
+    if {topology(r["steps"]) for r in refs} & {topology(r["steps"]) for r in blind}:
+        raise AssertionError()
+    if not (len({topology(r["steps"]) for r in blind}) == 24):
+        raise AssertionError()
     for rows in collisions.values():
-        assert len({r["target_risk_score"] for r in rows}) == 1, (
-            "feature/label conflict"
-        )
+        if not (len({r["target_risk_score"] for r in rows}) == 1):
+            raise AssertionError("feature/label conflict")
     for pair in package["pairs"]:
         for side in ("before", "after"):
             row = pair[side]
-            assert valid(row["steps"], row["config_snapshot"])
-            assert row["features"] == extract_features(
-                row["steps"], row["config_snapshot"]
-            )
-            assert row["target_risk_score"] == label(row["features"], rubric())[0]
+            if not (valid(row["steps"], row["config_snapshot"])):
+                raise AssertionError()
+            if not (
+                row["features"]
+                == extract_features(row["steps"], row["config_snapshot"])
+            ):
+                raise AssertionError()
+            if not (row["target_risk_score"] == label(row["features"], rubric())[0]):
+                raise AssertionError()
         delta = pair["after"]["target_risk_score"] - pair["before"]["target_risk_score"]
-        assert {"increase": delta > 0, "decrease": delta < 0, "equal": delta == 0}[
-            pair["expectation"]
-        ], (pair["kind"], delta)
+        if not (
+            {"increase": delta > 0, "decrease": delta < 0, "equal": delta == 0}[
+                pair["expectation"]
+            ]
+        ):
+            raise AssertionError((pair["kind"], delta))
     training = [r for r in refs if r["group"] == "five-transfers"]
     constants = sorted(
         k for k in refs[0]["features"] if len({r["features"][k] for r in training}) == 1
     )
     for diagnostic in package["diagnostics"]:
-        assert diagnostic["blockers"] == submit_blockers(
-            evaluate_expanded_scenario(diagnostic["steps"], config)
-        )
-        assert diagnostic["blockers"]
+        if not (
+            diagnostic["blockers"]
+            == submit_blockers(evaluate_expanded_scenario(diagnostic["steps"], config))
+        ):
+            raise AssertionError()
+        if not (diagnostic["blockers"]):
+            raise AssertionError()
     scores = [r["target_risk_score"] for r in refs]
-    assert len(set(scores)) > 1
+    if not (len(set(scores)) > 1):
+        raise AssertionError()
     return dict(
         status="technical_review_passed_not_approved",
         references=48,

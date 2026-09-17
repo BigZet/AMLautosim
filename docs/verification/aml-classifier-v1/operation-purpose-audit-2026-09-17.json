@@ -1,0 +1,633 @@
+{
+  "dataset": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v6r1-final",
+  "casebook_sha256": "1a53392f0238630d2432ecfd3a8a1867f0168e1de7b9c42aa38104344337344b",
+  "chains": 60504,
+  "unique_scenario_ids": 60504,
+  "operations": 588191,
+  "nonnull_claim_steps": 0,
+  "purpose_catalog": [
+    "unknown",
+    "loan",
+    "refund",
+    "asset_sale",
+    "shared_expense",
+    "service_payment",
+    "salary",
+    "personal_spending"
+  ],
+  "model_identity": {
+    "package_sha256": "b6c8864b575526948dcf0304c77182e8d3406327de59da412c159eb2295fd0bf",
+    "model_sha256": "ceaad4c391fa7094386662495405a9d3b5a49ab9d2b335c7b9bac2479b509fe7",
+    "context_sha256": "beeb4452c5efb30250f3e9b3554c0c78cfee2b6f8c4371f5df3576a68bde28f6",
+    "feature_schema_sha256": "98b504c5c54b1d4a9f6278bcef8850edc971f5599fae5967c0766d568c6dfee4",
+    "contract_version": 10,
+    "extractor_version": "aml-game-window-v2"
+  },
+  "operation_purpose_counts": [
+    {
+      "operation": "card_transfer",
+      "purpose": "shared_expense",
+      "count": 357585
+    },
+    {
+      "operation": "cash_withdrawal",
+      "purpose": "personal_spending",
+      "count": 37994
+    },
+    {
+      "operation": "incoming_transfer",
+      "purpose": "shared_expense",
+      "count": 177814
+    },
+    {
+      "operation": "purchase",
+      "purpose": "personal_spending",
+      "count": 7216
+    },
+    {
+      "operation": "salary",
+      "purpose": "salary",
+      "count": 7582
+    }
+  ],
+  "ambiguity_indicators": {
+    "shared_expense_unknown_relationship_steps": 268787,
+    "shared_expense_unknown_relationship_chains": 50430
+  },
+  "examples": {
+    "shared_expense_unknown_relationship": {
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "step": {
+        "step_id": "98a6ea29-5dfe-4eda-8cd0-a46aca29cf8b",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": null,
+        "sender_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      "party": {
+        "category": null,
+        "id": "C",
+        "information_status": "limited",
+        "kind": "person",
+        "name": "Получатель C — реквизиты различимы",
+        "personal_relationship": "unknown"
+      }
+    }
+  },
+  "probes": [
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "unknown",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "loan",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "refund",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "asset_sale",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "shared_expense",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "service_payment",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "salary",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "incoming_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "personal_spending",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "unknown",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "loan",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "refund",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "asset_sale",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "shared_expense",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "service_payment",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "salary",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "card_transfer",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 3,
+      "original_purpose": "shared_expense",
+      "changed_purpose": "personal_spending",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "unknown",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "loan",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "refund",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "asset_sale",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "shared_expense",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "service_payment",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "salary",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "cash_withdrawal",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 7,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "personal_spending",
+      "original_probability": 1.342192238677513e-05,
+      "accepted": true,
+      "probability": 1.342192238677513e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "unknown",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "loan",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "refund",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "asset_sale",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "shared_expense",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "service_payment",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "salary",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "purchase",
+      "scenario_id": "game-low-0-00005",
+      "step_number": 4,
+      "original_purpose": "personal_spending",
+      "changed_purpose": "personal_spending",
+      "original_probability": 9.101799231535323e-05,
+      "accepted": true,
+      "probability": 9.101799231535323e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "unknown",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "loan",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "refund",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "asset_sale",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "shared_expense",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "service_payment",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "salary",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    },
+    {
+      "operation": "salary",
+      "scenario_id": "game-low-0-00006",
+      "step_number": 1,
+      "original_purpose": "salary",
+      "changed_purpose": "personal_spending",
+      "original_probability": 1.2701752513668506e-05,
+      "accepted": true,
+      "probability": 1.2701752513668506e-05,
+      "difference": 0.0,
+      "evaluation_equal": true
+    }
+  ],
+  "attribute_probes": [
+    {
+      "name": "crypto_p2p_salary",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "action_details": {
+        "incoming_kind": "crypto_p2p"
+      },
+      "sender_id": "A",
+      "purpose_code": "salary",
+      "accepted": true,
+      "probability": 0.6694507026849921
+    },
+    {
+      "name": "exchange_shared_expense",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "action_details": {
+        "incoming_kind": "exchange_withdrawal"
+      },
+      "sender_id": "exchange",
+      "purpose_code": "shared_expense",
+      "accepted": true,
+      "probability": 0.6694507026849921
+    },
+    {
+      "name": "exchange_salary",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "action_details": {
+        "incoming_kind": "exchange_withdrawal"
+      },
+      "sender_id": "exchange",
+      "purpose_code": "salary",
+      "accepted": true,
+      "probability": 0.6694507026849921
+    },
+    {
+      "name": "invalid_bank_country_on_p2p",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "action_details": {
+        "incoming_kind": "crypto_p2p",
+        "bank_country": "RU"
+      },
+      "sender_id": "A",
+      "purpose_code": "asset_sale",
+      "accepted": false,
+      "error": "Поля поступления не соответствуют выбранному типу"
+    },
+    {
+      "name": "invalid_exchange_sender",
+      "scenario_id": "game-low-0-00000",
+      "step_number": 1,
+      "action_details": {
+        "incoming_kind": "exchange_withdrawal"
+      },
+      "sender_id": "A",
+      "purpose_code": "asset_sale",
+      "accepted": false,
+      "error": "Сторона не соответствует типу операции"
+    }
+  ]
+}

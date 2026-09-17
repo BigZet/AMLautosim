@@ -29,8 +29,14 @@ def history_summary(behavior: ExpandedBehavior) -> HistorySummaryOut | None:
         return None
     zone = ZoneInfo(behavior.timeline.timezone)
     end = behavior.timeline.starts_at.astimezone(timezone.utc)
+    start = end - timedelta(days=30)
+    context = getattr(behavior, "aml_context", None)
+    coverage = context.history_coverage if context is not None else None
+    if context is not None and context.history_start is not None:
+        start, end = context.history_start, context.history_end
     events = behavior.history.operations
-    known = events is not None
+    known = events is not None and coverage != "unknown"
+    complete = known and coverage in (None, "complete")
     ordered = sorted(events or [], key=lambda e: (e.occurred_at, e.id))
     parties = {p.id: p for p in behavior.counterparties}
     relations = []
@@ -38,9 +44,9 @@ def history_summary(behavior: ExpandedBehavior) -> HistorySummaryOut | None:
         related = [e for e in ordered if e.counterparty_id == party.id]
         relations.append(
             {
-                "activity": activity(related) if known else None,
+                "activity": activity(related) if known and (related or complete) else None,
                 "counterparty_id": party.id,
-                "observation": ("observed" if related else "absent")
+                "observation": ("observed" if related else "absent" if complete else "unknown")
                 if known
                 else "unknown",
                 "first_at": related[0].occurred_at.astimezone(zone)
@@ -53,7 +59,8 @@ def history_summary(behavior: ExpandedBehavior) -> HistorySummaryOut | None:
         )
     return HistorySummaryOut(
         status="observed" if known else "unknown",
-        starts_at=(end - timedelta(days=30)).astimezone(zone),
+        coverage=coverage,
+        starts_at=start.astimezone(zone),
         ends_before=end.astimezone(zone),
         timezone=behavior.timeline.timezone,
         activity=activity(ordered) if known else None,

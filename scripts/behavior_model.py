@@ -1,9 +1,7 @@
 """Behavior model v2: covered group validation, paired effects, untouched final holdout."""
 
 import json
-import platform
 import shutil
-import subprocess
 import time
 from pathlib import Path
 from itertools import product
@@ -12,6 +10,7 @@ import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 
+from scripts.training_environment import collect_training_environment
 from scripts.catboost_pipeline import (
     read,
     write,
@@ -342,19 +341,17 @@ def train(directory, output):
     if output.exists():
         raise ValueError("New experiment directory required")
     data = load(directory)
+    inventory, environment = collect_training_environment()
     output.mkdir(parents=True)
     write(output / "protocol.json", data["protocol"])
     write(output / "input-checksums.json", data["checksums"])
     write(output / "audit.json", audit(data))
     shutil.copyfile(__file__, output / "training-source.py")
-    (output / "environment.txt").write_text(
-        subprocess.check_output(["python", "-m", "pip", "freeze"], text=True)
-    )
+    (output / "environment.txt").write_text(inventory, encoding="utf-8")
     write(
         output / "environment.json",
         dict(
-            python=platform.python_version(),
-            platform=platform.platform(),
+            **environment,
             source_sha256=sha(__file__),
         ),
     )

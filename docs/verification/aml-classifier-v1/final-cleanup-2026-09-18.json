@@ -1,0 +1,625 @@
+[
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-attribute-context-v1-depth10-model",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-attribute-context-v1-depth10-model",
+    "bytes": 42525038,
+    "files": 3,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-attribute-context-v1-model",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-attribute-context-v1-model",
+    "bytes": 20494964,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-attributes-v1r1-model",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-attributes-v1r1-model",
+    "bytes": 19818841,
+    "files": 5,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-limits360-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-limits360-v1",
+    "bytes": 11984657,
+    "files": 5,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-limits360-v2",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-limits360-v2",
+    "bytes": 16998873,
+    "files": 5,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-limits360-v3",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-limits360-v3",
+    "bytes": 17079102,
+    "files": 5,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-relaxed-v3-model",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-relaxed-v3-model",
+    "bytes": 20732092,
+    "files": 5,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\aml-game-relaxed-v3-pilot-model",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\aml-game-relaxed-v3-pilot-model",
+    "bytes": 2232126,
+    "files": 3,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-attribute-context-v1-62000",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-attribute-context-v1-62000",
+    "bytes": 224964953,
+    "files": 8,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v5-60000",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v5-60000",
+    "bytes": 194669752,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v5-final",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v5-final",
+    "bytes": 194785405,
+    "files": 8,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v6-final",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v6-final",
+    "bytes": 196097524,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v6-raw",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v6-raw",
+    "bytes": 196206988,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v6r1-final",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v6r1-final",
+    "bytes": 196448076,
+    "files": 10,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-curriculum-v6r1-raw",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-curriculum-v6r1-raw",
+    "bytes": 196548853,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v1-60000",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-relaxed-v1-60000",
+    "bytes": 29596,
+    "files": 4,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v1-pilot",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-relaxed-v1-pilot",
+    "bytes": 4798580,
+    "files": 8,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v2-pilot",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-relaxed-v2-pilot",
+    "bytes": 5032318,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v3-60000",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-relaxed-v3-60000",
+    "bytes": 200515958,
+    "files": 9,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v3-pilot",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\artifacts\\game-relaxed-v3-pilot",
+    "bytes": 4990540,
+    "files": 8,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\aml-fixed-history-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\aml-fixed-history-v1",
+    "bytes": 1730138951,
+    "files": 83,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\aml-v1\\population-draft",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\aml-v1\\population-draft",
+    "bytes": 6485994952,
+    "files": 71,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\behavior-v3",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\behavior-v3",
+    "bytes": 688625862,
+    "files": 20,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\pilot-v2-1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\pilot-v2-1",
+    "bytes": 102130974,
+    "files": 26,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\pilot-v2-final-1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\pilot-v2-final-1",
+    "bytes": 102967779,
+    "files": 20,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-1",
+    "bytes": 4068072,
+    "files": 14,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-2",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-2",
+    "bytes": 5384901,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-3",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-3",
+    "bytes": 5473506,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-4",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-4",
+    "bytes": 5473501,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-5",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-5",
+    "bytes": 5520219,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-6",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-6",
+    "bytes": 5639130,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-7",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-7",
+    "bytes": 5674612,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-8",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-8",
+    "bytes": 5686434,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-9",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-9",
+    "bytes": 5816541,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-10",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-10",
+    "bytes": 5817105,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-11",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-11",
+    "bytes": 6593004,
+    "files": 27,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-12",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-12",
+    "bytes": 5891626,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\resources\\aml_dataset\\review-v2-draft-13",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\resources\\aml_dataset\\review-v2-draft-13",
+    "bytes": 5895950,
+    "files": 19,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-origins-reviewed-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-origins-reviewed-v1",
+    "bytes": 26729556,
+    "files": 13,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-origins-reviewed-v2",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-origins-reviewed-v2",
+    "bytes": 28676168,
+    "files": 14,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-origins-reviewed-v3",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-origins-reviewed-v3",
+    "bytes": 44610279,
+    "files": 14,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-origins-reviewed-v4",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-origins-reviewed-v4",
+    "bytes": 103894685,
+    "files": 14,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v1",
+    "bytes": 8765100,
+    "files": 13,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v2",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v2",
+    "bytes": 8819150,
+    "files": 13,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v3",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v3",
+    "bytes": 8850638,
+    "files": 13,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v4",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v4",
+    "bytes": 8851968,
+    "files": 13,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\game-curriculum-smoke-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\game-curriculum-smoke-v1",
+    "bytes": 771973,
+    "files": 7,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\game-panel-curriculum-probe-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\game-panel-curriculum-probe-v1",
+    "bytes": 7221547,
+    "files": 2,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\game-panel-curriculum-probe-v2",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\game-panel-curriculum-probe-v2",
+    "bytes": 7341866,
+    "files": 3,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\game-panel-probe-v1",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\game-panel-probe-v1",
+    "bytes": 3958776,
+    "files": 2,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v1-audit.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v1-audit.json",
+    "bytes": 1636,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v2-audit.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v2-audit.json",
+    "bytes": 1568,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v3-audit.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v3-audit.json",
+    "bytes": 1568,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-dataset-task3-pilot-v4-audit.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-dataset-task3-pilot-v4-audit.json",
+    "bytes": 1568,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-origins-and-diagnostics-v1.jsonl",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-origins-and-diagnostics-v1.jsonl",
+    "bytes": 13459429,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-origins-reviewed-v3-combined.jsonl",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-origins-reviewed-v3-combined.jsonl",
+    "bytes": 20942962,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\aml-origins-reviewed-v4-combined.jsonl",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\aml-origins-reviewed-v4-combined.jsonl",
+    "bytes": 48612095,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\finish_history_population.py",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\finish_history_population.py",
+    "bytes": 1282,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\finish_uniform_population.py",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\finish_uniform_population.py",
+    "bytes": 2046,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\isolate_curriculum_preset.py",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\isolate_curriculum_preset.py",
+    "bytes": 3267,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-33027478bc.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-33027478bc.json",
+    "bytes": 524,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-33027478bc.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-33027478bc.log",
+    "bytes": 22317,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-35f9530e16.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-35f9530e16.json",
+    "bytes": 335,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-35f9530e16.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-35f9530e16.log",
+    "bytes": 1462,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-53f558c7d9.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-53f558c7d9.json",
+    "bytes": 478,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-53f558c7d9.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-53f558c7d9.log",
+    "bytes": 1138,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-5877cef14e.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-5877cef14e.json",
+    "bytes": 405,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-5877cef14e.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-5877cef14e.log",
+    "bytes": 21661,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-728968f837.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-728968f837.json",
+    "bytes": 523,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-728968f837.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-728968f837.log",
+    "bytes": 1145,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-93e9d98b17.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-93e9d98b17.json",
+    "bytes": 395,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-93e9d98b17.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-93e9d98b17.log",
+    "bytes": 6297,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-b96207f86a.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-b96207f86a.json",
+    "bytes": 474,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-b96207f86a.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-b96207f86a.log",
+    "bytes": 6209,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-bb4934b894.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-bb4934b894.json",
+    "bytes": 406,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-bb4934b894.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-bb4934b894.log",
+    "bytes": 1119,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-f5b6db397f.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-f5b6db397f.json",
+    "bytes": 483,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-f5b6db397f.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-f5b6db397f.log",
+    "bytes": 22056,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-f8c854ab74.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-f8c854ab74.json",
+    "bytes": 524,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\linux-api-load-f8c854ab74.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\linux-api-load-f8c854ab74.log",
+    "bytes": 1145,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\windows-demo-af7946a18d.json",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\windows-demo-af7946a18d.json",
+    "bytes": 377,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\windows-demo-af7946a18d.log",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\windows-demo-af7946a18d.log",
+    "bytes": 980,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-attributes-v1.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-attributes-v1.tar.gz",
+    "bytes": 11135913,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-purpose-v1-final.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-purpose-v1-final.tar.gz",
+    "bytes": 5305562,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-purpose-v1-runtime.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-purpose-v1-runtime.tar.gz",
+    "bytes": 5305546,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-relaxed-v1-final.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-relaxed-v1-final.tar.gz",
+    "bytes": 8253695,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-relaxed-v1-release.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-relaxed-v1-release.tar.gz",
+    "bytes": 8253724,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-relaxed-v1.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-relaxed-v1.tar.gz",
+    "bytes": 8253704,
+    "files": 1,
+    "action": "reversible_archive_move"
+  },
+  {
+    "source": "C:\\Users\\bigze\\Documents\\GH\\AMLautosim-worktrees\\aml-probability-v1\\.local-run\\classifier-release\\aml-classifier-v1-runtime.tar.gz",
+    "destination": "E:\\AMLautosim-artifacts\\archive\\final-cleanup-2026-09-18\\worktree\\.local-run\\classifier-release\\aml-classifier-v1-runtime.tar.gz",
+    "bytes": 5304207,
+    "files": 1,
+    "action": "reversible_archive_move"
+  }
+]

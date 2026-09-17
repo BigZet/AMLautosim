@@ -40,9 +40,17 @@ async def health_ready(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+    from src.aml_workshop_simulator.core.errors import Conflict
 
-    scorer = get_model_scorer()
+    try:
+        scorer = get_game_classifier()
+    except Conflict:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {
+            "status": "not_ready",
+            "checks": {"database": "not_checked", "model": {"status": "unavailable"}},
+        }
     checks: dict[str, object] = {
         "model": scorer.identity,
         "ruleset_versions": sorted(

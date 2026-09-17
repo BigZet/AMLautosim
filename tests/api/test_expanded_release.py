@@ -9,7 +9,7 @@ def test_released_round_full_cycle_and_emergency_creation_switch(
 ):
     monkeypatch.setattr(settings, "EXPANDED_ROUNDS_ENABLED", True)
     metadata = request_api("GET", "/admin/game-config/editor-metadata", admin)
-    assert metadata["available_contracts"] == [8]
+    assert metadata["available_contracts"] == [10]
     new = request_api(
         "POST", f"/admin/rounds/{round_id}/restart?schema_version=8", admin, status=201
     )

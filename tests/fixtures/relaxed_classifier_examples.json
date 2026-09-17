@@ -1,0 +1,4210 @@
+[
+  {
+    "scenario_id": "game-low-0-10031",
+    "steps": [
+      {
+        "step_id": "c7758479-4a71-518b-afe4-715833e2c4a3",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": null,
+        "sender_id": "employer",
+        "purpose_code": "salary"
+      },
+      {
+        "step_id": "7fe0824e-c996-5160-ae5e-f43fecada57c",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "27579.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "d9c35b3c-c30f-5bd4-abc8-2bf52f47c2b9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "54000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "e74991eb-e00e-54d8-824c-b0a7debb9234",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "106371.30",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "5ca6c2e4-e3f7-5d21-8f8f-f9575e954cb3",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "94942",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "6c5bff6c-6f19-54e0-a6f7-5083574fcba1",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "20935.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "4dac27eb-a404-5670-8ddc-449e860ea2c7",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "63259",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "83b19fa4-68ed-5b4a-a19b-b7ec11094dad",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "92199.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "1c27311a-7536-513b-88ec-4a65b6202a5c",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "20111.10",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "9d3e5dc0-7cee-5e41-9bac-17b328ade159",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "38802.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      }
+    ],
+    "probability": 7.290044879824989e-05,
+    "target_probability": 0.0,
+    "route_family": "cash_reserve"
+  },
+  {
+    "scenario_id": "game-low-0-01199",
+    "steps": [
+      {
+        "step_id": "5bb0f5ba-8c7a-52bb-bf31-5469254c3d6f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "73481.30",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "loan",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "ea7849ee-ebcf-53d2-8ea7-a963a5d82181",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "22096.08",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "loan",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "c37891d7-8775-540f-958a-c1599b635553",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "26897.12",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "58368d28-b64d-5ad2-ae7a-d05177f4ffba",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "067e9fd0-4405-52b6-8cd3-7db2e7b4d510",
+        "card": {
+          "id": 5,
+          "code": "purchase",
+          "version": 1
+        },
+        "amount": "3000",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending",
+        "recipient_id": "shop"
+      },
+      {
+        "step_id": "aaab5334-7ed5-59da-8344-2f9896fb8986",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "64447.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "loan",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "ca13f1c7-c5f5-552a-a164-2633bab65441",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "30574.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "cebc9a83-b52d-5734-8841-1ccee238fa73",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "f0588856-9f0c-59aa-9097-67c185f6291e",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "29987.14",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "89a586db-0f02-5161-adaf-84f2a359d96d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "28326.96",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "loan",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "fb4ed16f-ea98-5f38-96d9-d909784a1362",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "54175.31",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "bde7a295-2f19-5fa5-8d77-993bd4114981",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "25824.69",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "cca72533-cffc-5262-8f37-8ef0c1a2b169",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "17261.63",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "loan",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "649ccd50-2451-5e5a-8232-a99a55d9c4fb",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "34588.07",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "loan",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "66627003-d42e-5450-88bb-c549796d0d6e",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "32339.40",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "D"
+      }
+    ],
+    "probability": 0.0001842651255878604,
+    "target_probability": 0.0,
+    "route_family": "purchase_with_irregular"
+  },
+  {
+    "scenario_id": "game-low-0-00030",
+    "steps": [
+      {
+        "step_id": "f08cf128-b104-5217-8a5f-77ca02071ee1",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76537.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "dd987088-02bc-51c0-aa4b-782bd39bb1c2",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "43285.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "91075897-88e7-5a7a-a4ae-1597349af74e",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "32468.70",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "d0bf9bb1-3bd1-5070-925c-1be63c1dc25d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "18886.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "52267a1f-cfcd-5c7f-b05c-42d923d5b0a9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "43070.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "dd91d333-0a53-5359-812d-f60b1235cafe",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "31713.30",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "452acee9-88bc-50b0-8875-9e111d2f4023",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "92029",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "cd6f3b7f-f323-5b29-adba-358df4c41087",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "75601.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "b7fd1a41-a8d5-571d-acb4-42261e4c442d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "29411.55",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "df1e0ecc-2845-5ca7-aa7e-5b48c747ecc5",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "20136.45",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "202c41ac-5952-5094-b7be-88cd707f4e34",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79634",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "dd6348fe-2cab-55f4-81a6-dd47f2c972a0",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "59130.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "77becb4b-35c1-55c4-915e-06c58cb6e8e9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "33943.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      }
+    ],
+    "probability": 0.00018934439709841866,
+    "target_probability": 0.0,
+    "route_family": "eight_repeated"
+  },
+  {
+    "scenario_id": "game-low-0-00042",
+    "steps": [
+      {
+        "step_id": "afd05a2c-f1e2-5867-bbc5-b2cb7ef1682a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "71941.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "3538fb55-f8d4-5404-8730-beaf266a0da4",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "46549.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "20ac182d-8bc6-52fc-8585-0372e0e9f82d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "75619",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "purpose_code": "shared_expense",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "d4a53d3c-5565-50cc-8a90-33151e736f7d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "27239.45",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "shared_expense",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "263d3f59-ef3e-5f54-8629-a788107a4177",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "28428.55",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "shared_expense",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "d58a6167-3b69-5cfe-8741-33c1a0bbc234",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "69622.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "shared_expense",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "461607a6-6f64-51bc-8cb0-a953d43fb180",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "90592",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "89668d4a-a275-5a58-bf67-665ec8f27417",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76094.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "2f0e88bb-04a7-5b81-96c3-c338f97d4394",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "67089",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "purpose_code": "shared_expense",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "c174b5af-08bc-511c-8f41-9fde1f23f35a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "47919.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "bb5a6d4f-7624-57b8-b65f-10c4dc55c4d0",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "32207.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "purpose_code": "shared_expense",
+        "recipient_id": "C"
+      }
+    ],
+    "probability": 0.0003135386873985061,
+    "target_probability": 0.0,
+    "route_family": "irregular_prepaid"
+  },
+  {
+    "scenario_id": "game-low-0-00043",
+    "steps": [
+      {
+        "step_id": "98a6ea29-5dfe-4eda-8cd0-a46aca29cf8b",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": null,
+        "sender_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "7e18bce8-96b9-4d51-8546-225496f0939c",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "4ff2d847-aed4-4aa3-a2a2-6f57d2227ecf",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "62109.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "e3960150-92bf-4fc4-8d8e-6cac931229d9",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "c8252946-0357-4f0e-b2f0-29dc6ce464f1",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "77925.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "bcb6d5d9-1553-4ae5-8e98-754014cbf565",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "60999.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "4ddd19d9-b367-4130-939d-69a9cbb388dd",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "58719.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "4327edf8-325b-4d7c-95cf-279fb85aa4c8",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "69549.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "1644109c-4100-4650-b854-b22f31a41d1d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "70699.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      }
+    ],
+    "probability": 0.0027911203305355757,
+    "target_probability": 0.0,
+    "route_family": "fixture-00"
+  },
+  {
+    "scenario_id": "game-low-0-00048",
+    "steps": [
+      {
+        "step_id": "3a45aa6a-cb7c-5018-84c7-6a870c9c6255",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "60483.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "9f5df140-749f-52f2-b6af-b1078e429c95",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "48474.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "5a8bae2a-3bde-5ece-843f-489936ded26d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "a7637985-8768-57bd-a6bc-9a5af18745d9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "62937.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "d734a80f-bc16-5e6a-ae12-abdb9e3635bd",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "607f2bb8-f5ab-5028-bd14-6d32c2d4871e",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "54411.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "9c8a2a27-4e64-59fd-a8a8-346e86b7212d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "53978.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "daee10fd-6998-5afe-9a67-f2d0f3fefb84",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "18ca1095-cf6f-505c-a8cb-7f9900b1d9ee",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "79714.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "loan",
+        "recipient_id": "D"
+      }
+    ],
+    "probability": 0.00045023402205369837,
+    "target_probability": 0.0,
+    "route_family": "cash_then_pause"
+  },
+  {
+    "scenario_id": "game-low-0-00087",
+    "steps": [
+      {
+        "step_id": "c7758479-4a71-518b-afe4-715833e2c4a3",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": null,
+        "sender_id": "employer",
+        "purpose_code": "salary"
+      },
+      {
+        "step_id": "d560543c-f4e9-4d07-b615-33a9b14e50b6",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "45870.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "d8de68a5-4c36-477e-a5a6-119a434a3210",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "69844.10",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "28fcedc0-5b42-46b2-90e9-c073656547a3",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "11041.15",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "4388b0ae-6171-4c7f-a692-6b923f9f20ba",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "38725.17",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "ffae9dcb-551f-59c2-8d38-1bc723c09354",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "40034.83",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "f24c8f17-eee0-4d0c-9e43-676283453d26",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "85096",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "a0c8abd5-26ce-59eb-b3a4-258995afd28f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "18686.21",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "14610010-eb3f-52fa-8be4-40faafd0d284",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "10702.34",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "8779a90e-d1b5-4826-aa5d-19bc5aff21c6",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79918",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "f2c6b0d9-4d4b-4b8f-86b6-9d7fc2b39c42",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "57049.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "de4f9ac2-5367-4686-ac0e-c4e3455d02dc",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "61710.30",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "asset_sale"
+      }
+    ],
+    "probability": 0.0001283556190672111,
+    "target_probability": 0.0,
+    "route_family": "fixture-11"
+  },
+  {
+    "scenario_id": "game-low-0-00100",
+    "steps": [
+      {
+        "step_id": "6c658d14-7b71-5540-8320-c0faa8634623",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "27093.98",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "4818f485-67cb-5eea-9359-550ddce93767",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "25510.52",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "b6a05b9d-1d26-5794-bf6e-29ea344a882f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "50245.10",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "80a26c96-cd56-52c4-9244-eb85dc68402a",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "purpose_code": "service_payment",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "41c1a01a-5dd6-5b4f-97f1-e23be41b3052",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "58106.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "620dcbab-ea3a-5ea4-9ed6-20d9a614c419",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "48799.70",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "8a95ee41-274f-5cbc-b9f8-f4ab53387efb",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "36545.65",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "4923b380-0950-5c14-9da2-7eff026d92c2",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "43454.35",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "1d077a6b-3fe6-56cf-9a58-01157adffd5c",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "53443.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "18cabc36-b6ef-59a3-9eb4-2c597b6d73f0",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "37445.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "f6ed1b37-dc64-5dae-902f-fee20da46136",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "eb01e96c-1463-5e83-a968-ae54f13bd140",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "59355.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      }
+    ],
+    "probability": 0.0001405401942415432,
+    "target_probability": 0.0,
+    "route_family": "seven_repeated"
+  },
+  {
+    "scenario_id": "game-low-0-00111",
+    "steps": [
+      {
+        "step_id": "c7c4c65e-37b8-46c9-83d4-a2b49242dd06",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "75925",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": null,
+        "sender_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "fc027b4c-6d46-4360-a45a-9e7146ef8285",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72495.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "28607b1f-d7df-47c1-ab83-8e4fef927894",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "83698",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "ea8d3f36-76be-4e76-b904-637d959c1920",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "84075",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "c704e180-53e3-487e-b155-5de807e528a9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "57618.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "c399198f-a1da-405b-b7d4-a1b68125143c",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "10000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "bacd0b15-9a1c-4469-a364-aa11d4da8cd9",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "d25736f9-4d6a-4d9e-972f-e85e303be194",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "78933.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "ed0874b1-7c0f-4e12-8969-5864a6779fe3",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "57255.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      }
+    ],
+    "probability": 2.9100711404964928e-05,
+    "target_probability": 0.0,
+    "route_family": "fixture-02"
+  },
+  {
+    "scenario_id": "game-low-0-00124",
+    "steps": [
+      {
+        "step_id": "e8b7d8bc-50e1-4901-a23e-3bea67d27d41",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "79587.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "1288d677-4f4d-4001-8c6f-ca272b1484ce",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "78000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "e2563d47-cd37-435b-bf43-20f6263d89a5",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "c92d7be8-8c48-4b6c-a056-c789a4462107",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "63499.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "b78cce8c-24df-4b10-8b56-8734b08e7ed1",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "88695",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "13350457-16fe-4b86-96dd-f2a78c9c05a4",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "59300",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "9ecd486e-68e6-44e4-ad16-522d89ca633c",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "71305",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "3a272118-0ca8-45f4-8037-0718160ad72a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76601.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "586d0819-2264-4fb5-b355-dc3ad49a74d5",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "43013.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      }
+    ],
+    "probability": 0.0016490389299565796,
+    "target_probability": 0.0,
+    "route_family": "fixture-01"
+  },
+  {
+    "scenario_id": "game-high-0-00011",
+    "steps": [
+      {
+        "step_id": "5166f585-ceca-47f7-a594-86764f6432f3",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": null,
+        "sender_id": "C",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "b1c19c26-c379-4bd2-a658-b8f803196592",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "70425.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "af845366-a173-4cb5-b01b-5020cce74c55",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "77050.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "35370609-a15a-4162-a0ca-39b4352aa7bb",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "12100c0b-4207-4b4c-947d-0f5db791d549",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "73254.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "069dc2c9-f1f9-438e-b12f-822ae260a777",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "10000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "55266b0f-0d82-4c5e-8d8b-377f624ecdca",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "33a2e8f3-2988-49c2-a4c0-7e623c5c3573",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "61702.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "db3095e4-d925-45af-8665-328e12108be0",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "67568.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "refund"
+      }
+    ],
+    "probability": 0.9994222748188305,
+    "target_probability": 1.0,
+    "route_family": "fixture-12"
+  },
+  {
+    "scenario_id": "game-high-0-00020",
+    "steps": [
+      {
+        "step_id": "dbf3702d-af25-4030-acda-35a56834973a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "9e2900b8-bede-428a-9563-b5c5e8074d3a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "9b0fe2a7-a22a-4bb7-9636-e1bb34f8a923",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "2fc0d912-49ba-41ef-8996-75d957db734e",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "37127.62",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "26b228db-8548-58b4-bac0-b43967a5e088",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "34872.38",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "6dc4d2ed-3e41-4c2e-a7ed-d6f5e94f039d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "b4ab4625-3f43-4c2b-8c64-1f2168c18972",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "b5c2a555-7dfb-49de-84c2-08d63efc108d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "52766.20",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "50cab3ea-90d0-50c1-9c14-07f0a98f38d1",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "27233.80",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "8e9546cb-3d9f-4bf5-860e-5d283048ed8b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "4d700df5-d21f-43c1-90b2-6caf7381801d",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": 1,
+        "sender_id": "employer",
+        "purpose_code": "salary"
+      }
+    ],
+    "probability": 0.9999906900099055,
+    "target_probability": 1.0,
+    "route_family": "fixture-09"
+  },
+  {
+    "scenario_id": "game-high-0-00034",
+    "steps": [
+      {
+        "step_id": "49365571-fe30-45b4-a534-04ce6a8a7034",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "15390.08",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": null,
+        "sender_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "aac615e9-dbc8-44f7-8f34-6348dfe20c82",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "26098.73",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "7c37301f-014a-5b90-8bb5-8200bb283712",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "31166.27",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "bd554745-87f9-4138-bd94-5c80615f34aa",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "74628.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "68841d9e-d062-457e-81b5-8b9bd5a4864e",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "d3b655a7-053a-4f95-8207-4d90cb3c77fd",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "24303.30",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "4228f120-f032-4a14-ae92-246eeaccda04",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "83847",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "55d6eb3b-4332-410f-a094-6f9d9a58eaab",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "55175.92",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "f161347f-2f66-53ee-abff-8f1b202e893d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "89434",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "sender_id": "D",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "1788640c-09aa-4305-adf1-09a396359087",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "41958.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "542e4f32-ee13-4b73-b6fa-c5d2289daf51",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "77997.70",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "asset_sale"
+      }
+    ],
+    "probability": 0.9996043878216921,
+    "target_probability": 1.0,
+    "route_family": "fixture-03"
+  },
+  {
+    "scenario_id": "game-high-0-00095",
+    "steps": [
+      {
+        "step_id": "22987bfa-6286-4e9a-87bb-15da3608a1d4",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72447.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "ff3ed18b-95d5-4ff4-bb86-076de884f5a7",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "36766.88",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "139be420-f20a-5033-a7a6-7556160d5fed",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "42733.12",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "9fe43a43-b2a2-4a2d-b0bb-a9c0505fa97f",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "77788",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "32878a42-9585-4b29-b987-ede3b8e3c1cf",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "42eb22f4-1b70-4db5-989d-59207a545136",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "78050",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "11f0c407-1d03-4634-8884-3217600a7ab8",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76053.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "00f20398-6841-4307-a233-cd5f0b5c075e",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "47434.77",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "5ba4ba60-7131-5812-9bab-faa6735d8817",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "27862.23",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "aa632503-1112-4bcc-b328-efcaa56fc6c8",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      }
+    ],
+    "probability": 0.9999912091422174,
+    "target_probability": 1.0,
+    "route_family": "fixture-05"
+  },
+  {
+    "scenario_id": "game-high-0-00111",
+    "steps": [
+      {
+        "step_id": "7c9ea415-caee-420d-805a-d7bc9917508a",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": null,
+        "sender_id": "employer",
+        "purpose_code": "salary"
+      },
+      {
+        "step_id": "8636f25c-0c78-4b01-b207-961df105a91a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "80000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "f72df849-3982-488d-8a01-5828525b47bc",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79317",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "D",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "b72e48f8-b5b3-4ebe-ad55-9d033a34b933",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "80000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "d4657e51-3c7e-4d74-a4bf-20181285e027",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "80000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "81f3580b-5f92-452d-a4fb-27963883b59e",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79145",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "C",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "c3d9ccf8-e8f9-4c11-8a25-b8e3f4681e1d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "80000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "d69fefaf-c01a-472a-8f46-3569ebb3cd8c",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "77169",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "service_payment"
+      },
+      {
+        "step_id": "924124e6-262c-4b03-9597-b843af7e0e75",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "80000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "service_payment"
+      }
+    ],
+    "probability": 0.9990020835976651,
+    "target_probability": 1.0,
+    "route_family": "fixture-08"
+  },
+  {
+    "scenario_id": "game-high-0-00163",
+    "steps": [
+      {
+        "step_id": "b5ecdc6c-7b59-5674-be5b-536db0a2a877",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "56400.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "8ad61f37-e69d-5d15-a03f-4b464745e3e5",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "51390.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "61d89697-7902-50f2-9572-57e7b776e8cb",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "66700",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "5fe5e769-9b1d-5588-a45f-6ba51ba9d33a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "86770.40",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "b2eeb806-e70c-5aff-af9d-02b35e5e815d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "93300",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "5e4762ae-64b2-57b9-8e9b-f7a79dca6353",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "43915.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "a17575dc-7477-579d-9e41-8bbda9cbd569",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "41582.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "349080f8-c1b3-521f-b793-6e8c5ad4a910",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "25470.36",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "282bb2a9-c647-511b-bf0c-483d406271a5",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "54529.64",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "purpose_code": "service_payment",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "726c239a-dccd-5ae5-88e9-bd91fe536b9b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "35135.10",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "4f3f13bf-4c41-5fa7-a311-b965d91c750e",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "25515.63",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "25059cf0-c170-585f-ad0a-760c6521b871",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "19289.07",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "service_payment",
+        "recipient_id": "A"
+      }
+    ],
+    "probability": 0.9999844971502544,
+    "target_probability": 1.0,
+    "route_family": "slow_eight_repeated"
+  },
+  {
+    "scenario_id": "game-high-0-00268",
+    "steps": [
+      {
+        "step_id": "c7758479-4a71-518b-afe4-715833e2c4a3",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": null,
+        "sender_id": "employer",
+        "purpose_code": "salary"
+      },
+      {
+        "step_id": "ae203c45-0498-4ce6-a86a-76f11e600dce",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "27737.13",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "1ff7be6d-0677-5da6-9631-b9b32e4d46db",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "24966.87",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "df3cb848-bf9c-4980-8e22-3a4b38f7e183",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "32201.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "27bc4caf-50a6-472b-9220-c50590957c9c",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "88853",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "f71f9a6e-264c-5cdf-9932-96b6c83a97d5",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "45206.58",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "fcac396b-2970-4c62-be97-78cd7c2077da",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "78725.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "05eb6f6a-bf88-470d-bdf2-05d423beedbd",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "41348.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "5dd7b5bb-ad2e-4b94-b7e5-6322be3fe80b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "48291.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "c344dd3c-f3ef-4903-8c30-199e5679f0b7",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "39829.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "b1084cc7-e640-45e7-9a8c-6c5da4e791be",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "22997.42",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "5cb182e3-a244-4381-af4e-d55d4c96796b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "66898.70",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "shared_expense"
+      }
+    ],
+    "probability": 0.9998186701434406,
+    "target_probability": 1.0,
+    "route_family": "fixture-14"
+  },
+  {
+    "scenario_id": "game-high-0-00405",
+    "steps": [
+      {
+        "step_id": "5e2bbfa8-de4f-4e3e-9b15-28a2ec11c8b2",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "63668.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "11031164-8064-43f9-b4cf-86d7cdabb1e9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "53114.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "7d100f1a-8fd2-41b0-8833-ae834b2484a2",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "35afd0f6-dabc-456e-a83f-b6e00854c138",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "52976.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "d00a1a53-1f82-43a3-95a9-15ca2d4725a4",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "25301.64",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "31e466ed-9f33-528f-9552-40d2b0544fdf",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "44793.36",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "fccdf166-a181-4b36-9e02-e536070390c3",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "6a7a0deb-dc76-478f-b183-6afc615458de",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "50000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "41ea6903-975a-46f0-be4c-941824621267",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "42314.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "bd6b3d5a-cad6-4245-ad2f-861a6fe6a85a",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "9c45eca9-b90c-4138-8dad-97313d9dc5b4",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "11130.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "9305e07d-7400-5892-9cbb-015bbda797ec",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "10000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      },
+      {
+        "step_id": "bc957eee-6d91-4a7c-a6b5-141adeb8e3c8",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "46703.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "loan"
+      }
+    ],
+    "probability": 0.9999747380425736,
+    "target_probability": 1.0,
+    "route_family": "fixture-06"
+  },
+  {
+    "scenario_id": "game-high-0-00532",
+    "steps": [
+      {
+        "step_id": "1d6bb310-7fce-4c25-838f-13f9554f059b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "d03d1575-8734-4033-914d-e9e3176a3cd2",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "93770.89",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "072e51c6-c83f-45ba-899b-0a83b10f9e23",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "sender_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "2a8e53df-ed13-4e1e-8beb-215dedc1f1c3",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "a98d0fde-c09b-4964-bea9-4c3f7b078884",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "24314.04",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "d81dc26a-7e41-5136-a5aa-137c552e45b3",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "55685.96",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "sender_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "720c46c4-aff9-4b6e-b74e-d5fddf716019",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "30292.59",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "77d2a7c4-465f-53b2-8db0-4e497ccf29bf",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "41707.41",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "83d8bcc4-ba07-4620-879f-cb7c595ab422",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "1c6fd382-6a45-4d7a-8ec7-f5845457d261",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "40229.11",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      },
+      {
+        "step_id": "8f9cf641-fc87-5808-a9c9-0ddeeff6170b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "10000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "B",
+        "purpose_code": "refund"
+      }
+    ],
+    "probability": 0.999719402873736,
+    "target_probability": 1.0,
+    "route_family": "fixture-13"
+  },
+  {
+    "scenario_id": "game-high-0-00660",
+    "steps": [
+      {
+        "step_id": "6b38bc75-018b-4eb2-b637-6948fd80313f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "46136.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "B",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "a94d55a5-75be-4b2d-ac91-665a95c981cb",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "88574.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "88b00704-a4a5-412d-8de9-ca51cbffc679",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "C",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "62cb36d0-d844-4419-b9d5-b7aadfcb435b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "77049.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "3a4eb959-d6cd-478b-b1ed-93a531e5acf1",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "168290f2-6c5c-45e9-8f87-5e085fb7ab9d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "69480.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "c930fa9d-a514-4d58-908c-c7638bc71f5e",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "80000",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "A",
+        "purpose_code": "asset_sale"
+      },
+      {
+        "step_id": "cb7d0aba-aac6-4db5-b953-1a9d762d6f98",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "78760.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "D",
+        "purpose_code": "asset_sale"
+      }
+    ],
+    "probability": 0.999504918211681,
+    "target_probability": 1.0,
+    "route_family": "fixture-04"
+  },
+  {
+    "scenario_id": "game-high-0-01135",
+    "steps": [
+      {
+        "step_id": "ba8f15b3-28a1-57eb-a99f-45b305c27df1",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "71342.10",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "refund",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "8dc32c2c-8f24-5dc6-8d3e-bc7e5fc8b4a2",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "68116.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "a462967d-95ee-5bd6-8e76-b0aad56be47a",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "76212",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "purpose_code": "refund",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "d9e51227-82e0-5b5c-a203-de391f9c2011",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "65893.50",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "38da3ca4-8348-56c1-baf9-6773e906cf37",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "75412",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "3540c4a3-435f-5019-b8df-9d178fccd191",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "55036.80",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "536af501-65df-57de-8562-28aa90aca06f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "44217.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "A"
+      },
+      {
+        "step_id": "8567928f-1d02-54b4-afe5-a91ff0abd4bb",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "75785",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "purpose_code": "refund",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "c5a8291f-2efc-571c-ba8b-9090af60cfe8",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "55393.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "refund",
+        "recipient_id": "A"
+      }
+    ],
+    "probability": 0.8946376107057429,
+    "target_probability": 0.9054726368159204,
+    "route_family": "staged_six"
+  },
+  {
+    "scenario_id": "game-grey-0-00158",
+    "steps": [
+      {
+        "step_id": "c7758479-4a71-518b-afe4-715833e2c4a3",
+        "card": {
+          "id": 1,
+          "code": "salary",
+          "version": 1
+        },
+        "amount": "30000",
+        "context": {},
+        "action_details": {
+          "income_basis": "payroll_registry"
+        },
+        "interval_minutes": null,
+        "purpose_code": "salary",
+        "sender_id": "employer"
+      },
+      {
+        "step_id": "56f1de1a-b6aa-5ad4-87c4-bc7ab053779d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "42841.20",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "18d30448-7f5a-584f-8b55-55aaef492e65",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "28844.76",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "3c029f1a-81b6-5866-ad19-dcd279a7d61a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "32515.44",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "96314b4f-12c2-51c2-a2e0-a1a98c84e2ac",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "83447",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "2390b1f2-1b63-5afa-967e-022cc0f6ca93",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76951.70",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "bc1b7ed1-f1c7-53b4-9f40-33934cff7017",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "26737.23",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "0cd34471-22e0-5ca2-81b5-6b5a64aec2ed",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "19740.27",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "8b6964f1-3e50-5682-8f42-38643d87e183",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "74402",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "sender_id": "C"
+      },
+      {
+        "step_id": "149c653f-8944-5162-8995-0055e1707f91",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "60883.30",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "191429d6-bc0d-5c1b-9381-ed777bae1019",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "34717.98",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      },
+      {
+        "step_id": "5bee4c70-7d34-5730-8da5-94c3d632161c",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "36768.12",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "purpose_code": "shared_expense",
+        "recipient_id": "D"
+      }
+    ],
+    "probability": 0.11644500293286099,
+    "target_probability": 0.11442786069651742,
+    "route_family": "salary_liquidity"
+  },
+  {
+    "scenario_id": "game-grey-0-00782",
+    "steps": [
+      {
+        "step_id": "338814eb-9397-4bbb-bab3-edc5d26bd15b",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "67599.90",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "29a71087-1514-44db-bb70-6b0e5674a7f2",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "99837",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "7b679052-ba15-4205-8e1d-66a9cbc63baf",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "14386.14",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "5040a9c3-0b04-5c39-a715-e8c172430e3c",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "30317.36",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "77544b08-c5c5-4c19-8402-6d1cd2a7935a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "75414.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 60,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "8b90b53c-4304-4f6f-ab49-5025445c5a30",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "23487.61",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "e817b0d9-645a-591d-8626-b2140caeea50",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "34021.39",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 60,
+        "sender_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "2c8ca681-39c3-4f1b-8f5a-d1994deb5c2e",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "52503.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "5e05fa89-bb0f-4968-b4d4-b4167b377f1f",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79497",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 10,
+        "sender_id": "D",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "1797a757-0930-4c9b-bc90-4c4a184fbf80",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "58526.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "a14203fe-02fa-49a0-86b5-61a7cf9298db",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "61253.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "C",
+        "purpose_code": "shared_expense"
+      }
+    ],
+    "probability": 0.6565044704945293,
+    "target_probability": 0.6218905472636815,
+    "route_family": "fixture-07"
+  },
+  {
+    "scenario_id": "game-grey-0-00901",
+    "steps": [
+      {
+        "step_id": "04f3ef9b-9932-479c-96b9-2714a8699dc6",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "46980.83",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "fb8b87ae-3508-5ba9-84b1-e5b085dd580c",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "26995.17",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "324104f7-6eda-483d-a49e-b6319662b060",
+        "card": {
+          "id": 5,
+          "code": "purchase",
+          "version": 1
+        },
+        "amount": "5000",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "shop",
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "907e3020-eff6-438b-b503-792f76ebcd83",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "84535",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "0d478f7f-1893-466b-b817-fda13477297a",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "49f881e6-2f67-4f3c-a8fb-54a813b75740",
+        "card": {
+          "id": 5,
+          "code": "purchase",
+          "version": 1
+        },
+        "amount": "5000",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "shop",
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "1b6916a6-8090-413b-a4b7-98e35f8fdc0d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "75445",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "ee196d11-5308-4cf9-bbf4-738ff74ac8f5",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "43850.97",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 10,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "55497d9c-5be5-58f0-bd39-701d4b989c40",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "34578.03",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "785b3360-bd85-458d-8d02-bc8281b4ce3f",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "75595.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "1fa21770-2607-4940-862b-849409c8e009",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "69426",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "sender_id": "B",
+        "purpose_code": "shared_expense"
+      },
+      {
+        "step_id": "028bece8-51fe-4565-a28b-e4a868d373d5",
+        "card": {
+          "id": 5,
+          "code": "purchase",
+          "version": 1
+        },
+        "amount": "5000",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "shop",
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "b968c19d-f7ea-4943-bd9f-ca943cf4c1bd",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "76000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "recipient_id": "A",
+        "purpose_code": "shared_expense"
+      }
+    ],
+    "probability": 0.6280085072896433,
+    "target_probability": 0.6301824212271974,
+    "route_family": "fixture-10"
+  },
+  {
+    "scenario_id": "game-low-0-03488",
+    "steps": [
+      {
+        "step_id": "3a45aa6a-cb7c-5018-84c7-6a870c9c6255",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "47718.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": null,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "9f5df140-749f-52f2-b6af-b1078e429c95",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "72000.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "recipient_id": "B"
+      },
+      {
+        "step_id": "5a8bae2a-3bde-5ece-843f-489936ded26d",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "76056",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "sender_id": "D"
+      },
+      {
+        "step_id": "a7637985-8768-57bd-a6bc-9a5af18745d9",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "61971.40",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "d734a80f-bc16-5e6a-ae12-abdb9e3635bd",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "76787",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "sender_id": "B"
+      },
+      {
+        "step_id": "607f2bb8-f5ab-5028-bd14-6d32c2d4871e",
+        "card": {
+          "id": 4,
+          "code": "cash_withdrawal",
+          "version": 1
+        },
+        "amount": "30890.00",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1440,
+        "purpose_code": "personal_spending"
+      },
+      {
+        "step_id": "9c8a2a27-4e64-59fd-a8a8-346e86b7212d",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "77936.40",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "recipient_id": "C"
+      },
+      {
+        "step_id": "daee10fd-6998-5afe-9a67-f2d0f3fefb84",
+        "card": {
+          "id": 2,
+          "code": "incoming_transfer",
+          "version": 1
+        },
+        "amount": "79284",
+        "context": {},
+        "action_details": {
+          "incoming_kind": "bank_transfer",
+          "bank_country": "RU"
+        },
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "sender_id": "A"
+      },
+      {
+        "step_id": "18ca1095-cf6f-505c-a8cb-7f9900b1d9ee",
+        "card": {
+          "id": 3,
+          "code": "card_transfer",
+          "version": 1
+        },
+        "amount": "69483.60",
+        "context": {},
+        "action_details": {},
+        "interval_minutes": 1,
+        "purpose_code": "asset_sale",
+        "recipient_id": "D"
+      }
+    ],
+    "probability": 0.10164045593383998,
+    "target_probability": 0.0945273631840796,
+    "route_family": "cash_then_pause"
+  }
+]

@@ -1,9 +1,0 @@
-{
-  "status": "approved",
-  "pilot_rows_hash": "a7b970ea07308ffacbbd28bb0ce9d00dc29315f86e8310025e41c18b6722189f",
-  "sample_hash": "fced9fa4c5b58176b0af5d5fc1b4a5205d966f189902c9388dd507283f863c99",
-  "reviewer": "Codex under explicit delegated correction and stage completion",
-  "reviewed_at": "2026-09-14T00:23:38.180466+00:00",
-  "review_mode": "delegated_feedback_resolution",
-  "user_decision_evidence": "User requested to fix intensive transit and finish stage 7. Original 12 human decisions preserved in pilot-v2-1; limitations documented in docs/verification/aml-dataset-stage07-final.md"
-}

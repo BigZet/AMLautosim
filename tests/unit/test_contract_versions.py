@@ -70,7 +70,7 @@ def test_expanded_typed_roundtrip_and_legacy_unchanged():
     assert "behavior" not in parsed.dump()
     legacy.pop("schema_version")
     assert parse_game_config(legacy).schema_version == 7
-    assert editor_metadata().schema_version == 8
+    assert editor_metadata().schema_version == 10
 
 
 @pytest.mark.parametrize(
@@ -83,7 +83,7 @@ def test_incomplete_expanded_config_rejected(field):
         parse_game_config(config)
 
 
-@pytest.mark.parametrize("version", [6, 10, "8", None, True])
+@pytest.mark.parametrize("version", [6, 11, "8", None, True])
 def test_unknown_versions_never_fall_back(version):
     config = deepcopy(GOLDEN["config"])
     config["schema_version"] = version

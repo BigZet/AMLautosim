@@ -13,7 +13,7 @@ class LiveOut(BaseModel):
 
 class ReadinessChecks(BaseModel):
     model: dict[str, JsonValue] | None = None
-    database: Literal["connected", "unavailable"]
+    database: Literal["connected", "unavailable", "not_checked"]
     ruleset_versions: list[str] | None = None
     migrations: Literal["head", "behind head", "alembic_version missing"] | None = None
 

@@ -16,7 +16,7 @@ def test_editor_metadata_requires_admin_and_matches_contract(
 
 
 def test_semantic_error_has_operation_path(request_api, admin, round_id):
-    config = request_api("GET", "/admin/game-config/default", admin)
+    config = request_api("GET", "/admin/game-config/default?schema_version=8", admin)
     config["operations"][0]["visible_params"] = ["action.nonexistent"]
     error = request_api(
         "PUT",

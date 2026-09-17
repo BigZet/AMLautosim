@@ -1,0 +1,36 @@
+{
+  "counts": {
+    "chains": 1500,
+    "four_receipts": 585,
+    "over_eight_card_transfers": 180,
+    "over_fourteen_actions": 17,
+    "incoming_over_80000": 0,
+    "card_over_80000": 0,
+    "cash_operation_over_100000": 0,
+    "total_cash_over_120000": 0,
+    "newly_playable": 1003
+  },
+  "newly_playable_bands": {
+    "low": 478,
+    "high": 397,
+    "grey": 128
+  },
+  "examples": {
+    "newly_playable": "game-low-0-00000",
+    "four_receipts": "game-low-0-00001",
+    "over_eight_card_transfers": "game-low-0-00001",
+    "over_fourteen_actions": "game-low-0-00010"
+  },
+  "purpose_counts": {
+    "loan": 2447,
+    "personal_spending": 1200,
+    "refund": 2554,
+    "asset_sale": 2387,
+    "service_payment": 2537,
+    "salary": 260,
+    "shared_expense": 4467
+  },
+  "immutable_behavior": true,
+  "source": "E:\\AMLautosim-artifacts\\aml-probability-v1\\game-relaxed-v2-pilot",
+  "baseline": "resources\\catboost_models\\aml-game-v1\\context.json"
+}

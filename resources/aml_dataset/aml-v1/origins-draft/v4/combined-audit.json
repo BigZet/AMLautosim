@@ -1,0 +1,63 @@
+{
+  "compiler_sha256": "3add5ca4badb4ef5f83972c8127387d08120be63cb0f33732bb9b34c1d4de1c3",
+  "confirmed_rows": 400,
+  "contradictory_feature_clusters": 42,
+  "input_sha256": {
+    "resources\\aml_dataset\\aml-v1\\origins-draft\\v4\\casebook.jsonl": "2aa97901124827b9ffbd1c3999185be655198289a7e0cdd89006159a09322a80",
+    "resources\\aml_dataset\\aml-v1\\origins-reviewed\\v3\\casebook.jsonl": "d822e7e7f3408e49f0c4ab6177fc791a6c64fda7688df3dc923d8ba2a6afbc8e"
+  },
+  "link_reasons": {
+    "declared_group": 400,
+    "feature_collision": 2,
+    "shared_nonempty_history": 1
+  },
+  "post_closure_components": 13,
+  "release_ready": false,
+  "review_status": "mixed_reviewed_and_unreviewed_development_only",
+  "roots_by_component": {
+    "group-16590ba8f35839cfdada1a99": [
+      "loan_consolidation"
+    ],
+    "group-1e2d43ff7e6b6e18cc4584a0": [
+      "cash_market_stall",
+      "crypto_self_custody_disposal",
+      "family_cost_return"
+    ],
+    "group-28391865935b4e4d87e5d9ea": [
+      "family_pool"
+    ],
+    "group-488a2879e2d39c3a98bbaf3a": [
+      "supplier_cancellations"
+    ],
+    "group-7911cdfc20f3d2b0ead93f58": [
+      "cash_mobile_repair"
+    ],
+    "group-9cafb987f4d796ad0caddce6": [
+      "asset_single"
+    ],
+    "group-9f04c6f42b7ae76748001ef0": [
+      "asset_portfolio",
+      "debt_collection"
+    ],
+    "group-a1a0423b74a034314c025b3d": [
+      "supplier_duplicate"
+    ],
+    "group-b87f39b738f82212df526020": [
+      "mixed_household_transition"
+    ],
+    "group-c2a8cf4906f5df4786137bb1": [
+      "service_jobs"
+    ],
+    "group-cae6c3b1b4cf2336614aa5f5": [
+      "dormant_land_compensation"
+    ],
+    "group-dca2ee36558fd3fd74b9f6b4": [
+      "foreign_estate_distribution"
+    ],
+    "group-f483d443bd5854aaef81b0d5": [
+      "service_milestones"
+    ]
+  },
+  "rows": 416,
+  "unresolved_rows": 16
+}

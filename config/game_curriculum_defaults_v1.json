@@ -1,0 +1,12 @@
+{
+  "preset_version": "aml-game-curriculum-v1",
+  "resources": {
+    "initial_balance": "180000.00",
+    "initial_energy": 30,
+    "initial_time": 30
+  },
+  "objectives": {
+    "target_outflow": "360000.00",
+    "max_actions": 14
+  }
+}
