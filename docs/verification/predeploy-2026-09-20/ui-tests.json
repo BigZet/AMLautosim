@@ -1,0 +1,24 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/test_timeline_ui.py",
+    "tests/unit/test_organizer_settings.py",
+    "tests/unit/test_profile_history_ui.py",
+    "tests/unit/test_purchase_ui.py",
+    "tests/unit/test_participant_limits.py",
+    "tests/unit/test_shap_table.py",
+    "tests/unit/test_game_poll_races.py",
+    "tests/unit/test_nicegui_client.py",
+    "tests/unit/test_nicegui_organizer.py",
+    "tests/api/test_nicegui_auth.py",
+    "tests/api/test_nicegui_participant_editing.py",
+    "tests/api/test_nicegui_forms.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=docs/verification/predeploy-2026-09-20/ui-tests.xml"
+  ],
+  "exit_code": 1,
+  "seconds": 31.2
+}

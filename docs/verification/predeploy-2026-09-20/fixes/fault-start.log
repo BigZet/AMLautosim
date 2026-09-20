@@ -1,0 +1,12 @@
+
+ Container aml-predeploy-fixes-20260920-db-1 Running 
+ Container aml-predeploy-fixes-20260920-api-1 Recreate 
+ Container aml-predeploy-fixes-20260920-api-1 Recreated 
+ Container aml-predeploy-fixes-20260920-db-1 Waiting 
+ Container aml-predeploy-fixes-20260920-db-1 Healthy 
+ Container aml-predeploy-fixes-20260920-api-1 Starting 
+ Container aml-predeploy-fixes-20260920-api-1 Started 
+ Container aml-predeploy-fixes-20260920-db-1 Waiting 
+ Container aml-predeploy-fixes-20260920-api-1 Waiting 
+ Container aml-predeploy-fixes-20260920-db-1 Healthy 
+ Container aml-predeploy-fixes-20260920-api-1 Healthy 

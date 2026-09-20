@@ -1,0 +1,12 @@
+
+ Container aml-release-20260920-db-1 Running 
+ Container aml-release-20260920-api-1 Recreate 
+ Container aml-release-20260920-api-1 Recreated 
+ Container aml-release-20260920-db-1 Waiting 
+ Container aml-release-20260920-db-1 Healthy 
+ Container aml-release-20260920-api-1 Starting 
+ Container aml-release-20260920-api-1 Started 
+ Container aml-release-20260920-api-1 Waiting 
+ Container aml-release-20260920-db-1 Waiting 
+ Container aml-release-20260920-db-1 Healthy 
+ Container aml-release-20260920-api-1 Healthy 

@@ -49,7 +49,12 @@ def test_legacy_golden(case):
     board = leaderboard_scores(
         score["risk_score"], resource_score(snap, config), config
     )
-    assert snap == case["snapshot"]
+    expected = deepcopy(case["snapshot"])
+    expected["limits"] = [
+        item for item in expected["limits"]
+        if item["code"] not in {"anonymous", "night_operations", "anonymous_operations"}
+    ]
+    assert snap == expected
     assert submit_blockers(snap) == case["blockers"]
     assert json.loads(json.dumps(score, default=str)) == case["scoring"]
     assert json.loads(json.dumps(board, default=str)) == case["leaderboard"]

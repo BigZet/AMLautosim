@@ -199,46 +199,64 @@ def aml_probability_result(explanation, *, expanded=False, on_change=None):
             )
 
 
+def shap_table_rows(factors):
+    """Rank signed contributions, not absolute magnitude: suspicion first."""
+    rows = []
+    scale = max((abs(f["contribution"]) for f in factors), default=0) or 1
+    for factor in sorted(factors, key=lambda f: (-f["contribution"], f["feature"])):
+        value = factor["value"]
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            value = number(value, 4).rstrip("0").rstrip(",")
+        contribution = factor["contribution"]
+        text = number(contribution, 4, True) if contribution else "0"
+        if contribution and abs(contribution) < 0.00005:
+            text = "+<0,0001" if contribution > 0 else "−<0,0001"
+        rows.append({
+            "feature": factor["feature"], "title": factor["title"],
+            "value": str(value), "raw_value": factor["value"], "contribution": contribution, "impact": text,
+            "bar_width": 50 * abs(contribution) / scale,
+            "bar_opacity": 0.3 + 0.7 * abs(contribution) / scale,
+        })
+    return rows
+
+
+def shap_table(factors):
+    table = ui.table(
+        columns=[
+            {"name": "title", "field": "title", "label": "Признак", "align": "left", "sortable": True},
+            {"name": "value", "field": "raw_value", "label": "Значение", "align": "right", "sortable": True},
+            {"name": "contribution", "field": "contribution", "label": "Вклад", "align": "right", "sortable": True},
+        ],
+        rows=shap_table_rows(factors), row_key="feature",
+        pagination={"rowsPerPage": 0, "sortBy": "contribution", "descending": True},
+    ).props("flat dense wrap-cells hide-bottom binary-state-sort").classes("shap-table w-full")
+    table.add_slot('body-cell-value', '<q-td :props="props">{{ props.row.value }}</q-td>')
+    table.add_slot('body-cell-contribution', '''<q-td :props="props">
+        <div class="shap-impact">
+            <span>{{ props.row.impact }}</span>
+            <div class="shap-track" aria-hidden="true">
+                <i class="shap-bar" :class="props.row.contribution < 0 ? 'shap-bar-negative' : 'shap-bar-positive'"
+                   :style="{width: props.row.bar_width + '%', opacity: props.row.bar_opacity,
+                            left: (props.row.contribution < 0 ? 50 - props.row.bar_width : 50) + '%'}"></i>
+            </div>
+        </div>
+    </q-td>''')
+
+
 def game_pattern_result(explanation, *, expanded=False, on_change=None):
-    view = aml_result_view_model(explanation)
-    result = view["explanation"]
-    with ui.card().classes("panel w-full min-w-0"):
-        ui.label(view["title"]).classes("text-lg font-semibold")
-        ui.label(f"{number(result['risk_score'], 2)} / 100").classes(
-            "text-2xl font-semibold"
-        )
-        ui.label(view["category_title"])
-        ui.label(view["context_text"]).classes("text-sm muted")
-        ui.label(
-            "Оценка описывает учебный паттерн, а не доказанную преступность. Меньший скор улучшает результат при соблюдении игровых ограничений."
-        ).classes("text-sm muted")
-        for window in result["windows"]:
-            with ui.expansion(
-                f"Окно {window['minutes']} мин: {number(100 * window['probability'], 2)}%",
-                value=expanded,
-            ).classes("w-full"):
-                ui.label(
-                    "Вклады SHAP относятся к логиту этого окна; они не складываются в проценты итогового скора."
-                ).classes("text-sm muted")
-                for factor in sorted(
-                    window["shap_values"], key=lambda f: -abs(f["contribution"])
-                ):
-                    aml_factor_row(factor)
-                ui.label(
-                    f"База {number(window['base_margin'])} + вклады = {number(window['raw_margin'])}; погрешность {number(window['shap_residual'], 8)}"
-                )
-        with ui.expansion(
-            "Как получен итоговый скор", value=expanded, on_value_change=on_change
-        ).classes("w-full"):
-            ui.label(
-                f"Средняя вероятность трёх окон: {number(result['uncalibrated_probability'])}"
-            )
-            ui.label(
-                f"Калибровка: {result['calibration']['parameters']['method']}; применяется к логиту средней вероятности."
-            )
-            ui.label(
-                f"Итог: 100 × {number(result['aml_probability'])} = {number(result['risk_score'], 2)}"
-            )
+    result = aml_result_view_model(explanation)["explanation"]
+    with ui.card().classes("panel shap-panel w-full min-w-0"):
+        ui.label("Что повлияло на оценку").classes("text-lg font-semibold")
+        ui.label("+ повышает подозрительность, − снижает. Вклад SHAP — не проценты.").classes("shap-note")
+        windows = result["windows"]
+        selected = max(windows, key=lambda w: w["probability"])["minutes"]
+        with ui.tabs().props("dense no-caps align=left").classes("shap-tabs w-full") as tabs:
+            choices = [ui.tab(str(w["minutes"]), label=f"{w['minutes']} мин") for w in windows]
+        with ui.tab_panels(tabs, value=str(selected)).classes("w-full shap-panels"):
+            for window, tab in zip(windows, choices):
+                with ui.tab_panel(tab):
+                    shap_table(window["shap_values"])
+        ui.label("Показаны вклады в оценку выбранного временного окна.").classes("shap-note")
 
 
 def aml_factor_row(factor):

@@ -123,10 +123,16 @@ class TurnoverPolicy(ContractModel):
 
 
 class PurchasePolicy(ContractModel):
-    version: Literal["purchase-policy-v1"] = "purchase-policy-v1"
+    version: Literal["purchase-policy-v1", "purchase-policy-v2"] = "purchase-policy-v1"
     max_total: Decimal = Field(
-        default=Decimal("30000.00"), ge=30000, le=30000, decimal_places=2
+        default=Decimal("30000.00"), ge=0, le=1000000000, decimal_places=2
     )
+
+    @model_validator(mode="after")
+    def legacy_total(self):
+        if self.version == "purchase-policy-v1" and self.max_total != Decimal("30000.00"):
+            raise ValueError("purchase-policy-v1 fixes the total at 30000")
+        return self
 
 
 class ExpandedBehavior(ContractModel):

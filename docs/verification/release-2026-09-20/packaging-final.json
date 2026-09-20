@@ -1,0 +1,11 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/test_runtime_package.py",
+    "-q"
+  ],
+  "exit_code": 0,
+  "seconds": 2.344666200049687
+}

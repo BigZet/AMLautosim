@@ -89,7 +89,7 @@ def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch
                 parties[0].set_value("B")
             assert await screen.editor.write()
             assert state["scenario"]["steps"][1]["recipient_id"] == "B"
-            await user.should_see("Операций в предыстории: 0")
+            assert parties[0].value == "B"
             with user:
                 party_readonly(config, state["scenario"]["steps"][1])
             await user.should_see("Получатель: Борис")

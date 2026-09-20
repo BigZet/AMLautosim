@@ -475,9 +475,23 @@ class OrganizerScreen:
                     button.bind_enabled_from(
                         field, "value", backward=lambda v: len((v or "").strip()) >= 10
                     )
-        result = await dialog
-        dialog.delete()
-        return result
+        client = dialog.client
+        disconnected = False
+
+        def cancel_on_disconnect():
+            nonlocal disconnected
+            disconnected = True
+            dialog.submit(None)
+
+        client.on_disconnect(cancel_on_disconnect)
+        try:
+            result = await dialog
+            return None if disconnected or client.is_deleted else result
+        finally:
+            if cancel_on_disconnect in client.disconnect_handlers:
+                client.disconnect_handlers.remove(cancel_on_disconnect)
+            if not client.is_deleted and not dialog.is_deleted:
+                dialog.delete()
 
     async def command(self, command):
         if self.busy or not self.round or (command == "start" and self.dirty):

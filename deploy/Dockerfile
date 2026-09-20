@@ -34,6 +34,8 @@ COPY resources/catboost_models/aml-game-v1 ./resources/catboost_models/aml-game-
 COPY resources/catboost_models/aml-game-relaxed-v1 ./resources/catboost_models/aml-game-relaxed-v1
 COPY resources/catboost_models/aml-game-attributes-v1 ./resources/catboost_models/aml-game-attributes-v1
 COPY resources/catboost_models/aml-game-attribute-context-v1 ./resources/catboost_models/aml-game-attribute-context-v1
+COPY resources/catboost_models/aml-game-organizer-settings-v1 ./resources/catboost_models/aml-game-organizer-settings-v1
+COPY resources/catboost_models/aml-game-attribute-context-unlimited-v1 ./resources/catboost_models/aml-game-attribute-context-unlimited-v1
 
 # The application only reads its own code; it never writes into /app.
 # NiceGUI persists browser sessions in its private writable volume.

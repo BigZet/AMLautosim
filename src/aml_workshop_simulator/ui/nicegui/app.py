@@ -67,7 +67,7 @@ async def auth_page(audience="play", register=False):
 
     with form:
         if audience == "admin":
-            ui.label("Вход организатора").classes("form-title")
+            ui.label("Вход организатора").classes("auth-admin-title")
         if audience == "play":
             with ui.element("nav").classes("auth-switch"):
                 ui.link("Вход", "/play/login").classes(
@@ -95,7 +95,12 @@ async def auth_page(audience="play", register=False):
             .classes("w-full")
         )
         fields["password"] = (
-            ui.input("Пароль", password=True, password_toggle_button=True)
+            ui.input(
+                "Пароль",
+                password=True,
+                password_toggle_button=True,
+                placeholder="От 10 до 128 символов" if register else None,
+            )
             .props(
                 "outlined maxlength=128 autocomplete="
                 + ("new-password" if register else "current-password")
@@ -103,7 +108,6 @@ async def auth_page(audience="play", register=False):
             .classes("w-full")
         )
         if register:
-            ui.label("От 10 до 128 символов.").classes("form-note -mt-3")
             fields["confirmation"] = (
                 ui.input("Повторите пароль", password=True, password_toggle_button=True)
                 .props("outlined autocomplete=new-password maxlength=128")
@@ -354,6 +358,11 @@ async def play_profile():
 @ui.page("/play/results")
 async def play_results():
     return await protected_page("play", section="results")
+
+
+@ui.page("/play/limits")
+async def play_limits():
+    return await protected_page("play", section="limits")
 
 
 @ui.page("/about")

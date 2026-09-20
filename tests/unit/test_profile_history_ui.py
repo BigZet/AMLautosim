@@ -44,10 +44,11 @@ def test_public_context_and_draft_controls(tmp_path, monkeypatch):
                 ProfileHistoryForm(config["behavior"], lambda: changed.append(True))
 
             await user.open("/history-ui")
-            await user.should_see("Роль клиента: Наёмный сотрудник")
-            await user.should_see("Поступления: 105 000,50 ₽ · Списания: 18 500,25 ₽")
+            await user.should_see("Наёмный сотрудник")
+            await user.should_see("105 000,50 ₽")
+            await user.should_see("18 500,25 ₽")
             await user.should_see(
-                "История не меняет начальные ресурсы и не засчитывается в цель."
+                "до игры, не входит в цель"
             )
             with user:
                 fields = [

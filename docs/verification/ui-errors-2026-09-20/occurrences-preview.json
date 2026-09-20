@@ -1,0 +1,187 @@
+{
+  "resources": {
+    "schema_version": 7,
+    "ruleset_version": "expanded-rules-stage04-v1",
+    "valid": false,
+    "resources_after": {
+      "balance": "220000.00",
+      "energy": 18,
+      "time": 16,
+      "available_steps": 14
+    },
+    "totals": {
+      "gross_inflow": "40000.00",
+      "gross_outflow": "0.00",
+      "fees": "0.00",
+      "target_outflow": "0.00",
+      "purchase_outflow": "0.00"
+    },
+    "objective": {
+      "target_outflow": "360000.00",
+      "reached": false
+    },
+    "limit_usage": {
+      "cash": "0.00",
+      "anonymous": "0.00",
+      "night_operations": 0,
+      "anonymous_operations": 0,
+      "actions": 2
+    },
+    "limits": [
+      {
+        "code": "cash",
+        "label": "Наличные операции",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "150000.00",
+        "remaining": "150000.00"
+      },
+      {
+        "code": "actions",
+        "label": "Действия в раунде",
+        "kind": "count",
+        "used": "2",
+        "limit": "16",
+        "remaining": "14"
+      },
+      {
+        "code": "purchase_total",
+        "label": "Сумма покупок",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "30000.00",
+        "remaining": "30000.00"
+      },
+      {
+        "code": "purchase_count",
+        "label": "Количество покупок",
+        "kind": "count",
+        "used": "0",
+        "limit": "3",
+        "remaining": "3"
+      }
+    ],
+    "violations": [
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 2 «Получить зарплату»: суммарно по карточке «Получить зарплату» набрано 2 карточек за раунд, лимит — 1. Удалите лишние карточки этой операции.",
+        "step_id": "9ec05a9c-08f2-4eb3-94ad-54dc182e4514",
+        "step_index": 2,
+        "field": "card",
+        "current": "2",
+        "allowed": "1"
+      }
+    ],
+    "per_step": [
+      {
+        "step_id": "3abd5d1a-73d2-434e-949a-34a569bbf5d5",
+        "step_index": 1,
+        "card_code": "salary",
+        "card_version": 1,
+        "card_title": "Получить зарплату",
+        "resources_before": {
+          "balance": "180000.00",
+          "energy": 34,
+          "time": 34
+        },
+        "resources_after": {
+          "balance": "200000.00",
+          "energy": 26,
+          "time": 25
+        },
+        "gross": "20000.00",
+        "fee": "0.00",
+        "money_delta": "20000.00",
+        "energy_cost": 8,
+        "time_cost": 9,
+        "detail_factors": [
+          {
+            "field_key": "income_basis",
+            "field_label": "Основание дохода",
+            "value": "payroll_registry",
+            "value_label": "Зарплатный реестр"
+          }
+        ]
+      },
+      {
+        "step_id": "9ec05a9c-08f2-4eb3-94ad-54dc182e4514",
+        "step_index": 2,
+        "card_code": "salary",
+        "card_version": 1,
+        "card_title": "Получить зарплату",
+        "resources_before": {
+          "balance": "200000.00",
+          "energy": 26,
+          "time": 25
+        },
+        "resources_after": {
+          "balance": "220000.00",
+          "energy": 18,
+          "time": 16
+        },
+        "gross": "20000.00",
+        "fee": "0.00",
+        "money_delta": "20000.00",
+        "energy_cost": 8,
+        "time_cost": 9,
+        "detail_factors": [
+          {
+            "field_key": "income_basis",
+            "field_label": "Основание дохода",
+            "value": "payroll_registry",
+            "value_label": "Зарплатный реестр"
+          }
+        ]
+      }
+    ],
+    "timeline": {
+      "version": "operation-timeline-v1",
+      "timezone": "Europe/Moscow",
+      "steps": [
+        {
+          "step_id": "3abd5d1a-73d2-434e-949a-34a569bbf5d5",
+          "step_index": 1,
+          "occurred_at": "2026-09-13T09:00:00+03:00",
+          "elapsed_minutes": 0,
+          "interval_minutes": null,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 9,
+          "time_of_day": "day",
+          "pace": null
+        },
+        {
+          "step_id": "9ec05a9c-08f2-4eb3-94ad-54dc182e4514",
+          "step_index": 2,
+          "occurred_at": "2026-09-13T09:01:00+03:00",
+          "elapsed_minutes": 1,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 9,
+          "time_of_day": "day",
+          "pace": "rapid"
+        }
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 2 «Получить зарплату»: суммарно по карточке «Получить зарплату» набрано 2 карточек за раунд, лимит — 1. Удалите лишние карточки этой операции.",
+      "step_id": "9ec05a9c-08f2-4eb3-94ad-54dc182e4514",
+      "step_index": 2,
+      "field": "card",
+      "current": "2",
+      "allowed": "1"
+    },
+    {
+      "reason": "target_outflow_not_reached",
+      "message": "Цель раунда не достигнута: расходный оборот 0 ₽ из необходимых 360 000 ₽. Добавьте или увеличьте расходные операции.",
+      "step_id": null,
+      "step_index": null,
+      "field": "objective.target_outflow",
+      "current": "0.00",
+      "allowed": "360000.00"
+    }
+  ],
+  "can_submit": false
+}

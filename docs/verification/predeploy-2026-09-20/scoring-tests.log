@@ -1,0 +1,71 @@
+..............FFFF.............FF                                        [100%]
+================================== FAILURES ===================================
+_ test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-v1] _
+tests\unit\test_pinned_game_packages.py:16: in test_saved_round_keeps_its_verified_package_after_default_changes
+    selected = runtime.get_pinned_game_classifier(config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\aml_workshop_simulator\services\game_classifier.py:333: in get_pinned_game_classifier
+    if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
+                                                    ^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'release'
+_ test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-relaxed-v1] _
+tests\unit\test_pinned_game_packages.py:16: in test_saved_round_keeps_its_verified_package_after_default_changes
+    selected = runtime.get_pinned_game_classifier(config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\aml_workshop_simulator\services\game_classifier.py:333: in get_pinned_game_classifier
+    if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
+                                                    ^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'release'
+_ test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-attributes-v1] _
+tests\unit\test_pinned_game_packages.py:16: in test_saved_round_keeps_its_verified_package_after_default_changes
+    selected = runtime.get_pinned_game_classifier(config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\aml_workshop_simulator\services\game_classifier.py:333: in get_pinned_game_classifier
+    if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
+                                                    ^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'release'
+_ test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-attribute-context-v1] _
+tests\unit\test_pinned_game_packages.py:16: in test_saved_round_keeps_its_verified_package_after_default_changes
+    selected = runtime.get_pinned_game_classifier(config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\aml_workshop_simulator\services\game_classifier.py:333: in get_pinned_game_classifier
+    if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
+                                                    ^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'release'
+_________________ test_ranking_ties_access_and_shared_results _________________
+tests\api\test_scoring.py:18: in test_ranking_ties_access_and_shared_results
+    summary = request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\conftest.py:105: in request
+    assert response.status_code == status, response.text
+E   AssertionError: {"code":"scoring_failed","message":"Ошибка скоринга. Приём сценариев закрыт; организатор может повторить расчёт.","details":null,"request_id":"c1d3a8f5-06a0-4b07-8ed0-e0b348dc3e92"}
+E   assert 500 == 200
+E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+___________ test_scoring_failure_rolls_back_scores_but_keeps_cutoff ___________
+tests\api\test_scoring.py:112: in test_scoring_failure_rolls_back_scores_but_keeps_cutoff
+    request_api("POST", f"/admin/rounds/{active_round}/score", admin)[
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\conftest.py:105: in request
+    assert response.status_code == status, response.text
+E   AssertionError: {"code":"scoring_failed","message":"Ошибка скоринга. Приём сценариев закрыт; организатор может повторить расчёт.","details":null,"request_id":"d6382c19-e17e-41d2-a470-8bdeae67dcd1"}
+E   assert 500 == 200
+E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+============================== warnings summary ===============================
+..\..\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\..\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_pinned_game_packages.py::test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-v1]
+FAILED tests/unit/test_pinned_game_packages.py::test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-relaxed-v1]
+FAILED tests/unit/test_pinned_game_packages.py::test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-attributes-v1]
+FAILED tests/unit/test_pinned_game_packages.py::test_saved_round_keeps_its_verified_package_after_default_changes[aml-game-attribute-context-v1]
+FAILED tests/api/test_scoring.py::test_ranking_ties_access_and_shared_results
+FAILED tests/api/test_scoring.py::test_scoring_failure_rolls_back_scores_but_keeps_cutoff
+6 failed, 27 passed, 2 warnings in 79.72s (0:01:19)
+

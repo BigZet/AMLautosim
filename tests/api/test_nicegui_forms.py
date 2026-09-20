@@ -162,15 +162,10 @@ def test_registration_login_and_full_workshop(
             user.find("Email").type(email)
             user.find("Пароль").type("participant123")
             user.find("Войти").click()
-            await user.should_see("Добавить операцию", retries=40)
-            cards = {
-                c["code"]: c
-                for c in await front.api.request("GET", f"rounds/{round_id}/cards")
-            }
+            await user.should_see("Входящий перевод", retries=40)
             for step in chain():
-                user.find(kind=ui.button, content="Добавить операцию").click()
                 user.find(
-                    kind=ui.button, content=cards[step["card"]["code"]]["title"]
+                    kind=ui.button, content={"salary":"Зарплата", "incoming_transfer":"Входящий перевод", "card_transfer":"Перевод по карте", "cash_withdrawal":"Наличные", "purchase":"Покупка"}[step["card"]["code"]]
                 ).click()
                 with user:
                     amount = min(
@@ -198,8 +193,7 @@ def test_registration_login_and_full_workshop(
                             selector.set_value(step[key])
             await asyncio.sleep(1.8)
             await user.should_see("Сохранено", retries=40)
-            user.find("Лимиты и условия отправки").click()
-            await user.should_see("Условия отправки")
+            await user.should_see("Лимиты и цель")
             await user.should_see("Всё готово к отправке")
             user.find("Отправить сценарий").click()
             await user.should_see("Отправить сценарий окончательно?")

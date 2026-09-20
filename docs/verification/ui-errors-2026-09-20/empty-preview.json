@@ -1,0 +1,93 @@
+{
+  "resources": {
+    "schema_version": 7,
+    "ruleset_version": "expanded-rules-stage04-v1",
+    "valid": true,
+    "resources_after": {
+      "balance": "180000.00",
+      "energy": 34,
+      "time": 34,
+      "available_steps": 16
+    },
+    "totals": {
+      "gross_inflow": "0.00",
+      "gross_outflow": "0.00",
+      "fees": "0.00",
+      "target_outflow": "0.00",
+      "purchase_outflow": "0.00"
+    },
+    "objective": {
+      "target_outflow": "360000.00",
+      "reached": false
+    },
+    "limit_usage": {
+      "cash": "0.00",
+      "anonymous": "0.00",
+      "night_operations": 0,
+      "anonymous_operations": 0,
+      "actions": 0
+    },
+    "limits": [
+      {
+        "code": "cash",
+        "label": "Наличные операции",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "150000.00",
+        "remaining": "150000.00"
+      },
+      {
+        "code": "actions",
+        "label": "Действия в раунде",
+        "kind": "count",
+        "used": "0",
+        "limit": "16",
+        "remaining": "16"
+      },
+      {
+        "code": "purchase_total",
+        "label": "Сумма покупок",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "30000.00",
+        "remaining": "30000.00"
+      },
+      {
+        "code": "purchase_count",
+        "label": "Количество покупок",
+        "kind": "count",
+        "used": "0",
+        "limit": "3",
+        "remaining": "3"
+      }
+    ],
+    "violations": [],
+    "per_step": [],
+    "timeline": {
+      "version": "operation-timeline-v1",
+      "timezone": "Europe/Moscow",
+      "steps": []
+    }
+  },
+  "blockers": [
+    {
+      "reason": "scenario_empty",
+      "message": "Цепочка пуста. Добавьте хотя бы одну операцию, чтобы отправить сценарий.",
+      "step_id": null,
+      "step_index": null,
+      "field": "steps",
+      "current": "0",
+      "allowed": "1.."
+    },
+    {
+      "reason": "target_outflow_not_reached",
+      "message": "Цель раунда не достигнута: расходный оборот 0 ₽ из необходимых 360 000 ₽. Добавьте или увеличьте расходные операции.",
+      "step_id": null,
+      "step_index": null,
+      "field": "objective.target_outflow",
+      "current": "0.00",
+      "allowed": "360000.00"
+    }
+  ],
+  "can_submit": false
+}

@@ -79,20 +79,33 @@ class ConfigForm:
 
     def render(self):
         if self.config.get("schema_version") == 10:
-            ui.label(
-                "История, цель и ограничения закреплены за проверенным классификатором и одинаковы для всех участников."
-            ).classes("text-sm muted")
+            for key, title in (("resources", "Начальные ресурсы"), ("objectives", "Цель и шаги")):
+                ui.label(title).classes("text-lg font-semibold")
+                with ui.row().classes("w-full gap-4"):
+                    for field, value in self.config[key].items():
+                        self.text_number(self.config[key], field, integer=isinstance(value, int))
+            ui.label("Ограничения за раунд").classes("text-lg font-semibold")
             with ui.row().classes("w-full gap-4"):
-                for section in ("resources", "objectives"):
-                    for key, value in self.config[section].items():
-                        ui.input(self.labels.get(key, key), value=str(value)).props(
-                            "outlined dense readonly"
-                        )
-            with ui.expansion("Общая неизменная предыстория").classes("w-full"):
-                for event in self.config["behavior"]["history"]["operations"]:
-                    ui.label(
-                        f"{event['occurred_at']} · {event['operation_code']} · {event['amount']}"
-                    )
+                for field, value in self.config["constraints"].items():
+                    if field != "category_limits":
+                        self.text_number(self.config["constraints"], field, integer=True)
+                for field in self.config["constraints"]["category_limits"]:
+                    self.text_number(self.config["constraints"]["category_limits"], field, self.metadata["quotas"].get(field, field))
+                purchases = self.config["behavior"]["purchases"]
+                field = self.text_number(purchases, "max_total", "Покупки за раунд")
+                field.on_value_change(lambda: purchases.__setitem__("version", "purchase-policy-v2"))
+            ui.label("Лимиты операций").classes("text-lg font-semibold")
+            for operation in self.config["operations"]:
+                card = self.catalog[(operation["code"], operation["version"])]
+                ui.label(card["title"]).classes("text-sm font-medium")
+                with ui.row().classes("w-full gap-4"):
+                    for key in ("min_amount", "max_amount", "max_occurrences"):
+                        if operation.get(key) is None:
+                            operation[key] = card[key]
+                        field = self.text_number(operation, key, integer=key == "max_occurrences")
+                        if operation["code"] == "purchase":
+                            field.on_value_change(lambda: purchases.__setitem__("version", "purchase-policy-v2"))
+            ProfileHistoryForm(self.config["behavior"], self.on_change)
             return
         is_expanded = self.config.get("schema_version") == 8
         if is_expanded:

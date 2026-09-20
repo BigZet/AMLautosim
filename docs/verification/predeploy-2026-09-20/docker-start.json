@@ -1,0 +1,19 @@
+{
+  "command": [
+    "docker",
+    "compose",
+    "--env-file",
+    ".local-run/predeploy-2026-09-20/compose.env",
+    "-p",
+    "aml-predeploy-20260920",
+    "-f",
+    "docker-compose.yml",
+    "up",
+    "-d",
+    "--wait",
+    "--wait-timeout",
+    "90"
+  ],
+  "exit_code": 0,
+  "seconds": 22.3
+}

@@ -41,7 +41,7 @@ STRICT = ConfigDict(extra="forbid")
 CONFIG_SCHEMA_VERSION = LEGACY_CONTRACT_VERSION
 
 #: Quota buckets an organiser can cap. They match `domain.rules.QUOTA_LABELS`.
-QUOTA_CODES = ("cash", "anonymous")
+QUOTA_CODES = ("cash",)
 
 RESOURCE_WEIGHT_KEYS = ("balance", "energy", "time", "fees", "available_steps")
 
@@ -86,9 +86,19 @@ class ConstraintsIn(BaseModel):
     model_config = STRICT
 
     max_identical_steps: int = Field(ge=1, le=LIMITS["max_actions"])
-    max_night_operations: int = Field(ge=0, le=LIMITS["max_actions"])
-    max_anonymous_operations: int = Field(ge=0, le=LIMITS["max_actions"])
     category_limits: dict[str, Decimal] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def ignore_retired_limits(cls, value):
+        if not isinstance(value, dict):
+            return value
+        value = dict(value)
+        value.pop("max_night_operations", None)
+        value.pop("max_anonymous_operations", None)
+        if isinstance(value.get("category_limits"), dict):
+            value["category_limits"] = {k: v for k, v in value["category_limits"].items() if k != "anonymous"}
+        return value
 
     @field_validator("category_limits")
     @classmethod
@@ -112,8 +122,6 @@ class ConstraintsIn(BaseModel):
     def dump(self) -> dict[str, Any]:
         return {
             "max_identical_steps": self.max_identical_steps,
-            "max_night_operations": self.max_night_operations,
-            "max_anonymous_operations": self.max_anonymous_operations,
             "category_limits": {
                 code: _money(limit)
                 for code, limit in sorted(self.category_limits.items())
@@ -340,7 +348,12 @@ class ExpandedGameConfigIn(GameConfigIn):
                 if operation.version != 1:
                     raise ValueError("Неизвестная версия покупки")
                 entry = catalog_entry("purchase", operation.version)
+                custom_limits = self.behavior.purchases.version == "purchase-policy-v2"
+                if custom_limits and self.schema_version != 10:
+                    raise ValueError("Настраиваемые лимиты покупок требуют версию 10")
                 for key in CARD_OVERRIDE_KEYS:
+                    if custom_limits and key in {"min_amount", "max_amount", "max_occurrences"}:
+                        continue
                     value = getattr(operation, key)
                     if value is not None and value != entry[key]:
                         raise ValueError(

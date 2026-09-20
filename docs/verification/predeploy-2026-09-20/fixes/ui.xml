@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="45" time="22.643" timestamp="2026-09-20T02:44:41.944751+03:00" hostname="bz"><testcase classname="tests.unit.test_timeline_ui" name="test_interval_reorder_delete_and_reload" time="0.305" /><testcase classname="tests.unit.test_organizer_settings" name="test_only_round_settings_are_mutable" time="0.072" /><testcase classname="tests.unit.test_organizer_settings" name="test_draft_form_edits_history_goal_and_limits" time="0.189" /><testcase classname="tests.unit.test_organizer_settings" name="test_custom_purchase_limits_are_applied_and_reported" time="0.026" /><testcase classname="tests.unit.test_profile_history_ui" name="test_public_context_and_draft_controls" time="0.150" /><testcase classname="tests.unit.test_profile_history_ui" name="test_config_form_keeps_expanded_contract" time="0.172" /><testcase classname="tests.unit.test_purchase_ui" name="test_purchase_form_and_both_turnover_labels" time="0.153" /><testcase classname="tests.unit.test_participant_limits" name="test_limits_follow_round_overrides_and_enabled_operations" time="0.001" /><testcase classname="tests.unit.test_participant_limits" name="test_purchase_total_uses_published_configuration" time="0.001" /><testcase classname="tests.unit.test_participant_limits" name="test_participant_api_cost_shape" time="0.001" /><testcase classname="tests.unit.test_shap_table" name="test_shap_orders_positive_contributions_before_larger_negative_ones" time="0.000" /><testcase classname="tests.unit.test_game_poll_races" name="test_older_cards_response_cannot_replace_newer_round" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_cards_response_cannot_roll_back_completed_save" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_failed_round_cards_fetch_keeps_previous_snapshot_and_draft" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_round_transition_is_not_visible_while_cards_are_loading" time="0.002" /><testcase classname="tests.unit.test_game_poll_races" name="test_edit_during_cards_fetch_is_preserved_with_revision_conflict" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_concurrent_requests_keep_credentials_separate" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response0-api_error]" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response1-login_temporarily_locked]" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response2-invalid_response]" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_transport_failure_does_not_logout" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_late_login_cannot_restore_logged_out_session" time="0.002" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-detail]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-detail]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-detail]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_confirmation_client_lifecycle[disconnect]" time="0.119"><failure message="ValueError: This user has not opened a page yet. Did you forgot to call .open()?">tests\unit\test_nicegui_organizer.py:78: in test_confirmation_client_lifecycle
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_nicegui_organizer.py:61: in run
+    with user:
+         ^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:57: in __enter__
+    return self._client.__enter__()
+           ^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:67: in __getattribute__
+    return super().__getattribute__(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:53: in _client
+    raise ValueError('This user has not opened a page yet. Did you forgot to call .open()?')
+E   ValueError: This user has not opened a page yet. Did you forgot to call .open()?</failure></testcase><testcase classname="tests.unit.test_nicegui_organizer" name="test_confirmation_client_lifecycle[delete]" time="0.114"><failure message="ValueError: This user has not opened a page yet. Did you forgot to call .open()?">tests\unit\test_nicegui_organizer.py:78: in test_confirmation_client_lifecycle
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_nicegui_organizer.py:61: in run
+    with user:
+         ^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:57: in __enter__
+    return self._client.__enter__()
+           ^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:67: in __getattribute__
+    return super().__getattribute__(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:53: in _client
+    raise ValueError('This user has not opened a page yet. Did you forgot to call .open()?')
+E   ValueError: This user has not opened a page yet. Did you forgot to call .open()?</failure></testcase><testcase classname="tests.unit.test_nicegui_organizer" name="test_confirmation_client_lifecycle[confirm]" time="0.115"><failure message="ValueError: This user has not opened a page yet. Did you forgot to call .open()?">tests\unit\test_nicegui_organizer.py:78: in test_confirmation_client_lifecycle
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_nicegui_organizer.py:61: in run
+    with user:
+         ^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:57: in __enter__
+    return self._client.__enter__()
+           ^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:67: in __getattribute__
+    return super().__getattribute__(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:53: in _client
+    raise ValueError('This user has not opened a page yet. Did you forgot to call .open()?')
+E   ValueError: This user has not opened a page yet. Did you forgot to call .open()?</failure></testcase><testcase classname="tests.unit.test_nicegui_organizer" name="test_confirmation_client_lifecycle[cancel]" time="0.124"><failure message="ValueError: This user has not opened a page yet. Did you forgot to call .open()?">tests\unit\test_nicegui_organizer.py:78: in test_confirmation_client_lifecycle
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_nicegui_organizer.py:61: in run
+    with user:
+         ^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:57: in __enter__
+    return self._client.__enter__()
+           ^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:67: in __getattribute__
+    return super().__getattribute__(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:53: in _client
+    raise ValueError('This user has not opened a page yet. Did you forgot to call .open()?')
+E   ValueError: This user has not opened a page yet. Did you forgot to call .open()?</failure></testcase><testcase classname="tests.api.test_nicegui_auth" name="test_register_login_reload_logout_and_audiences" time="2.336" /><testcase classname="tests.api.test_nicegui_auth" name="test_blocking_clears_ui_session_and_requires_new_login" time="1.481" /><testcase classname="tests.api.test_nicegui_participant_editing" name="test_parameters_and_amount_remain_editable_after_autosave" time="2.029"><failure message="AssertionError: expected to find at least one element of type Button with marker=None and content='Получить входящий перевод' on the page:&#10;q-layout&#10; q-page-container&#10;  q-page&#10;   div&#10;    Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]&#10;    Row&#10;     Row&#10;      div&#10;       Label [text=AML Практикум]&#10;      Label [text=Мастер-класс AML]&#10;     Space&#10;     Label [text=Игра идёт]&#10;     Label [text=Участник]&#10;     Row&#10;      Link [text=Об игре, href=/about?audience=play, target=_blank]&#10;       Icon [name=menu_book, aria-hidden=true]&#10;      Tooltip [text=Открыть описание игр..., target=#c14]&#10;      Button [icon=logout, flat=True, dense=True, aria-label=Выйти]&#10;      Tooltip [text=Выйти, target=#c17]&#10;    Column&#10;     Label [visible=False]&#10;     Column&#10;      Column&#10;       Column&#10;        Row&#10;         Link [text=Сценарий, href=/play, target=_self]&#10;         Link [text=Профиль, href=/play/profile, target=_self]&#10;         Link [text=Ограничения, href=/play/limits, target=_self]&#10;        div&#10;         Column&#10;          Column&#10;          Column&#10;           Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]&#10;           Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]&#10;           Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]&#10;           Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]&#10;           Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]&#10;          Column&#10;           Column&#10;            Icon [name=playlist_add]&#10;            Label [text=Добавьте первую опер...]&#10;         Card&#10;          Column&#10;           Label [text=Цель: 400 000,00 ₽ и...]&#10;           Label [text=На старте: 180 000,0...]&#10;           Label [text=Покупки не засчитыва...]&#10;          Label [visible=False]&#10;          Column&#10;           Label [text=Сохранено]&#10;           Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]&#10;           Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]&#10;    Timer&#10;    Timer">tests\api\test_nicegui_participant_editing.py:109: in test_parameters_and_amount_remain_editable_after_autosave
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_participant_editing.py:45: in run
+    user.find(kind=ui.button, content=card["title"]).click()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:221: in find
+    raise AssertionError('expected to find at least one ' +
+E   AssertionError: expected to find at least one element of type Button with marker=None and content='Получить входящий перевод' on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Мастер-класс AML]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Участник]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Label [text=Цель: 400 000,00 ₽ и...]
+E              Label [text=На старте: 180 000,0...]
+E              Label [text=Покупки не засчитыва...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer</failure></testcase><testcase classname="tests.api.test_nicegui_forms" name="test_registration_login_and_full_workshop" time="6.152"><failure message="AssertionError: expected to find at least one element of type Button with marker=None and content='Получить входящий перевод' on the page:&#10;q-layout&#10; q-page-container&#10;  q-page&#10;   div&#10;    Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]&#10;    Row&#10;     Row&#10;      div&#10;       Label [text=AML Практикум]&#10;      Label [text=Игра NiceGUI]&#10;     Space&#10;     Label [text=Игра идёт]&#10;     Label [text=Тест формы]&#10;     Row&#10;      Link [text=Об игре, href=/about?audience=play, target=_blank]&#10;       Icon [name=menu_book, aria-hidden=true]&#10;      Tooltip [text=Открыть описание игр..., target=#c14]&#10;      Button [icon=logout, flat=True, dense=True, aria-label=Выйти]&#10;      Tooltip [text=Выйти, target=#c17]&#10;    Column&#10;     Label [visible=False]&#10;     Column&#10;      Column&#10;       Column&#10;        Row&#10;         Link [text=Сценарий, href=/play, target=_self]&#10;         Link [text=Профиль, href=/play/profile, target=_self]&#10;         Link [text=Ограничения, href=/play/limits, target=_self]&#10;        div&#10;         Column&#10;          Column&#10;          Column&#10;           Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]&#10;           Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]&#10;           Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]&#10;           Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]&#10;           Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]&#10;          Column&#10;           Column&#10;            Icon [name=playlist_add]&#10;            Label [text=Добавьте первую опер...]&#10;         Card&#10;          Column&#10;           Label [text=Цель: 400 000,00 ₽ и...]&#10;           Label [text=На старте: 180 000,0...]&#10;           Label [text=Покупки не засчитыва...]&#10;          Label [visible=False]&#10;          Column&#10;           Label [text=Сохранено]&#10;           Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]&#10;           Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]&#10;    Timer&#10;    Timer">tests\api\test_nicegui_forms.py:254: in test_registration_login_and_full_workshop
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_forms.py:171: in run
+    user.find(
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:221: in find
+    raise AssertionError('expected to find at least one ' +
+E   AssertionError: expected to find at least one element of type Button with marker=None and content='Получить входящий перевод' on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Игра NiceGUI]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Тест формы]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Label [text=Цель: 400 000,00 ₽ и...]
+E              Label [text=На старте: 180 000,0...]
+E              Label [text=Покупки не засчитыва...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer</failure></testcase><testcase classname="tests.api.test_nicegui_forms" name="test_reconnect_checks_session[False]" time="1.697" /><testcase classname="tests.api.test_nicegui_forms" name="test_reconnect_checks_session[True]" time="1.706" /><testcase classname="tests.api.test_nicegui_forms" name="test_state_load_failure_remains_visible_and_recovers" time="4.597" /></testsuite></testsuites>

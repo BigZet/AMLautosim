@@ -11,7 +11,7 @@ def test_saved_round_keeps_its_verified_package_after_default_changes(monkeypatc
     previous = runtime.GameClassifier(runtime.ROOT / 'resources/catboost_models' / name)
     config = deepcopy(previous.context)
     config['risk_model'] = previous.identity
-    future = SimpleNamespace(identity={'package_sha256':'future-default'})
+    future = SimpleNamespace(identity={'package_sha256':'future-default'}, release={})
     monkeypatch.setattr(runtime, 'get_game_classifier', lambda: future)
     selected = runtime.get_pinned_game_classifier(config)
     assert selected.identity == previous.identity

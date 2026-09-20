@@ -1,0 +1,6 @@
+{
+  "amount": true,
+  "animation": "correction-highlight",
+  "background": "rgb(255, 248, 243)",
+  "message": "Ошибки в цепочкеШаг 3Общая сумма покупок превышает 30 000 ₽"
+}

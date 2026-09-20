@@ -1,0 +1,10 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "scripts/check_nicegui_transport.py",
+    "--url",
+    "http://127.0.0.1:18120"
+  ],
+  "exit_code": 0,
+  "seconds": 0.5103666000068188
+}

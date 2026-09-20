@@ -4,10 +4,17 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier, Event
 
+import pytest
+
 from sqlalchemy import event
 
 from src.aml_workshop_simulator.db.session import async_engine
 from src.aml_workshop_simulator.services import scoring_run
+
+
+@pytest.fixture(params=[8, 10])
+def seeded_game_version(request):
+    return request.param
 
 
 def test_submission_races_autosave(

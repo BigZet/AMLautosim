@@ -1,0 +1,183 @@
+{
+  "architecture": "mean_of_three_shared_classifier_views",
+  "calibration": {
+    "method": "none"
+  },
+  "calibration_comparison": {
+    "raw": {
+      "agreement": 0.9980551053484603,
+      "expected_brier": 0.030820507578225447,
+      "expected_log_loss": 0.09379708230016373,
+      "grey_row_share": 0.14392220421393842,
+      "high_row_share": 0.43630470016207457,
+      "low_row_share": 0.419773095623987,
+      "mean_absolute_target_error": 0.0029005192104133025,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 3085,
+      "target_mse": 0.00012030484339914667
+    },
+    "sigmoid": {
+      "agreement": 0.9980551053484603,
+      "expected_brier": 0.030825238875686677,
+      "expected_log_loss": 0.09379123410945053,
+      "grey_row_share": 0.14327390599675852,
+      "high_row_share": 0.43630470016207457,
+      "low_row_share": 0.42042139384116695,
+      "mean_absolute_target_error": 0.0029792229091896174,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 3085,
+      "target_mse": 0.0001250361408603829
+    }
+  },
+  "context_sha256": "0e95f8df274a02cf71300071a0033ab6bb7e5b9eba7066041174bddba259041f",
+  "dataset_hashes": {
+    "casebook.jsonl": "53bc8caa1a6677b208ee023d29b3b9e9569e80ab37203453d2ec42490dce00c0",
+    "context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+    "features.csv": "0ea00097a82f38a27d4a8ef94d0311868400b40248d43cadaa52292615248078",
+    "groups.json": "75c263ee00d5bb9a014733b6b0658869e7cf966a9433c230a4bf6fc516d86bc0",
+    "policy.json": "bc3f976291c2a942d03a70f6641d9c082999072e60bf3fa1f947e763d5775eb1",
+    "targets.csv": "ef055ff45839a8e2e685d1030a7843b44311e10f75269ff6413b2e17f280e143"
+  },
+  "extractor_version": "aml-game-attributes-context-v1",
+  "failures": [],
+  "features": [
+    "recipient_count",
+    "precredit_outflow_share",
+    "cash_share",
+    "sender_count",
+    "max_recipient_share",
+    "second_return_ratio_all",
+    "third_return_ratio_all",
+    "card_count",
+    "second_split_ratio_all",
+    "amount_repetition_strength",
+    "second_match_error",
+    "fanout",
+    "cash",
+    "debit_episodes",
+    "rail_switch_rate",
+    "country_switch_rate",
+    "transfer_channel_switch_rate",
+    "cash_channel_switch_rate",
+    "purpose_switch_rate",
+    "unsupported_refund_share",
+    "supported_refund_share",
+    "shared_expense_alignment",
+    "service_relay_share",
+    "asset_cash_share",
+    "personal_passthrough_share",
+    "salary_consumption_share",
+    "funding_diversity",
+    "cash_purpose_switch_rate"
+  ],
+  "full_dataset_window_label_equivalence": true,
+  "inference_source_sha256": "2c535fac4b94c3db01381c6616a48c064cad6d309795c934c6b2d7dc5de818f4",
+  "limitations": [
+    "Synthetic interpretation target, not expert consensus or crime probability",
+    "Runtime integration and live-game acceptance remain separate"
+  ],
+  "metrics": {
+    "calibration-check": {
+      "agreement": 0.9980551053484603,
+      "expected_brier": 0.030820507578225447,
+      "expected_log_loss": 0.09379708230016373,
+      "grey_row_share": 0.14392220421393842,
+      "high_row_share": 0.43630470016207457,
+      "low_row_share": 0.419773095623987,
+      "mean_absolute_target_error": 0.0029005192104133025,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 3085,
+      "target_mse": 0.00012030484339914667
+    },
+    "calibration-fit": {
+      "agreement": 0.9959527278614214,
+      "expected_brier": 0.03254019250729663,
+      "expected_log_loss": 0.09874932822117122,
+      "grey_row_share": 0.1555771410069613,
+      "high_row_share": 0.43208677351465113,
+      "low_row_share": 0.41233608547838757,
+      "mean_absolute_target_error": 0.003298800791925575,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 6177,
+      "target_mse": 0.00025220900781885156
+    },
+    "test": {
+      "agreement": 0.9964320467077522,
+      "expected_brier": 0.03267581692548198,
+      "expected_log_loss": 0.09951845976747446,
+      "grey_row_share": 0.1579630230295167,
+      "high_row_share": 0.4317223483619851,
+      "low_row_share": 0.4103146286084982,
+      "mean_absolute_target_error": 0.003056259755518222,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 6166,
+      "target_mse": 0.00012005166463912571
+    },
+    "train": {
+      "agreement": 0.9986848109080173,
+      "expected_brier": 0.032703986816613316,
+      "expected_log_loss": 0.09975150750699986,
+      "grey_row_share": 0.15803741578763722,
+      "high_row_share": 0.4336903132297286,
+      "low_row_share": 0.40827227098263413,
+      "mean_absolute_target_error": 0.0022487758046255664,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 37257,
+      "target_mse": 4.1395652819560446e-05
+    },
+    "validation": {
+      "agreement": 0.9978529253891573,
+      "expected_brier": 0.0327337998202858,
+      "expected_log_loss": 0.10001429678563088,
+      "grey_row_share": 0.1563070316693505,
+      "high_row_share": 0.4349973161567364,
+      "low_row_share": 0.40869565217391307,
+      "mean_absolute_target_error": 0.003066694694755732,
+      "nonpattern_share_among_high": 0.0,
+      "pattern_share_among_low": 0.0,
+      "rows": 9315,
+      "target_mse": 0.00011776253272306765
+    }
+  },
+  "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+  "offline_quality_passed": true,
+  "panel_policy": {
+    "country_policy": "Within-sender country changes only; RU and KG have equal status",
+    "interpretations": 603,
+    "maximum_strictness_shift": 0.12,
+    "meaning": "Synthetic observable educational pattern membership; not criminal likelihood",
+    "purpose_policy": "Claims modify ambiguity only in combination with observable flow; no proof of legitimacy",
+    "sensitivity_settings": 201,
+    "time_windows": [
+      2,
+      10,
+      60
+    ],
+    "version": "aml-attribute-context-panel-v1"
+  },
+  "quality_policy": {
+    "grey_denominator": "unweighted held-out chain rows, not selected demonstrations",
+    "grey_probability_high_exclusive": 0.9,
+    "grey_probability_low_inclusive": 0.1,
+    "maximum_confident_error": 0.05,
+    "minimum_agreement": 0.95,
+    "population_grey_share_max": 0.2,
+    "population_grey_share_min": 0.1,
+    "version": "pattern-quality-v2"
+  },
+  "release_ready": false,
+  "score_kind": "educational_pattern_interpretation_probability",
+  "trainer_sha256": "ecd7732e416fdc83bb38ebaba6301e36e4476d76ebacb7e47b54b37ccd1a3712",
+  "training_parameters": {
+    "depth": 8,
+    "iterations": 1400,
+    "selected_iteration": 1399
+  },
+  "training_weighting": "Equal family contribution; view probabilities averaged using the three equal policy windows"
+}

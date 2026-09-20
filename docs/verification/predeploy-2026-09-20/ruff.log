@@ -1,0 +1,35 @@
+F401 [*] `src.aml_workshop_simulator.services.game_classifier.get_game_classifier` imported but unused
+ --> tests\api\test_organizer_settings.py:6:65
+  |
+4 | from pathlib import Path
+5 | import pytest
+6 | from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+  |                                                                 ^^^^^^^^^^^^^^^^^^^
+7 |
+8 | @pytest.fixture
+  |
+help: Remove unused import: `src.aml_workshop_simulator.services.game_classifier.get_game_classifier`
+  |
+5 | import pytest
+  - from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+6 |
+  |
+
+F401 [*] `src.aml_workshop_simulator.services.game_classifier.contract` imported but unused
+ --> tests\unit\test_organizer_settings.py:7:86
+  |
+5 | import pytest
+6 | from src.aml_workshop_simulator.core.errors import Conflict
+7 | from src.aml_workshop_simulator.services.game_classifier import get_game_classifier, contract
+  |                                                                                      ^^^^^^^^
+help: Remove unused import: `src.aml_workshop_simulator.services.game_classifier.contract`
+  |
+6 | from src.aml_workshop_simulator.core.errors import Conflict
+  - from src.aml_workshop_simulator.services.game_classifier import get_game_classifier, contract
+7 + from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+8 |
+  |
+
+Found 2 errors.
+[*] 2 fixable with the `--fix` option.
+

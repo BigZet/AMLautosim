@@ -1,0 +1,257 @@
+....................................FF...                                [100%]
+================================== FAILURES ===================================
+__________ test_parameters_and_amount_remain_editable_after_autosave __________
+tests\api\test_nicegui_participant_editing.py:109: in test_parameters_and_amount_remain_editable_after_autosave
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_participant_editing.py:42: in run
+    await user.should_see("Добавить операцию", retries=40)
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: in should_see
+    raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E   AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Мастер-класс AML]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Участник]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E              div
+E               Column
+E                Label [text=Баланс]
+E                Row
+E                 Label [text=180 000,00]
+E                 Label [text=₽]
+E               Column
+E                Column
+E                 Row
+E                  Label [text=Энергия]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]
+E                Column
+E                 Row
+E                  Label [text=Время]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Время: 30]
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Column
+E               Label [text=Цель исходящих опера...]
+E               Row
+E                Row
+E                 Label [text=0,00]
+E                 Label [text=₽]
+E                Label [text=0%]
+E               LinearProgress [size=4px, rounded=True]
+E               Label [text=из 400 000,00 ₽]
+E              Row
+E               Label [text=Комиссии]
+E               Label [text=0,00 ₽]
+E              Column
+E               Column
+E                Label [text=Лимиты и цель]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Цель]
+E                 Label [text=Ещё 400 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Наличные операции]
+E                 Label [text=0,00 / 120 000,00 ₽]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Действия в раунде]
+E                 Label [text=0 / 14]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Сумма покупок]
+E                 Label [text=0,00 / 30 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Количество покупок]
+E                 Label [text=0 / 3]
+E                Label [text=Добавьте хотя бы одн...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer
+__________________ test_registration_login_and_full_workshop __________________
+tests\api\test_nicegui_forms.py:254: in test_registration_login_and_full_workshop
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_forms.py:165: in run
+    await user.should_see("Добавить операцию", retries=40)
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: in should_see
+    raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E   AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Игра NiceGUI]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Тест формы]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E              div
+E               Column
+E                Label [text=Баланс]
+E                Row
+E                 Label [text=180 000,00]
+E                 Label [text=₽]
+E               Column
+E                Column
+E                 Row
+E                  Label [text=Энергия]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]
+E                Column
+E                 Row
+E                  Label [text=Время]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Время: 30]
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Column
+E               Label [text=Цель исходящих опера...]
+E               Row
+E                Row
+E                 Label [text=0,00]
+E                 Label [text=₽]
+E                Label [text=0%]
+E               LinearProgress [size=4px, rounded=True]
+E               Label [text=из 400 000,00 ₽]
+E              Row
+E               Label [text=Комиссии]
+E               Label [text=0,00 ₽]
+E              Column
+E               Column
+E                Label [text=Лимиты и цель]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Цель]
+E                 Label [text=Ещё 400 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Наличные операции]
+E                 Label [text=0,00 / 120 000,00 ₽]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Действия в раунде]
+E                 Label [text=0 / 14]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Сумма покупок]
+E                 Label [text=0,00 / 30 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Количество покупок]
+E                 Label [text=0 / 3]
+E                Label [text=Добавьте хотя бы одн...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer
+============================== warnings summary ===============================
+..\..\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\..\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/api/test_nicegui_participant_editing.py::test_parameters_and_amount_remain_editable_after_autosave
+FAILED tests/api/test_nicegui_forms.py::test_registration_login_and_full_workshop
+2 failed, 39 passed, 2 warnings in 28.95s
+

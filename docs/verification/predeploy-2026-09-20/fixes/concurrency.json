@@ -1,0 +1,12 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/api/test_concurrency.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 0,
+  "seconds": 20.53
+}

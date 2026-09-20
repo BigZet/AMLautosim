@@ -1,0 +1,9 @@
+
+Traceback (most recent call last):
+  File "/tmp/model_probe.py", line 20, in <module>
+    with (dest/"features.json").open("a") as f:f.write(" ")
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/usr/local/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/aml-package-audit-gjq5pomp/copy/features.json'

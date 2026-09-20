@@ -193,8 +193,6 @@ class RoundRules:
     target_outflow: Decimal
     max_actions: int
     max_identical_steps: int
-    max_night_operations: int
-    max_anonymous_operations: int
     category_limits: dict[str, Decimal] = field(default_factory=dict)
 
     @classmethod
@@ -212,9 +210,7 @@ class RoundRules:
             target_outflow=money(objectives["target_outflow"]),
             max_actions=int(objectives["max_actions"]),
             max_identical_steps=int(constraints["max_identical_steps"]),
-            max_night_operations=int(constraints["max_night_operations"]),
-            max_anonymous_operations=int(constraints["max_anonymous_operations"]),
-            category_limits={key: money(value) for key, value in raw_limits.items()},
+            category_limits={key: money(value) for key, value in raw_limits.items() if key != "anonymous"},
         )
 
 

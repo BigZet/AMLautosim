@@ -174,20 +174,6 @@ def _limit_report(
     ]
     entries.extend(
         [
-            (
-                "night_operations",
-                "Ночные операции",
-                "count",
-                nights,
-                rules.max_night_operations,
-            ),
-            (
-                "anonymous_operations",
-                "Анонимные получатели",
-                "count",
-                anonymous,
-                rules.max_anonymous_operations,
-            ),
             ("actions", "Действия в раунде", "count", actions, rules.max_actions),
         ]
     )
@@ -313,42 +299,9 @@ def _evaluate_validated(
 
         if time_of_day == "night":
             night_operations += 1
-            if night_operations > rules.max_night_operations:
-                violations.append(
-                    Violation(
-                        reason="night_operations_exceeded",
-                        step_id=step_id,
-                        step_index=index,
-                        field="context.time_of_day",
-                        current=str(night_operations),
-                        allowed=str(rules.max_night_operations),
-                        message=(
-                            f"{_step_label(index, spec)}, поле «Время операции»: это "
-                            f"{night_operations}-я ночная операция, за раунд допустимо не более "
-                            f"{rules.max_night_operations}. Перенесите операцию на день или вечер."
-                        ),
-                    )
-                )
 
         if recipient_type == "anonymous_wallet":
             anonymous_operations += 1
-            if anonymous_operations > rules.max_anonymous_operations:
-                violations.append(
-                    Violation(
-                        reason="anonymous_operations_exceeded",
-                        step_id=step_id,
-                        step_index=index,
-                        field="context.recipient_type",
-                        current=str(anonymous_operations),
-                        allowed=str(rules.max_anonymous_operations),
-                        message=(
-                            f"{_step_label(index, spec)}, поле «Получатель»: это "
-                            f"{anonymous_operations}-я операция на анонимного получателя, "
-                            f"за раунд допустимо не более {rules.max_anonymous_operations}. "
-                            "Выберите известного контрагента."
-                        ),
-                    )
-                )
 
         energy_cost, time_cost = _resource_costs(
             spec,
@@ -382,7 +335,7 @@ def _evaluate_validated(
                             field="amount",
                             current=str(purchase_outflow),
                             allowed=str(money(purchase_policy["max_total"])),
-                            message="Общая сумма покупок превышает 30 000 ₽. Уменьшите сумму или удалите покупку.",
+                            message=f"Общая сумма покупок превышает {_fmt_money(money(purchase_policy['max_total']))} ₽. Уменьшите сумму или удалите покупку.",
                         )
                     )
         else:  # neutral

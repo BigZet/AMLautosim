@@ -37,7 +37,9 @@ def test_fixed_salary_and_no_empty_claim_selector(tmp_path, monkeypatch):
                 )
 
             await user.open("/purpose-salary")
-            await user.should_see("Назначение операции: Зарплата")
+            field = next(e for e in user.find(ui.input).elements if e.value == "Зарплата")
+            assert field.props["label"] == "Назначение операции"
+            assert field.props["readonly"] is True
             await user.should_not_see("Основание (необязательно)")
             await user.should_not_see(ui.select)
 
@@ -336,7 +338,7 @@ def test_profile_history_does_not_infer_absence_from_incomplete_observation(
                 await user.should_see(
                     "В доступном фрагменте истории операций не наблюдалось"
                 )
-                await user.should_see("сведения об операциях неполны")
+                await user.should_see("Остальная история неизвестна")
                 await user.should_see("12.09.2026")
             else:
                 await user.should_see("Отсутствие операций не установлено")

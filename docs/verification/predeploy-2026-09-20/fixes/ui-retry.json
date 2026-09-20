@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/test_nicegui_organizer.py",
+    "tests/api/test_nicegui_participant_editing.py",
+    "tests/api/test_nicegui_forms.py",
+    "-q",
+    "--tb=short"
+  ],
+  "exit_code": 1,
+  "seconds": 35.23
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "docker",
+    "compose",
+    "--env-file",
+    ".local-run/predeploy-2026-09-20/fixes/compose.env",
+    "-p",
+    "aml-predeploy-fixes-20260920",
+    "-f",
+    "docker-compose.yml",
+    "restart",
+    "ui"
+  ],
+  "exit_code": 0,
+  "seconds": 0.84
+}

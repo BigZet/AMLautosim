@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from nicegui import ui
 
-from .counterparties import category_label, party_name
+from .counterparties import INFO, KINDS, category_label, party_name
 from src.aml_workshop_simulator.domain.counterparty_roles import party_allowed
 
 from decimal import Decimal
@@ -39,52 +39,68 @@ def profile_history_panel(round_data):
     profile = behavior["profile"]
     parties = {p["id"]: p for p in behavior["counterparties"]}
     coverage = summary.get("coverage")
-    with ui.expansion("Профиль и предыстория", value=True).classes("w-full"):
-        ui.label(f"Роль клиента: {profile['title']}").classes("font-semibold")
-        ui.label(profile["description"])
-        if coverage != "unknown":
-            period_label = (
-                "Доступный фрагмент истории"
-                if coverage == "partial"
-                else "Период истории"
-                if coverage
-                else "30 дней"
-            )
-            ui.label(
-                f"{period_label}: {datetime.fromisoformat(summary['starts_at']).strftime('%d.%m.%Y, %H:%M')} — до {datetime.fromisoformat(summary['ends_before']).strftime('%d.%m.%Y, %H:%M')} · {summary['timezone']}"
-            )
-        ui.label("История не меняет начальные ресурсы и не засчитывается в цель.")
+    with ui.column().classes("profile-section"):
+        with ui.column().classes("profile-overview"):
+            ui.label(profile['title']).classes("profile-section-title")
+            description = profile["description"]
+            if description == "Получает зарплату и переводы от знакомых, оплачивает повседневные покупки. Другие доходы неизвестны.":
+                description = "Зарплата и переводы от знакомых; повседневные покупки. Другие доходы неизвестны."
+            ui.label(description).classes("profile-description")
+            if coverage != "unknown":
+                period_label = "Часть истории" if coverage == "partial" else "История"
+                ui.label(
+                    f"{period_label}: {datetime.fromisoformat(summary['starts_at']).strftime('%d.%m.%Y')} — до {datetime.fromisoformat(summary['ends_before']).strftime('%d.%m.%Y')} · до игры, не входит в цель"
+                ).classes("profile-period")
+        if summary["status"] != "unknown" and coverage != "unknown":
+            total = summary["activity"]
+            with ui.element("div").classes("profile-metrics profile-totals"):
+                for label, value in [("Поступления", money(total['inflow'])), ("Списания", money(total['outflow']))]:
+                    with ui.column().classes("profile-metric"):
+                        ui.label(label).classes("text-xs muted")
+                        ui.label(value).classes("font-semibold")
+        with ui.column().classes("profile-subsection"):
+            ui.label("Стороны операций").classes("profile-section-title")
+            ui.table(
+                columns=[
+                    {"name": key, "label": label, "field": key, "align": "left"}
+                    for key, label in [
+                        ("name", "Сторона"),
+                        ("kind", "Тип"),
+                        ("information", "Сведения"),
+                        ("description", "Описание"),
+                    ]
+                ],
+                rows=[
+                    {
+                        "id": party["id"],
+                        "name": party_name(party),
+                        "kind": KINDS[party["kind"]],
+                        "information": INFO[party["information_status"]],
+                        "description": (
+                            "Личный знакомый"
+                            if party["personal_relationship"] == "known"
+                            else "Знакомство неизвестно"
+                        ) if party["kind"] == "person" else (
+                            category_label(party["category"]) if party.get("category") else "—"
+                        ),
+                    }
+                    for party in parties.values()
+                ],
+                row_key="id",
+                pagination={"rowsPerPage": 0},
+            ).props("flat wrap-cells hide-bottom").classes("w-full profile-history-table profile-parties-table")
         if summary["status"] == "unknown" or coverage == "unknown":
             ui.label("История недоступна. Отсутствие операций не установлено.")
             return
         total = summary["activity"]
-        ui.label(
-            f"Операций в истории: {total['count']} · Дней с активностью: {summary['active_days']}"
-        )
-        ui.label(
-            f"Поступления: {money(total['inflow'])} · Списания: {money(total['outflow'])}"
-        )
         if not total["count"]:
             ui.label(
                 "В доступном фрагменте истории операций не наблюдалось. Остальная история неизвестна."
                 if coverage == "partial"
                 else "За наблюдаемый период операций не было."
             )
-        with ui.expansion("Связи со сторонами").classes("w-full"):
-            ui.label(
-                "Личное знакомство и операции в доступной истории — разные сведения."
-                if coverage
-                else "Личное знакомство и операции за последние 30 дней — разные сведения."
-            )
-            for item in summary["counterparties"]:
-                if item["observation"] == "unknown":
-                    relation = "сведения об операциях неполны; отсутствие операций не установлено"
-                elif item["observation"] == "absent":
-                    relation = "операций не наблюдалось"
-                else:
-                    relation = f"операций: {item['activity']['count']}"
-                ui.label(f"{parties[item['counterparty_id']]['name']} — {relation}")
-        with ui.expansion("События предыстории").classes("w-full"):
+        with ui.column().classes("profile-subsection"):
+            ui.label("История операций").classes("profile-section-title")
             ui.table(
                 columns=[
                     {"name": key, "label": label, "field": key, "align": "left"}
@@ -114,8 +130,8 @@ def profile_history_panel(round_data):
                     for e in summary["events"]
                 ],
                 row_key="id",
-                pagination=10,
-            ).classes("w-full")
+                pagination={"rowsPerPage": 0},
+            ).props("flat wrap-cells hide-bottom").classes("w-full profile-history-table")
 
 
 class ProfileHistoryForm:
@@ -144,6 +160,13 @@ class ProfileHistoryForm:
     def update(self, target, key, value):
         target[key] = value
         self.behavior["history"]["version"] = "observed-history-v1"
+        context = self.behavior.get("aml_context")
+        if context is not None and target is self.behavior["history"] and key == "operations":
+            if value is None:
+                context.update(history_coverage="unknown", history_start=None, history_end=None)
+            elif context["history_coverage"] == "unknown":
+                start = datetime.fromisoformat(self.behavior["timeline"]["starts_at"])
+                context.update(history_coverage="complete", history_start=(start - timedelta(days=self.behavior["history"]["window_days"])).isoformat(), history_end=start.isoformat())
         self.on_change()
 
     def render(self):
@@ -178,6 +201,8 @@ class ProfileHistoryForm:
                         self.update(item, "operation_code", e.value)
                         item["counterparty_id"] = None
                         item["category"] = None
+                        for key in ("incoming_kind", "bank_country", "channel", "income_basis"):
+                            item.pop(key, None)
                         self.render()
 
                     ui.select(

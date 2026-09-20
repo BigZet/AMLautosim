@@ -113,12 +113,13 @@ def context_panel(config):
         return
     ctx = config["behavior"]["aml_context"]
     purposes = purpose_options(config)
-    with ui.expansion("Сведения и основания операций").classes("w-full"):
+    with ui.column().classes("profile-section"):
+        ui.label("Ожидаемая активность и основания").classes("profile-section-title")
         if not any(f["fact_type"] != "opening_balance" for f in ctx["facts"]):
             ui.label(
                 "В этой игре доступно подтверждение начального остатка. Документы по отдельным операциям не предоставлены; назначение является заявлением участника."
             ).classes("text-sm muted")
-        ui.label(f"Сведения на: {moment(ctx['as_of'])}").classes("text-sm muted")
+        ui.label(f"Сведения на: {moment(ctx['as_of'])}").classes("text-xs muted")
         ui.label("Ожидаемая активность").classes("font-semibold")
         expected = ctx["expected_activity"]
         ui.label(
@@ -128,15 +129,12 @@ def context_panel(config):
             "Виды деятельности: "
             + ", ".join(purposes[k] for k in expected["activity_kinds"])
         )
-        for direction, label in (("credit", "Поступления"), ("debit", "Списания")):
-            lo, hi = (
-                expected[f"expected_{direction}_min"],
-                expected[f"expected_{direction}_max"],
-            )
-            ui.label(
-                f"{label}: "
-                + ("неизвестно" if lo is None else f"{money(lo)} — {money(hi)}")
-            )
+        with ui.element("div").classes("profile-metrics"):
+            for direction, label in (("credit", "Поступления"), ("debit", "Списания")):
+                lo, hi = (expected[f"expected_{direction}_min"], expected[f"expected_{direction}_max"])
+                with ui.column().classes("profile-metric"):
+                    ui.label(label).classes("text-xs muted")
+                    ui.label("неизвестно" if lo is None else f"{money(lo)} — {money(hi)}").classes("font-medium")
         ui.label(
             "Это ожидаемые объёмы за указанный период, а не обязательные лимиты операций."
         ).classes("text-xs muted")
@@ -150,15 +148,22 @@ def context_panel(config):
             ui.label(
                 f"Известное окно истории: {moment(ctx['history_start'])} — {moment(ctx['history_end'])}"
             )
-        ui.label(
-            "Факты зафиксированы в раунде. Выбор основания не изменяет его проверку; учитываются срок, стороны, операция и предел суммы."
-        ).classes("text-xs muted")
+        ui.label("Для каждого основания важны статус проверки, срок, стороны и сумма.").classes("text-sm muted")
         if not ctx["facts"]:
             ui.label("Основания не представлены")
         for fact in ctx["facts"]:
-            with ui.expansion(fact_title(fact, purposes)).classes("w-full"):
-                for line in fact_details(config, fact):
-                    ui.label(line).classes("text-sm")
+            with ui.column().classes("profile-fact"):
+                title = FACT_TYPES[fact['fact_type']]
+                if fact['purpose_code'] != 'unknown':
+                    title += " · " + purposes[fact['purpose_code']]
+                ui.label(title).classes("font-semibold")
+                ui.label(STATUSES[fact['verification_status']]).classes("fact-status")
+                with ui.element("div").classes("fact-details-grid"):
+                    for line in fact_details(config, fact):
+                        label, _, value = line.partition(": ")
+                        with ui.column().classes("fact-detail"):
+                            ui.label(label).classes("text-xs muted")
+                            ui.label(value).classes("text-sm")
 
 
 def claim_details(config, claim_id):
@@ -181,9 +186,9 @@ def explanation_selector(config, step, on_change):
     if len(purposes) == 1:
         if not valid:
             on_change("purpose_code", next(iter(purposes)))
-        ui.label(
-            f"{purpose_field_label(step)}: {next(iter(purposes.values()))}"
-        ).classes("text-sm muted")
+        ui.input(
+            purpose_field_label(step), value=next(iter(purposes.values()))
+        ).props("outlined dense readonly hide-bottom-space").classes("operation-parameter operation-fixed")
     else:
         issue = None
 
@@ -210,21 +215,21 @@ def explanation_selector(config, step, on_change):
     }
     if not claims:
         return
-    details = ui.label(claim_details(config, step.get("claim_id"))).classes(
-        "text-xs muted"
-    )
+    with ui.column().classes("operation-timing"):
+        def update(event):
+            on_change("claim_id", event.value)
+            details.set_text(claim_details(config, event.value))
 
-    def update(event):
-        on_change("claim_id", event.value)
-        details.set_text(claim_details(config, event.value))
-
-    ui.select(
-        claims,
-        value=step.get("claim_id"),
-        label="Основание (необязательно)",
-        on_change=update,
-        clearable=True,
-    ).props("outlined dense options-dense").classes("operation-parameter")
+        ui.select(
+            claims,
+            value=step.get("claim_id"),
+            label="Основание (необязательно)",
+            on_change=update,
+            clearable=True,
+        ).props("outlined dense options-dense hide-bottom-space").classes("operation-parameter")
+        details = ui.label(claim_details(config, step.get("claim_id"))).classes(
+            "operation-moment"
+        )
 
 
 def explanation_readonly(config, step):

@@ -129,19 +129,12 @@ def party_selector(config, step, on_change):
         identity = next(iter(options))
         if step.get(role) != identity:
             on_change(role, identity)
-        ui.label(f"{label}: {options[identity]}").classes("text-sm muted")
+        ui.input(label, value=options[identity]).props("outlined dense readonly hide-bottom-space").classes("operation-parameter operation-fixed")
         return
-    details = ui.label(party_description(config, step.get(role))).classes(
-        "text-xs muted"
-    )
-
-    def update(event):
-        on_change(role, event.value)
-        details.set_text(party_description(config, event.value))
-
-    ui.select(options, value=step.get(role), label=label, on_change=update).props(
-        "outlined dense options-dense"
-    ).classes("operation-parameter")
+    ui.select(
+        options, value=step.get(role), label=label,
+        on_change=lambda event: on_change(role, event.value),
+    ).props("outlined dense options-dense hide-bottom-space").classes("operation-parameter")
 
 
 def party_readonly(config, step):

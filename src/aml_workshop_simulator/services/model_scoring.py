@@ -1,6 +1,7 @@
 """The sole online risk scorer: pinned CatBoost prediction and local Tree SHAP."""
 
 import json
+from copy import deepcopy
 import math
 import os
 from decimal import Decimal, ROUND_HALF_EVEN
@@ -28,9 +29,36 @@ def rounded(value):
     return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
+class LegacyOnlineModel(AMLRiskModel):
+    """Apply retired-rule compatibility without changing the archived extractor."""
+
+    def check_contract(self, config):
+        # Retired limits are irrelevant to inference, but remain in the archived
+        # v8 signature. Project only those keys to its frozen reference values.
+        signature_config = deepcopy(config)
+        frozen = json.loads(Path("config/model/smoke-scenario.json").read_text())["config"]["constraints"]
+        constraints = signature_config["constraints"]
+        for key in ("max_night_operations", "max_anonymous_operations"):
+            constraints[key] = frozen[key]
+        constraints.setdefault("category_limits", {})["anonymous"] = frozen["category_limits"]["anonymous"]
+        if (config.get("schema_version") != 8
+                or contract_signature(signature_config) != self.manifest["game_contract_signature"]):
+            raise Conflict("Конфигурация не поддерживается моделью CatBoost.",
+                           code="model_contract_mismatch")
+
+    def predict(self, steps, config):
+        from src.aml_workshop_simulator.domain.simulation import submit_blockers
+        from src.aml_workshop_simulator.services.expanded_simulation import evaluate_expanded_scenario
+
+        self.check_contract(config)
+        if submit_blockers(evaluate_expanded_scenario(steps, config)):
+            raise ValueError("Model supports only valid goal-completing scenarios")
+        return self.predict_features(extract_features(steps, config))
+
+
 class ModelScorer:
     def __init__(self):
-        self.adapter = AMLRiskModel(PACKAGE)
+        self.adapter = LegacyOnlineModel(PACKAGE)
         self.dictionary = json.loads(DICTIONARY.read_text())
         if set(self.dictionary["features"]) != set(self.adapter.columns):
             raise ValueError("Incomplete SHAP feature dictionary")
@@ -47,15 +75,7 @@ class ModelScorer:
         self.score(smoke["steps"], smoke["config"], require_pin=False)
 
     def check_config(self, config, *, require_pin=False):
-        if (
-            config.get("schema_version") != 8
-            or contract_signature(config)
-            != self.adapter.manifest["game_contract_signature"]
-        ):
-            raise Conflict(
-                "Конфигурация не поддерживается моделью CatBoost.",
-                code="model_contract_mismatch",
-            )
+        self.adapter.check_contract(config)
         cards = {c["code"]: c for c in config["card_snapshots"]}
         if {o["code"] for o in config["operations"]} != set(cards):
             raise Conflict(

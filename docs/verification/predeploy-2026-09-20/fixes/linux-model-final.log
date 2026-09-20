@@ -1,0 +1,12 @@
+{
+  "baseline_equal": 25,
+  "scored": 15,
+  "probability_min": 0.0009733191542858382,
+  "probability_max": 0.9998970302992771,
+  "shap_max_residual": 3.197442310920451e-14,
+  "seconds_total": 2.5579344620055053,
+  "median_ms": 166.3863540161401,
+  "max_ms": 215.05448600510135,
+  "corruption_rejected": true
+}
+

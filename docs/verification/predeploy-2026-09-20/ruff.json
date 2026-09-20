@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\bigze\\Documents\\GH\\AMLautosim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "ruff",
+    "check",
+    "src",
+    "scripts",
+    "tests",
+    "migrations"
+  ],
+  "exit_code": 1,
+  "seconds": 0.13
+}

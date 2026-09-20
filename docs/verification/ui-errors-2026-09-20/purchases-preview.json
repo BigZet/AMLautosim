@@ -1,0 +1,181 @@
+{
+  "resources": {
+    "schema_version": 7,
+    "ruleset_version": "expanded-rules-stage04-v1",
+    "valid": false,
+    "resources_after": {
+      "balance": "140000.00",
+      "energy": 32,
+      "time": 32,
+      "available_steps": 14
+    },
+    "totals": {
+      "gross_inflow": "0.00",
+      "gross_outflow": "40000.00",
+      "fees": "0.00",
+      "target_outflow": "0.00",
+      "purchase_outflow": "40000.00"
+    },
+    "objective": {
+      "target_outflow": "360000.00",
+      "reached": false
+    },
+    "limit_usage": {
+      "cash": "0.00",
+      "anonymous": "0.00",
+      "night_operations": 0,
+      "anonymous_operations": 0,
+      "actions": 2
+    },
+    "limits": [
+      {
+        "code": "cash",
+        "label": "Наличные операции",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "150000.00",
+        "remaining": "150000.00"
+      },
+      {
+        "code": "actions",
+        "label": "Действия в раунде",
+        "kind": "count",
+        "used": "2",
+        "limit": "16",
+        "remaining": "14"
+      },
+      {
+        "code": "purchase_total",
+        "label": "Сумма покупок",
+        "kind": "money",
+        "used": "40000.00",
+        "limit": "30000.00",
+        "remaining": "0"
+      },
+      {
+        "code": "purchase_count",
+        "label": "Количество покупок",
+        "kind": "count",
+        "used": "2",
+        "limit": "3",
+        "remaining": "1"
+      }
+    ],
+    "violations": [
+      {
+        "reason": "purchase_total_exceeded",
+        "message": "Общая сумма покупок превышает 30 000 ₽ ₽. Уменьшите сумму или удалите покупку.",
+        "step_id": "c5f45868-f9e5-493c-9e9f-3ab891bc8561",
+        "step_index": 2,
+        "field": "amount",
+        "current": "40000.00",
+        "allowed": "30000.00"
+      }
+    ],
+    "per_step": [
+      {
+        "step_id": "1160a64c-4f27-4315-ac72-6b85b89686ad",
+        "step_index": 1,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "180000.00",
+          "energy": 34,
+          "time": 34
+        },
+        "resources_after": {
+          "balance": "160000.00",
+          "energy": 33,
+          "time": 33
+        },
+        "gross": "20000.00",
+        "fee": "0.00",
+        "money_delta": "-20000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "c5f45868-f9e5-493c-9e9f-3ab891bc8561",
+        "step_index": 2,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "160000.00",
+          "energy": 33,
+          "time": 33
+        },
+        "resources_after": {
+          "balance": "140000.00",
+          "energy": 32,
+          "time": 32
+        },
+        "gross": "20000.00",
+        "fee": "0.00",
+        "money_delta": "-20000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      }
+    ],
+    "timeline": {
+      "version": "operation-timeline-v1",
+      "timezone": "Europe/Moscow",
+      "steps": [
+        {
+          "step_id": "1160a64c-4f27-4315-ac72-6b85b89686ad",
+          "step_index": 1,
+          "occurred_at": "2026-09-13T09:00:00+03:00",
+          "elapsed_minutes": 0,
+          "interval_minutes": null,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": null
+        },
+        {
+          "step_id": "c5f45868-f9e5-493c-9e9f-3ab891bc8561",
+          "step_index": 2,
+          "occurred_at": "2026-09-13T09:01:00+03:00",
+          "elapsed_minutes": 1,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        }
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "reason": "purchase_total_exceeded",
+      "message": "Общая сумма покупок превышает 30 000 ₽ ₽. Уменьшите сумму или удалите покупку.",
+      "step_id": "c5f45868-f9e5-493c-9e9f-3ab891bc8561",
+      "step_index": 2,
+      "field": "amount",
+      "current": "40000.00",
+      "allowed": "30000.00"
+    },
+    {
+      "reason": "target_outflow_not_reached",
+      "message": "Цель раунда не достигнута: расходный оборот 0 ₽ из необходимых 360 000 ₽. Добавьте или увеличьте расходные операции.",
+      "step_id": null,
+      "step_index": null,
+      "field": "objective.target_outflow",
+      "current": "0.00",
+      "allowed": "360000.00"
+    }
+  ],
+  "can_submit": false
+}

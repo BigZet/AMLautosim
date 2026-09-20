@@ -1,0 +1,39 @@
+Player session and result survive API/UI restart
+Admin session survives; new game created; mobile overflow False
+
+Traceback (most recent call last):
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\predeploy-2026-09-20\browser_restart.py", line 15, in <module>
+    a.get_by_label("Цель исходящих операций",exact=True).fill("250000")
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\sync_api\_generated.py", line 18398, in fill
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.fill(
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_locator.py", line 219, in fill
+    return await self._frame.fill(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_frame.py", line 637, in fill
+    await self._fill(**locals_to_params(locals()))
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_frame.py", line 649, in _fill
+    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\.local-run\ui-review-deps\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.fill: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_label("Цель исходящих операций", exact=True)
+

@@ -1,0 +1,62 @@
+ M .dockerignore
+ M config/base_round.json
+ M config/game_curriculum_defaults_v4.json
+ M deploy/Dockerfile
+ M docker-compose.yml
+ M docs/README.md
+ M docs/deployment.md
+ M docs/operations.md
+ M scripts/package_runtime.py
+ M src/aml_workshop_simulator/domain/game_models.py
+ M src/aml_workshop_simulator/domain/simulation.py
+ M src/aml_workshop_simulator/schemas/expanded_contract.py
+ M src/aml_workshop_simulator/schemas/round_config.py
+ M src/aml_workshop_simulator/services/counterparties.py
+ M src/aml_workshop_simulator/services/editor_metadata.py
+ M src/aml_workshop_simulator/services/game_classifier.py
+ M src/aml_workshop_simulator/services/model_scoring.py
+ M src/aml_workshop_simulator/ui/nicegui/aml_context.py
+ M src/aml_workshop_simulator/ui/nicegui/app.py
+ M src/aml_workshop_simulator/ui/nicegui/configuration.py
+ M src/aml_workshop_simulator/ui/nicegui/counterparties.py
+ M src/aml_workshop_simulator/ui/nicegui/operation_timeline.py
+ M src/aml_workshop_simulator/ui/nicegui/organizer.py
+ M src/aml_workshop_simulator/ui/nicegui/participant.py
+ M src/aml_workshop_simulator/ui/nicegui/profile_history.py
+ M src/aml_workshop_simulator/ui/nicegui/shap_result.py
+ M src/aml_workshop_simulator/ui/nicegui/theme.py
+ M tests/api/test_concurrency.py
+ M tests/api/test_nicegui_forms.py
+ M tests/api/test_nicegui_participant_editing.py
+ M tests/api/test_rounds.py
+ M tests/unit/test_game_engine.py
+ M tests/unit/test_nicegui_organizer.py
+ M tests/unit/test_pinned_game_packages.py
+ M tests/unit/test_profile_history_ui.py
+ M tests/unit/test_purchase_ui.py
+ M tests/unit/test_runtime_package.py
+ M tests/unit/test_timeline_ui.py
+?? deploy/compose.image.yml
+?? docs/ui-style-guide.md
+?? docs/verification/aml-classifier-v1/organizer-settings-2026-09-20.md
+?? docs/verification/aml-classifier-v1/retired-limits-2026-09-18.md
+?? docs/verification/predeploy-2026-09-20/
+?? docs/verification/ui-errors-2026-09-20/
+?? docs/verification/ui-interactive-2026-09-20/
+?? resources/catboost_models/aml-game-attribute-context-unlimited-v1/
+?? resources/catboost_models/aml-game-organizer-settings-v1/
+?? scripts/package_organizer_settings.py
+?? scripts/package_retired_limits.py
+?? scripts/package_verification.py
+?? src/aml_workshop_simulator/ui/nicegui/participant_limits.py
+?? tests/api/test_organizer_settings.py
+?? tests/api/test_retired_limits_release.py
+?? tests/fixtures/retired_limits_baseline.json
+?? tests/unit/test_correction_navigation.py
+?? tests/unit/test_legacy_retired_limits.py
+?? tests/unit/test_organizer_settings.py
+?? tests/unit/test_package_publication.py
+?? tests/unit/test_participant_limits.py
+?? tests/unit/test_retired_limits_model.py
+?? tests/unit/test_retired_limits_ui.py
+?? tests/unit/test_shap_table.py

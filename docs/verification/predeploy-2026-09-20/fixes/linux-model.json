@@ -1,0 +1,11 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "aml-predeploy-fixes-20260920-api-1",
+    "python",
+    "/tmp/model_probe.py"
+  ],
+  "exit_code": 1,
+  "seconds": 4.58
+}

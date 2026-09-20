@@ -30,8 +30,6 @@ def editor_metadata() -> EditorMetadataOut:
             "target_outflow": "Цель исходящих операций",
             "max_actions": "Максимум шагов",
             "max_identical_steps": "Повторения одной операции",
-            "max_night_operations": "Ночные операции",
-            "max_anonymous_operations": "Анонимные операции",
             "min_amount": "Минимальная сумма",
             "max_amount": "Максимальная сумма",
             "max_occurrences": "Максимум использований",
@@ -82,7 +80,7 @@ def editor_metadata() -> EditorMetadataOut:
         schema_version=10,
         limits=LIMITS,
         labels=labels,
-        quotas=QUOTA_LABELS,
+        quotas={k: v for k, v in QUOTA_LABELS.items() if k != "anonymous"},
         resource_weights={k: labels[k] for k in RESOURCE_WEIGHT_KEYS},
         supported_versions={
             "ruleset_version": sorted(SUPPORTED_RULESETS),

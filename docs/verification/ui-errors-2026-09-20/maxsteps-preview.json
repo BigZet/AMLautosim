@@ -1,0 +1,1255 @@
+{
+  "resources": {
+    "schema_version": 7,
+    "ruleset_version": "expanded-rules-stage04-v1",
+    "valid": false,
+    "resources_after": {
+      "balance": "163000.00",
+      "energy": 17,
+      "time": 17,
+      "available_steps": 0
+    },
+    "totals": {
+      "gross_inflow": "0.00",
+      "gross_outflow": "17000.00",
+      "fees": "0.00",
+      "target_outflow": "0.00",
+      "purchase_outflow": "17000.00"
+    },
+    "objective": {
+      "target_outflow": "360000.00",
+      "reached": false
+    },
+    "limit_usage": {
+      "cash": "0.00",
+      "anonymous": "0.00",
+      "night_operations": 0,
+      "anonymous_operations": 0,
+      "actions": 17
+    },
+    "limits": [
+      {
+        "code": "cash",
+        "label": "Наличные операции",
+        "kind": "money",
+        "used": "0.00",
+        "limit": "150000.00",
+        "remaining": "150000.00"
+      },
+      {
+        "code": "actions",
+        "label": "Действия в раунде",
+        "kind": "count",
+        "used": "17",
+        "limit": "16",
+        "remaining": "0"
+      },
+      {
+        "code": "purchase_total",
+        "label": "Сумма покупок",
+        "kind": "money",
+        "used": "17000.00",
+        "limit": "30000.00",
+        "remaining": "13000.00"
+      },
+      {
+        "code": "purchase_count",
+        "label": "Количество покупок",
+        "kind": "count",
+        "used": "17",
+        "limit": "3",
+        "remaining": "0"
+      }
+    ],
+    "violations": [
+      {
+        "reason": "max_actions_exceeded",
+        "message": "В цепочке 17 шагов, а раунд допускает не более 16. Удалите лишние шаги.",
+        "step_id": null,
+        "step_index": null,
+        "field": "steps",
+        "current": "17",
+        "allowed": "16"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 4 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 4 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+        "step_index": 4,
+        "field": "card",
+        "current": "4",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 4 «Оплатить товары или услуги»: подряд идет 4 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+        "step_index": 4,
+        "field": "card",
+        "current": "4",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 5 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 5 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+        "step_index": 5,
+        "field": "card",
+        "current": "5",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 5 «Оплатить товары или услуги»: подряд идет 5 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+        "step_index": 5,
+        "field": "card",
+        "current": "5",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 6 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 6 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+        "step_index": 6,
+        "field": "card",
+        "current": "6",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 6 «Оплатить товары или услуги»: подряд идет 6 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+        "step_index": 6,
+        "field": "card",
+        "current": "6",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 7 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 7 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+        "step_index": 7,
+        "field": "card",
+        "current": "7",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 7 «Оплатить товары или услуги»: подряд идет 7 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+        "step_index": 7,
+        "field": "card",
+        "current": "7",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 8 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 8 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+        "step_index": 8,
+        "field": "card",
+        "current": "8",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 8 «Оплатить товары или услуги»: подряд идет 8 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+        "step_index": 8,
+        "field": "card",
+        "current": "8",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 9 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 9 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+        "step_index": 9,
+        "field": "card",
+        "current": "9",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 9 «Оплатить товары или услуги»: подряд идет 9 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+        "step_index": 9,
+        "field": "card",
+        "current": "9",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 10 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 10 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+        "step_index": 10,
+        "field": "card",
+        "current": "10",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 10 «Оплатить товары или услуги»: подряд идет 10 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+        "step_index": 10,
+        "field": "card",
+        "current": "10",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 11 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 11 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+        "step_index": 11,
+        "field": "card",
+        "current": "11",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 11 «Оплатить товары или услуги»: подряд идет 11 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+        "step_index": 11,
+        "field": "card",
+        "current": "11",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 12 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 12 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+        "step_index": 12,
+        "field": "card",
+        "current": "12",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 12 «Оплатить товары или услуги»: подряд идет 12 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+        "step_index": 12,
+        "field": "card",
+        "current": "12",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 13 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 13 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+        "step_index": 13,
+        "field": "card",
+        "current": "13",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 13 «Оплатить товары или услуги»: подряд идет 13 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+        "step_index": 13,
+        "field": "card",
+        "current": "13",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 14 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 14 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+        "step_index": 14,
+        "field": "card",
+        "current": "14",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 14 «Оплатить товары или услуги»: подряд идет 14 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+        "step_index": 14,
+        "field": "card",
+        "current": "14",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 15 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 15 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+        "step_index": 15,
+        "field": "card",
+        "current": "15",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 15 «Оплатить товары или услуги»: подряд идет 15 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+        "step_index": 15,
+        "field": "card",
+        "current": "15",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 16 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 16 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+        "step_index": 16,
+        "field": "card",
+        "current": "16",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 16 «Оплатить товары или услуги»: подряд идет 16 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+        "step_index": 16,
+        "field": "card",
+        "current": "16",
+        "allowed": "3"
+      },
+      {
+        "reason": "max_occurrences_exceeded",
+        "message": "Шаг 17 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 17 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+        "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+        "step_index": 17,
+        "field": "card",
+        "current": "17",
+        "allowed": "3"
+      },
+      {
+        "reason": "identical_streak_exceeded",
+        "message": "Шаг 17 «Оплатить товары или услуги»: подряд идет 17 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+        "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+        "step_index": 17,
+        "field": "card",
+        "current": "17",
+        "allowed": "3"
+      }
+    ],
+    "per_step": [
+      {
+        "step_id": "419a6f9b-bd65-44e1-b840-78697532322a",
+        "step_index": 1,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "180000.00",
+          "energy": 34,
+          "time": 34
+        },
+        "resources_after": {
+          "balance": "179000.00",
+          "energy": 33,
+          "time": 33
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "b2044e12-343c-4400-aab7-7ca7f73874e1",
+        "step_index": 2,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "179000.00",
+          "energy": 33,
+          "time": 33
+        },
+        "resources_after": {
+          "balance": "178000.00",
+          "energy": 32,
+          "time": 32
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "ae3aa4a0-1e85-44db-b0de-6fc838659e8e",
+        "step_index": 3,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "178000.00",
+          "energy": 32,
+          "time": 32
+        },
+        "resources_after": {
+          "balance": "177000.00",
+          "energy": 31,
+          "time": 31
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+        "step_index": 4,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "177000.00",
+          "energy": 31,
+          "time": 31
+        },
+        "resources_after": {
+          "balance": "176000.00",
+          "energy": 30,
+          "time": 30
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+        "step_index": 5,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "176000.00",
+          "energy": 30,
+          "time": 30
+        },
+        "resources_after": {
+          "balance": "175000.00",
+          "energy": 29,
+          "time": 29
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+        "step_index": 6,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "175000.00",
+          "energy": 29,
+          "time": 29
+        },
+        "resources_after": {
+          "balance": "174000.00",
+          "energy": 28,
+          "time": 28
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+        "step_index": 7,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "174000.00",
+          "energy": 28,
+          "time": 28
+        },
+        "resources_after": {
+          "balance": "173000.00",
+          "energy": 27,
+          "time": 27
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+        "step_index": 8,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "173000.00",
+          "energy": 27,
+          "time": 27
+        },
+        "resources_after": {
+          "balance": "172000.00",
+          "energy": 26,
+          "time": 26
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+        "step_index": 9,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "172000.00",
+          "energy": 26,
+          "time": 26
+        },
+        "resources_after": {
+          "balance": "171000.00",
+          "energy": 25,
+          "time": 25
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+        "step_index": 10,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "171000.00",
+          "energy": 25,
+          "time": 25
+        },
+        "resources_after": {
+          "balance": "170000.00",
+          "energy": 24,
+          "time": 24
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+        "step_index": 11,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "170000.00",
+          "energy": 24,
+          "time": 24
+        },
+        "resources_after": {
+          "balance": "169000.00",
+          "energy": 23,
+          "time": 23
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+        "step_index": 12,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "169000.00",
+          "energy": 23,
+          "time": 23
+        },
+        "resources_after": {
+          "balance": "168000.00",
+          "energy": 22,
+          "time": 22
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+        "step_index": 13,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "168000.00",
+          "energy": 22,
+          "time": 22
+        },
+        "resources_after": {
+          "balance": "167000.00",
+          "energy": 21,
+          "time": 21
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+        "step_index": 14,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "167000.00",
+          "energy": 21,
+          "time": 21
+        },
+        "resources_after": {
+          "balance": "166000.00",
+          "energy": 20,
+          "time": 20
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+        "step_index": 15,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "166000.00",
+          "energy": 20,
+          "time": 20
+        },
+        "resources_after": {
+          "balance": "165000.00",
+          "energy": 19,
+          "time": 19
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+        "step_index": 16,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "165000.00",
+          "energy": 19,
+          "time": 19
+        },
+        "resources_after": {
+          "balance": "164000.00",
+          "energy": 18,
+          "time": 18
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      },
+      {
+        "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+        "step_index": 17,
+        "card_code": "purchase",
+        "card_version": 1,
+        "card_title": "Оплатить товары или услуги",
+        "resources_before": {
+          "balance": "164000.00",
+          "energy": 18,
+          "time": 18
+        },
+        "resources_after": {
+          "balance": "163000.00",
+          "energy": 17,
+          "time": 17
+        },
+        "gross": "1000.00",
+        "fee": "0.00",
+        "money_delta": "-1000.00",
+        "energy_cost": 1,
+        "time_cost": 1,
+        "detail_factors": [],
+        "purchase": {
+          "merchant_id": "shop",
+          "category": "groceries"
+        }
+      }
+    ],
+    "timeline": {
+      "version": "operation-timeline-v1",
+      "timezone": "Europe/Moscow",
+      "steps": [
+        {
+          "step_id": "419a6f9b-bd65-44e1-b840-78697532322a",
+          "step_index": 1,
+          "occurred_at": "2026-09-13T09:00:00+03:00",
+          "elapsed_minutes": 0,
+          "interval_minutes": null,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": null
+        },
+        {
+          "step_id": "b2044e12-343c-4400-aab7-7ca7f73874e1",
+          "step_index": 2,
+          "occurred_at": "2026-09-13T09:01:00+03:00",
+          "elapsed_minutes": 1,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "ae3aa4a0-1e85-44db-b0de-6fc838659e8e",
+          "step_index": 3,
+          "occurred_at": "2026-09-13T09:02:00+03:00",
+          "elapsed_minutes": 2,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+          "step_index": 4,
+          "occurred_at": "2026-09-13T09:03:00+03:00",
+          "elapsed_minutes": 3,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+          "step_index": 5,
+          "occurred_at": "2026-09-13T09:04:00+03:00",
+          "elapsed_minutes": 4,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+          "step_index": 6,
+          "occurred_at": "2026-09-13T09:05:00+03:00",
+          "elapsed_minutes": 5,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+          "step_index": 7,
+          "occurred_at": "2026-09-13T09:06:00+03:00",
+          "elapsed_minutes": 6,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+          "step_index": 8,
+          "occurred_at": "2026-09-13T09:07:00+03:00",
+          "elapsed_minutes": 7,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+          "step_index": 9,
+          "occurred_at": "2026-09-13T09:08:00+03:00",
+          "elapsed_minutes": 8,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+          "step_index": 10,
+          "occurred_at": "2026-09-13T09:09:00+03:00",
+          "elapsed_minutes": 9,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+          "step_index": 11,
+          "occurred_at": "2026-09-13T09:10:00+03:00",
+          "elapsed_minutes": 10,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+          "step_index": 12,
+          "occurred_at": "2026-09-13T09:11:00+03:00",
+          "elapsed_minutes": 11,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+          "step_index": 13,
+          "occurred_at": "2026-09-13T09:12:00+03:00",
+          "elapsed_minutes": 12,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+          "step_index": 14,
+          "occurred_at": "2026-09-13T09:13:00+03:00",
+          "elapsed_minutes": 13,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+          "step_index": 15,
+          "occurred_at": "2026-09-13T09:14:00+03:00",
+          "elapsed_minutes": 14,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+          "step_index": 16,
+          "occurred_at": "2026-09-13T09:15:00+03:00",
+          "elapsed_minutes": 15,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        },
+        {
+          "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+          "step_index": 17,
+          "occurred_at": "2026-09-13T09:16:00+03:00",
+          "elapsed_minutes": 16,
+          "interval_minutes": 1,
+          "waiting_time_cost": 0,
+          "operation_time_cost": 1,
+          "time_of_day": "day",
+          "pace": "rapid"
+        }
+      ]
+    }
+  },
+  "blockers": [
+    {
+      "reason": "max_actions_exceeded",
+      "message": "В цепочке 17 шагов, а раунд допускает не более 16. Удалите лишние шаги.",
+      "step_id": null,
+      "step_index": null,
+      "field": "steps",
+      "current": "17",
+      "allowed": "16"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 4 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 4 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+      "step_index": 4,
+      "field": "card",
+      "current": "4",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 4 «Оплатить товары или услуги»: подряд идет 4 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "0369a671-a0ee-4c31-898e-230b596d9e30",
+      "step_index": 4,
+      "field": "card",
+      "current": "4",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 5 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 5 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+      "step_index": 5,
+      "field": "card",
+      "current": "5",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 5 «Оплатить товары или услуги»: подряд идет 5 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "ace5160f-037e-4d68-bc40-90693a33f634",
+      "step_index": 5,
+      "field": "card",
+      "current": "5",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 6 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 6 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+      "step_index": 6,
+      "field": "card",
+      "current": "6",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 6 «Оплатить товары или услуги»: подряд идет 6 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "f32283f2-b23b-4494-af1e-2bf5e5882401",
+      "step_index": 6,
+      "field": "card",
+      "current": "6",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 7 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 7 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+      "step_index": 7,
+      "field": "card",
+      "current": "7",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 7 «Оплатить товары или услуги»: подряд идет 7 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "cce89658-465d-4d59-888d-c09a5e1fca07",
+      "step_index": 7,
+      "field": "card",
+      "current": "7",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 8 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 8 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+      "step_index": 8,
+      "field": "card",
+      "current": "8",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 8 «Оплатить товары или услуги»: подряд идет 8 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "5a503242-19c6-4a32-88cb-42c743b32cc1",
+      "step_index": 8,
+      "field": "card",
+      "current": "8",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 9 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 9 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+      "step_index": 9,
+      "field": "card",
+      "current": "9",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 9 «Оплатить товары или услуги»: подряд идет 9 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "0ee8ec52-1e8f-4134-a1b1-f9db18d56fb2",
+      "step_index": 9,
+      "field": "card",
+      "current": "9",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 10 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 10 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+      "step_index": 10,
+      "field": "card",
+      "current": "10",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 10 «Оплатить товары или услуги»: подряд идет 10 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "9e467165-498a-4497-b746-313a78d7047c",
+      "step_index": 10,
+      "field": "card",
+      "current": "10",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 11 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 11 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+      "step_index": 11,
+      "field": "card",
+      "current": "11",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 11 «Оплатить товары или услуги»: подряд идет 11 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "027b7d15-12bb-46b7-8716-4652215099c5",
+      "step_index": 11,
+      "field": "card",
+      "current": "11",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 12 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 12 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+      "step_index": 12,
+      "field": "card",
+      "current": "12",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 12 «Оплатить товары или услуги»: подряд идет 12 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "dc21a900-a397-410e-bc8b-dedd3e6e755b",
+      "step_index": 12,
+      "field": "card",
+      "current": "12",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 13 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 13 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+      "step_index": 13,
+      "field": "card",
+      "current": "13",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 13 «Оплатить товары или услуги»: подряд идет 13 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "df82e010-c8bb-4b51-8a71-44367cce83d0",
+      "step_index": 13,
+      "field": "card",
+      "current": "13",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 14 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 14 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+      "step_index": 14,
+      "field": "card",
+      "current": "14",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 14 «Оплатить товары или услуги»: подряд идет 14 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "9ee9d068-c1fe-4dee-a9e9-98aa31cbd196",
+      "step_index": 14,
+      "field": "card",
+      "current": "14",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 15 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 15 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+      "step_index": 15,
+      "field": "card",
+      "current": "15",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 15 «Оплатить товары или услуги»: подряд идет 15 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "665d1a3f-e983-444d-9a60-4baaf6565f88",
+      "step_index": 15,
+      "field": "card",
+      "current": "15",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 16 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 16 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+      "step_index": 16,
+      "field": "card",
+      "current": "16",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 16 «Оплатить товары или услуги»: подряд идет 16 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "4e552031-c612-46e5-8c5a-dbd42070b55a",
+      "step_index": 16,
+      "field": "card",
+      "current": "16",
+      "allowed": "3"
+    },
+    {
+      "reason": "max_occurrences_exceeded",
+      "message": "Шаг 17 «Оплатить товары или услуги»: суммарно по карточке «Оплатить товары или услуги» набрано 17 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+      "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+      "step_index": 17,
+      "field": "card",
+      "current": "17",
+      "allowed": "3"
+    },
+    {
+      "reason": "identical_streak_exceeded",
+      "message": "Шаг 17 «Оплатить товары или услуги»: подряд идет 17 одинаковых операций, допустимо не более 3. Переставьте шаги так, чтобы между ними была другая операция.",
+      "step_id": "c4cc61c1-526f-4501-baa0-78abc1cd02a5",
+      "step_index": 17,
+      "field": "card",
+      "current": "17",
+      "allowed": "3"
+    },
+    {
+      "reason": "target_outflow_not_reached",
+      "message": "Цель раунда не достигнута: расходный оборот 0 ₽ из необходимых 360 000 ₽. Добавьте или увеличьте расходные операции.",
+      "step_id": null,
+      "step_index": null,
+      "field": "objective.target_outflow",
+      "current": "0.00",
+      "allowed": "360000.00"
+    }
+  ],
+  "can_submit": false
+}

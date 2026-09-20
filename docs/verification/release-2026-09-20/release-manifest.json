@@ -1,0 +1,54 @@
+{
+  "tag": "aml-runtime:20260920",
+  "image_id": "sha256:a9a792b0dc963a3b744e3edb8fb976030e476b2b862ad144a4f3807d05dc56b7",
+  "os": "linux",
+  "architecture": "amd64",
+  "commit": "13e01a9e95b8eff711dd04f920ac602e0815d2b6",
+  "source": "working tree with uncommitted changes",
+  "health": {
+    "status": "ready",
+    "checks": {
+      "model": {
+        "package_sha256": "6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+        "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+        "context_sha256": "e70d9bd62bed8bb270d377de7bb54e314018a639808fa15da99791c88a139cef",
+        "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+        "contract_version": 10,
+        "extractor_version": "aml-game-attributes-context-v1",
+        "score_kind": "educational_pattern_probability",
+        "model_version": "aml-game:sha256:6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+        "explanation_version": 5
+      },
+      "database": "connected",
+      "ruleset_versions": [
+        "aml-game:sha256:6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+        "game-rules-v5",
+        "leaderboard-v2"
+      ],
+      "migrations": "head"
+    }
+  },
+  "artifacts": {
+    "aml-runtime-image.tar": "fc1bb4094b725540a77836b5d158ce027808051cc20766e641addfc9f459ef8e",
+    "aml-runtime.tar.gz": "1e0bfb14a01bca975cc80dc09522a1b7e00214f7ab08ebca38541e10b096a904"
+  },
+  "postgres": {
+    "image_id": "sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+    "repo_digests": [
+      "postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"
+    ]
+  },
+  "status": "release-candidate; see verification report for unresolved full-suite failures",
+  "report": "verification/README.md",
+  "verification": {
+    "release_tests_passed": 196,
+    "windows_symlink_skip_verified_on_linux": true,
+    "full_suite_before_test_updates": {
+      "passed": 973,
+      "failed": 77,
+      "errors": 11,
+      "skipped": 1
+    },
+    "outstanding": "research contract drift and two test-only legacy/offline classifier integrations"
+  }
+}

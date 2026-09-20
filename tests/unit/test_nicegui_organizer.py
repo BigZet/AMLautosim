@@ -48,3 +48,37 @@ def test_delayed_panel_response_is_discarded(panel, change):
         await task
 
     asyncio.run(run())
+
+
+@pytest.mark.parametrize("finish", ["disconnect", "delete", "confirm", "cancel"])
+def test_confirmation_client_lifecycle(finish):
+    from nicegui import ui
+    from nicegui.testing.user_simulation import user_simulation
+
+    async def run():
+        async with user_simulation() as user:
+            @ui.page("/confirmation-test")
+            def page():
+                ui.label("Confirmation test")
+            await user.open("/confirmation-test")
+            screen = OrganizerScreen.__new__(OrganizerScreen)
+            async def confirm():
+                with user:
+                    return await screen.confirm("Confirm action")
+            task = asyncio.create_task(confirm())
+            await asyncio.sleep(0.1)
+            dialog = next(iter(user.find(ui.dialog).elements))
+            client = dialog.client
+            if finish == "disconnect":
+                for handler in list(client.disconnect_handlers):
+                    handler()
+            elif finish == "delete":
+                client.delete()
+            else:
+                dialog.submit(True if finish == "confirm" else None)
+            result = await asyncio.wait_for(task, 2)
+            assert result is (True if finish == "confirm" else None)
+            assert not client.disconnect_handlers
+            assert dialog.is_deleted
+
+    asyncio.run(run())

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "docker",
+    "compose",
+    "-p",
+    "aml-release-20260920",
+    "--env-file",
+    ".local-run/release-2026-09-20/compose.env",
+    "-f",
+    ".local-run/release-2026-09-20/unpacked/docker-compose.yml",
+    "-f",
+    ".local-run/release-2026-09-20/unpacked/deploy/compose.image.yml",
+    "up",
+    "-d",
+    "--no-build",
+    "--wait",
+    "api"
+  ],
+  "exit_code": 0,
+  "seconds": 12.624007900012657
+}

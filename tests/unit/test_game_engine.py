@@ -110,12 +110,26 @@ def test_empty_and_incomplete_objective(game):
     assert {v["reason"] for v in submit_blockers(one)} == {"target_outflow_not_reached"}
 
 
-def test_night_limit(game):
+@pytest.mark.parametrize("legacy_limit", [0, 1])
+def test_retired_limits_do_not_block_submission(game, legacy_limit):
+    from src.aml_workshop_simulator.domain.simulation import _evaluate_validated
     config, specs, steps = game
+    config["constraints"].update(max_night_operations=legacy_limit, max_anonymous_operations=legacy_limit)
+    config["constraints"]["category_limits"]["anonymous"] = "0.00"
     for step in steps:
-        step["context"]["time_of_day"] = "night"
-    snapshot = evaluate_scenario(steps, specs, config)
-    assert "night_operations_exceeded" in {v["reason"] for v in snapshot["violations"]}
+        step["context"].update(time_of_day="night", recipient_type="anonymous_wallet")
+    snapshot = _evaluate_validated(steps, specs, config, RoundPolicy.from_config(config, specs))
+    assert not submit_blockers(snapshot)
+    assert not {"night_operations", "anonymous_operations", "anonymous"} & {row["code"] for row in snapshot["limits"]}
+
+
+def test_retired_config_fields_are_ignored():
+    from src.aml_workshop_simulator.schemas.round_config import ConstraintsIn
+    old = dict(max_identical_steps=3, max_night_operations=0, max_anonymous_operations=0,
+               category_limits={"cash": "150000.00", "anonymous": "0.00"})
+    clean = ConstraintsIn.model_validate(old).dump()
+    assert clean == {"max_identical_steps": 3, "category_limits": {"cash": "150000.00"}}
+    assert ConstraintsIn.model_validate(clean).dump() == clean
 
 
 def test_hash_ignores_object_key_order_but_preserves_chain_order(game):

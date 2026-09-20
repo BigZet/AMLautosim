@@ -24,7 +24,7 @@ from src.aml_workshop_simulator.services.aml_game_window_model_v2 import (
 )
 
 ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PACKAGE = ROOT / "resources/catboost_models/aml-game-attribute-context-v1"
+DEFAULT_PACKAGE = ROOT / "resources/catboost_models/aml-game-organizer-settings-v1"
 INFERENCE_FILES = (
     "src/aml_workshop_simulator/services/aml_game_pattern_panel.py",
     "src/aml_workshop_simulator/services/aml_game_pattern_panel_v2.py",
@@ -171,6 +171,10 @@ class GameClassifier:
             if file_hash(ROOT / name) != expected:
                 raise ValueError("Classifier feature implementation changed")
 
+        for name, expected in self.release.get("compatibility_sources", {}).items():
+            if file_hash(ROOT / name) != expected:
+                raise ValueError("Classifier compatibility implementation changed")
+
     def pin_identity(self, config):
         return deepcopy(self.identity)
 
@@ -181,12 +185,30 @@ class GameClassifier:
             raise Conflict(
                 "Пакет классификатора недоступен или изменён.", code="model_unavailable"
             ) from exc
-        if contract(config) != self.expected_contract:
+        actual = contract(config)
+        expected = deepcopy(self.expected_contract)
+        if self.release.get("organizer_settings_version") == 1:
+            # Round settings are frozen separately; the model vocabulary stays fixed.
+            for key in ("resources", "objectives", "constraints"):
+                actual[key] = expected[key]
+            for key in ("profile", "history", "purchases"):
+                actual["behavior"][key] = expected["behavior"][key]
+            for key in ("history_coverage", "history_start", "history_end"):
+                actual["behavior"]["aml_context"][key] = expected["behavior"]["aml_context"][key]
+            for operation in actual["operations"]:
+                reference = next((o for o in expected["operations"] if (o["code"], o["version"]) == (operation["code"], operation["version"])), {})
+                for key in ("min_amount", "max_amount", "max_occurrences"):
+                    if key in reference:
+                        operation[key] = reference[key]
+                    else:
+                        operation.pop(key, None)
+        if actual != expected:
             raise Conflict(
-                "История и игровые ограничения закреплены за учебной моделью.",
+                "Изменены параметры, не совместимые с контрактом классификатора.",
                 code="model_contract_mismatch",
             )
-        if require_pin and config.get("risk_model") != self.identity:
+        accepted_pins = [self.identity, *self.release.get("compatible_identities", [])]
+        if require_pin and config.get("risk_model") not in accepted_pins:
             raise Conflict(
                 "Закреплённый пакет классификатора изменён.",
                 code="model_version_mismatch",
@@ -296,18 +318,19 @@ def get_game_classifier():
 
 
 def game_config():
-    return {
+    from src.aml_workshop_simulator.schemas.round_config import parse_game_config
+    return parse_game_config({
         k: deepcopy(v)
         for k, v in get_game_classifier().context.items()
         if k not in ("card_snapshots", "config_version", "risk_model")
-    }
+    }).dump()
 
 
 def get_pinned_game_classifier(config):
     """Keep saved rounds on their exact released package during a gradual rollout."""
     current = get_game_classifier()
     pin = config.get("risk_model")
-    if not pin or pin.get("package_sha256") == current.identity.get("package_sha256"):
+    if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
         return current
     # Explicit release locations only; never construct a filesystem path from a pin.
     for name in ("aml-game-v1", "aml-game-relaxed-v1", "aml-game-attributes-v1", "aml-game-attribute-context-v1"):

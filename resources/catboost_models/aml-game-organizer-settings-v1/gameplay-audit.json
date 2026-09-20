@@ -1,0 +1,118 @@
+{
+  "above_tolerance_cases": [],
+  "context_sha256": "0e95f8df274a02cf71300071a0033ab6bb7e5b9eba7066041174bddba259041f",
+  "counts": {
+    "cent_mutations_valid": 1824,
+    "valid": 1850,
+    "waiting_still_high": 71,
+    "waiting_valid": 755
+  },
+  "distinct_low_game_scores": 476,
+  "distinct_low_resource_scores": 573,
+  "error_tolerance_policy": {
+    "absolute_probability_error": 0.25,
+    "actual_chains_above_tolerance": 0,
+    "approval": "explicit_user_instruction",
+    "maximum_chains_above_tolerance": 20,
+    "minimum_valid_chains": 1500,
+    "required_candidate_seeds": 5000,
+    "user_statement": "До 20 цепочек выше допуска норма"
+  },
+  "failures": [],
+  "largest_errors": [
+    {
+      "family": 23,
+      "probability": 0.903542088888404,
+      "seed": 2091903191,
+      "target": 0.7064676616915423
+    },
+    {
+      "family": 21,
+      "probability": 0.11381181746622664,
+      "seed": 2091904701,
+      "target": 0.263681592039801
+    },
+    {
+      "family": 5,
+      "probability": 0.22438072166528003,
+      "seed": 2091904685,
+      "target": 0.36815920398009955
+    },
+    {
+      "family": 1,
+      "probability": 0.8176489477471286,
+      "seed": 2091903913,
+      "target": 0.681592039800995
+    },
+    {
+      "family": 23,
+      "probability": 0.6081412059177017,
+      "seed": 2091902519,
+      "target": 0.472636815920398
+    },
+    {
+      "family": 2,
+      "probability": 0.4946090101331307,
+      "seed": 2091900170,
+      "target": 0.36815920398009955
+    },
+    {
+      "family": 23,
+      "probability": 0.6005886820599775,
+      "seed": 2091903431,
+      "target": 0.4825870646766169
+    },
+    {
+      "family": 3,
+      "probability": 0.909713010343444,
+      "seed": 2091904899,
+      "target": 0.8009950248756219
+    },
+    {
+      "family": 20,
+      "probability": 0.718922188766197,
+      "seed": 2091904940,
+      "target": 0.8208955223880597
+    },
+    {
+      "family": 7,
+      "probability": 0.9065096577461388,
+      "seed": 2091903871,
+      "target": 0.8059701492537313
+    }
+  ],
+  "low_families": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "max_cent_probability_shift": 0.0,
+  "max_target_error": 0.19707442719686175,
+  "mean_absolute_target_error": 0.005977896092404299,
+  "note": "Unseen seeds within authored route families; not independent human AML validation",
+  "passed": true,
+  "script_sha256": "64843e81a0513d3015ad0e988f411c6f77de13d8db303ea13320b7d05be480b2",
+  "seed_count": 5000,
+  "seed_start": 2091900000
+}

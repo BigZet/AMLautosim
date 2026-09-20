@@ -69,6 +69,18 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
 
             await user.open("/timeline-test")
 
+            # A party change updates the matching heading without rebuilding the form.
+            with user:
+                party_fields = [e for e in user.find(ui.select).elements if e._props.get("label") in ("Получатель", "Отправитель")]
+                for field in party_fields:
+                    alternative = next((key for key in field.options if key != field.value), None)
+                    if alternative is not None:
+                        name = field.options[alternative]
+                        field.set_value(alternative)
+                        captions = [e.text for e in user.find(ui.label).elements if "operation-caption" in e.classes]
+                        assert any(name in caption for caption in captions)
+                assert not any(e.text.startswith(("Начало:", "Выполнение:")) for e in user.find(ui.label).elements)
+
             def intervals():
                 return sorted(
                     (e for e in user.find(ui.select).elements if 1440 in e.options),
@@ -80,17 +92,38 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
             with user:
                 intervals()[0].set_value(1440)
             await user.should_see("15.09.2026, 00:30")
+            # Actions must work while every operation is collapsed.
             with user:
-                screen.show_order()
+                screen.open_steps.clear()
+                screen.render_chain()
+                assert all(not e.value for e in user.find(ui.expansion).elements)
+                copies = sorted(
+                    (b for b in user.find(ui.button).elements if b._props.get("icon") == "content_copy"),
+                    key=lambda b: b.id,
+                )
+                copies[0].mark("copy-collapsed")
+            previous_count = len(screen.editor.steps)
+            user.find("copy-collapsed").click()
+            assert len(screen.editor.steps) == previous_count + 1
+            assert not screen.open_steps
+            with user:
+                deletes = sorted(
+                    (b for b in user.find(ui.button).elements if b._props.get("icon") == "delete_outline"),
+                    key=lambda b: b.id,
+                )
+                deletes[0].mark("delete-copy")
+            user.find("delete-copy").click()
+            assert len(screen.editor.steps) == previous_count
+            with user:
                 buttons = sorted(
                     (
                         b
                         for b in user.find(ui.button).elements
-                        if b._props.get("icon") == "arrow_downward"
+                        if b._props.get("icon") == "arrow_upward"
                     ),
                     key=lambda b: b.id,
                 )
-                buttons[0].mark("move-first")
+                buttons[-1].mark("move-first")
             user.find("move-first").click()
             assert screen.editor.steps[0]["interval_minutes"] is None
             assert screen.editor.steps[1]["interval_minutes"] == 1

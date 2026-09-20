@@ -1,0 +1,11 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "aml-release-20260920-api-1",
+    "python",
+    "/tmp/legacy_probe.py"
+  ],
+  "exit_code": 0,
+  "seconds": 1.8106867999886163
+}

@@ -1,0 +1,58 @@
+NiceGUI ready to go on http://localhost:8080, and http://172.19.0.4:8080
+NiceGUI ready to go on http://localhost:8080, and http://172.19.0.4:8080
+
+Client has been deleted but is still being used. This is most likely a bug in your application code. See https://github.com/zauberzeug/nicegui/issues/3028 for more information.
+Stack (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/app/src/aml_workshop_simulator/ui/nicegui/app.py", line 391, in <module>
+    ui.run(
+  File "/usr/local/lib/python3.13/site-packages/nicegui/ui_run.py", line 311, in run
+    Server.instance.run()
+  File "/usr/local/lib/python3.13/site-packages/nicegui/server.py", line 49, in run
+    super().run(sockets=sockets)
+  File "/usr/local/lib/python3.13/site-packages/uvicorn/server.py", line 77, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/usr/local/lib/python3.13/asyncio/runners.py", line 196, in run
+    return runner.run(main)
+  File "/usr/local/lib/python3.13/asyncio/runners.py", line 119, in run
+    return self._loop.run_until_complete(task)
+  File "/usr/local/lib/python3.13/site-packages/nicegui/events.py", line 495, in _await_and_handle_in_context
+    await awaitable
+  File "/app/src/aml_workshop_simulator/ui/nicegui/organizer.py", line 493, in command
+    choice = await self.confirm(
+  File "/app/src/aml_workshop_simulator/ui/nicegui/organizer.py", line 479, in confirm
+    dialog.delete()
+  File "/usr/local/lib/python3.13/site-packages/nicegui/element.py", line 551, in delete
+    parent_slot.parent.remove(self)
+  File "/usr/local/lib/python3.13/site-packages/nicegui/element.py", line 541, in remove
+    self.client.remove_elements(element.descendants(include_self=True))
+  File "/usr/local/lib/python3.13/site-packages/nicegui/client.py", line 437, in remove_elements
+    self.outbox.enqueue_delete(element)
+  File "/usr/local/lib/python3.13/site-packages/nicegui/outbox.py", line 71, in enqueue_delete
+    self.client.check_existence()
+  File "/usr/local/lib/python3.13/site-packages/nicegui/client.py", line 480, in check_existence
+    helpers.warn_once('Client has been deleted but is still being used. '
+  File "/usr/local/lib/python3.13/site-packages/nicegui/helpers/warnings.py", line 9, in warn_once
+    log.warning(message, stack_info=stack_info)
+list.remove(x): x not in list
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/nicegui/events.py", line 495, in _await_and_handle_in_context
+    await awaitable
+  File "/app/src/aml_workshop_simulator/ui/nicegui/organizer.py", line 493, in command
+    choice = await self.confirm(
+             ^^^^^^^^^^^^^^^^^^^
+        messages[command], versions=command == "restart"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/app/src/aml_workshop_simulator/ui/nicegui/organizer.py", line 479, in confirm
+    dialog.delete()
+    ~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/nicegui/element.py", line 551, in delete
+    parent_slot.parent.remove(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/nicegui/element.py", line 544, in remove
+    parent_slot.children.remove(element)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+ValueError: list.remove(x): x not in list

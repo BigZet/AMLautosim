@@ -9,23 +9,14 @@ def moment(value):
 
 
 def timeline_control(timing, config, on_change):
-    ui.label(
-        f"Момент операции: {moment(timing['occurred_at'])} · {config['behavior']['timeline']['timezone']}"
-    ).classes("text-xs muted")
     if timing["step_index"] == 1:
-        ui.label("Начало сценария · ожидание 0").classes("text-xs muted")
-    else:
-        ui.select(
-            {
-                1: "1 минута · 0 ед. ресурса",
-                10: "10 минут · 1 ед. ресурса",
-                60: "1 час · 2 ед. ресурса",
-                1440: "1 сутки · 4 ед. ресурса",
-            },
-            value=timing["interval_minutes"],
-            label="Ожидание перед операцией",
-            on_change=lambda event: on_change(event.value),
-        ).props("outlined dense").classes("operation-parameter")
+        return
+    ui.select(
+        {1: "1 минута", 10: "10 минут", 60: "1 час", 1440: "1 сутки"},
+        value=timing["interval_minutes"],
+        label="Ожидание перед операцией",
+        on_change=lambda event: on_change(event.value),
+    ).props("outlined dense hide-bottom-space").classes("operation-parameter")
 
 
 def timeline_summary(snapshot):

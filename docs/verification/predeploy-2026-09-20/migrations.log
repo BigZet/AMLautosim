@@ -1,0 +1,6 @@
+predeploy upgrade head 
+predeploy current 0001_current_schema (head)
+audit_schema_copy upgrade head 
+audit_schema_copy current 0001_current_schema (head)
+Clean database and schema-only copy upgraded; no live data modified
+

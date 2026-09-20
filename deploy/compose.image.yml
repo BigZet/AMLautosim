@@ -1,0 +1,6 @@
+# Use with docker-compose.yml and --no-build after docker load.
+services:
+  api:
+    image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}
+  ui:
+    image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}

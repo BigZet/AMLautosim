@@ -1,11 +1,31 @@
 {
   "preset_version": "aml-game-relaxed-v3",
-  "resources": {"initial_balance": "180000.00", "initial_energy": 34, "initial_time": 34},
-  "objectives": {"target_outflow": "360000.00", "max_actions": 16},
-  "constraints": {"max_identical_steps": 3, "category_limits": {"anonymous": "60000.00", "cash": "150000.00"}},
+  "resources": {
+    "initial_balance": "180000.00",
+    "initial_energy": 34,
+    "initial_time": 34
+  },
+  "objectives": {
+    "target_outflow": "360000.00",
+    "max_actions": 16
+  },
+  "constraints": {
+    "max_identical_steps": 3,
+    "category_limits": {
+      "cash": "150000.00"
+    }
+  },
   "operation_overrides": {
-    "incoming_transfer": {"max_occurrences": 4, "max_amount": "100000.00"},
-    "card_transfer": {"max_occurrences": 10, "max_amount": "100000.00"},
-    "cash_withdrawal": {"max_amount": "120000.00"}
+    "incoming_transfer": {
+      "max_occurrences": 4,
+      "max_amount": "100000.00"
+    },
+    "card_transfer": {
+      "max_occurrences": 10,
+      "max_amount": "100000.00"
+    },
+    "cash_withdrawal": {
+      "max_amount": "120000.00"
+    }
   }
 }

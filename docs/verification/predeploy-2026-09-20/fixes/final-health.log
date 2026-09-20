@@ -1,0 +1,5 @@
+NAME                                 IMAGE                              COMMAND                  SERVICE   CREATED              STATUS                        PORTS
+aml-predeploy-fixes-20260920-api-1   aml-predeploy-fixes-20260920-api   "sh -c 'python -m sc…"   api       About a minute ago   Up About a minute (healthy)   127.0.0.1:18010->8000/tcp
+aml-predeploy-fixes-20260920-db-1    postgres:16                        "docker-entrypoint.s…"   db        8 minutes ago        Up 8 minutes (healthy)        127.0.0.1:55490->5432/tcp
+aml-predeploy-fixes-20260920-ui-1    aml-predeploy-fixes-20260920-ui    "python -m src.aml_w…"   ui        About a minute ago   Up About a minute (healthy)   0.0.0.0:18090->8080/tcp, [::]:18090->8080/tcp
+

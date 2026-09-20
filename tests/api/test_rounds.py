@@ -97,20 +97,12 @@ def test_unsent_chain_hidden_from_admin_and_deleted_at_cutoff(
     assert sql("SELECT count(*) AS n FROM scenarios")[0]["n"] == 0
 
 
-def test_unsupported_financial_configuration_is_rejected_atomically(
-    request_api, admin, round_id, sql
-):
+def test_organizer_energy_change_is_saved_with_revision(request_api, admin, round_id):
     before = request_api("GET", "/admin/rounds/current", admin)
-    audit = sql("SELECT * FROM audit_events ORDER BY id")
     config = request_api("GET", "/admin/game-config/default", admin)
     config["resources"]["initial_energy"] = 1
-    error = request_api(
-        "PUT",
-        f"/admin/rounds/{round_id}",
-        admin,
-        {"expected_config_revision": before["config_revision"], "game_config": config},
-        409,
-    )
-    assert error["code"] == "model_contract_mismatch"
-    assert request_api("GET", "/admin/rounds/current", admin) == before
-    assert sql("SELECT * FROM audit_events ORDER BY id") == audit
+    updated = request_api("PUT", f"/admin/rounds/{round_id}", admin,
+                          {"expected_config_revision": before["config_revision"], "game_config": config})
+    assert updated["config_revision"] == before["config_revision"] + 1
+    assert updated["game_config"]["resources"]["initial_energy"] == 1
+    assert request_api("GET", "/admin/rounds/current", admin) == updated

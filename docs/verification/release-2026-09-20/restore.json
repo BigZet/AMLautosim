@@ -1,0 +1,18 @@
+{
+  "rounds": {
+    "equal": true,
+    "rows": 1
+  },
+  "scenarios": {
+    "equal": true,
+    "rows": 1
+  },
+  "scoring_results": {
+    "equal": true,
+    "rows": 1
+  },
+  "users": {
+    "equal": true,
+    "rows": 4
+  }
+}

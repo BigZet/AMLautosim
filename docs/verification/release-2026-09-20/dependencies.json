@@ -1,0 +1,13 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "aml-release-20260920-api-1",
+    "python",
+    "-m",
+    "pip",
+    "check"
+  ],
+  "exit_code": 0,
+  "seconds": 1.0269229999976233
+}

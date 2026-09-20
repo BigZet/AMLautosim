@@ -98,6 +98,8 @@ def canonical_expanded_steps(steps, config):
                 "channels",
                 "risk_weight",
             ):
+                if behavior.purchases.version == "purchase-policy-v2" and name in {"min_amount", "max_amount", "max_occurrences"}:
+                    continue
                 if getattr(spec, name) != fixed[name]:
                     fail(
                         "Параметры покупки не соответствуют purchase-policy-v1.",

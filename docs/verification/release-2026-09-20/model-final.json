@@ -1,0 +1,11 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "aml-release-20260920-api-1",
+    "python",
+    "/tmp/model_probe.py"
+  ],
+  "exit_code": 0,
+  "seconds": 5.0007505000103265
+}

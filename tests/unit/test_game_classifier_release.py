@@ -71,7 +71,7 @@ def test_package_corruption_fails_closed(tmp_path, monkeypatch, filename):
     assert error.value.code == "model_unavailable"
 
 
-def test_context_and_pin_are_immutable():
+def test_pin_is_immutable_and_organizer_history_is_supported():
     runtime = get_game_classifier()
     config = deepcopy(runtime.context)
     config["risk_model"] = runtime.identity
@@ -81,8 +81,7 @@ def test_context_and_pin_are_immutable():
         runtime.check_config(config, require_pin=True)
     config = deepcopy(runtime.context)
     config["behavior"]["history"]["operations"][0]["amount"] = "123.00"
-    with pytest.raises(Conflict):
-        runtime.check_config(config)
+    runtime.check_config(config)
 
 
 def test_individual_window_shap_is_validated(example):

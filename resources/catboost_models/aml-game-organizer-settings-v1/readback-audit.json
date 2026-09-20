@@ -1,0 +1,19 @@
+{
+  "audit_script_sha256": "69b86a4ea85af85e9b76c1b73d8ac016b707c03bf5efb59a3c40cfba99e6cd2d",
+  "canonical_validation": false,
+  "canonical_validation_inherited": true,
+  "feature_readback_exact": true,
+  "group_splits_preserved": true,
+  "identical_steps_and_context": true,
+  "passed": true,
+  "rows": 62000,
+  "source_artifacts": {
+    "casebook.jsonl": "adda61b11d4e35ae9df8bb86535fd0324b9ed22a47dd1a776c71ea64ba967d7b",
+    "context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+    "features.csv": "7cdf4462f05df6ad4c24b6e1795849cce2b3dd027bb9a87dfd124d1f91561d0b",
+    "groups.json": "75c263ee00d5bb9a014733b6b0658869e7cf966a9433c230a4bf6fc516d86bc0",
+    "policy.json": "4abc8368b66b96551e5b9430baa8df12828bb84b6471c7709e0742deadebe8ad",
+    "targets.csv": "76bcf7f08ef3b588672276911e99b4c5e41bd733d4626ce7e9bdae2ad313d7db"
+  },
+  "source_financial_replay_sha256": "b12c439f126b4c7708023f75398f9dd60af624b2d8e72da44444452b28e663af"
+}

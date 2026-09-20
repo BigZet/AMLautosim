@@ -39,11 +39,10 @@ def test_parameters_and_amount_remain_editable_after_autosave(
             with user:
                 app.storage.user["auth_play"] = {"session_id": token}
             await user.open("/play")
-            await user.should_see("Добавить операцию", retries=40)
+            await user.should_see("Входящий перевод", retries=40)
             cards = await front.api.request("GET", f"rounds/{active_round}/cards")
-            card = next(c for c in cards if c["code"] == "incoming_transfer")
-            user.find(kind=ui.button, content="Добавить операцию").click()
-            user.find(kind=ui.button, content=card["title"]).click()
+            assert any(c["code"] == "incoming_transfer" for c in cards)
+            user.find(kind=ui.button, content="Входящий перевод").click()
             await asyncio.sleep(1.6)
             with user:
                 sender = next(
@@ -90,7 +89,7 @@ def test_parameters_and_amount_remain_editable_after_autosave(
                 )
                 assert float(saved["steps"][0]["amount"]) == expected
             await user.open("/play")
-            await user.should_see("Добавить операцию", retries=40)
+            await user.should_see("Входящий перевод", retries=40)
             restored = next(
                 e
                 for e in user.find(ui.select).elements
@@ -99,10 +98,10 @@ def test_parameters_and_amount_remain_editable_after_autosave(
             assert restored.value == "crypto_exchange"
             before_profile = await front.api.request("GET", f"rounds/{active_round}/scenario", session_id=token)
             await user.open("/play/profile")
-            await user.should_see("Профиль и предыстория", retries=40)
-            await user.should_not_see("Добавить операцию")
+            await user.should_see("История операций", retries=40)
+            await user.should_not_see(kind=ui.button, content="Входящий перевод")
             await user.open("/play")
-            await user.should_see("Добавить операцию", retries=40)
+            await user.should_see("Входящий перевод", retries=40)
             after_profile = await front.api.request("GET", f"rounds/{active_round}/scenario", session_id=token)
             assert after_profile["steps"] == before_profile["steps"]
             await front.api.close()

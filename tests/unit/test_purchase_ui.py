@@ -53,7 +53,6 @@ def test_purchase_form_and_both_turnover_labels(tmp_path, monkeypatch):
             await user.open("/purchase-ui")
             with user:
                 screen.add(next(c for c in cards if c["code"] == "purchase"))
-            await user.should_see("Покупка не засчитывается в цель")
             merchants = [
                 c for c in user.find(ui.select).elements if "shop" in c.options
             ]

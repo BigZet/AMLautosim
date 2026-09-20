@@ -1,0 +1,3790 @@
+.................FFFFFFFFFFFFFF.............F.......F...........FFFFF... [  6%]
+F.F.FFF......F..........................F........FF.................F... [ 13%]
+...............FEEEEEEEEEEE.F..................F....F........FFF........ [ 20%]
+...........FFFF......................................................... [ 27%]
+..FF........................................FFFFF..F.....FFFFFFFF.F..... [ 33%]
+FFF......FFFF....................................FF..................F.. [ 40%]
+............F.........................................FFF............... [ 47%]
+.............................F........................................F. [ 54%]
+........................................................................ [ 61%]
+........................................................................ [ 67%]
+.............................................s.......................... [ 74%]
+........................................................................ [ 81%]
+............................................................F.F......... [ 88%]
+........................................................................ [ 94%]
+......................................................                   [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_verified_receipt_binds_snapshot_and_actual_current_corpus _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_verified_receipt_binds_sn0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546F5D6890>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__ ERROR at setup of test_expanded_development_cannot_include_demo_relative ___
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_expanded_development_cann0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000154738279A0>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ ERROR at setup of test_new_distinct_id_from_same_history_is_rejected _____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_new_distinct_id_from_same0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015472803C40>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ ERROR at setup of test_rehashing_envelope_cannot_approve_altered_reviewed_record _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_rehashing_envelope_cannot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000154738E7EE0>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[checksum] ____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015473AE6D60>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[missing] ____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015471EEEB30>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_____ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[extra] _____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000154736CADD0>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[source] _____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015472B43070>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[roster] _____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015473AE4520>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___ ERROR at setup of test_malformed_frozen_snapshot_is_rejected[protocol] ____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_malformed_frozen_snapshot5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015472DBF5B0>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ ERROR at setup of test_snapshot_is_captured_once_before_closure _______
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_snapshot_is_captured_once0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015473997850>
+
+    @pytest.fixture
+    def frozen(tmp_path, monkeypatch):
+        from scripts import aml_demo_casebook as demo
+        from scripts.aml_dataset.aml_training import jsonl_bytes, read_rows
+    
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+        cases = [r for r in rows if r["provenance"]["root_id"] == "service_jobs"][:25]
+        development = [
+            r for r in rows if r["provenance"]["root_id"] == "loan_consolidation"
+        ][:1]
+        # IO fixture only: real bound reviews, financial engine and closure remain on.
+        # These are existing development records, never the acceptance demo roster.
+        monkeypatch.setattr(demo, "validate_roster", lambda value: value["fixture_rows"])
+        source = tmp_path / "source.json"
+        source.write_text(json.dumps({"fixture_rows": cases}), encoding="utf-8")
+        dev = tmp_path / "development.jsonl"
+        dev.write_bytes(jsonl_bytes(development))
+        output = tmp_path / "frozen"
+>       demo.freeze_demo(source, dev, output)
+
+tests\unit\test_aml_demo_training.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+================================== FAILURES ===================================
+__________________ test_control_outcomes_and_engine_contract __________________
+
+    def test_control_outcomes_and_engine_contract():
+        rows = controls()
+        assert Counter(r["aml_label"] for r in rows) == {0: 10, 1: 10, None: 5}
+        assert all(r["public_snapshot"]["config"] == common_context()[0] for r in rows)
+>       features = p.validate_sources(rows, p.protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_control.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: control-01'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: control-01
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____________ test_private_narrative_does_not_enter_model_features _____________
+
+    def test_private_narrative_does_not_enter_model_features():
+        row = controls()[0]
+        changed = deepcopy(row)
+        changed["title"] = "Completely different wording"
+        changed["author_truth"]["economic_event"] = "Unobservable narrative replacement"
+>       assert p.validate_sources([row], p.protocol()) == p.validate_sources(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            [changed], p.protocol()
+        )
+
+tests\unit\test_aml_chain_control.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: control-01'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: control-01
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___________________ test_freeze_cannot_be_silently_replaced ___________________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_freeze_cannot_be_silently0')
+
+    def test_freeze_cannot_be_silently_replaced(tmp_path):
+        path = tmp_path / "control"
+>       result = freeze(path)
+                 ^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_control.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_chain_control.py:304: in freeze
+    features = p.validate_sources(rows, p.protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: control-01'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: control-01
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[0] ______
+
+index = 0
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (30, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 30/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[1] ______
+
+index = 1
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (31, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 31/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[2] ______
+
+index = 2
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (32, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 32/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[3] ______
+
+index = 3
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (33, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 33/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[4] ______
+
+index = 4
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (34, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 34/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+______ test_matched_chains_pass_engine_and_keep_parties_amounts_equal[5] ______
+
+index = 5
+
+    @pytest.mark.parametrize("index", range(6))
+    def test_matched_chains_pass_engine_and_keep_parties_amounts_equal(index):
+>       rows, features, _ = generate_unit((index + 30, 2))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_chain_dataset.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (35, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        context, _ = common_context()
+        rows, features, rejected = [], {}, 0
+        for variant in range(variants):
+            for attempt in range(100):
+                pair = []
+                for label in (0, 1):
+                    steps, mode = make_steps(index, variant, attempt, label)
+                    pair.append(record(index, variant, label, steps, mode, context))
+                try:
+                    vectors = p.validate_sources(pair, p.protocol())
+                except ValueError:
+                    rejected += 1
+                    continue
+                rows.extend(pair)
+                features.update(vectors)
+                break
+            else:
+>               raise ValueError(f"No valid matched pair: {index}/{variant}")
+E               ValueError: No valid matched pair: 35/0
+
+scripts\build_aml_chain_dataset.py:275: ValueError
+_________________ test_compact_readback_rejects_wrong_context _________________
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "C:\Users\bigze\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py", line 254, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+  File "C:\Users\bigze\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py", line 203, in _process_chunk
+    return [fn(*args) for args in chunk]
+            ~~^^^^^^^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\scripts\build_aml_chain_dataset.py", line 275, in generate_unit
+    raise ValueError(f"No valid matched pair: {index}/{variant}")
+ValueError: No valid matched pair: 0/0
+"""
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_compact_readback_rejects_0')
+
+    def test_compact_readback_rejects_wrong_context(tmp_path):
+        root = tmp_path / "corpus"
+>       build(root, units=12, variants=1, workers=1)
+
+tests\unit\test_aml_chain_dataset.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_chain_dataset.py:316: in build
+    for n, (rows, features, failures) in enumerate(
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py:620: in _chain_from_iterable_of_lists
+    for element in iterable:
+                   ^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:625: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:318: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:460: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = None
+
+    def __get_result(self):
+        if self._exception is not None:
+            try:
+>               raise self._exception
+E               ValueError: No valid matched pair: 0/0
+
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:402: ValueError
+_ test_uniform_units_preserve_both_truths_and_real_channel_coverage[service-artisan_owner] _
+
+source = 'service', role = 'artisan_owner'
+
+    @pytest.mark.parametrize(
+        "source,role", [("service", "artisan_owner"), ("asset", "collection_owner")]
+    )
+    def test_uniform_units_preserve_both_truths_and_real_channel_coverage(source, role):
+        world = p.author_role_world(
+            p.author_world(source, (1, 1, 1), (0, 0, 1, 2, 3, 4)), role
+        )
+        selection = dict(
+            root_id=world.id,
+            profile=role,
+            activity_sha256=p.digest(world.activity),
+            extra_label=0,
+            parent_ids=["original-universe-anchor"],
+            coverage_kinds=["cash", "salary_purchase"],
+            rails=["payment_service", "crypto_p2p", "exchange_withdrawal"]
+            if source == "asset"
+            else ["payment_service"],
+        )
+>       rows, ids, features = compile_unit((asdict(world), selection))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_closed_population.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_closed_population.py:72: in compile_unit
+    features = p.validate_sources(rows, p.protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_uniform_units_preserve_both_truths_and_real_channel_coverage[asset-collection_owner] _
+
+source = 'asset', role = 'collection_owner'
+
+    @pytest.mark.parametrize(
+        "source,role", [("service", "artisan_owner"), ("asset", "collection_owner")]
+    )
+    def test_uniform_units_preserve_both_truths_and_real_channel_coverage(source, role):
+        world = p.author_role_world(
+            p.author_world(source, (1, 1, 1), (0, 0, 1, 2, 3, 4)), role
+        )
+        selection = dict(
+            root_id=world.id,
+            profile=role,
+            activity_sha256=p.digest(world.activity),
+            extra_label=0,
+            parent_ids=["original-universe-anchor"],
+            coverage_kinds=["cash", "salary_purchase"],
+            rails=["payment_service", "crypto_p2p", "exchange_withdrawal"]
+            if source == "asset"
+            else ["payment_service"],
+        )
+>       rows, ids, features = compile_unit((asdict(world), selection))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_closed_population.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_closed_population.py:72: in compile_unit
+    features = p.validate_sources(rows, p.protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-111-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-111-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_final_audit_uses_whole_universe_and_never_approves_small_draft[False] __
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_final_audit_uses_whole_un0')
+crossing = False
+
+    @pytest.mark.parametrize("crossing", [False, True])
+    def test_final_audit_uses_whole_universe_and_never_approves_small_draft(
+        tmp_path, crossing
+    ):
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 1, 2, 3, 4)), "artisan_owner"
+        )
+        selection = dict(
+            root_id=world.id,
+            profile="artisan_owner",
+            activity_sha256=p.digest(world.activity),
+            extra_label=0,
+            parent_ids=[],
+        )
+>       rows, ids, features = compile_unit((asdict(world), selection))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_closed_population.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_closed_population.py:72: in compile_unit
+    features = p.validate_sources(rows, p.protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__ test_final_audit_uses_whole_universe_and_never_approves_small_draft[True] __
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_final_audit_uses_whole_un1')
+crossing = True
+
+    @pytest.mark.parametrize("crossing", [False, True])
+    def test_final_audit_uses_whole_universe_and_never_approves_small_draft(
+        tmp_path, crossing
+    ):
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 1, 2, 3, 4)), "artisan_owner"
+        )
+        selection = dict(
+            root_id=world.id,
+            profile="artisan_owner",
+            activity_sha256=p.digest(world.activity),
+            extra_label=0,
+            parent_ids=[],
+        )
+>       rows, ids, features = compile_unit((asdict(world), selection))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_closed_population.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_closed_population.py:72: in compile_unit
+    features = p.validate_sources(rows, p.protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________________ test_fixed_salary_and_no_empty_claim_selector ________________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_fixed_salary_and_no_empty0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546C8D50D0>
+
+    def test_fixed_salary_and_no_empty_claim_selector(tmp_path, monkeypatch):
+        from nicegui import ui
+        from nicegui.storage import Storage
+        from nicegui.testing.user_simulation import user_simulation
+        from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
+        from src.aml_workshop_simulator.ui.nicegui.aml_context import explanation_selector
+        from src.aml_workshop_simulator.domain.operation_purposes import default_purpose
+    
+        monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+        config = get_game_classifier().context
+        step = {
+            "card": {"code": "salary"},
+            "action_details": {"income_basis": "payroll_registry"},
+        }
+        step["purpose_code"] = default_purpose(step)
+    
+        async def run():
+            async with user_simulation() as user:
+    
+                @ui.page("/purpose-salary")
+                def page():
+                    explanation_selector(
+                        config, step, lambda key, value: step.update({key: value})
+                    )
+    
+                await user.open("/purpose-salary")
+                await user.should_see("Назначение операции: Зарплата")
+                await user.should_not_see("Основание (необязательно)")
+                await user.should_not_see(ui.select)
+    
+>       asyncio.run(run())
+
+tests\unit\test_aml_context_ui.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_aml_context_ui.py:40: in run
+    await user.should_see("Назначение операции: Зарплата")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <nicegui.testing.user.User object at 0x000001546B60D010>
+target = 'Назначение операции: Зарплата', kind = None, marker = None
+content = None, retries = 3
+
+    async def should_see(self,
+                         target: str | type[T] | None = None,
+                         *,
+                         kind: type[T] | None = None,
+                         marker: str | list[str] | None = None,
+                         content: str | list[str] | None = None,
+                         retries: int = 3,
+                         ) -> None:
+        """Assert that the page contains an element fulfilling certain filter rules.
+    
+        Note that there is no scrolling in the user simulation -- the entire page is always *visible*.
+        Due to asynchronous execution, sometimes the expected elements only appear after a short delay.
+    
+        By default `should_see` makes three attempts to find the element before failing.
+        This can be adjusted with the `retries` parameter.
+        """
+        for _ in range(retries):
+            if self._sees(target, kind, marker, content):
+                return
+            await asyncio.sleep(0.1)
+>       raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E       AssertionError: expected to see at least one element with marker=Назначение операции: Зарплата or content=Назначение операции: Зарплата on the page:
+E       q-layout
+E        q-page-container
+E         q-page
+E          div
+E           Input [value=Зарплата, label=Назначение операции, for=c4, type=text, outlined=True, dense=True, readonly=True, hide-bottom-space=True]
+
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: AssertionError
+_ test_profile_history_does_not_infer_absence_from_incomplete_observation[partial] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_profile_history_does_not_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546BBD3850>
+coverage = 'partial'
+
+    @pytest.mark.parametrize("coverage", ["partial", "unknown"])
+    def test_profile_history_does_not_infer_absence_from_incomplete_observation(
+        tmp_path, monkeypatch, coverage
+    ):
+        from nicegui import ui
+        from nicegui.storage import Storage
+        from nicegui.testing.user_simulation import user_simulation
+        from src.aml_workshop_simulator.ui.nicegui.profile_history import (
+            profile_history_panel,
+        )
+    
+        monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+        config, _ = context_fixture()
+        summary = {
+            "coverage": coverage,
+            "status": "unknown" if coverage == "unknown" else "observed",
+            "starts_at": "2026-09-12T09:00:00+03:00",
+            "ends_before": "2026-09-13T09:00:00+03:00",
+            "timezone": "Europe/Moscow",
+            "activity": {"count": 0, "inflow": "0", "outflow": "0"},
+            "active_days": 0,
+            "events": [],
+            "counterparties": [
+                {"counterparty_id": "A", "observation": "unknown", "activity": None}
+            ],
+        }
+    
+        async def run():
+            async with user_simulation() as user:
+    
+                @ui.page("/aml-profile")
+                def page():
+                    profile_history_panel(
+                        {"game_config": config, "context_summary": summary}
+                    )
+    
+                await user.open("/aml-profile")
+                await user.should_not_see("30 дней:")
+                await user.should_not_see("За наблюдаемый период операций не было.")
+                if coverage == "partial":
+                    await user.should_see(
+                        "В доступном фрагменте истории операций не наблюдалось"
+                    )
+                    await user.should_see("сведения об операциях неполны")
+                    await user.should_see("12.09.2026")
+                else:
+                    await user.should_see("Отсутствие операций не установлено")
+                    await user.should_not_see("12.09.2026")
+    
+>       asyncio.run(run())
+
+tests\unit\test_aml_context_ui.py:345: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_aml_context_ui.py:339: in run
+    await user.should_see("сведения об операциях неполны")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <nicegui.testing.user.User object at 0x000001546B786E00>
+target = 'сведения об операциях неполны', kind = None, marker = None
+content = None, retries = 3
+
+    async def should_see(self,
+                         target: str | type[T] | None = None,
+                         *,
+                         kind: type[T] | None = None,
+                         marker: str | list[str] | None = None,
+                         content: str | list[str] | None = None,
+                         retries: int = 3,
+                         ) -> None:
+        """Assert that the page contains an element fulfilling certain filter rules.
+    
+        Note that there is no scrolling in the user simulation -- the entire page is always *visible*.
+        Due to asynchronous execution, sometimes the expected elements only appear after a short delay.
+    
+        By default `should_see` makes three attempts to find the element before failing.
+        This can be adjusted with the `retries` parameter.
+        """
+        for _ in range(retries):
+            if self._sees(target, kind, marker, content):
+                return
+            await asyncio.sleep(0.1)
+>       raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E       AssertionError: expected to see at least one element with marker=сведения об операциях неполны or content=сведения об операциях неполны on the page:
+E       q-layout
+E        q-page-container
+E         q-page
+E          div
+E           Column
+E            Column
+E             Label [text=Наёмный сотрудник]
+E             Label [text=Зарплата и переводы...]
+E             Label [text=Часть истории: 12.09...]
+E            div
+E             Column
+E              Label [text=Поступления]
+E              Label [text=0,00 ₽]
+E             Column
+E              Label [text=Списания]
+E              Label [text=0,00 ₽]
+E            Column
+E             Label [text=Стороны операций]
+E             Table [columns=[{'name': 'name', 'l..., rows=[{'id': 'A', 'name':..., row-key=id, pagination={'rowsPerPage': 0}, selection=none, flat=True, wrap-cells=True, hide-bottom=True]
+E            Label [text=В доступном фрагмент...]
+E            Column
+E             Label [text=История операций]
+E             Table [columns=[{'name': 'time', 'l..., row-key=id, pagination={'rowsPerPage': 0}, selection=none, flat=True, wrap-cells=True, hide-bottom=True]
+
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: AssertionError
+___________ test_pilot_export_is_auditable_but_never_release_ready ____________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DFA2E80>)
+
+    def test_pilot_export_is_auditable_but_never_release_ready(source):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        paths = write([row])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___________ test_unreviewed_and_rejected_never_enter_supervised_csv ___________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DE49760>)
+
+    def test_unreviewed_and_rejected_never_enter_supervised_csv(source):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        rejected = deepcopy(row)
+        rejected.update(scenario_id="rejected", review_status="rejected")
+        row.update(review_status="authored_unreviewed", review=None)
+        paths = write([row, rejected])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:261: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___ test_relabelled_duplicate_stays_in_one_group_and_collision_is_reported ____
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546E0D4680>)
+
+    def test_relabelled_duplicate_stays_in_one_group_and_collision_is_reported(source):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        second = deepcopy(row)
+        second.update(
+            scenario_id="other-root", provenance_group_id="fake-independent", aml_label=1
+        )
+        second["author_truth"]["aml_episode_present"] = True
+        second["public_snapshot"]["steps"][0]["step_id"] = (
+            "00000000-0000-0000-0000-000000000001"
+        )
+        paths = write([row, second])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:280: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_audit_recomputes_features_even_if_attacker_updates_checksums ______
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DE9F4C0>)
+
+    def test_audit_recomputes_features_even_if_attacker_updates_checksums(source):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        paths = write([row])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:292: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________ test_invalid_public_metadata_or_unachieved_objective_rejected ________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DE01E40>)
+
+    def test_invalid_public_metadata_or_unachieved_objective_rejected(source):
+        from scripts.aml_dataset.aml_training import build_dataset
+    
+        row, write = source
+        row["public_snapshot"]["aml_label"] = 0
+        with pytest.raises(ValueError, match="forbidden public"):
+            build_dataset(*write([row]))
+        row["public_snapshot"].pop("aml_label")
+        row["public_snapshot"]["steps"] = row["public_snapshot"]["steps"][:1]
+>       with pytest.raises(ValueError, match="resource|objective"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'resource|objective'
+E         Actual message: 'Changed fixed financial contract: P01-4-0'
+
+tests\unit\test_aml_dataset.py:321: AssertionError
+_ test_unresolved_diagnostic_preserves_confirmed_sibling_and_declares_dependence _
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546E030C20>)
+
+    def test_unresolved_diagnostic_preserves_confirmed_sibling_and_declares_dependence(
+        source,
+    ):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        unresolved = deepcopy(row)
+        unresolved.update(
+            scenario_id="unresolved", aml_label=None, label_status="unresolved"
+        )
+        unresolved["author_truth"]["aml_episode_present"] = None
+        paths = write([row, unresolved])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:398: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_____ test_shared_origin_split_tamper_is_detected_under_optimized_python ______
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DF4CEA0>)
+
+    def test_shared_origin_split_tamper_is_detected_under_optimized_python(source):
+        from scripts.aml_dataset.aml_training import build_dataset
+    
+        row, write = source
+        other = deepcopy(row)
+        other["scenario_id"] = "variant"
+        paths = write([row, other])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:443: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_preregistered_challenge_reserves_entire_connected_component _______
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DD23EC0>)
+
+    def test_preregistered_challenge_reserves_entire_connected_component(source):
+        from scripts.aml_dataset.aml_training import build_dataset, audit_dataset
+    
+        row, write = source
+        other = deepcopy(row)
+        other.update(scenario_id="heldout", challenge_set="family-held-out")
+        paths = write([row, other])
+        protocol = json.loads(paths[1].read_text(encoding="utf-8"))
+        protocol["family_held_out"] = [row["family_id"]]
+        registered = paths[0].parent / "registered-protocol.json"
+        registered.write_text(json.dumps(protocol), encoding="utf-8")
+>       build_dataset(paths[0], registered, paths[2])
+
+tests\unit\test_aml_dataset.py:532: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__________ test_coverage_reports_entirely_missing_supported_channels __________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DFD3920>)
+
+    def test_coverage_reports_entirely_missing_supported_channels(source):
+        from scripts.aml_dataset.aml_training import build_dataset
+    
+        row, write = source
+        paths = write([row])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:543: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_________ test_audit_cli_cannot_mutate_immutable_dataset_with_report __________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DED3100>)
+
+    def test_audit_cli_cannot_mutate_immutable_dataset_with_report(source):
+        from scripts.aml_dataset.aml_training import build_dataset
+    
+        row, write = source
+        paths = write([row])
+>       build_dataset(*paths)
+
+tests\unit\test_aml_dataset.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:633: in build_dataset
+    artifacts, report = derive(rows, rules)
+                        ^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__________ test_row_tag_cannot_create_an_unregistered_family_holdout __________
+
+source = ({'scenario_id': 'P01-4-0', 'provenance_group_id': 'P01-contrast-4', 'family_id': 'P01', 'aml_label': 0, ...}, <function source.<locals>.write at 0x000001546DDFA200>)
+
+    def test_row_tag_cannot_create_an_unregistered_family_holdout(source):
+        from scripts.aml_dataset.aml_training import build_dataset
+        row, write = source
+        row["challenge_set"] = "family-held-out"
+>       with pytest.raises(ValueError, match="preregistered"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'preregistered'
+E         Actual message: 'Changed fixed financial contract: P01-4-0'
+
+tests\unit\test_aml_dataset.py:611: AssertionError
+__ test_real_roster_and_financial_engine_accept_all_25_shared_context_cases ___
+
+    def test_real_roster_and_financial_engine_accept_all_25_shared_context_cases():
+        m = module()
+        book, dossiers = m.author_casebook()
+        from scripts.aml_demo_casebook import validate_roster
+        from scripts.aml_dataset.aml_training import validate_sources
+        from scripts.aml_dataset.aml_casebook import protocol
+    
+        rows = validate_roster(book)
+        assert len(rows) == 25
+>       assert len(validate_sources(rows, protocol())) == 25
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_demo_author.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: demo-housing_closeout-strategy-1'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: demo-housing_closeout-strategy-1
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ test_scoped_evidence_does_not_make_all_shared_round_cases_equal _______
+
+    def test_scoped_evidence_does_not_make_all_shared_round_cases_equal():
+        m = module()
+        book, _ = m.author_casebook()
+        from scripts.aml_dataset.aml_training import validate_sources
+        from scripts.aml_dataset.aml_casebook import protocol
+    
+        rows = [c["record"] for g in book["rounds"] for c in g["cases"]]
+>       features = validate_sources(rows, protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_demo_author.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: demo-housing_closeout-strategy-1'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: demo-housing_closeout-strategy-1
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_____________ test_complete_development_closure_has_no_demo_links _____________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_complete_development_clos0')
+
+    def test_complete_development_closure_has_no_demo_links(tmp_path):
+        m = module()
+>       report = m.build_demo(tmp_path / "demo")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_demo_author.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_demo_author.py:1421: in build_demo
+    validate_sources(rows, protocol())
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: demo-housing_closeout-strategy-1'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: demo-housing_closeout-strategy-1
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_development_inputs_are_captured_once_for_parsing_and_hashing ______
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_development_inputs_are_ca0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546AE373F0>
+
+    def test_development_inputs_are_captured_once_for_parsing_and_hashing(
+        tmp_path, monkeypatch
+    ):
+        m = module()
+        from pathlib import Path
+        from collections import Counter
+    
+        reads = Counter()
+        original = Path.read_bytes
+    
+        def read_bytes(path):
+            if path.name == "casebook.jsonl" and "resources" in path.parts:
+                reads[str(path)] += 1
+            return original(path)
+    
+        monkeypatch.setattr(Path, "read_bytes", read_bytes)
+>       m.build_demo(tmp_path / "single-snapshot")
+
+tests\unit\test_aml_demo_author.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_demo_author.py:1421: in build_demo
+    validate_sources(rows, protocol())
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: demo-housing_closeout-strategy-1'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: demo-housing_closeout-strategy-1
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ test_freeze_binds_the_exact_bytes_used_for_real_corpus_closure ________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_freeze_binds_the_exact_by0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546C8FBE70>
+
+    def test_freeze_binds_the_exact_bytes_used_for_real_corpus_closure(
+        tmp_path, monkeypatch
+    ):
+        """Isolate roster shape only; real review/engine/closure/hash checks stay on.
+    
+        These development records are an IO regression fixture, never an acceptance
+        demo. Domain approval is the existing exact review, not fabricated by test.
+        """
+        from pathlib import Path
+        from hashlib import sha256
+        from scripts.aml_dataset.aml_training import read_rows, jsonl_bytes
+    
+        m = module()
+        rows = read_rows(
+            Path("resources/aml_dataset/aml-v1/origins-reviewed/v3/casebook.jsonl")
+        )
+    
+        def family(root):
+            return [r for r in rows if r["provenance"]["root_id"] == root]
+    
+        demo = family("service_jobs")[:25]
+        old = family("loan_consolidation")[:1]
+        replacement = family("family_pool")[:1]
+        assert len(demo) == 25 and old and replacement
+        monkeypatch.setattr(m, "validate_roster", lambda _: demo)
+        source = tmp_path / "io-fixture.json"
+        source.write_text('{"scope":"IO regression only"}', encoding="utf-8")
+        development = tmp_path / "development.jsonl"
+        old_bytes = jsonl_bytes(old)
+        development.write_bytes(old_bytes)
+        actual_read = Path.read_bytes
+        reads = []
+    
+        def replace_after_read(path):
+            raw = actual_read(path)
+            if path == development:
+                reads.append(path)
+                path.write_bytes(jsonl_bytes(replacement))
+            return raw
+    
+        monkeypatch.setattr(Path, "read_bytes", replace_after_read)
+        output = tmp_path / "frozen"
+>       manifest = m.freeze_demo(source, development, output)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_demo_casebook.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_demo_casebook.py:141: in freeze_demo
+    features = validate_sources(combined, criteria)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: loan_consolidation-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: loan_consolidation-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___ test_masked_counterfactuals_remain_valid_and_observationally_identical ____
+
+    def test_masked_counterfactuals_remain_valid_and_observationally_identical():
+        from scripts.aml_dataset.aml_diagnostics import mask_evidence
+    
+        parents = reviewed_pair()
+        masked = [mask_evidence(row) for row in parents]
+>       features = validate_sources(masked, protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_diagnostics.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: service_jobs-schedule-0-records-0--masked-evidence-v1'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: service_jobs-schedule-0-records-0--masked-evidence-v1
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____________ test_full_engine_validation_and_closure_are_reported _____________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_full_engine_validation_an0')
+
+    def test_full_engine_validation_and_closure_are_reported(tmp_path):
+        m = module()
+>       report = m.build_origins(tmp_path / "draft")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_expanded_origins.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_expanded_origins.py:718: in build_origins
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: cash_mobile_repair-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: cash_mobile_repair-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________ test_source_hashes_bind_author_and_reused_compiler_file_bytes ________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_source_hashes_bind_author0')
+
+    def test_source_hashes_bind_author_and_reused_compiler_file_bytes(tmp_path):
+        m = module()
+>       report = m.build_origins(tmp_path / "checksums")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_expanded_origins.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_expanded_origins.py:718: in build_origins
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: cash_mobile_repair-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: cash_mobile_repair-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__________ test_all_classes_share_exact_existing_history_and_profile __________
+
+    def test_all_classes_share_exact_existing_history_and_profile():
+        config, _ = common_context()
+        baseline = json.loads(BEHAVIOR.read_bytes())
+        assert config["behavior"]["history"] == baseline["history"]
+        assert config["behavior"]["profile"] == baseline["profile"]
+        expected = digest(config)
+        for index in (0, 1, 12, 13):
+>           rows, features, _ = generate_unit((index, 2))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_fixed_history_dataset.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (0, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        config, strategies = common_context()
+        rng = random.Random(SEED + index)
+        # Episode is authored first. No heuristic score or feature threshold labels it.
+        label = index % 2
+        episode = "criminal_proceeds_concealment" if label else "lawful_personal_settlement"
+        # Both classes deliberately include atypical and ordinary-looking chains.
+        motif = rng.choices(
+            ["ordinary", "distributed", "cash", "mixed"],
+            [2, 3, 3, 2] if label else [6, 1, 1, 2],
+        )[0]
+        # These are explicit synthetic episode hypotheses, NOT observed population
+        # frequencies. Known parties can offend; unfamiliar parties can be lawful.
+        source_parties = rng.choices([["A", "B"], ["C", "D"]], [2, 8] if label else [8, 2])[
+            0
+        ]
+        settlement_parties = rng.choices(
+            [["A", "B"], ["C", "D"], ["A", "B", "C", "D"]],
+            [2, 5, 3] if label else [7, 1, 2],
+        )[0]
+        templates = [
+            s
+            for s in strategies
+            if any(x["card"]["code"] == "incoming_transfer" for x in s["steps"])
+        ]
+        preferred = [
+            s
+            for s in templates
+            if (
+                any(x["card"]["code"] == "cash_withdrawal" for x in s["steps"])
+                if motif == "cash"
+                else any(x["card"]["code"] in ("salary", "purchase") for x in s["steps"])
+                if motif == "mixed"
+                else sum(x["card"]["code"] == "card_transfer" for x in s["steps"]) >= 6
+                if motif == "distributed"
+                else not any(
+                    x["card"]["code"] in ("salary", "purchase") for x in s["steps"]
+                )
+            )
+        ]
+        parent = rng.choice(preferred or templates)
+        rows, vectors, seen, rejected = [], {}, set(), 0
+        for attempt in range(variants * 100):
+            steps = deepcopy(parent["steps"])
+            for pos, step in enumerate(steps):
+                code = step["card"]["code"]
+                step["context"] = {}
+                step.pop("claim_id", None)
+                step["purpose_code"] = (
+                    "salary"
+                    if code == "salary"
+                    else "personal_spending"
+                    if code in ("purchase", "cash_withdrawal")
+                    else rng.choice(
+                        [
+                            "loan",
+                            "refund",
+                            "shared_expense",
+                            "service_payment",
+                            "asset_sale",
+                        ]
+                    )
+                )
+                if code == "incoming_transfer":
+                    step["sender_id"] = rng.choice(source_parties)
+                    kind = rng.choice(
+                        [
+                            "bank_transfer",
+                            "payment_service",
+                            "crypto_p2p",
+                            "exchange_withdrawal",
+                        ]
+                    )
+                    step["action_details"] = dict(incoming_kind=kind)
+                    if kind == "bank_transfer":
+                        step["action_details"]["bank_country"] = rng.choice(["RU", "KG"])
+                    if kind == "exchange_withdrawal":
+                        step["sender_id"] = "exchange"
+                elif code == "card_transfer":
+                    step["recipient_id"] = rng.choice(settlement_parties)
+                    step["action_details"] = {}
+                elif code == "salary":
+                    step["action_details"] = {
+                        "income_basis": rng.choice(
+                            ["employment_contract", "payroll_registry", "unknown"]
+                        )
+                    }
+                else:
+                    step["action_details"] = {}
+                step["interval_minutes"] = (
+                    None if pos == 0 else rng.choices([1, 10, 60], [7, 2, 1])[0]
+                )
+            key = p.digest(steps)
+            if key in seen:
+                continue
+            truth = private_ledger(steps, episode)
+            truth["current_settlement_instructions"] = [
+                dict(
+                    payment=n + 1,
+                    party=s.get("recipient_id", "player_cash"),
+                    amount=s["amount"],
+                    basis="current contractual liability"
+                    if not label
+                    else "nominee disposition instruction",
+                    instructed_by="account_holder" if not label else "offence_beneficiary",
+                )
+                for n, s in enumerate(steps)
+                if s["card"]["code"] in ("card_transfer", "cash_withdrawal")
+            ]
+            sid = f"fixed-{index:05d}-{len(rows):02d}"
+            row = dict(
+                scenario_id=sid,
+                provenance_group_id=f"fixed-origin-{index:05d}",
+                family_id="P10"
+                if any(s["card"]["code"] == "salary" for s in steps)
+                else "P05"
+                if any(s["card"]["code"] == "cash_withdrawal" for s in steps)
+                else "P06",
+                aml_label=label,
+                label_status="confirmed",
+                review_status="authored_unreviewed",
+                review=None,
+                author_id="fixed-context-causal-author-v1",
+                label_source="authored-private-funds-origin-not-risk-rule",
+                label_protocol_version="aml-labels-v1",
+                population_id="aml-game-balanced-v1",
+                label_rationale="Private authored ownership and gross-principal flow establish the episode; observable suspicion does not establish guilt.",
+                author_truth=truth,
+                public_snapshot=dict(config=config, steps=steps),
+                observability=dict(
+                    distinguishable=False,
+                    reason="Common history does not reveal private current funds ownership. Identical public chains may have opposite outcomes; confidence is not guaranteed.",
+                ),
+                hypothesis_source=dict(
+                    kind="synthetic conditional episode, not empirical fraud prevalence",
+                    motif=motif,
+                ),
+                alternative_explanation=dict(
+                    description="The same observable transfers may settle lawful liabilities or route concealed criminal proceeds."
+                ),
+                necessary_facts=[
+                    "actual source ownership",
+                    "actual debit obligations",
+                    "custody and downstream allocation",
+                ],
+                forbidden_information=["private episode", "label", "origin identifier"],
+                provenance=dict(root_id=f"fixed-origin-{index:05d}", parent_ids=[]),
+                variant_recipe="common-context-current-chain",
+            )
+            try:
+                feature = p.validate_sources([row], p.protocol())
+            except ValueError:
+                rejected += 1
+                continue
+            seen.add(key)
+            rows.append(row)
+            vectors.update(feature)
+            if len(rows) == variants:
+                return rows, vectors, rejected
+>       raise ValueError(f"Insufficient engine-valid chains for unit {index}: {len(rows)}")
+E       ValueError: Insufficient engine-valid chains for unit 0: 0
+
+scripts\build_aml_fixed_history_dataset.py:311: ValueError
+_________ test_generation_is_repeatable_and_does_not_mutate_baseline __________
+
+    def test_generation_is_repeatable_and_does_not_mutate_baseline():
+        original = BEHAVIOR.read_bytes()
+>       first = generate_unit((4, 2))
+                ^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_fixed_history_dataset.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task = (4, 2)
+
+    def generate_unit(task):
+        index, variants = task
+        config, strategies = common_context()
+        rng = random.Random(SEED + index)
+        # Episode is authored first. No heuristic score or feature threshold labels it.
+        label = index % 2
+        episode = "criminal_proceeds_concealment" if label else "lawful_personal_settlement"
+        # Both classes deliberately include atypical and ordinary-looking chains.
+        motif = rng.choices(
+            ["ordinary", "distributed", "cash", "mixed"],
+            [2, 3, 3, 2] if label else [6, 1, 1, 2],
+        )[0]
+        # These are explicit synthetic episode hypotheses, NOT observed population
+        # frequencies. Known parties can offend; unfamiliar parties can be lawful.
+        source_parties = rng.choices([["A", "B"], ["C", "D"]], [2, 8] if label else [8, 2])[
+            0
+        ]
+        settlement_parties = rng.choices(
+            [["A", "B"], ["C", "D"], ["A", "B", "C", "D"]],
+            [2, 5, 3] if label else [7, 1, 2],
+        )[0]
+        templates = [
+            s
+            for s in strategies
+            if any(x["card"]["code"] == "incoming_transfer" for x in s["steps"])
+        ]
+        preferred = [
+            s
+            for s in templates
+            if (
+                any(x["card"]["code"] == "cash_withdrawal" for x in s["steps"])
+                if motif == "cash"
+                else any(x["card"]["code"] in ("salary", "purchase") for x in s["steps"])
+                if motif == "mixed"
+                else sum(x["card"]["code"] == "card_transfer" for x in s["steps"]) >= 6
+                if motif == "distributed"
+                else not any(
+                    x["card"]["code"] in ("salary", "purchase") for x in s["steps"]
+                )
+            )
+        ]
+        parent = rng.choice(preferred or templates)
+        rows, vectors, seen, rejected = [], {}, set(), 0
+        for attempt in range(variants * 100):
+            steps = deepcopy(parent["steps"])
+            for pos, step in enumerate(steps):
+                code = step["card"]["code"]
+                step["context"] = {}
+                step.pop("claim_id", None)
+                step["purpose_code"] = (
+                    "salary"
+                    if code == "salary"
+                    else "personal_spending"
+                    if code in ("purchase", "cash_withdrawal")
+                    else rng.choice(
+                        [
+                            "loan",
+                            "refund",
+                            "shared_expense",
+                            "service_payment",
+                            "asset_sale",
+                        ]
+                    )
+                )
+                if code == "incoming_transfer":
+                    step["sender_id"] = rng.choice(source_parties)
+                    kind = rng.choice(
+                        [
+                            "bank_transfer",
+                            "payment_service",
+                            "crypto_p2p",
+                            "exchange_withdrawal",
+                        ]
+                    )
+                    step["action_details"] = dict(incoming_kind=kind)
+                    if kind == "bank_transfer":
+                        step["action_details"]["bank_country"] = rng.choice(["RU", "KG"])
+                    if kind == "exchange_withdrawal":
+                        step["sender_id"] = "exchange"
+                elif code == "card_transfer":
+                    step["recipient_id"] = rng.choice(settlement_parties)
+                    step["action_details"] = {}
+                elif code == "salary":
+                    step["action_details"] = {
+                        "income_basis": rng.choice(
+                            ["employment_contract", "payroll_registry", "unknown"]
+                        )
+                    }
+                else:
+                    step["action_details"] = {}
+                step["interval_minutes"] = (
+                    None if pos == 0 else rng.choices([1, 10, 60], [7, 2, 1])[0]
+                )
+            key = p.digest(steps)
+            if key in seen:
+                continue
+            truth = private_ledger(steps, episode)
+            truth["current_settlement_instructions"] = [
+                dict(
+                    payment=n + 1,
+                    party=s.get("recipient_id", "player_cash"),
+                    amount=s["amount"],
+                    basis="current contractual liability"
+                    if not label
+                    else "nominee disposition instruction",
+                    instructed_by="account_holder" if not label else "offence_beneficiary",
+                )
+                for n, s in enumerate(steps)
+                if s["card"]["code"] in ("card_transfer", "cash_withdrawal")
+            ]
+            sid = f"fixed-{index:05d}-{len(rows):02d}"
+            row = dict(
+                scenario_id=sid,
+                provenance_group_id=f"fixed-origin-{index:05d}",
+                family_id="P10"
+                if any(s["card"]["code"] == "salary" for s in steps)
+                else "P05"
+                if any(s["card"]["code"] == "cash_withdrawal" for s in steps)
+                else "P06",
+                aml_label=label,
+                label_status="confirmed",
+                review_status="authored_unreviewed",
+                review=None,
+                author_id="fixed-context-causal-author-v1",
+                label_source="authored-private-funds-origin-not-risk-rule",
+                label_protocol_version="aml-labels-v1",
+                population_id="aml-game-balanced-v1",
+                label_rationale="Private authored ownership and gross-principal flow establish the episode; observable suspicion does not establish guilt.",
+                author_truth=truth,
+                public_snapshot=dict(config=config, steps=steps),
+                observability=dict(
+                    distinguishable=False,
+                    reason="Common history does not reveal private current funds ownership. Identical public chains may have opposite outcomes; confidence is not guaranteed.",
+                ),
+                hypothesis_source=dict(
+                    kind="synthetic conditional episode, not empirical fraud prevalence",
+                    motif=motif,
+                ),
+                alternative_explanation=dict(
+                    description="The same observable transfers may settle lawful liabilities or route concealed criminal proceeds."
+                ),
+                necessary_facts=[
+                    "actual source ownership",
+                    "actual debit obligations",
+                    "custody and downstream allocation",
+                ],
+                forbidden_information=["private episode", "label", "origin identifier"],
+                provenance=dict(root_id=f"fixed-origin-{index:05d}", parent_ids=[]),
+                variant_recipe="common-context-current-chain",
+            )
+            try:
+                feature = p.validate_sources([row], p.protocol())
+            except ValueError:
+                rejected += 1
+                continue
+            seen.add(key)
+            rows.append(row)
+            vectors.update(feature)
+            if len(rows) == variants:
+                return rows, vectors, rejected
+>       raise ValueError(f"Insufficient engine-valid chains for unit {index}: {len(rows)}")
+E       ValueError: Insufficient engine-valid chains for unit 4: 0
+
+scripts\build_aml_fixed_history_dataset.py:311: ValueError
+_____ test_readback_checks_exact_history_even_if_file_checksum_is_updated _____
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "C:\Users\bigze\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py", line 254, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+  File "C:\Users\bigze\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py", line 203, in _process_chunk
+    return [fn(*args) for args in chunk]
+            ~~^^^^^^^
+  File "C:\Users\bigze\Documents\GH\AMLautosim-worktrees\aml-probability-v1\scripts\build_aml_fixed_history_dataset.py", line 311, in generate_unit
+    raise ValueError(f"Insufficient engine-valid chains for unit {index}: {len(rows)}")
+ValueError: Insufficient engine-valid chains for unit 0: 0
+"""
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_readback_checks_exact_his0')
+
+    def test_readback_checks_exact_history_even_if_file_checksum_is_updated(tmp_path):
+        output = tmp_path / "data"
+>       build(output, units=4, variants=2, workers=1)
+
+tests\unit\test_aml_fixed_history_dataset.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\build_aml_fixed_history_dataset.py:367: in build
+    for index, (rows, vectors, failures) in enumerate(
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\process.py:620: in _chain_from_iterable_of_lists
+    for element in iterable:
+                   ^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:625: in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:318: in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:460: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = None
+
+    def __get_result(self):
+        if self._exception is not None:
+            try:
+>               raise self._exception
+E               ValueError: Insufficient engine-valid chains for unit 0: 0
+
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py:402: ValueError
+__ test_complete_audit_checks_preregistered_roster_and_saved_artifacts[None] __
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_complete_audit_checks_pre0')
+defect = None
+
+    @pytest.mark.parametrize("defect", [None, "incomplete_policy", "checksum", "nonfinite"])
+    def test_complete_audit_checks_preregistered_roster_and_saved_artifacts(
+        tmp_path, defect
+    ):
+        channels = ("cash", "card", "card", "card", "card", "card")
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 0, 0, 0, 0), channels), "artisan_owner"
+        )
+        records = (
+            p.compile_probe_rows(world)
+            + p.compile_variants(world, 0)
+            + p.compile_diagnostics(world)
+        )
+        for kind in ("cash", "salary_purchase"):
+            records += p.compile_coverage_case(p.author_coverage_case(world, kind))
+        records += compile_route(author_route(world, "payment_service"))
+>       vectors = p.validate_sources(records, p.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_history_population_audit.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_complete_audit_checks_preregistered_roster_and_saved_artifacts[incomplete_policy] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_complete_audit_checks_pre1')
+defect = 'incomplete_policy'
+
+    @pytest.mark.parametrize("defect", [None, "incomplete_policy", "checksum", "nonfinite"])
+    def test_complete_audit_checks_preregistered_roster_and_saved_artifacts(
+        tmp_path, defect
+    ):
+        channels = ("cash", "card", "card", "card", "card", "card")
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 0, 0, 0, 0), channels), "artisan_owner"
+        )
+        records = (
+            p.compile_probe_rows(world)
+            + p.compile_variants(world, 0)
+            + p.compile_diagnostics(world)
+        )
+        for kind in ("cash", "salary_purchase"):
+            records += p.compile_coverage_case(p.author_coverage_case(world, kind))
+        records += compile_route(author_route(world, "payment_service"))
+>       vectors = p.validate_sources(records, p.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_history_population_audit.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_complete_audit_checks_preregistered_roster_and_saved_artifacts[checksum] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_complete_audit_checks_pre2')
+defect = 'checksum'
+
+    @pytest.mark.parametrize("defect", [None, "incomplete_policy", "checksum", "nonfinite"])
+    def test_complete_audit_checks_preregistered_roster_and_saved_artifacts(
+        tmp_path, defect
+    ):
+        channels = ("cash", "card", "card", "card", "card", "card")
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 0, 0, 0, 0), channels), "artisan_owner"
+        )
+        records = (
+            p.compile_probe_rows(world)
+            + p.compile_variants(world, 0)
+            + p.compile_diagnostics(world)
+        )
+        for kind in ("cash", "salary_purchase"):
+            records += p.compile_coverage_case(p.author_coverage_case(world, kind))
+        records += compile_route(author_route(world, "payment_service"))
+>       vectors = p.validate_sources(records, p.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_history_population_audit.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_complete_audit_checks_preregistered_roster_and_saved_artifacts[nonfinite] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_complete_audit_checks_pre3')
+defect = 'nonfinite'
+
+    @pytest.mark.parametrize("defect", [None, "incomplete_policy", "checksum", "nonfinite"])
+    def test_complete_audit_checks_preregistered_roster_and_saved_artifacts(
+        tmp_path, defect
+    ):
+        channels = ("cash", "card", "card", "card", "card", "card")
+        world = p.author_role_world(
+            p.author_world("service", (3,), (0, 0, 0, 0, 0, 0), channels), "artisan_owner"
+        )
+        records = (
+            p.compile_probe_rows(world)
+            + p.compile_variants(world, 0)
+            + p.compile_diagnostics(world)
+        )
+        for kind in ("cash", "salary_purchase"):
+            records += p.compile_coverage_case(p.author_coverage_case(world, kind))
+        records += compile_route(author_route(world, "payment_service"))
+>       vectors = p.validate_sources(records, p.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_history_population_audit.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-000000-deposits-hbbbbb-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_compiled_variants_preserve_engine_contract_and_private_truth ______
+
+    def test_compiled_variants_preserve_engine_contract_and_private_truth():
+        module = origins()
+        from scripts.aml_dataset.aml_casebook import protocol
+        from scripts.aml_dataset.aml_training import validate_sources
+    
+        roots = module.author_roots()
+        rows = [row for root in roots for row in module.compile_root(root)]
+>       features = validate_sources(rows, protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_origins.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: service_jobs-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: service_jobs-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_report_counts_closure_not_dossiers_and_never_promotes_review ______
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_report_counts_closure_not0')
+
+    def test_report_counts_closure_not_dossiers_and_never_promotes_review(tmp_path):
+        module = origins()
+>       result = module.build_origins(tmp_path / "draft")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_origins.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_origins.py:1201: in build_origins
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: service_jobs-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: service_jobs-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ test_all_source_grammars_and_schedules_pass_unchanged_finances ________
+
+    def test_all_source_grammars_and_schedules_pass_unchanged_finances():
+        m = module()
+        from scripts.aml_dataset.aml_training import validate_sources
+        from scripts.aml_dataset.aml_casebook import protocol
+    
+        for source in ("service", "asset", "refund", "debt", "cost"):
+            for incoming in ((3,), (2, 1), (1, 1, 1)):
+                w = m.author_world(source, incoming, (0, 0, 1, 2, 3, 4))
+                rows = m.compile_variants(w, extra_label=0)
+                assert len(rows) == 25
+                assert sum(r["aml_label"] == 0 for r in rows) == 13
+                assert sum(r["aml_label"] == 1 for r in rows) == 12
+>               assert len(validate_sources(rows, protocol())) == 25
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-001234-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-001234-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_________ test_probe_reports_empirical_closure_and_binds_written_rows _________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_probe_reports_empirical_c0')
+
+    def test_probe_reports_empirical_closure_and_binds_written_rows(tmp_path):
+        m = module()
+        worlds = [
+            m.author_world("service", (1, 1, 1), p) for p in m.provider_partitions(6)[:4]
+        ]
+>       report = m.audit_probe(worlds, tmp_path / "probe")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-000000-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-000000-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ test_prefit_availability_mix_retains_third_opaque_pair_as_diagnostics ____
+
+    def test_prefit_availability_mix_retains_third_opaque_pair_as_diagnostics():
+        m = module()
+        w = m.author_world("service", (1, 1, 1), (0, 0, 1, 2, 3, 4))
+        rows = m.compile_variants(w, 1)
+        assert len([r for r in rows if r["variant_recipe"].endswith("-opaque")]) == 4
+        assert (
+            len([r for r in rows if r["variant_recipe"] == "schedule-2-wrong_cover"]) == 2
+        )
+        diagnostics = m.compile_diagnostics(w)
+        assert len(diagnostics) == 2
+        assert {r["aml_label"] for r in diagnostics} == {0, 1}
+        assert diagnostics[0]["public_snapshot"] == diagnostics[1]["public_snapshot"]
+        assert all(r["provenance"]["root_id"] == w.id for r in diagnostics)
+>       assert len(m.validate_sources(rows + diagnostics, m.protocol())) == 27
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+______ test_closure_projection_preserves_every_supported_ancestry_field _______
+
+    def test_closure_projection_preserves_every_supported_ancestry_field():
+        m = module()
+        rows = m.compile_probe_rows(m.author_world("service", (3,), (0, 1, 2, 3, 4, 5)))
+        rows[0].update(
+            parent_ids=["external-parent"], history_origin_ids=["external-history"]
+        )
+>       features = m.validate_sources(rows, m.protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-3-012345-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-3-012345-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________ test_role_dossier_binds_actual_activity_contracts_and_assets _________
+
+    def test_role_dossier_binds_actual_activity_contracts_and_assets():
+        m = module()
+        base = m.author_world("asset", (2, 1), (0, 0, 1, 2, 3, 4))
+        w = m.author_role_world(base, "collection_owner")
+        m.validate_role_world(w)
+        assert w.profile["id"] == "collection_owner"
+        assert w.activity["asset_membership"]
+        altered = deepcopy(w)
+        altered.activity["source_contracts"][0]["basis"] = "invented-event"
+        with pytest.raises(ValueError, match="activity"):
+            m.validate_role_world(altered)
+        with pytest.raises(ValueError, match="incompatible"):
+            m.author_role_world(
+                m.author_world("service", (3,), (0, 1, 2, 3, 4, 5)), "collection_owner"
+            )
+        originals = m.compile_variants(base, 0)
+        assigned = m.compile_variants(w, 0)
+>       assert m.validate_sources(originals, m.protocol()) == m.validate_sources(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            assigned, m.protocol()
+        )
+
+tests\unit\test_aml_population_author.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-21-001234-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-21-001234-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ test_selected_compilation_keeps_raw_ancestry_and_diagnostic_exclusion ____
+
+    def test_selected_compilation_keeps_raw_ancestry_and_diagnostic_exclusion():
+        m = module()
+        w = m.author_role_world(
+            m.author_world("refund", (3,), (0, 0, 1, 2, 3, 4)), "event_organizer"
+        )
+        selection = dict(
+            root_id=w.id,
+            profile=w.profile["id"],
+            extra_label=0,
+            parent_ids=[w.id + "-opaque-0", w.id + "-opaque-1", "other-raw-sibling"],
+            activity_sha256=m.digest(w.activity),
+        )
+        main, diagnostics = m.compile_selected(w, selection)
+        assert len(main) == 25 and len(diagnostics) == 2
+        assert all(
+            r["provenance"]["parent_ids"] == selection["parent_ids"]
+            for r in main + diagnostics
+        )
+        assert all(r.get("challenge_set") == "masked-context" for r in diagnostics)
+        assert all(r.get("challenge_set") is None for r in main)
+        assert all(r["activity_dossier"] == w.activity for r in main + diagnostics)
+>       assert len(m.validate_sources(main + diagnostics, m.protocol())) == 27
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-refund-3-001234-schedule-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-refund-3-001234-schedule-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________ test_build_rejects_tampered_selection_before_output[parents] _________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_rejects_tampered_se0')
+defect = 'parents'
+
+    @pytest.mark.parametrize(
+        "defect", ["parents", "component", "extra", "quota", "candidates"]
+    )
+    def test_build_rejects_tampered_selection_before_output(tmp_path, defect):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ test_build_rejects_tampered_selection_before_output[component] ________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_rejects_tampered_se1')
+defect = 'component'
+
+    @pytest.mark.parametrize(
+        "defect", ["parents", "component", "extra", "quota", "candidates"]
+    )
+    def test_build_rejects_tampered_selection_before_output(tmp_path, defect):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_________ test_build_rejects_tampered_selection_before_output[extra] __________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_rejects_tampered_se2')
+defect = 'extra'
+
+    @pytest.mark.parametrize(
+        "defect", ["parents", "component", "extra", "quota", "candidates"]
+    )
+    def test_build_rejects_tampered_selection_before_output(tmp_path, defect):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_________ test_build_rejects_tampered_selection_before_output[quota] __________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_rejects_tampered_se3')
+defect = 'quota'
+
+    @pytest.mark.parametrize(
+        "defect", ["parents", "component", "extra", "quota", "candidates"]
+    )
+    def test_build_rejects_tampered_selection_before_output(tmp_path, defect):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_______ test_build_rejects_tampered_selection_before_output[candidates] _______
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_rejects_tampered_se4')
+defect = 'candidates'
+
+    @pytest.mark.parametrize(
+        "defect", ["parents", "component", "extra", "quota", "candidates"]
+    )
+    def test_build_rejects_tampered_selection_before_output(tmp_path, defect):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____ test_small_build_and_complete_closure_bind_actual_written_population _____
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_small_build_and_complete_0')
+
+    def test_small_build_and_complete_closure_bind_actual_written_population(tmp_path):
+        m = module()
+        probe = tmp_path / "probe"
+>       m.audit_probe(
+            [m.author_world(s, (3,), (0, 0, 1, 2, 3, 4)) for s in ("asset", "debt")], probe
+        )
+
+tests\unit\test_aml_population_author.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_population_author.py:1272: in audit_probe
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-3-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-3-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________ test_coverage_cash_and_payroll_are_actual_bound_worlds[cash] _________
+
+kind = 'cash'
+
+    @pytest.mark.parametrize("kind", ["cash", "salary_purchase"])
+    def test_coverage_cash_and_payroll_are_actual_bound_worlds(kind):
+        m = module()
+        w = m.author_role_world(
+            m.author_world("service", (1, 1, 1), (0, 0, 1, 2, 3, 4)), "artisan_owner"
+        )
+        case = m.author_coverage_case(w, kind)
+        rows = m.compile_coverage_case(case)
+        assert len(rows) == 2 and {r["aml_label"] for r in rows} == {0, 1}
+>       assert len(m.validate_sources(rows, m.protocol())) == 2
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-coverage-cash-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-coverage-cash-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___ test_coverage_cash_and_payroll_are_actual_bound_worlds[salary_purchase] ___
+
+kind = 'salary_purchase'
+
+    @pytest.mark.parametrize("kind", ["cash", "salary_purchase"])
+    def test_coverage_cash_and_payroll_are_actual_bound_worlds(kind):
+        m = module()
+        w = m.author_role_world(
+            m.author_world("service", (1, 1, 1), (0, 0, 1, 2, 3, 4)), "artisan_owner"
+        )
+        case = m.author_coverage_case(w, kind)
+        rows = m.compile_coverage_case(case)
+        assert len(rows) == 2 and {r["aml_label"] for r in rows} == {0, 1}
+>       assert len(m.validate_sources(rows, m.protocol())) == 2
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-coverage-salary_purchase-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-coverage-salary_purchase-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_cash_deposit_history_requires_actual_withdrawal_handover_and_receipt[None] _
+
+defect = None
+
+    @pytest.mark.parametrize(
+        "defect",
+        [
+            None,
+            "receiver",
+            "receipt_amount",
+            "withdrawal_owner",
+            "missing_history",
+            "receipt_parent",
+        ],
+    )
+    def test_cash_deposit_history_requires_actual_withdrawal_handover_and_receipt(defect):
+        m = module()
+        w = m.author_world(
+            "service",
+            (1, 1, 1),
+            (0, 0, 1, 2, 3, 4),
+            deposit_channels=("cash", "card", "card", "card", "card", "card"),
+        )
+        if defect is None:
+            m.graph.validate_world(w)
+            role = m.author_role_world(w, "artisan_owner")
+            rows = m.compile_probe_rows(role) + m.compile_coverage_case(
+                m.author_coverage_case(role, "cash")
+            )
+>           assert len(m.validate_sources(rows, m.protocol())) == 4
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_author.py:411: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-deposits-hbbbbb-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-deposits-hbbbbb-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_routes_pass_full_engine_keep_both_truths_and_parent_history[payment_service] _
+
+world = ActivityWorld(id='population-asset-111-001234', source='asset', participants=[Party(id='player', role='account holder'...', 'title_event': 'economic-event-7', 'disposed_to': 'source-2', 'activity': 'population-asset-111-001234-activity'}]})
+rail = 'payment_service'
+
+    @pytest.mark.parametrize(
+        "rail", ["payment_service", "crypto_p2p", "exchange_withdrawal"]
+    )
+    def test_routes_pass_full_engine_keep_both_truths_and_parent_history(world, rail):
+        dossier = author_route(world, rail)
+        if rail == "payment_service":
+            instruction = dossier["worlds"]["lawful"][0]["events"][0]
+            assert (
+                instruction["originating_account_jurisdiction"]
+                != instruction["destination_account_jurisdiction"]
+            )
+        rows = compile_route(dossier)
+        assert len(rows) == 6
+>       assert len(population.validate_sources(rows, population.protocol())) == 6
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_rails.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-111-001234-rail-payment_service-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-111-001234-rail-payment_service-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_routes_pass_full_engine_keep_both_truths_and_parent_history[crypto_p2p] _
+
+world = ActivityWorld(id='population-asset-111-001234', source='asset', participants=[Party(id='player', role='account holder'...', 'title_event': 'economic-event-7', 'disposed_to': 'source-2', 'activity': 'population-asset-111-001234-activity'}]})
+rail = 'crypto_p2p'
+
+    @pytest.mark.parametrize(
+        "rail", ["payment_service", "crypto_p2p", "exchange_withdrawal"]
+    )
+    def test_routes_pass_full_engine_keep_both_truths_and_parent_history(world, rail):
+        dossier = author_route(world, rail)
+        if rail == "payment_service":
+            instruction = dossier["worlds"]["lawful"][0]["events"][0]
+            assert (
+                instruction["originating_account_jurisdiction"]
+                != instruction["destination_account_jurisdiction"]
+            )
+        rows = compile_route(dossier)
+        assert len(rows) == 6
+>       assert len(population.validate_sources(rows, population.protocol())) == 6
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_rails.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-111-001234-rail-crypto_p2p-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-111-001234-rail-crypto_p2p-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_routes_pass_full_engine_keep_both_truths_and_parent_history[exchange_withdrawal] _
+
+world = ActivityWorld(id='population-asset-111-001234', source='asset', participants=[Party(id='player', role='account holder'...', 'title_event': 'economic-event-7', 'disposed_to': 'source-2', 'activity': 'population-asset-111-001234-activity'}]})
+rail = 'exchange_withdrawal'
+
+    @pytest.mark.parametrize(
+        "rail", ["payment_service", "crypto_p2p", "exchange_withdrawal"]
+    )
+    def test_routes_pass_full_engine_keep_both_truths_and_parent_history(world, rail):
+        dossier = author_route(world, rail)
+        if rail == "payment_service":
+            instruction = dossier["worlds"]["lawful"][0]["events"][0]
+            assert (
+                instruction["originating_account_jurisdiction"]
+                != instruction["destination_account_jurisdiction"]
+            )
+        rows = compile_route(dossier)
+        assert len(rows) == 6
+>       assert len(population.validate_sources(rows, population.protocol())) == 6
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_rails.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-111-001234-rail-exchange_withdrawal-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-111-001234-rail-exchange_withdrawal-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_____ test_inactive_statement_retains_older_actual_payments_and_ancestry ______
+
+world = ActivityWorld(id='population-asset-111-001234', source='asset', participants=[Party(id='player', role='account holder'...', 'title_event': 'economic-event-7', 'disposed_to': 'source-2', 'activity': 'population-asset-111-001234-activity'}]})
+
+    def test_inactive_statement_retains_older_actual_payments_and_ancestry(world):
+        rows = compile_inactive_history(world)
+>       features = population.validate_sources(rows, population.protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_population_rails.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-asset-111-001234-inactive-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-asset-111-001234-inactive-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[None] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_versioned_observations_ke0')
+defect = None
+
+    @pytest.mark.parametrize(
+        "defect", [None, "missing_shared_row", "changed_shared_vector"]
+    )
+    def test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound(
+        tmp_path, defect
+    ):
+        def rows(source):
+            return population.compile_probe_rows(
+                population.author_world(source, (1, 1, 1), (0, 0, 1, 2, 3, 4))
+            )
+    
+        raw = rows("service")
+>       vectors = population.validate_sources(raw, population.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_probe_universe.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[missing_shared_row] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_versioned_observations_ke1')
+defect = 'missing_shared_row'
+
+    @pytest.mark.parametrize(
+        "defect", [None, "missing_shared_row", "changed_shared_vector"]
+    )
+    def test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound(
+        tmp_path, defect
+    ):
+        def rows(source):
+            return population.compile_probe_rows(
+                population.author_world(source, (1, 1, 1), (0, 0, 1, 2, 3, 4))
+            )
+    
+        raw = rows("service")
+>       vectors = population.validate_sources(raw, population.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_probe_universe.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_ test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[changed_shared_vector] _
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_versioned_observations_ke2')
+defect = 'changed_shared_vector'
+
+    @pytest.mark.parametrize(
+        "defect", [None, "missing_shared_row", "changed_shared_vector"]
+    )
+    def test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound(
+        tmp_path, defect
+    ):
+        def rows(source):
+            return population.compile_probe_rows(
+                population.author_world(source, (1, 1, 1), (0, 0, 1, 2, 3, 4))
+            )
+    
+        raw = rows("service")
+>       vectors = population.validate_sources(raw, population.protocol())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_probe_universe.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: population-service-111-001234-opaque-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: population-service-111-001234-opaque-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+___________ test_export_rejects_changes_after_independent_approval ____________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_export_rejects_changes_af0')
+
+    def test_export_rejects_changes_after_independent_approval(tmp_path):
+        from scripts.aml_dataset.aml_review import apply_review
+        from scripts.aml_dataset.aml_training import validate_sources
+    
+        source, review = review_fixture(tmp_path)
+        rows = apply_review(source, review)
+        protocol = json.loads(
+            Path("config/ml/aml-classifier-v1-protocol.json").read_text(encoding="utf-8")
+        )
+>       validate_sources(rows, protocol)
+
+tests\unit\test_aml_review.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+____________ test_missing_review_binding_cannot_pass_release_gate _____________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_missing_review_binding_ca0')
+
+    def test_missing_review_binding_cannot_pass_release_gate(tmp_path):
+        from scripts.aml_dataset.aml_review import apply_review
+        from scripts.aml_dataset.aml_training import derive
+    
+        source, review = review_fixture(tmp_path)
+        rows = apply_review(source, review)
+        rows[0]["review"].pop("reviewed_record_sha256")
+        protocol = json.loads(
+            Path("config/ml/aml-classifier-v1-protocol.json").read_text(encoding="utf-8")
+        )
+>       _, report = derive(rows, protocol)
+                    ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_review.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:348: in derive
+    features = validate_sources(rows, protocol)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Changed fixed financial contract: P01-4-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: P01-4-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+_____ test_pilot_has_causal_topologies_and_financially_valid_opaque_pairs _____
+
+    def test_pilot_has_causal_topologies_and_financially_valid_opaque_pairs():
+        m = module()
+        roots = m.author_roots()
+        assert 50 <= len(roots) <= 100
+        assert len({tuple(p.operation for p in r.payments) for r in roots}) >= 3
+        rows = [row for root in roots for row in m.compile_root(root)]
+        from scripts.aml_dataset.aml_training import validate_sources
+        from scripts.aml_dataset.aml_casebook import protocol
+    
+>       features = validate_sources(rows, protocol())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_world_graph.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_training.py:153: in validate_sources
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'Changed fixed financial contract: world-service-1-5-0-records-0'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Changed fixed financial contract: world-service-1-5-0-records-0
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+__________ test_build_audits_full_corpus_and_binds_exact_input_bytes __________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_build_audits_full_corpus_0')
+
+    def test_build_audits_full_corpus_and_binds_exact_input_bytes(tmp_path):
+        m = module()
+>       report = m.build_pilot(tmp_path / "pilot")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_aml_world_graph.py:144: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+scripts\aml_dataset\aml_world_graph.py:1405: in build_pilot
+    features = validate_sources(rows, protocol())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts\aml_dataset\aml_training.py:123: in validate_sources
+    check(bool(rows), "Empty casebook")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Empty casebook'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Empty casebook
+
+scripts\aml_dataset\aml_training.py:51: ValueError
+________________________ test_legacy_golden[transfers] ________________________
+
+case = {'name': 'transfers', 'steps': [{'step_id': 'b9885cc9-9e4f-50b7-b595-39c4aa36e76d', 'card': {'id': 2, 'code': 'incomin...-621d-577a-8f87-4494b6c974c1', 'code': 'amount:adjustment', 'category': 'amount', 'points': '-5.00', ...}], ...}}, ...}
+
+    @pytest.mark.parametrize("case", GOLDEN["cases"], ids=lambda c: c["name"])
+    def test_legacy_golden(case):
+        config = deepcopy(GOLDEN["config"])
+        specs = snapshot_specs(config)
+        snap = evaluate_scenario(case["steps"], specs, config)
+        score = score_scenario(case["steps"], specs, config)
+        board = leaderboard_scores(
+            score["risk_score"], resource_score(snap, config), config
+        )
+>       assert snap == case["snapshot"]
+E       AssertionError: assert {'schema_vers...eps': 6}, ...} == {'schema_vers...eps': 6}, ...}
+E         
+E         Omitting 9 identical items, use -vv to show
+E         Differing items:
+E         {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '0.00', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '8', ...}]} != {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '0.00', ...}, {'code': 'anonymous'...nd': 'count', 'used': '0', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '8', ...}]}
+E         Use -v to get more diff
+
+tests\unit\test_contract_versions.py:52: AssertionError
+__________________________ test_legacy_golden[mixed] __________________________
+
+case = {'name': 'mixed', 'steps': [{'step_id': '58e0c844-a2d0-57aa-9954-8d393c28fea8', 'card': {'id': 1, 'code': 'salary', 'v...-8caf-503c-9777-0d555998e29d', 'code': 'amount:adjustment', 'category': 'amount', 'points': '-5.00', ...}], ...}}, ...}
+
+    @pytest.mark.parametrize("case", GOLDEN["cases"], ids=lambda c: c["name"])
+    def test_legacy_golden(case):
+        config = deepcopy(GOLDEN["config"])
+        specs = snapshot_specs(config)
+        snap = evaluate_scenario(case["steps"], specs, config)
+        score = score_scenario(case["steps"], specs, config)
+        board = leaderboard_scores(
+            score["risk_score"], resource_score(snap, config), config
+        )
+>       assert snap == case["snapshot"]
+E       AssertionError: assert {'schema_vers...eps': 5}, ...} == {'schema_vers...eps': 5}, ...}
+E         
+E         Omitting 9 identical items, use -vv to show
+E         Differing items:
+E         {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '0.00', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '9', ...}]} != {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '0.00', ...}, {'code': 'anonymous'...nd': 'count', 'used': '0', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '9', ...}]}
+E         Use -v to get more diff
+
+tests\unit\test_contract_versions.py:52: AssertionError
+____________________ test_legacy_golden[incoming_funding] _____________________
+
+case = {'name': 'incoming_funding', 'steps': [{'step_id': 'ff4dc5b6-7199-5c05-8d20-3844d69ed097', 'card': {'id': 2, 'code': '...-c2c6-5e2c-a439-3ffdd752d361', 'code': 'amount:adjustment', 'category': 'amount', 'points': '-5.00', ...}], ...}}, ...}
+
+    @pytest.mark.parametrize("case", GOLDEN["cases"], ids=lambda c: c["name"])
+    def test_legacy_golden(case):
+        config = deepcopy(GOLDEN["config"])
+        specs = snapshot_specs(config)
+        snap = evaluate_scenario(case["steps"], specs, config)
+        score = score_scenario(case["steps"], specs, config)
+        board = leaderboard_scores(
+            score["risk_score"], resource_score(snap, config), config
+        )
+>       assert snap == case["snapshot"]
+E       AssertionError: assert {'schema_vers...eps': 5}, ...} == {'schema_vers...eps': 5}, ...}
+E         
+E         Omitting 9 identical items, use -vv to show
+E         Differing items:
+E         {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '10000.00', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '9', ...}]} != {'limits': [{'code': 'cash', 'label': 'Наличные операции', 'kind': 'money', 'used': '10000.00', ...}, {'code': 'anonym...nd': 'count', 'used': '0', ...}, {'code': 'actions', 'label': 'Действия в раунде', 'kind': 'count', 'used': '9', ...}]}
+E         Use -v to get more diff
+
+tests\unit\test_contract_versions.py:52: AssertionError
+___________ test_select_save_reload_change_party_and_admin_details ____________
+
+tmp_path = WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_select_save_reload_change0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546B0BCE50>
+
+    def test_select_save_reload_change_party_and_admin_details(tmp_path, monkeypatch):
+        from nicegui import ui
+        from nicegui.storage import Storage
+        from nicegui.testing.user_simulation import user_simulation
+        from src.aml_workshop_simulator.ui.nicegui.participant import ParticipantScreen
+        from src.aml_workshop_simulator.ui.nicegui.counterparties import party_readonly
+    
+        monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+        config = config_v8()
+        cards = [
+            card_out(s).model_dump(mode="json") for s in snapshot_specs(config).values()
+        ]
+        state = {
+            "round": {"id": 1, "config_version": "stage02-test", "game_config": config},
+            "can_edit": True,
+            "scenario": None,
+        }
+    
+        class Transport:
+            async def request(self, method, path, **kwargs):
+                if method == "GET":
+                    return deepcopy(cards if path.endswith("/cards") else state)
+                assert method == "PUT"
+                body = kwargs["body"]
+                saved = {
+                    "steps": canonical_expanded_steps(body["steps"], config),
+                    "revision": body["expected_revision"] + 1,
+                    "status": "editing",
+                }
+                state["scenario"] = saved
+                return deepcopy(saved)
+    
+        screen = ParticipantScreen.__new__(ParticipantScreen)
+        screen.submitting = False
+        screen.open_steps = set()
+        screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
+        screen.changed = screen.editor.changed
+    
+        async def run():
+            await screen.editor.poll()
+            async with user_simulation() as user:
+    
+                @ui.page("/stage02-ui")
+                def page():
+                    screen.chain_box = ui.column()
+                    screen.open_steps = {s["step_id"] for s in screen.editor.steps}
+                    screen.render_chain()
+    
+                await user.open("/stage02-ui")
+                with user:
+                    screen.add(next(c for c in cards if c["code"] == "incoming_transfer"))
+                    screen.add(next(c for c in cards if c["code"] == "card_transfer"))
+                selectors = sorted(user.find(ui.select).elements, key=lambda e: e.id)
+                parties = [s for s in selectors if "A" in s.options]
+                assert len(parties) == 2
+                assert all("shop" not in s.options for s in parties)
+                assert all(s.value == "A" for s in parties)
+                assert not any(
+                    "regular_sender" in s.options or "anonymous_wallet" in s.options
+                    for s in selectors
+                )
+                with user:
+                    for control in parties:
+                        control.set_value("A")
+                assert await screen.editor.write()
+                # Restore solely from server state, with a fresh editor/local workspace.
+                screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
+                screen.changed = screen.editor.changed
+                await screen.editor.poll()
+                await user.open("/stage02-ui")
+                parties = sorted(
+                    (s for s in user.find(ui.select).elements if "A" in s.options),
+                    key=lambda e: e.id,
+                )
+                assert [s.value for s in parties] == ["A", "A"]
+                with user:
+                    parties[0].set_value("B")
+                assert await screen.editor.write()
+                assert state["scenario"]["steps"][1]["recipient_id"] == "B"
+                await user.should_see("Операций в предыстории: 0")
+                with user:
+                    party_readonly(config, state["scenario"]["steps"][1])
+                await user.should_see("Получатель: Борис")
+                assert "sender_relationship" not in screen.editor.steps[0]["action_details"]
+    
+>       asyncio.run(run())
+
+tests\unit\test_counterparty_ui.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\unit\test_counterparty_ui.py:92: in run
+    await user.should_see("Операций в предыстории: 0")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <nicegui.testing.user.User object at 0x000001546F4D0470>
+target = 'Операций в предыстории: 0', kind = None, marker = None, content = None
+retries = 3
+
+    async def should_see(self,
+                         target: str | type[T] | None = None,
+                         *,
+                         kind: type[T] | None = None,
+                         marker: str | list[str] | None = None,
+                         content: str | list[str] | None = None,
+                         retries: int = 3,
+                         ) -> None:
+        """Assert that the page contains an element fulfilling certain filter rules.
+    
+        Note that there is no scrolling in the user simulation -- the entire page is always *visible*.
+        Due to asynchronous execution, sometimes the expected elements only appear after a short delay.
+    
+        By default `should_see` makes three attempts to find the element before failing.
+        This can be adjusted with the `retries` parameter.
+        """
+        for _ in range(retries):
+            if self._sees(target, kind, marker, content):
+                return
+            await asyncio.sleep(0.1)
+>       raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E       AssertionError: expected to see at least one element with marker=Операций в предыстории: 0 or content=Операций в предыстории: 0 on the page:
+E       q-layout
+E        q-page-container
+E         q-page
+E          div
+E           Column
+E            Expansion [model-value=True, label=2. Перевести по карт..., caption=Алексей — постоянный...]
+E             div
+E              Number [model-value=10000, label=Сумма, for=c22, type=number, min=10000.0, max=80000.0, step=0.01, suffix=₽, outlined=True, dense=True, hide-bottom-space=True, inputmode=decimal]
+E              Select [model-value={'value': 0, 'label'..., options=[{'value': 0, 'label..., label=Канал, outlined=True, dense=True, options-dense=True]
+E              Tooltip [text=Канал, target=#c23]
+E              Select [model-value={'value': 1, 'label'..., options=[{'value': 0, 'label..., label=Получатель, outlined=True, dense=True, options-dense=True, hide-bottom-space=True]
+E              Select [model-value={'value': 0, 'label'..., options=[{'value': 0, 'label..., label=Ожидание перед опера..., outlined=True, dense=True, hide-bottom-space=True]
+E            Expansion [model-value=True, label=1. Получить входящий..., caption=Алексей — постоянный...]
+E             div
+E              Number [model-value=10000, label=Сумма, for=c44, type=number, min=10000.0, max=80000.0, step=0.01, suffix=₽, outlined=True, dense=True, hide-bottom-space=True, inputmode=decimal]
+E              Select [model-value={'value': 0, 'label'..., options=[{'value': 0, 'label..., label=Источник перевода, outlined=True, dense=True, options-dense=True]
+E              Tooltip [text=Откуда поступают ден..., target=#c45]
+E              Select [model-value={'value': 0, 'label'..., options=[{'value': 0, 'label..., label=Отправитель, outlined=True, dense=True, options-dense=True, hide-bottom-space=True]
+
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: AssertionError
+_____________________ test_context_and_pin_are_immutable ______________________
+
+    def test_context_and_pin_are_immutable():
+        runtime = get_game_classifier()
+        config = deepcopy(runtime.context)
+        config["risk_model"] = runtime.identity
+        runtime.check_config(config, require_pin=True)
+        config["risk_model"] = {**runtime.identity, "model_version": "other"}
+        with pytest.raises(Conflict):
+            runtime.check_config(config, require_pin=True)
+        config = deepcopy(runtime.context)
+        config["behavior"]["history"]["operations"][0]["amount"] = "123.00"
+>       with pytest.raises(Conflict):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE Conflict
+
+tests\unit\test_game_classifier_release.py:84: Failed
+__________ test_probability_atomic_retry_storage_and_completed_reads __________
+
+request_api = <function request_api.<locals>.request at 0x0000015476980A40>
+admin = {'X-Session-ID': '[REDACTED]'}
+player_factory = <function player_factory.<locals>.create at 0x0000015476981C60>
+command = <function command.<locals>.<lambda> at 0x000001546CA3B2E0>
+sql = <function sql.<locals>.<lambda> at 0x000001546CA387C0>
+installed_aml_round = (1, {'schema_version': 10, 'operations': [{'code': 'salary', 'version': 1, 'visible_params': ['action.income_basis']},...00000000006', 'card': {'id': 4, 'code': 'cash_withdrawal', 'version': 1}, 'amount': '10000', 'context': {}, ...}, ...])
+probability_scorer = <src.aml_workshop_simulator.services.model_scoring.ProbabilityScorer object at 0x000001546CBDF3E0>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546CBFF0E0>
+
+    def test_probability_atomic_retry_storage_and_completed_reads(
+        request_api,
+        admin,
+        player_factory,
+        command,
+        sql,
+        installed_aml_round,
+        probability_scorer,  # noqa: F811
+        monkeypatch,  # noqa: F811
+    ):
+        round_id, config, steps = installed_aml_round
+        players = [player_factory("First"), player_factory("Second")]
+        for player in players:
+            request_api(
+                "POST",
+                f"/rounds/{round_id}/scenario/submit",
+                player["headers"],
+                command(steps),
+            )
+        original = probability_scorer.score
+        calls = 0
+    
+        def fail_second(*args, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise ValueError("test interruption")
+            return original(*args, **kwargs)
+    
+        monkeypatch.setattr(probability_scorer, "score", fail_second)
+        request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+        assert sql("SELECT * FROM scoring_results") == []
+        assert [r["status"] for r in sql("SELECT status FROM scenarios")] == [
+            "submitted",
+            "submitted",
+        ]
+        # A process restart may leave scoring status persisted; the existing lock/retry protocol recovers it.
+        sql("UPDATE rounds SET status='scoring'")
+        monkeypatch.setattr(probability_scorer, "score", original)
+>       summary = request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\api\test_aml_integration.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+method = 'POST', path = '/admin/rounds/1/score'
+headers = {'X-Session-ID': '[REDACTED]'}
+body = None, status = 200
+
+    def request(method, path, headers=None, body=None, status=200):
+        response = api.request(method, "/api/v1" + path, headers=headers, json=body)
+>       assert response.status_code == status, response.text
+E       AssertionError: {"code":"scoring_failed","message":"Ошибка скоринга. Приём сценариев закрыт; организатор может повторить расчёт.","details":null,"request_id":"14dbad10-5430-4413-a929-7af56cc7c986"}
+E       assert 500 == 200
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests\conftest.py:105: AssertionError
+_______ test_native_probability_and_shap_survive_api_storage_and_retry ________
+
+candidate = (WindowsPath('C:/Users/bigze/AppData/Local/Temp/pytest-of-bigze/pytest-336/test_native_probability_and_sh0/candidate')...pth=2, iterations=8, random_seed=19, thread_count=1, verbose=False), <catboost.core.Pool object at 0x000001546C9B6E70>)
+observations = [{'config': {'schema_version': 10, 'resources': {'initial_balance': '180000.00', 'initial_energy': 30, 'initial_time':...5143c', 'card': {'id': 4, 'code': 'cash_withdrawal', 'version': 1}, 'amount': '10000', 'context': {}, ...}, ...]}, ...]
+active_round = 1, sql = <function sql.<locals>.<lambda> at 0x000001546CA76E80>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001546CA408A0>
+request_api = <function request_api.<locals>.request at 0x0000015476961F80>
+player = {'id': 2, 'email': '01648e607b48477aa940d7dcc2abc614@example.com', 'display_name': 'Участник', 'role': 'participant', ...}
+admin = {'X-Session-ID': '[REDACTED]'}
+command = <function command.<locals>.<lambda> at 0x0000015476960D60>
+
+    def test_native_probability_and_shap_survive_api_storage_and_retry(
+        candidate,  # noqa: F811
+        observations,  # noqa: F811
+        active_round,
+        sql,
+        monkeypatch,
+        request_api,
+        player,
+        admin,
+        command,
+    ):
+        package, _, _ = candidate
+        native_factory = aml_probability_model.AMLProbabilityModel
+        with pytest.raises(ValueError, match="release"):
+            native_factory(package)
+        # Only this tiny fixture bypasses release admission. Feature extraction,
+        # native inference/SHAP, scoring dispatch, API, DB and projections are real.
+        monkeypatch.setattr(
+            aml_probability_model,
+            "AMLProbabilityModel",
+            lambda path: native_factory(path, offline_candidate=True),
+        )
+        monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(package))
+        monkeypatch.setattr(
+            'src.aml_workshop_simulator.services.game_classifier.get_game_classifier',
+            lambda: model_scoring._probability_scorer(str(package)),
+        )
+        public = deepcopy(observations[0])
+        config, steps = public["config"], public["steps"]
+        scorer = model_scoring.get_round_scorer(config)
+        config["risk_model"] = scorer.pin_identity(config)
+        config["config_version"] = config_version(config)
+        sql(
+            "UPDATE rounds SET game_config=CAST(:config AS jsonb) WHERE id=:id",
+            {"config": json.dumps(config), "id": active_round},
+        )
+>       expected = native_factory(package, offline_candidate=True).predict(steps, config)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\api\test_aml_native_integration.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\aml_workshop_simulator\services\aml_probability_model.py:351: in predict
+    features = self.feature_vector(steps, config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\aml_workshop_simulator\services\aml_probability_model.py:324: in feature_vector
+    self.check_config(config)
+src\aml_workshop_simulator\services\aml_probability_model.py:313: in check_config
+    check(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'Incompatible financial rules'
+
+    def check(condition, message):
+        if not condition:
+>           raise ValueError(message)
+E           ValueError: Incompatible financial rules
+
+src\aml_workshop_simulator\services\aml_probability_model.py:104: ValueError
+============================== warnings summary ===============================
+..\..\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\..\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\bigze\Documents\GH\AMLautosim\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_aml_chain_control.py::test_control_outcomes_and_engine_contract
+FAILED tests/unit/test_aml_chain_control.py::test_private_narrative_does_not_enter_model_features
+FAILED tests/unit/test_aml_chain_control.py::test_freeze_cannot_be_silently_replaced
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[0]
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[1]
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[2]
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[3]
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[4]
+FAILED tests/unit/test_aml_chain_dataset.py::test_matched_chains_pass_engine_and_keep_parties_amounts_equal[5]
+FAILED tests/unit/test_aml_chain_dataset.py::test_compact_readback_rejects_wrong_context
+FAILED tests/unit/test_aml_closed_population.py::test_uniform_units_preserve_both_truths_and_real_channel_coverage[service-artisan_owner]
+FAILED tests/unit/test_aml_closed_population.py::test_uniform_units_preserve_both_truths_and_real_channel_coverage[asset-collection_owner]
+FAILED tests/unit/test_aml_closed_population.py::test_final_audit_uses_whole_universe_and_never_approves_small_draft[False]
+FAILED tests/unit/test_aml_closed_population.py::test_final_audit_uses_whole_universe_and_never_approves_small_draft[True]
+FAILED tests/unit/test_aml_context_ui.py::test_fixed_salary_and_no_empty_claim_selector
+FAILED tests/unit/test_aml_context_ui.py::test_profile_history_does_not_infer_absence_from_incomplete_observation[partial]
+FAILED tests/unit/test_aml_dataset.py::test_pilot_export_is_auditable_but_never_release_ready
+FAILED tests/unit/test_aml_dataset.py::test_unreviewed_and_rejected_never_enter_supervised_csv
+FAILED tests/unit/test_aml_dataset.py::test_relabelled_duplicate_stays_in_one_group_and_collision_is_reported
+FAILED tests/unit/test_aml_dataset.py::test_audit_recomputes_features_even_if_attacker_updates_checksums
+FAILED tests/unit/test_aml_dataset.py::test_invalid_public_metadata_or_unachieved_objective_rejected
+FAILED tests/unit/test_aml_dataset.py::test_unresolved_diagnostic_preserves_confirmed_sibling_and_declares_dependence
+FAILED tests/unit/test_aml_dataset.py::test_shared_origin_split_tamper_is_detected_under_optimized_python
+FAILED tests/unit/test_aml_dataset.py::test_preregistered_challenge_reserves_entire_connected_component
+FAILED tests/unit/test_aml_dataset.py::test_coverage_reports_entirely_missing_supported_channels
+FAILED tests/unit/test_aml_dataset.py::test_audit_cli_cannot_mutate_immutable_dataset_with_report
+FAILED tests/unit/test_aml_dataset.py::test_row_tag_cannot_create_an_unregistered_family_holdout
+FAILED tests/unit/test_aml_demo_author.py::test_real_roster_and_financial_engine_accept_all_25_shared_context_cases
+FAILED tests/unit/test_aml_demo_author.py::test_scoped_evidence_does_not_make_all_shared_round_cases_equal
+FAILED tests/unit/test_aml_demo_author.py::test_complete_development_closure_has_no_demo_links
+FAILED tests/unit/test_aml_demo_author.py::test_development_inputs_are_captured_once_for_parsing_and_hashing
+FAILED tests/unit/test_aml_demo_casebook.py::test_freeze_binds_the_exact_bytes_used_for_real_corpus_closure
+FAILED tests/unit/test_aml_diagnostics.py::test_masked_counterfactuals_remain_valid_and_observationally_identical
+FAILED tests/unit/test_aml_expanded_origins.py::test_full_engine_validation_and_closure_are_reported
+FAILED tests/unit/test_aml_expanded_origins.py::test_source_hashes_bind_author_and_reused_compiler_file_bytes
+FAILED tests/unit/test_aml_fixed_history_dataset.py::test_all_classes_share_exact_existing_history_and_profile
+FAILED tests/unit/test_aml_fixed_history_dataset.py::test_generation_is_repeatable_and_does_not_mutate_baseline
+FAILED tests/unit/test_aml_fixed_history_dataset.py::test_readback_checks_exact_history_even_if_file_checksum_is_updated
+FAILED tests/unit/test_aml_history_population_audit.py::test_complete_audit_checks_preregistered_roster_and_saved_artifacts[None]
+FAILED tests/unit/test_aml_history_population_audit.py::test_complete_audit_checks_preregistered_roster_and_saved_artifacts[incomplete_policy]
+FAILED tests/unit/test_aml_history_population_audit.py::test_complete_audit_checks_preregistered_roster_and_saved_artifacts[checksum]
+FAILED tests/unit/test_aml_history_population_audit.py::test_complete_audit_checks_preregistered_roster_and_saved_artifacts[nonfinite]
+FAILED tests/unit/test_aml_origins.py::test_compiled_variants_preserve_engine_contract_and_private_truth
+FAILED tests/unit/test_aml_origins.py::test_report_counts_closure_not_dossiers_and_never_promotes_review
+FAILED tests/unit/test_aml_population_author.py::test_all_source_grammars_and_schedules_pass_unchanged_finances
+FAILED tests/unit/test_aml_population_author.py::test_probe_reports_empirical_closure_and_binds_written_rows
+FAILED tests/unit/test_aml_population_author.py::test_prefit_availability_mix_retains_third_opaque_pair_as_diagnostics
+FAILED tests/unit/test_aml_population_author.py::test_closure_projection_preserves_every_supported_ancestry_field
+FAILED tests/unit/test_aml_population_author.py::test_role_dossier_binds_actual_activity_contracts_and_assets
+FAILED tests/unit/test_aml_population_author.py::test_selected_compilation_keeps_raw_ancestry_and_diagnostic_exclusion
+FAILED tests/unit/test_aml_population_author.py::test_build_rejects_tampered_selection_before_output[parents]
+FAILED tests/unit/test_aml_population_author.py::test_build_rejects_tampered_selection_before_output[component]
+FAILED tests/unit/test_aml_population_author.py::test_build_rejects_tampered_selection_before_output[extra]
+FAILED tests/unit/test_aml_population_author.py::test_build_rejects_tampered_selection_before_output[quota]
+FAILED tests/unit/test_aml_population_author.py::test_build_rejects_tampered_selection_before_output[candidates]
+FAILED tests/unit/test_aml_population_author.py::test_small_build_and_complete_closure_bind_actual_written_population
+FAILED tests/unit/test_aml_population_author.py::test_coverage_cash_and_payroll_are_actual_bound_worlds[cash]
+FAILED tests/unit/test_aml_population_author.py::test_coverage_cash_and_payroll_are_actual_bound_worlds[salary_purchase]
+FAILED tests/unit/test_aml_population_author.py::test_cash_deposit_history_requires_actual_withdrawal_handover_and_receipt[None]
+FAILED tests/unit/test_aml_population_rails.py::test_routes_pass_full_engine_keep_both_truths_and_parent_history[payment_service]
+FAILED tests/unit/test_aml_population_rails.py::test_routes_pass_full_engine_keep_both_truths_and_parent_history[crypto_p2p]
+FAILED tests/unit/test_aml_population_rails.py::test_routes_pass_full_engine_keep_both_truths_and_parent_history[exchange_withdrawal]
+FAILED tests/unit/test_aml_population_rails.py::test_inactive_statement_retains_older_actual_payments_and_ancestry
+FAILED tests/unit/test_aml_probe_universe.py::test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[None]
+FAILED tests/unit/test_aml_probe_universe.py::test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[missing_shared_row]
+FAILED tests/unit/test_aml_probe_universe.py::test_versioned_observations_keep_original_ancestry_and_shared_cache_is_bound[changed_shared_vector]
+FAILED tests/unit/test_aml_review.py::test_export_rejects_changes_after_independent_approval
+FAILED tests/unit/test_aml_review.py::test_missing_review_binding_cannot_pass_release_gate
+FAILED tests/unit/test_aml_world_graph.py::test_pilot_has_causal_topologies_and_financially_valid_opaque_pairs
+FAILED tests/unit/test_aml_world_graph.py::test_build_audits_full_corpus_and_binds_exact_input_bytes
+FAILED tests/unit/test_contract_versions.py::test_legacy_golden[transfers] - ...
+FAILED tests/unit/test_contract_versions.py::test_legacy_golden[mixed] - Asse...
+FAILED tests/unit/test_contract_versions.py::test_legacy_golden[incoming_funding]
+FAILED tests/unit/test_counterparty_ui.py::test_select_save_reload_change_party_and_admin_details
+FAILED tests/unit/test_game_classifier_release.py::test_context_and_pin_are_immutable
+FAILED tests/api/test_aml_integration.py::test_probability_atomic_retry_storage_and_completed_reads
+FAILED tests/api/test_aml_native_integration.py::test_native_probability_and_shap_survive_api_storage_and_retry
+ERROR tests/unit/test_aml_demo_training.py::test_verified_receipt_binds_snapshot_and_actual_current_corpus
+ERROR tests/unit/test_aml_demo_training.py::test_expanded_development_cannot_include_demo_relative
+ERROR tests/unit/test_aml_demo_training.py::test_new_distinct_id_from_same_history_is_rejected
+ERROR tests/unit/test_aml_demo_training.py::test_rehashing_envelope_cannot_approve_altered_reviewed_record
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[checksum]
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[missing]
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[extra]
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[source]
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[roster]
+ERROR tests/unit/test_aml_demo_training.py::test_malformed_frozen_snapshot_is_rejected[protocol]
+ERROR tests/unit/test_aml_demo_training.py::test_snapshot_is_captured_once_before_closure
+77 failed, 973 passed, 1 skipped, 2 warnings, 11 errors in 660.77s (0:11:00)
+

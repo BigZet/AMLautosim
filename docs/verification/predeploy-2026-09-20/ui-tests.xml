@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="41" time="28.946" timestamp="2026-09-20T02:09:25.742875+03:00" hostname="bz"><testcase classname="tests.unit.test_timeline_ui" name="test_interval_reorder_delete_and_reload" time="0.287" /><testcase classname="tests.unit.test_organizer_settings" name="test_only_round_settings_are_mutable" time="0.064" /><testcase classname="tests.unit.test_organizer_settings" name="test_draft_form_edits_history_goal_and_limits" time="0.161" /><testcase classname="tests.unit.test_organizer_settings" name="test_custom_purchase_limits_are_applied_and_reported" time="0.022" /><testcase classname="tests.unit.test_profile_history_ui" name="test_public_context_and_draft_controls" time="0.138" /><testcase classname="tests.unit.test_profile_history_ui" name="test_config_form_keeps_expanded_contract" time="0.154" /><testcase classname="tests.unit.test_purchase_ui" name="test_purchase_form_and_both_turnover_labels" time="0.140" /><testcase classname="tests.unit.test_participant_limits" name="test_limits_follow_round_overrides_and_enabled_operations" time="0.001" /><testcase classname="tests.unit.test_participant_limits" name="test_purchase_total_uses_published_configuration" time="0.001" /><testcase classname="tests.unit.test_participant_limits" name="test_participant_api_cost_shape" time="0.001" /><testcase classname="tests.unit.test_shap_table" name="test_shap_orders_positive_contributions_before_larger_negative_ones" time="0.000" /><testcase classname="tests.unit.test_game_poll_races" name="test_older_cards_response_cannot_replace_newer_round" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_cards_response_cannot_roll_back_completed_save" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_failed_round_cards_fetch_keeps_previous_snapshot_and_draft" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_round_transition_is_not_visible_while_cards_are_loading" time="0.001" /><testcase classname="tests.unit.test_game_poll_races" name="test_edit_during_cards_fetch_is_preserved_with_revision_conflict" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_concurrent_requests_keep_credentials_separate" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response0-api_error]" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response1-login_temporarily_locked]" time="0.002" /><testcase classname="tests.unit.test_nicegui_client" name="test_errors[response2-invalid_response]" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_transport_failure_does_not_logout" time="0.001" /><testcase classname="tests.unit.test_nicegui_client" name="test_late_login_cannot_restore_logged_out_session" time="0.002" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[restart-detail]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[new_request-detail]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-participants]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-results]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-audit]" time="0.001" /><testcase classname="tests.unit.test_nicegui_organizer" name="test_delayed_panel_response_is_discarded[logout-detail]" time="0.001" /><testcase classname="tests.api.test_nicegui_auth" name="test_register_login_reload_logout_and_audiences" time="2.297" /><testcase classname="tests.api.test_nicegui_auth" name="test_blocking_clears_ui_session_and_requires_new_login" time="1.467" /><testcase classname="tests.api.test_nicegui_participant_editing" name="test_parameters_and_amount_remain_editable_after_autosave" time="5.946"><failure message="AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:&#10;q-layout&#10; q-page-container&#10;  q-page&#10;   div&#10;    Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]&#10;    Row&#10;     Row&#10;      div&#10;       Label [text=AML Практикум]&#10;      Label [text=Мастер-класс AML]&#10;     Space&#10;     Label [text=Игра идёт]&#10;     Label [text=Участник]&#10;     Row&#10;      Link [text=Об игре, href=/about?audience=play, target=_blank]&#10;       Icon [name=menu_book, aria-hidden=true]&#10;      Tooltip [text=Открыть описание игр..., target=#c14]&#10;      Button [icon=logout, flat=True, dense=True, aria-label=Выйти]&#10;      Tooltip [text=Выйти, target=#c17]&#10;    Column&#10;     Label [visible=False]&#10;     Column&#10;      Column&#10;       Column&#10;        Row&#10;         Link [text=Сценарий, href=/play, target=_self]&#10;         Link [text=Профиль, href=/play/profile, target=_self]&#10;         Link [text=Ограничения, href=/play/limits, target=_self]&#10;        div&#10;         Column&#10;          Column&#10;           div&#10;            Column&#10;             Label [text=Баланс]&#10;             Row&#10;              Label [text=180 000,00]&#10;              Label [text=₽]&#10;            Column&#10;             Column&#10;              Row&#10;               Label [text=Энергия]&#10;               Label [text=30]&#10;              LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]&#10;             Column&#10;              Row&#10;               Label [text=Время]&#10;               Label [text=30]&#10;              LinearProgress [value=1.0, size=3px, aria-label=Время: 30]&#10;          Column&#10;           Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]&#10;           Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]&#10;           Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]&#10;           Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]&#10;           Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]&#10;          Column&#10;           Column&#10;            Icon [name=playlist_add]&#10;            Label [text=Добавьте первую опер...]&#10;         Card&#10;          Column&#10;           Column&#10;            Label [text=Цель исходящих опера...]&#10;            Row&#10;             Row&#10;              Label [text=0,00]&#10;              Label [text=₽]&#10;             Label [text=0%]&#10;            LinearProgress [size=4px, rounded=True]&#10;            Label [text=из 400 000,00 ₽]&#10;           Row&#10;            Label [text=Комиссии]&#10;            Label [text=0,00 ₽]&#10;           Column&#10;            Column&#10;             Label [text=Лимиты и цель]&#10;             Row&#10;              Icon [name=radio_button_uncheck...]&#10;              Label [text=Цель]&#10;              Label [text=Ещё 400 000,00 ₽]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Наличные операции]&#10;              Label [text=0,00 / 120 000,00 ₽]&#10;             Row&#10;              Icon [name=radio_button_uncheck...]&#10;              Label [text=Действия в раунде]&#10;              Label [text=0 / 14]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Сумма покупок]&#10;              Label [text=0,00 / 30 000,00 ₽]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Количество покупок]&#10;              Label [text=0 / 3]&#10;             Label [text=Добавьте хотя бы одн...]&#10;          Label [visible=False]&#10;          Column&#10;           Label [text=Сохранено]&#10;           Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]&#10;           Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]&#10;    Timer&#10;    Timer">tests\api\test_nicegui_participant_editing.py:109: in test_parameters_and_amount_remain_editable_after_autosave
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_participant_editing.py:42: in run
+    await user.should_see("Добавить операцию", retries=40)
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: in should_see
+    raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E   AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Мастер-класс AML]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Участник]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E              div
+E               Column
+E                Label [text=Баланс]
+E                Row
+E                 Label [text=180 000,00]
+E                 Label [text=₽]
+E               Column
+E                Column
+E                 Row
+E                  Label [text=Энергия]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]
+E                Column
+E                 Row
+E                  Label [text=Время]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Время: 30]
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Column
+E               Label [text=Цель исходящих опера...]
+E               Row
+E                Row
+E                 Label [text=0,00]
+E                 Label [text=₽]
+E                Label [text=0%]
+E               LinearProgress [size=4px, rounded=True]
+E               Label [text=из 400 000,00 ₽]
+E              Row
+E               Label [text=Комиссии]
+E               Label [text=0,00 ₽]
+E              Column
+E               Column
+E                Label [text=Лимиты и цель]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Цель]
+E                 Label [text=Ещё 400 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Наличные операции]
+E                 Label [text=0,00 / 120 000,00 ₽]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Действия в раунде]
+E                 Label [text=0 / 14]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Сумма покупок]
+E                 Label [text=0,00 / 30 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Количество покупок]
+E                 Label [text=0 / 3]
+E                Label [text=Добавьте хотя бы одн...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer</failure></testcase><testcase classname="tests.api.test_nicegui_forms" name="test_registration_login_and_full_workshop" time="9.578"><failure message="AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:&#10;q-layout&#10; q-page-container&#10;  q-page&#10;   div&#10;    Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]&#10;    Row&#10;     Row&#10;      div&#10;       Label [text=AML Практикум]&#10;      Label [text=Игра NiceGUI]&#10;     Space&#10;     Label [text=Игра идёт]&#10;     Label [text=Тест формы]&#10;     Row&#10;      Link [text=Об игре, href=/about?audience=play, target=_blank]&#10;       Icon [name=menu_book, aria-hidden=true]&#10;      Tooltip [text=Открыть описание игр..., target=#c14]&#10;      Button [icon=logout, flat=True, dense=True, aria-label=Выйти]&#10;      Tooltip [text=Выйти, target=#c17]&#10;    Column&#10;     Label [visible=False]&#10;     Column&#10;      Column&#10;       Column&#10;        Row&#10;         Link [text=Сценарий, href=/play, target=_self]&#10;         Link [text=Профиль, href=/play/profile, target=_self]&#10;         Link [text=Ограничения, href=/play/limits, target=_self]&#10;        div&#10;         Column&#10;          Column&#10;           div&#10;            Column&#10;             Label [text=Баланс]&#10;             Row&#10;              Label [text=180 000,00]&#10;              Label [text=₽]&#10;            Column&#10;             Column&#10;              Row&#10;               Label [text=Энергия]&#10;               Label [text=30]&#10;              LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]&#10;             Column&#10;              Row&#10;               Label [text=Время]&#10;               Label [text=30]&#10;              LinearProgress [value=1.0, size=3px, aria-label=Время: 30]&#10;          Column&#10;           Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]&#10;           Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]&#10;           Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]&#10;           Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]&#10;           Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]&#10;          Column&#10;           Column&#10;            Icon [name=playlist_add]&#10;            Label [text=Добавьте первую опер...]&#10;         Card&#10;          Column&#10;           Column&#10;            Label [text=Цель исходящих опера...]&#10;            Row&#10;             Row&#10;              Label [text=0,00]&#10;              Label [text=₽]&#10;             Label [text=0%]&#10;            LinearProgress [size=4px, rounded=True]&#10;            Label [text=из 400 000,00 ₽]&#10;           Row&#10;            Label [text=Комиссии]&#10;            Label [text=0,00 ₽]&#10;           Column&#10;            Column&#10;             Label [text=Лимиты и цель]&#10;             Row&#10;              Icon [name=radio_button_uncheck...]&#10;              Label [text=Цель]&#10;              Label [text=Ещё 400 000,00 ₽]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Наличные операции]&#10;              Label [text=0,00 / 120 000,00 ₽]&#10;             Row&#10;              Icon [name=radio_button_uncheck...]&#10;              Label [text=Действия в раунде]&#10;              Label [text=0 / 14]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Сумма покупок]&#10;              Label [text=0,00 / 30 000,00 ₽]&#10;             Row&#10;              Icon [name=check_circle]&#10;              Label [text=Количество покупок]&#10;              Label [text=0 / 3]&#10;             Label [text=Добавьте хотя бы одн...]&#10;          Label [visible=False]&#10;          Column&#10;           Label [text=Сохранено]&#10;           Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]&#10;           Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]&#10;    Timer&#10;    Timer">tests\api\test_nicegui_forms.py:254: in test_registration_login_and_full_workshop
+    asyncio.run(run())
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:196: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\runners.py:119: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\base_events.py:726: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\api\test_nicegui_forms.py:165: in run
+    await user.should_see("Добавить операцию", retries=40)
+..\..\AMLautosim\.venv\Lib\site-packages\nicegui\testing\user.py:147: in should_see
+    raise AssertionError('expected to see at least one ' + self._build_error_message(target, kind, marker, content))
+E   AssertionError: expected to see at least one element with marker=Добавить операцию or content=Добавить операцию on the page:
+E   q-layout
+E    q-page-container
+E     q-page
+E      div
+E       Colors [primary=#1555a2, secondary=#397fbd, accent=#9c27b0, dark=#1d1d1d, dark-page=#121212, positive=#247c62, negative=#ad4535, info=#31ccec, warning=#f2c037]
+E       Row
+E        Row
+E         div
+E          Label [text=AML Практикум]
+E         Label [text=Игра NiceGUI]
+E        Space
+E        Label [text=Игра идёт]
+E        Label [text=Тест формы]
+E        Row
+E         Link [text=Об игре, href=/about?audience=play, target=_blank]
+E          Icon [name=menu_book, aria-hidden=true]
+E         Tooltip [text=Открыть описание игр..., target=#c14]
+E         Button [icon=logout, flat=True, dense=True, aria-label=Выйти]
+E         Tooltip [text=Выйти, target=#c17]
+E       Column
+E        Label [visible=False]
+E        Column
+E         Column
+E          Column
+E           Row
+E            Link [text=Сценарий, href=/play, target=_self]
+E            Link [text=Профиль, href=/play/profile, target=_self]
+E            Link [text=Ограничения, href=/play/limits, target=_self]
+E           div
+E            Column
+E             Column
+E              div
+E               Column
+E                Label [text=Баланс]
+E                Row
+E                 Label [text=180 000,00]
+E                 Label [text=₽]
+E               Column
+E                Column
+E                 Row
+E                  Label [text=Энергия]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Энергия: 30]
+E                Column
+E                 Row
+E                  Label [text=Время]
+E                  Label [text=30]
+E                 LinearProgress [value=1.0, size=3px, aria-label=Время: 30]
+E             Column
+E              Button [label=Зарплата, icon=account_balance_wall..., flat=True, no-caps=True, align=center]
+E              Button [label=Входящий перевод, icon=south_west, flat=True, no-caps=True, align=center]
+E              Button [label=Перевод по карте, icon=credit_card, flat=True, no-caps=True, align=center]
+E              Button [label=Наличные, icon=payments, flat=True, no-caps=True, align=center]
+E              Button [label=Покупка, icon=shopping_bag, flat=True, no-caps=True, align=center]
+E             Column
+E              Column
+E               Icon [name=playlist_add]
+E               Label [text=Добавьте первую опер...]
+E            Card
+E             Column
+E              Column
+E               Label [text=Цель исходящих опера...]
+E               Row
+E                Row
+E                 Label [text=0,00]
+E                 Label [text=₽]
+E                Label [text=0%]
+E               LinearProgress [size=4px, rounded=True]
+E               Label [text=из 400 000,00 ₽]
+E              Row
+E               Label [text=Комиссии]
+E               Label [text=0,00 ₽]
+E              Column
+E               Column
+E                Label [text=Лимиты и цель]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Цель]
+E                 Label [text=Ещё 400 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Наличные операции]
+E                 Label [text=0,00 / 120 000,00 ₽]
+E                Row
+E                 Icon [name=radio_button_uncheck...]
+E                 Label [text=Действия в раунде]
+E                 Label [text=0 / 14]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Сумма покупок]
+E                 Label [text=0,00 / 30 000,00 ₽]
+E                Row
+E                 Icon [name=check_circle]
+E                 Label [text=Количество покупок]
+E                 Label [text=0 / 3]
+E                Label [text=Добавьте хотя бы одн...]
+E             Label [visible=False]
+E             Column
+E              Label [text=Сохранено]
+E              Button [label=Повторить запрос, outline=True, no-caps=True, visible=False]
+E              Button [label=Отправить сценарий, icon=arrow_forward, unelevated=True, no-caps=True, disable=True, text-color=blue-grey-5]
+E       Timer
+E       Timer</failure></testcase><testcase classname="tests.api.test_nicegui_forms" name="test_reconnect_checks_session[False]" time="1.669" /><testcase classname="tests.api.test_nicegui_forms" name="test_reconnect_checks_session[True]" time="1.714" /><testcase classname="tests.api.test_nicegui_forms" name="test_state_load_failure_remains_visible_and_recovers" time="4.408" /></testsuite></testsuites>
