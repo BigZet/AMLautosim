@@ -47,6 +47,11 @@ def display_number(value):
     return f"{Decimal(str(value)):,f}".replace(",", " ").replace(".", ",")
 
 
+def display_operation_amount(value):
+    amount = Decimal(str(value)).quantize(Decimal("0.01"))
+    return display_number(amount.quantize(Decimal("1")) if amount == amount.to_integral_value() else amount)
+
+
 def display_moment(value):
     return datetime.fromisoformat(value).strftime("%d.%m.%Y, %H:%M")
 
@@ -304,7 +309,7 @@ def scoring_wait_panel(state, cards):
                                     ui.label(" · ".join(details)).classes("submitted-operation-detail")
                                 if config.get("schema_version") == 10 and step.get("claim_id"):
                                     ui.label(claim_details(config, step["claim_id"])).classes("submitted-operation-detail")
-                        ui.label(f"{display_number(step['amount'])} ₽").classes("submitted-operation-amount")
+                    ui.label(f"{display_operation_amount(step['amount'])} ₽").classes("submitted-operation-amount")
 
 
 def resources(snapshot):
@@ -976,7 +981,7 @@ class ParticipantScreen:
                     else "Наличные",
                 )
                 moment = display_moment(timing[index]["occurred_at"]) if timing else ""
-                amount_text = display_number(step["amount"]) if step["amount"] else "—"
+                amount_text = display_operation_amount(step["amount"]) if step["amount"] else "—"
                 summary = f"{index + 1}. {card['title']} · {amount_text} ₽"
                 caption = " · ".join(part for part in (party, moment) if part)
 
@@ -997,7 +1002,7 @@ class ParticipantScreen:
                         with ui.element("q-item-section").classes("operation-heading"):
                             with ui.row().classes("operation-name"):
                                 ui.label(f"{index + 1}. {card['title']}")
-                                ui.label(f"{amount_text} ₽").classes("operation-heading-amount")
+                                amount_label = ui.label(f"{amount_text} ₽").classes("operation-heading-amount")
                             caption_label = ui.label(caption).classes("operation-caption")
                         with ui.element("q-item-section").props("side").classes("operation-actions-slot"):
                             actions = ui.row().classes("operation-actions")
@@ -1052,11 +1057,16 @@ class ParticipantScreen:
                         ).classes("operation-delete").tooltip("Удалить операцию")
                     with ui.element("div").classes("operation-fields"):
 
-                        def amount(e, step_id=step["step_id"]):
+                        def amount(
+                            e, step_id=step["step_id"], label=amount_label,
+                            expansion=operation, title=f"{index + 1}. {card['title']}",
+                        ):
                             if not self.submitting:
-                                self.current_step(step_id)["amount"] = str(
-                                    e.value or ""
-                                ).replace(",", ".")
+                                value = "" if e.value is None else str(e.value).replace(",", ".")
+                                self.current_step(step_id)["amount"] = value
+                                formatted = display_operation_amount(value) if value else "—"
+                                label.set_text(f"{formatted} ₽")
+                                expansion.set_text(f"{title} · {formatted} ₽")
                                 self.changed()
 
                         minimum = float(card["min_amount"])
