@@ -13,6 +13,7 @@ from src.aml_workshop_simulator.schemas.admin import (
     ScoringSummaryOut,
 )
 from src.aml_workshop_simulator.schemas.editor_metadata import EditorMetadataOut
+from src.aml_workshop_simulator.schemas.game_version import GameVersion
 from src.aml_workshop_simulator.schemas.round_config import (
     RoundConfigInput,
     parse_game_config,
@@ -33,23 +34,19 @@ router = APIRouter(dependencies=[Depends(get_current_admin)])
 
 @router.get("/game-config/default", response_model=RoundConfigInput)
 async def default_game_config(
-    schema_version: int = Query(default=10, ge=8, le=10),
+    schema_version: GameVersion = Query(default=GameVersion.current),
 ) -> dict:
     value = expanded_game_config() if schema_version == 8 else game_config()
-    if schema_version not in (8, 10):
-        from src.aml_workshop_simulator.core.errors import Conflict
-
-        raise Conflict("Unsupported game version", code="round_contract_not_ready")
     require_new_round_allowed(value)
     return parse_game_config(value).dump()
 
 
 @router.get("/action-cards", response_model=list[ActionCardOut])
 async def action_cards(
-    schema_version: int = Query(default=10, ge=8, le=10),
+    schema_version: GameVersion = Query(default=GameVersion.current),
     db: AsyncSession = Depends(get_db),
 ):
-    return await catalog_cards(db, schema_version=schema_version)
+    return await catalog_cards(db, schema_version=int(schema_version))
 
 
 @router.get("/rounds/current", response_model=RoundAdminOut | None)
@@ -117,12 +114,12 @@ async def score_round(
 async def restart_round(
     round_id: int,
     request: Request,
-    schema_version: int = Query(default=10, ge=8, le=10),
+    schema_version: GameVersion = Query(default=GameVersion.current),
     principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
     return await operations.restart(
-        db, round_id, principal.user_id, request.state.request_id, schema_version
+        db, round_id, principal.user_id, request.state.request_id, int(schema_version)
     )
 
 

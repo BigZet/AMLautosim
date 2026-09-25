@@ -510,6 +510,14 @@ def _evaluate_validated(
             ],
         }
     if purchase_policy is not None:
+        purchase_spec = next(
+            (
+                card_specs[key].with_overrides(policy.for_card(key).overrides)
+                for key in policy.enabled_keys()
+                if key[0] == "purchase" and key in card_specs
+            ),
+            None,
+        )
         snapshot["schema_version"] = 7
         snapshot["ruleset_version"] = "expanded-rules-stage04-v1"
         snapshot["totals"].update(
@@ -528,9 +536,11 @@ def _evaluate_validated(
                 "Количество покупок",
                 "count",
                 card_counts.get("purchase", 0),
-                3,
+                purchase_spec.max_occurrences if purchase_spec else 0,
             ),
         ]:
+            if code == "purchase_count" and purchase_spec is None:
+                continue
             snapshot["limits"].append(
                 {
                     "code": code,

@@ -60,7 +60,13 @@ Raw local JUnit, JSON reports and logs are under
 
 ## Remaining acceptance
 
-T04–T15, final independent review, browser/device checks and final measured
+T04 targeted suite: 41 passed; legacy/disabled-purchase and supported-version
+boundary additions: four passed. RED reproduced 13 failures before changes.
+Purchase counts use the effective card override, versions are restricted to
+8/10 before loading config or acquiring restart locks. All 25 full model
+replays remained identical after the controlled source compatibility release.
+
+T05–T15, final independent review, browser/device checks and final measured
 load/soak gates remain outstanding. The PR must remain draft until required
 acceptance is satisfied. Production probes and real-device results must never
 be inferred from local emulation.

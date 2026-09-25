@@ -16,6 +16,44 @@ from src.aml_workshop_simulator.services.round_configuration import config_versi
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures/contracts"
 
 
+@pytest.mark.parametrize("version", ["7", "9", "11", "abc"])
+@pytest.mark.parametrize("endpoint", ["game-config/default", "action-cards", "rounds/1/restart"])
+def test_invalid_query_version_rejected_before_work(version, endpoint, api, admin, monkeypatch):
+    from src.aml_workshop_simulator.api.routers.admin import rounds
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Invalid version reached config or service")
+
+    monkeypatch.setattr(rounds, "game_config", forbidden)
+    monkeypatch.setattr(rounds, "catalog_cards", forbidden)
+    monkeypatch.setattr(rounds.operations, "restart", forbidden)
+    response = api.request("POST" if endpoint.endswith("restart") else "GET",
+                           f"/api/v1/admin/{endpoint}?schema_version={version}", headers=admin)
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("version", [7, 9, 11, "abc", True, 8.0])
+def test_direct_restart_rejects_version_before_database(version):
+    import asyncio
+    from src.aml_workshop_simulator.services.admin_rounds import restart
+    from src.aml_workshop_simulator.core.errors import ValidationFailed
+
+    class NoDatabase:
+        async def execute(self, *args):
+            raise AssertionError("Invalid version acquired a database lock")
+
+    with pytest.raises(ValidationFailed):
+        asyncio.run(restart(NoDatabase(), 1, 1, None, version))
+
+
+@pytest.mark.parametrize("version", [None, 8, 10])
+def test_supported_query_versions_and_default(version, request_api, admin):
+    query = "" if version is None else f"?schema_version={version}"
+    config = request_api("GET", "/admin/game-config/default" + query, admin)
+    assert config["schema_version"] == (version or 10)
+    assert request_api("GET", "/admin/action-cards" + query, admin)
+
+
 def expanded(config):
     result = deepcopy(config)
     result.pop("card_snapshots", None)

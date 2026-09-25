@@ -78,3 +78,28 @@ def test_custom_purchase_limits_are_applied_and_reported():
     assert exceeded["allowed"] == "45000.00"
     assert "45 000" in exceeded["message"]
     assert "30 000" not in exceeded["message"]
+
+
+@pytest.mark.parametrize("limit", [2, 3, 5])
+@pytest.mark.parametrize("extra", [0, 1])
+def test_purchase_count_report_matches_effective_card(limit, extra):
+    from uuid import uuid4
+    from src.aml_workshop_simulator.services.aml_context import evaluate
+
+    config = deepcopy(get_game_classifier().context)
+    config["behavior"]["purchases"].update(version="purchase-policy-v2", max_total="45000.00")
+    for operation in config["operations"]:
+        if operation["code"] == "purchase":
+            operation["max_occurrences"] = limit
+    rows = json.loads((Path(__file__).parents[1] / "fixtures/retired_limits_baseline.json").read_bytes())["rows"]
+    sample = next(s for row in rows for s in row["steps"] if s["card"]["code"] == "purchase")
+    steps = [{**deepcopy(sample), "step_id": str(uuid4()), "amount": "1000.00", "interval_minutes": 1 if i else None} for i in range(limit + extra)]
+    snapshot = evaluate(steps, config)
+    report = next(row for row in snapshot["limits"] if row["code"] == "purchase_count")
+    assert report["limit"] == str(limit)
+    assert report["used"] == str(limit + extra)
+    assert report["remaining"] == "0"
+    violations = [row for row in snapshot["violations"] if row["reason"] == "max_occurrences_exceeded"]
+    assert len(violations) == extra
+    if extra:
+        assert violations[0]["allowed"] == str(limit)

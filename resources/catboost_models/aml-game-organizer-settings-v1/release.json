@@ -20,7 +20,7 @@
     "src/aml_workshop_simulator/services/game_classifier.py": "138a9bcc69f57b85d6496c6524e5bd7aed77b3cfafb22d378c2ba8cc0586cd89",
     "src/aml_workshop_simulator/schemas/round_config.py": "11015032ee6cd2076312e1563520557d046c0564e3b5e7389c51922a87f07264",
     "src/aml_workshop_simulator/domain/game_models.py": "2c084987cfdc1de41388dd587343f7038ddc0dad22025d15d94736e69ed9b714",
-    "src/aml_workshop_simulator/domain/simulation.py": "7f2a8e612b31139ccf33d72b3285dbb7aa43ede11dc2ce8367cca78e4d41d029",
+    "src/aml_workshop_simulator/domain/simulation.py": "670aafa5014592589976443fb9ec9cca84ea9dfef6995e56bb6abc2949754a5d",
     "config/base_round.json": "c8d0c9b86d17fdd603ba99669f9bd0f792e9524c8f925954c4bcf2665f084dfd",
     "src/aml_workshop_simulator/schemas/expanded_contract.py": "1eeeacc87bda5e8c3ee321aba2851b69239e6a491e7cbcadaa4d66fd1d7b52c0",
     "src/aml_workshop_simulator/services/counterparties.py": "155dfb2b0e797c2e7e21da970e3b598c8431e98c38609f205f7e143ec87aef76",
@@ -29,6 +29,17 @@
     "src/aml_workshop_simulator/services/source_hashing.py": "eb48f1f2a59ce951793fbda3f80a81d5fe98000eeaaa75ca4583df7331b7168f"
   },
   "compatible_identities": [
+    {
+      "package_sha256": "582b5cac0fcba73f87c6d65b1ee8394f151a09912e23702382ff9191e18d758f",
+      "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+      "context_sha256": "e70d9bd62bed8bb270d377de7bb54e314018a639808fa15da99791c88a139cef",
+      "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+      "contract_version": 10,
+      "extractor_version": "aml-game-attributes-context-v1",
+      "score_kind": "educational_pattern_probability",
+      "model_version": "aml-game:sha256:582b5cac0fcba73f87c6d65b1ee8394f151a09912e23702382ff9191e18d758f",
+      "explanation_version": 5
+    },
     {
       "package_sha256": "65c9346e4a6561e8e16d5ae7a334c672af32af246b94c223519d61458f7fe984",
       "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",

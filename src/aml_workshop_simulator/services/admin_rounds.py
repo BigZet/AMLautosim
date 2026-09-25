@@ -182,13 +182,14 @@ async def restart(
     request_id: str | None,
     schema_version: int = 10,
 ) -> RoundAdminOut:
+    from src.aml_workshop_simulator.schemas.game_version import require_game_version
+
+    schema_version = int(require_game_version(schema_version))
     await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
     row = await get_round(db, round_id, lock="update")
     from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
     from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
-    if schema_version not in (8, 10):
-        raise Conflict("Версия игры не поддерживается.", code="model_contract_mismatch")
     selected = parse_game_config(
         expanded_game_config() if schema_version == 8 else game_config()
     )
