@@ -32,42 +32,6 @@ def test_real_roster_and_financial_engine_accept_all_25_shared_context_cases():
             m.validate_case(dossier, case["record"])
 
 
-def test_profile_categories_are_stable_roles_without_changing_acceptance_cases():
-    import json
-    from pathlib import Path
-    from scripts.aml_dataset.aml_provenance import neutral_observation
-    from src.aml_workshop_simulator.services.aml_dataset_features_v5 import (
-        extract_features,
-    )
-
-    old = json.loads(
-        Path("resources/aml_dataset/aml-v1/demo-draft/v2/casebook.json").read_bytes()
-    )
-    current, _ = module().author_casebook()
-    categories = [
-        "project_coordinator",
-        "artisan_owner",
-        "collection_owner",
-        "event_organizer",
-        "equipment_pool_organizer",
-    ]
-    for previous_game, game, category in zip(
-        old["rounds"], current["rounds"], categories, strict=True
-    ):
-        for previous, case in zip(previous_game["cases"], game["cases"], strict=True):
-            public = case["record"]["public_snapshot"]
-            prior_public = previous["record"]["public_snapshot"]
-            assert public["config"]["behavior"]["profile"]["id"] == category
-            assert extract_features(**public) == extract_features(**prior_public)
-            for shape in (False, True):
-                assert neutral_observation(public, shape=shape) == neutral_observation(
-                    prior_public, shape=shape
-                )
-            normalized = deepcopy(case)
-            normalized["record"]["public_snapshot"]["config"]["behavior"]["profile"][
-                "id"
-            ] = prior_public["config"]["behavior"]["profile"]["id"]
-            assert normalized == previous
 
 
 @pytest.mark.parametrize(

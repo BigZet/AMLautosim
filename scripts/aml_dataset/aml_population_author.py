@@ -947,7 +947,7 @@ def compiler_hashes():
                 "scripts/aml_dataset/aml_world_graph.py",
                 "scripts/aml_dataset/aml_origins.py",
                 "scripts/aml_dataset/aml_casebook.py",
-                "docs/verification/semantic-interface-audit/fixtures.json",
+                "config/aml_scenario_templates.json",
                 "docs/research/2026-09-16-aml-behavior-and-legitimate-context.md",
             )
         },

@@ -41,13 +41,9 @@ def probability_scorer(monkeypatch, aml_explanation):  # noqa: F811
 def test_dispatch_rejects_v9_and_missing_classifier(monkeypatch, tmp_path):
     assert hasattr(model_scoring, "get_round_scorer"), "missing contract dispatch"
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(tmp_path / "missing"))
-    for version in (9, 10):
+    for version in (8, 9, 10):
         with pytest.raises(Conflict):
             model_scoring.get_round_scorer({"schema_version": version})
-    assert (
-        model_scoring.get_round_scorer({"schema_version": 8})
-        is model_scoring.get_model_scorer()
-    )
 
 
 def test_v10_creation_uses_released_classifier():

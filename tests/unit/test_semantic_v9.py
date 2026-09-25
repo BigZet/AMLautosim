@@ -1,6 +1,5 @@
 from copy import deepcopy
 import json
-from pathlib import Path
 
 import pytest
 
@@ -136,14 +135,3 @@ def test_mass_generation_and_new_rounds_are_gated(review):
             changed,
             rows,
         )
-
-
-def test_pinned_v8_source_files_unchanged():
-    import hashlib
-
-    manifest = json.loads(
-        Path("resources/catboost_models/integration-v2-final/manifest.json").read_text()
-    )
-    root = Path("src/aml_workshop_simulator/services")
-    for name, expected in manifest["source_checksums"].items():
-        assert hashlib.sha256((root / name).read_bytes()).hexdigest() == expected

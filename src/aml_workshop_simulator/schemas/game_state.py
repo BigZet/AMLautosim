@@ -90,6 +90,10 @@ class StepImpactOut(BaseModel):
     @model_serializer(mode="wrap")
     def serialize(self, handler):
         result = handler(self)
+        # JSONB reorders object keys; preview and persisted results must agree.
+        result["detail_factors"] = sorted(
+            result["detail_factors"], key=lambda factor: factor["field_key"]
+        )
         if self.purchase is None:
             result.pop("purchase", None)
         return result

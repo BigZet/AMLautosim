@@ -24,7 +24,6 @@ from src.aml_workshop_simulator.schemas.round_config import (
     RoundConfigInput,
     parse_game_config,
 )
-from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
 from src.aml_workshop_simulator.services.game_classifier import game_config
 from src.aml_workshop_simulator.domain.contract_versions import (
     require_new_round_allowed,
@@ -43,7 +42,7 @@ router = APIRouter(dependencies=[Depends(get_current_admin)])
 async def default_game_config(
     schema_version: GameVersion = Query(default=GameVersion.current),
 ) -> dict:
-    value = expanded_game_config() if schema_version == 8 else game_config()
+    value = game_config()
     require_new_round_allowed(value)
     return parse_game_config(value).dump()
 

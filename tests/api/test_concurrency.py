@@ -72,7 +72,7 @@ def test_pool_exhaustion_returns_retryable_503_without_losing_command(
     asyncio.run(run())
 
 
-@pytest.fixture(params=[8, 10])
+@pytest.fixture(params=[10])
 def seeded_game_version(request):
     return request.param
 

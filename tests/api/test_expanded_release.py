@@ -13,10 +13,10 @@ def test_released_round_full_cycle_and_emergency_creation_switch(
     metadata = request_api("GET", "/admin/game-config/editor-metadata", admin)
     assert metadata["available_contracts"] == [10]
     new = request_api(
-        "POST", f"/admin/rounds/{round_id}/restart?schema_version=8", admin, status=201
+        "POST", f"/admin/rounds/{round_id}/restart?schema_version=10", admin, status=201
     )
     identity = new["id"]
-    assert identity != round_id and new["game_config"]["schema_version"] == 8
+    assert identity != round_id and new["game_config"]["schema_version"] == 10
     assert new["context_summary"]["status"] == "observed"
     config = new["game_config"]
     frozen = deepcopy(sql("SELECT game_config FROM rounds")[0]["game_config"])
@@ -41,7 +41,7 @@ def test_released_round_full_cycle_and_emergency_creation_switch(
         == []
     )
     request_api(
-        "POST", f"/admin/rounds/{identity}/restart?schema_version=8", admin, status=409
+        "POST", f"/admin/rounds/{identity}/restart?schema_version=10", admin, status=409
     )
     assert sql("SELECT game_config FROM rounds")[0]["game_config"] == frozen
     players = []
@@ -84,7 +84,7 @@ def test_no_in_place_upgrade_and_disabled_default(
     monkeypatch, request_api, admin, round_id
 ):
     monkeypatch.setattr(settings, "EXPANDED_ROUNDS_ENABLED", False)
-    request_api("GET", "/admin/game-config/default?schema_version=8", admin, status=409)
+    request_api("GET", "/admin/game-config/default?schema_version=10", admin, status=409)
     monkeypatch.setattr(settings, "EXPANDED_ROUNDS_ENABLED", True)
     from src.aml_workshop_simulator.core.game_config import base_game_config
 
@@ -96,7 +96,7 @@ def test_no_in_place_upgrade_and_disabled_default(
         {"game_config": config, "expected_config_revision": 1},
         409,
     )
-    assert len(request_api("GET", "/admin/action-cards?schema_version=8", admin)) == 5
+    assert len(request_api("GET", "/admin/action-cards?schema_version=10", admin)) == 5
     assert len(request_api("GET", "/admin/action-cards", admin)) == 5
 
 
@@ -104,7 +104,7 @@ def test_employer_incoming_is_rejected_by_api(
     request_api, admin, round_id, player_factory
 ):
     new = request_api(
-        "POST", f"/admin/rounds/{round_id}/restart?schema_version=8", admin, status=201
+        "POST", f"/admin/rounds/{round_id}/restart?schema_version=10", admin, status=201
     )
     assert new["game_config"]["behavior"]["sender_policy"] == "separate-employer-v1"
     request_api("POST", f"/admin/rounds/{new['id']}/start", admin)

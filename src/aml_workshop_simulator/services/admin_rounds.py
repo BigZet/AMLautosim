@@ -210,12 +210,9 @@ async def restart(
     schema_version = int(require_game_version(schema_version))
     await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
     row = await get_round(db, round_id, lock="update")
-    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
     from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
-    selected = parse_game_config(
-        expanded_game_config() if schema_version == 8 else game_config()
-    )
+    selected = parse_game_config(game_config())
     config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.
     await db.execute(update(ScoringJob).where(

@@ -42,6 +42,13 @@ async def execute(statement, parameters=None):
         return rows
 
 
+@pytest.fixture(autouse=True)
+def isolated_ui_storage(tmp_path, monkeypatch):
+    """User simulation must never clear a developer's real NiceGUI sessions."""
+    from nicegui.storage import Storage
+    monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+
+
 @pytest.fixture(scope="session")
 def database():
     async def manage(create):
@@ -64,8 +71,8 @@ def database():
 
 @pytest.fixture
 def seeded_game_version():
-    """Existing contract-v8 regression tests keep an explicitly legacy round."""
-    return 8
+    """All API regressions use the current v10 release."""
+    return 10
 
 
 @pytest.fixture
@@ -76,28 +83,8 @@ def api(database, seeded_game_version):
     asyncio.run(
         execute("TRUNCATE action_cards, users, rounds, auth_rate_limits RESTART IDENTITY CASCADE")
     )
-    if seeded_game_version == 8:
-        from unittest.mock import patch
-        from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
-        from src.aml_workshop_simulator.services.configuration import freeze_game_config
-        from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
-        from src.aml_workshop_simulator.services.round_configuration import (
-            config_version,
-        )
-
-        def legacy_config(cards):
-            config = freeze_game_config(expanded_game_config(), cards)
-            scorer = get_model_scorer()
-            scorer.check_config(config)
-            config["risk_model"] = scorer.identity.copy()
-            config["config_version"] = config_version(config)
-            return config
-
-        with patch("scripts.seed_database.reference_game_config", legacy_config):
-            asyncio.run(seed())
-    else:
-        assert seeded_game_version == 10
-        asyncio.run(seed())
+    assert seeded_game_version == 10
+    asyncio.run(seed())
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
 
@@ -271,10 +258,10 @@ def invalid_game_config(request):
 
 @pytest.fixture
 def invalid_expanded_game_config(invalid_game_config):
-    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+    from src.aml_workshop_simulator.services.game_classifier import game_config
 
     invalid, message = invalid_game_config
-    config = expanded_game_config()
+    config = game_config()
     for operation in invalid["operations"]:
         if (
             operation.get("visible_params") in (["action.funds_source"], ["channel"])
@@ -284,7 +271,8 @@ def invalid_expanded_game_config(invalid_game_config):
                 o for o in config["operations"] if o["code"] == operation["code"]
             )
             if operation.get("min_amount") == "90000.00":
-                target["min_amount"] = "90000.00"
+                from decimal import Decimal
+                target["min_amount"] = str(Decimal(target["max_amount"]) + 1)
             else:
                 target["visible_params"] = operation["visible_params"]
     return config, message

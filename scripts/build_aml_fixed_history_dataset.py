@@ -20,7 +20,7 @@ from scripts.audit_aml_history_population import require, file_hash
 from src.aml_workshop_simulator.services.semantic_contract import new_config
 
 SEED = 2026091701
-BASE = Path("docs/verification/semantic-interface-audit/fixtures.json")
+BASE = Path("config/aml_scenario_templates.json")
 BEHAVIOR = Path("config/expanded_behavior.json")
 
 

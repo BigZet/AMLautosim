@@ -49,35 +49,43 @@ def test_parameters_and_amount_remain_editable_after_autosave(
                     e for e in user.find(ui.select).elements if e.label == "Отправитель"
                 )
                 sender.set_value("A")
-            source = next(
-                e
-                for e in user.find(ui.select).elements
-                if "crypto_exchange" in e.options
-            )
-            amount = next(
-                e for e in user.find(ui.number).elements if e.label == "Сумма"
-            )
+                purpose = next(
+                    e for e in user.find(ui.select).elements
+                    if "unknown" in e.options and "shared_expense" in e.options
+                )
+                purpose.set_value("unknown")
             for value, total in [
-                ("foreign_bank_kg", "71000.01"),
-                ("crypto_exchange", "72000.02"),
+                ("payment_service", "71000.01"),
+                ("crypto_p2p", "72000.02"),
             ]:
                 with user:
+                    source = next(
+                        e for e in user.find(ui.select).elements
+                        if "crypto_p2p" in e.options
+                    )
                     source.set_value(value)
+                await asyncio.sleep(0.1)
+                with user:
+                    amount = next(
+                        e for e in user.find(ui.number).elements if e.label == "Сумма"
+                    )
                     amount.set_value(float(total))
                 await asyncio.sleep(1.6)
                 saved = await front.api.request(
                     "GET", f"rounds/{active_round}/scenario", session_id=token
                 )
-                assert saved["steps"][0]["action_details"]["transfer_source"] == value
+                assert saved["steps"][0]["action_details"]["incoming_kind"] == value
                 assert saved["steps"][0]["amount"] == total
                 assert (
-                    previews[-1]["steps"][0]["action_details"]["transfer_source"]
+                    previews[-1]["steps"][0]["action_details"]["incoming_kind"]
                     == value
                 )
                 assert previews[-1]["steps"][0]["amount"] == total
                 assert source.value == value
                 assert amount.value == float(total)
-            for invalid, expected in [(9999, 10000), (80001, 80000)]:
+            incoming = next(c for c in cards if c["code"] == "incoming_transfer")
+            minimum, maximum = float(incoming["min_amount"]), float(incoming["max_amount"])
+            for invalid, expected in [(minimum - 1, minimum), (maximum + 1, maximum)]:
                 with user:
                     amount.set_value(invalid)
                     assert not amount.validate()
@@ -93,9 +101,9 @@ def test_parameters_and_amount_remain_editable_after_autosave(
             restored = next(
                 e
                 for e in user.find(ui.select).elements
-                if "crypto_exchange" in e.options
+                if "crypto_p2p" in e.options
             )
-            assert restored.value == "crypto_exchange"
+            assert restored.value == "crypto_p2p"
             before_profile = await front.api.request("GET", f"rounds/{active_round}/scenario", session_id=token)
             await user.open("/play/profile")
             await user.should_see("История операций", retries=40)

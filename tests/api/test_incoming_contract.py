@@ -29,7 +29,8 @@ def test_incoming_card_preview_save_submit_and_score(
             incoming = next(c for c in cards if c["code"] == "incoming_transfer")
             assert [p["key"] for p in incoming["visible_params"]] == [
                 "channel",
-                "transfer_source",
+                "incoming_kind",
+        "bank_country",
             ]
             assert (
                 incoming["channels"] == ["bank"] and incoming["quota_category"] is None
@@ -38,8 +39,9 @@ def test_incoming_card_preview_save_submit_and_score(
             for step in steps:
                 if step["card"]["code"] == "incoming_transfer":
                     step["action_details"] = {
-                        "transfer_source": "crypto_exchange",
+                        "incoming_kind": "crypto_p2p",
                     }
+                    step["purpose_code"] = "unknown"
             sid = player["headers"]["X-Session-ID"]
             preview = await client.request(
                 "POST", path + "/preview", session_id=sid, body={"steps": steps}

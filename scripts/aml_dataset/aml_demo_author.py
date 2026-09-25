@@ -1491,7 +1491,7 @@ def build_demo(output):
                     "scripts/aml_dataset/aml_origins.py",
                     "scripts/aml_dataset/aml_casebook.py",
                     "scripts/aml_demo_casebook.py",
-                    "docs/verification/semantic-interface-audit/fixtures.json",
+                    "config/aml_scenario_templates.json",
                     "docs/research/2026-09-16-aml-behavior-and-legitimate-context.md",
                 )
             },

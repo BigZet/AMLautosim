@@ -60,22 +60,16 @@ python scripts/check_nicegui_transport.py --url http://127.0.0.1:8080
 
 Сборка, первый запуск, повторный seed и восстановление резервной копии входят
 в контейнерную проверку. Инструкции: [deployment](../docs/deployment.md) и
-[operations](../docs/operations.md). Результаты фиксируются в `docs/verification/`.
+[operations](../docs/operations.md). Результаты выпуска фиксируются в `docs/current-release.md`.
 
-## Офлайн CatBoost
+## Текущая модель
 
-Тесты `tests/ml` выполняются отдельно в образе `deploy/Dockerfile.ml` с
-`requirements-ml.txt`. Они не требуют БД. Команды и отдельная интеграционная
-проверка оценки без вызова fit: [обучение CatBoost](../docs/catboost-training.md).
-
-## Интеграция CatBoost и SHAP
-
-Для текущего выпуска: `tests/ml/test_model_scoring.py`, `tests/api/test_model_integration.py`, `tests/unit/test_expanded_result_ui.py`. Нужны CatBoost 1.2.10 и отдельная PostgreSQL. Проверка всех 4413 прогнозов и SHAP — `python -m scripts.verify_model_integration`; параметры приведены в [отчёте](../docs/verification/catboost-shap-integration.md).
-
-Регрессии ML-верификатора проверяют ошибки входных данных и обязательные пороги
-также в `python -O` и при `PYTHONOPTIMIZE=1`. Успешный отчёт записывается только
-после всех проверок, в новый файл. Сбор окружения обучения проверяется без `fit`
-и без зависимости от наличия `pip` или другого `python` в `PATH`.
+Пакет `aml-game-organizer-settings-v1` проверяется через `test_model_registry`,
+`test_game_classifier_release`, `test_package_publication` и API-тесты.
+Численные регрессии сверяют 25 цепочек, признаки, вероятности и SHAP.
+Архивные модели и их приёмочные тесты сняты с поддержки. Общие API-сценарии
+и проверки worker перенесены на v10. Research-тесты генерируют пилотные входы
+во временном каталоге; прежние датасеты в репозитории не нужны.
 
 ## Контуры и обязательный CI
 

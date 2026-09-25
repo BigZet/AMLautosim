@@ -211,60 +211,27 @@ def shap_table_rows(factors):
         text = number(contribution, 4, True) if contribution else "0"
         if contribution and abs(contribution) < 0.00005:
             text = "+<0,0001" if contribution > 0 else "−<0,0001"
-        rows.append(
-            {
-                "feature": factor["feature"],
-                "title": factor["title"],
-                "value": str(value),
-                "raw_value": factor["value"],
-                "contribution": contribution,
-                "impact": text,
-                "bar_width": 50 * abs(contribution) / scale,
-                "bar_opacity": 0.3 + 0.7 * abs(contribution) / scale,
-            }
-        )
+        rows.append({
+            "feature": factor["feature"], "title": factor["title"],
+            "value": str(value), "raw_value": factor["value"], "contribution": contribution, "impact": text,
+            "bar_width": 50 * abs(contribution) / scale,
+            "bar_opacity": 0.3 + 0.7 * abs(contribution) / scale,
+        })
     return rows
 
 
 def shap_table(factors):
-    table = (
-        ui.table(
-            columns=[
-                {
-                    "name": "title",
-                    "field": "title",
-                    "label": "Признак",
-                    "align": "left",
-                    "sortable": True,
-                },
-                {
-                    "name": "value",
-                    "field": "raw_value",
-                    "label": "Значение",
-                    "align": "right",
-                    "sortable": True,
-                },
-                {
-                    "name": "contribution",
-                    "field": "contribution",
-                    "label": "Вклад",
-                    "align": "right",
-                    "sortable": True,
-                },
-            ],
-            rows=shap_table_rows(factors),
-            row_key="feature",
-            pagination={"rowsPerPage": 0, "sortBy": "contribution", "descending": True},
-        )
-        .props("flat dense wrap-cells hide-bottom binary-state-sort")
-        .classes("shap-table w-full")
-    )
-    table.add_slot(
-        "body-cell-value", '<q-td :props="props">{{ props.row.value }}</q-td>'
-    )
-    table.add_slot(
-        "body-cell-contribution",
-        """<q-td :props="props">
+    table = ui.table(
+        columns=[
+            {"name": "title", "field": "title", "label": "Признак", "align": "left", "sortable": True},
+            {"name": "value", "field": "raw_value", "label": "Значение", "align": "right", "sortable": True},
+            {"name": "contribution", "field": "contribution", "label": "Вклад", "align": "right", "sortable": True},
+        ],
+        rows=shap_table_rows(factors), row_key="feature",
+        pagination={"rowsPerPage": 0, "sortBy": "contribution", "descending": True},
+    ).props("flat dense wrap-cells hide-bottom binary-state-sort").classes("shap-table w-full")
+    table.add_slot('body-cell-value', '<q-td :props="props">{{ props.row.value }}</q-td>')
+    table.add_slot('body-cell-contribution', '''<q-td :props="props">
         <div class="shap-impact">
             <span>{{ props.row.impact }}</span>
             <div class="shap-track" aria-hidden="true">
@@ -273,37 +240,23 @@ def shap_table(factors):
                             left: (props.row.contribution < 0 ? 50 - props.row.bar_width : 50) + '%'}"></i>
             </div>
         </div>
-    </q-td>""",
-    )
+    </q-td>''')
 
 
 def game_pattern_result(explanation, *, expanded=False, on_change=None):
     result = aml_result_view_model(explanation)["explanation"]
     with ui.card().classes("panel shap-panel w-full min-w-0"):
-        with ui.expansion(
-            "Что повлияло на оценку", value=expanded, on_value_change=on_change
-        ).classes("w-full"):
-            ui.label(
-                "+ повышает подозрительность, − снижает. Вклад SHAP — не проценты."
-            ).classes("shap-note")
-            windows = result["windows"]
-            selected = max(windows, key=lambda w: w["probability"])["minutes"]
-            with (
-                ui.tabs()
-                .props("dense no-caps align=left")
-                .classes("shap-tabs w-full") as tabs
-            ):
-                choices = [
-                    ui.tab(str(w["minutes"]), label=f"{w['minutes']} мин")
-                    for w in windows
-                ]
-            with ui.tab_panels(tabs, value=str(selected)).classes("w-full shap-panels"):
-                for window, tab in zip(windows, choices):
-                    with ui.tab_panel(tab):
-                        shap_table(window["shap_values"])
-            ui.label("Показаны вклады в оценку выбранного временного окна.").classes(
-                "shap-note"
-            )
+        ui.label("Что повлияло на оценку").classes("text-lg font-semibold")
+        ui.label("+ повышает подозрительность, − снижает. Вклад SHAP — не проценты.").classes("shap-note")
+        windows = result["windows"]
+        selected = max(windows, key=lambda w: w["probability"])["minutes"]
+        with ui.tabs().props("dense no-caps align=left").classes("shap-tabs w-full") as tabs:
+            choices = [ui.tab(str(w["minutes"]), label=f"{w['minutes']} мин") for w in windows]
+        with ui.tab_panels(tabs, value=str(selected)).classes("w-full shap-panels"):
+            for window, tab in zip(windows, choices):
+                with ui.tab_panel(tab):
+                    shap_table(window["shap_values"])
+        ui.label("Показаны вклады в оценку выбранного временного окна.").classes("shap-note")
 
 
 def aml_factor_row(factor):

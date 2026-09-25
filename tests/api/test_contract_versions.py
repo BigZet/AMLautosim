@@ -16,7 +16,7 @@ from src.aml_workshop_simulator.services.round_configuration import config_versi
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures/contracts"
 
 
-@pytest.mark.parametrize("version", ["7", "9", "11", "abc"])
+@pytest.mark.parametrize("version", ["7", "8", "9", "11", "abc"])
 @pytest.mark.parametrize("endpoint", ["game-config/default", "action-cards", "rounds/1/restart"])
 def test_invalid_query_version_rejected_before_work(version, endpoint, api, admin, monkeypatch):
     from src.aml_workshop_simulator.api.routers.admin import rounds
@@ -32,7 +32,7 @@ def test_invalid_query_version_rejected_before_work(version, endpoint, api, admi
     assert response.status_code == 422
 
 
-@pytest.mark.parametrize("version", [7, 9, 11, "abc", True, 8.0])
+@pytest.mark.parametrize("version", [7, 8, 9, 11, "abc", True, 8.0])
 def test_direct_restart_rejects_version_before_database(version):
     import asyncio
     from src.aml_workshop_simulator.services.admin_rounds import restart
@@ -46,7 +46,7 @@ def test_direct_restart_rejects_version_before_database(version):
         asyncio.run(restart(NoDatabase(), 1, 1, None, version))
 
 
-@pytest.mark.parametrize("version", [None, 8, 10])
+@pytest.mark.parametrize("version", [None, 10])
 def test_supported_query_versions_and_default(version, request_api, admin):
     query = "" if version is None else f"?schema_version={version}"
     config = request_api("GET", "/admin/game-config/default" + query, admin)
@@ -77,7 +77,8 @@ def state(sql):
 def test_snapshot_roundtrip_in_postgresql(
     version, api, request_api, admin, player, round_id, sql
 ):
-    config = request_api("GET", "/admin/game-config/default?schema_version=8", admin)
+    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+    config = expanded_game_config()
     if version == 7:
         from src.aml_workshop_simulator.core.game_config import base_game_config
 
@@ -170,7 +171,6 @@ def test_config_rejection_is_atomic(kind, status, request_api, admin, round_id, 
 @pytest.mark.parametrize("status", ["draft", "active"])
 def test_stored_expanded_start_is_blocked(status, request_api, admin, round_id, sql):
     config = request_api("GET", f"/admin/rounds/{round_id}", admin)["game_config"]
-    config["schema_version"] = 8
     config["behavior"].pop("release")
     sql(
         "UPDATE rounds SET game_config=CAST(:config AS jsonb), status=:status WHERE id=:id",
@@ -189,7 +189,6 @@ def test_no_evaluation_or_cutoff_for_injected_expanded_round(
     path = f"/rounds/{active_round}/scenario"
     request_api("PUT", path, player["headers"], command(steps))
     config = request_api("GET", f"/admin/rounds/{active_round}", admin)["game_config"]
-    config["schema_version"] = 8
     config["behavior"].pop("release")
     sql(
         "UPDATE rounds SET game_config=CAST(:config AS jsonb) WHERE id=:id",

@@ -2,7 +2,7 @@
 import pytest
 from unittest.mock import patch
 from scripts.check_expanded_balance import demo_steps
-from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
 
 
 def test_model_round_atomic_retry_and_no_early_explanation(
@@ -10,8 +10,8 @@ def test_model_round_atomic_retry_and_no_early_explanation(
 ):
     config = request_api("GET", "/admin/rounds/current", admin)["game_config"]
     assert (
-        config["schema_version"] == 8
-        and config["risk_model"] == get_model_scorer().identity
+        config["schema_version"] == 10
+        and config["risk_model"] == get_game_classifier().identity
     )
     request_api("POST", f"/admin/rounds/{round_id}/start", admin)
     players = []
@@ -29,7 +29,7 @@ def test_model_round_atomic_retry_and_no_early_explanation(
             request_api("GET", "/rounds/current/state", player["headers"])["result"]
             is None
         )
-    scorer = get_model_scorer()
+    scorer = get_game_classifier()
     original = scorer.score
     calls = 0
 
@@ -50,8 +50,8 @@ def test_model_round_atomic_retry_and_no_early_explanation(
         state = request_api("GET", "/rounds/current/state", player["headers"])
         explanation = state["result"]["explanation"]
         assert (
-            explanation["method"] == "catboost-tree-shap"
-            and len(explanation["factors"]) == 84
+            explanation["schema_version"] == 5
+            and len(explanation["windows"]) == 3
         )
         assert (
             request_api("GET", "/rounds/current/state", player["headers"])["result"]
@@ -70,7 +70,6 @@ def test_100_scenarios_keep_state_requests_responsive(
     request_api, admin, round_id, player, command, sql
 ):
     import time
-    from concurrent.futures import ThreadPoolExecutor
 
     config = request_api("GET", "/admin/rounds/current", admin)["game_config"]
     request_api("POST", f"/admin/rounds/{round_id}/start", admin)
@@ -92,19 +91,18 @@ def test_100_scenarios_keep_state_requests_responsive(
     latencies = []
     observed_scoring = False
     started = time.perf_counter()
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(
-            request_api, "POST", f"/admin/rounds/{round_id}/score?wait=true", admin
-        )
-        while not future.done():
-            before = time.perf_counter()
-            state = request_api("GET", "/rounds/current/state", player["headers"])
-            latencies.append(time.perf_counter() - before)
-            if state["round"]["status"] == "scoring":
-                observed_scoring = True
-                assert state["result"] is None
-            time.sleep(0.05)
-        result = future.result()
+    job = request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=202)
+    while job["state"] in ("queued", "running") and time.perf_counter() - started < 60:
+        before = time.perf_counter()
+        state = request_api("GET", "/rounds/current/state", player["headers"])
+        latencies.append(time.perf_counter() - before)
+        if state["round"]["status"] == "scoring":
+            observed_scoring = True
+            assert state["result"] is None
+        time.sleep(0.05)
+        job = request_api("GET", f"/admin/scoring-jobs/{job['job_id']}", admin)
+    assert job["state"] == "completed", job
+    result = job["summary"]
     elapsed = time.perf_counter() - started
     assert result["scored_count"] == 100 and elapsed < 60
     assert observed_scoring and max(latencies) < 2

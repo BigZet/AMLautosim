@@ -10,7 +10,7 @@ import pytest
 from src.aml_workshop_simulator.db.session import AsyncSessionLocal
 
 
-@pytest.fixture(params=[8, 10])
+@pytest.fixture(params=[10])
 def seeded_game_version(request):
     return request.param
 

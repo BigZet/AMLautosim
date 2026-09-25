@@ -284,10 +284,8 @@ def _probability_scorer(package):
 
 
 def get_round_scorer(config):
-    """Dispatch by saved contract; v9 and unavailable v10 never fall back."""
+    """Only the current v10 contract is supported; unavailable pins never fall back."""
     version = config.get("schema_version")
-    if type(version) is int and version == 8:
-        return get_model_scorer()
     if type(version) is int and version == 10:
         from src.aml_workshop_simulator.services.game_classifier import (
             get_pinned_game_classifier,

@@ -56,6 +56,12 @@ def test_amount_heading_updates_without_rebuilding_cards(tmp_path, monkeypatch):
             )
             assert len(fields) == len(labels) == 5
             operations = dict(screen.operation_elements)
+            assert not any(isinstance(e, ui.menu) for e in user.client.elements.values())
+            with user:
+                cards = list(operations.values())
+                cards[0].close()
+                cards[0].open()
+            assert all(card.value for card in cards)
             screen.changed.reset_mock()
             for index, (field, label, current) in enumerate(zip(fields, labels, reversed(screen.editor.steps))):
                 for value in (23456.78 + index, None, 0, 12345.67 + index):

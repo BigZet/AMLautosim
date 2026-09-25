@@ -6,7 +6,7 @@ from src.aml_workshop_simulator.core.errors import Conflict
 from src.aml_workshop_simulator.services import game_classifier as runtime
 
 
-@pytest.mark.parametrize('name', ['aml-game-v1', 'aml-game-relaxed-v1', 'aml-game-attributes-v1', 'aml-game-attribute-context-v1'])
+@pytest.mark.parametrize('name', ['aml-game-organizer-settings-v1'])
 def test_saved_round_keeps_its_verified_package_after_default_changes(monkeypatch, name):
     previous = runtime.GameClassifier(runtime.ROOT / 'resources/catboost_models' / name)
     config = deepcopy(previous.context)

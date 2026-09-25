@@ -1,36 +1,7 @@
 {
   "version": 1,
   "current_runtime": "aml-game-organizer-settings-v1",
-  "legacy_runtime": "integration-v2-final",
   "packages": [
-    {
-      "path": "aml-game-attribute-context-unlimited-v1",
-      "identity": "0741a120d78f6be61a3cc4ef6206e6423759fc1262ee3df0b096806e641ea2a5",
-      "identity_kind": "release-json-canonical-sha256",
-      "kind": "game-classifier",
-      "support": "research",
-      "runtime_consumers": []
-    },
-    {
-      "path": "aml-game-attribute-context-v1",
-      "identity": "eb686e2fede5f010f8e87f70785d600d477e508cabb72b154013e05b4200232b",
-      "identity_kind": "release-json-canonical-sha256",
-      "kind": "game-classifier",
-      "support": "legacy",
-      "runtime_consumers": [
-        "saved-v10-exact-pin"
-      ]
-    },
-    {
-      "path": "aml-game-attributes-v1",
-      "identity": "716773a9f607084a317787390d2ceb4243887b9bb18de4e655daf0726d4fa005",
-      "identity_kind": "release-json-canonical-sha256",
-      "kind": "game-classifier",
-      "support": "legacy",
-      "runtime_consumers": [
-        "saved-v10-exact-pin"
-      ]
-    },
     {
       "path": "aml-game-organizer-settings-v1",
       "identity": "19ebf3a7c286e94ac9d77d0f01340d7a65468980430205f82006b5f8495702a0",
@@ -40,60 +11,6 @@
       "runtime_consumers": [
         "default-v10",
         "saved-v10-compatible-pins"
-      ]
-    },
-    {
-      "path": "aml-game-relaxed-v1",
-      "identity": "d520cc674efb743a8fd0736a01545299aa8568b5f4a5370225d7f21b1ad1e7d8",
-      "identity_kind": "release-json-canonical-sha256",
-      "kind": "game-classifier",
-      "support": "legacy",
-      "runtime_consumers": [
-        "saved-v10-exact-pin"
-      ]
-    },
-    {
-      "path": "aml-game-v1",
-      "identity": "b6c8864b575526948dcf0304c77182e8d3406327de59da412c159eb2295fd0bf",
-      "identity_kind": "release-json-canonical-sha256",
-      "kind": "game-classifier",
-      "support": "legacy",
-      "runtime_consumers": [
-        "saved-v10-exact-pin"
-      ]
-    },
-    {
-      "path": "experiment-v1",
-      "identity": null,
-      "identity_kind": "manifest-bytes-sha256",
-      "kind": "legacy-adapter",
-      "support": "research",
-      "runtime_consumers": []
-    },
-    {
-      "path": "experiment-v2",
-      "identity": null,
-      "identity_kind": "manifest-bytes-sha256",
-      "kind": "legacy-adapter",
-      "support": "research",
-      "runtime_consumers": []
-    },
-    {
-      "path": "integration-v2",
-      "identity": "449389a3a1d22228acd0f4b1a218ec681e9b208e55653e1263d8847bb167e148",
-      "identity_kind": "manifest-bytes-sha256",
-      "kind": "legacy-adapter",
-      "support": "research",
-      "runtime_consumers": []
-    },
-    {
-      "path": "integration-v2-final",
-      "identity": "89bf2e946c35fa9012231484ad66c7f3432ad166ce6092329e19c53dfae9f89e",
-      "identity_kind": "manifest-bytes-sha256",
-      "kind": "legacy-adapter",
-      "support": "legacy",
-      "runtime_consumers": [
-        "saved-v8"
       ]
     }
   ]

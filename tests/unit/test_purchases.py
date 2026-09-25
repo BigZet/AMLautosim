@@ -184,10 +184,11 @@ def test_gap_between_financial_operations_survives_purchase_filtering():
 
 def test_preview_and_scoring_use_same_totals_and_snapshot():
     from scripts.check_expanded_balance import demo_config, demo_steps
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
+    from src.aml_workshop_simulator.services.game_classifier import get_game_classifier, game_config
 
     config = demo_config()
-    config["risk_model"] = get_model_scorer().identity
+    config.update(game_config())
+    config["risk_model"] = get_game_classifier().identity
     values = demo_steps(config, "purchase")
     preview = evaluate_expanded_scenario(values, config)
     specs = snapshot_specs(config)

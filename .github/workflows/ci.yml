@@ -21,7 +21,7 @@ concurrency:
 env:
   PYTHONUTF8: '1'
   PYTHONUNBUFFERED: '1'
-  RUNTIME_LFS: resources/catboost_models/integration-v2-final/**,resources/catboost_models/aml-game-v1/**,resources/catboost_models/aml-game-relaxed-v1/**,resources/catboost_models/aml-game-attributes-v1/**,resources/catboost_models/aml-game-attribute-context-v1/**,resources/catboost_models/aml-game-organizer-settings-v1/**
+  RUNTIME_LFS: resources/catboost_models/aml-game-organizer-settings-v1/**
 
 jobs:
   runtime:
@@ -122,7 +122,7 @@ jobs:
           python-version: '3.13'
           cache: pip
           cache-dependency-path: requirements*.txt
-      - run: git lfs pull --include="${{ env.RUNTIME_LFS }},resources/aml_dataset/aml-v1/pilot/**,resources/aml_dataset/aml-v1/origins-reviewed/v3/**"
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
       - run: python -m pip install -r requirements-ml.txt
       - id: research
         continue-on-error: true

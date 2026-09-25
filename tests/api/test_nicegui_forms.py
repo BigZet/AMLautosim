@@ -193,8 +193,6 @@ def test_registration_login_and_full_workshop(
                             selector.set_value(step[key])
             await asyncio.sleep(1.8)
             await user.should_see("Сохранено", retries=40)
-            user.find(kind=ui.expansion, content="Условия отправки").click()
-            await user.should_see("Лимиты и цель")
             await user.should_see("Всё готово к отправке")
             user.find("Отправить сценарий").click()
             await user.should_see("Отправить сценарий окончательно?")

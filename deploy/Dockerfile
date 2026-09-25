@@ -31,15 +31,11 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.t
     && rm -rf /wheels
 
 COPY alembic.ini ./
+COPY RELEASE.json ./
 COPY migrations ./migrations
 COPY scripts ./scripts
 COPY src ./src
 COPY config ./config
-COPY resources/catboost_models/integration-v2-final ./resources/catboost_models/integration-v2-final
-COPY resources/catboost_models/aml-game-v1 ./resources/catboost_models/aml-game-v1
-COPY resources/catboost_models/aml-game-relaxed-v1 ./resources/catboost_models/aml-game-relaxed-v1
-COPY resources/catboost_models/aml-game-attributes-v1 ./resources/catboost_models/aml-game-attributes-v1
-COPY resources/catboost_models/aml-game-attribute-context-v1 ./resources/catboost_models/aml-game-attribute-context-v1
 COPY resources/catboost_models/aml-game-organizer-settings-v1 ./resources/catboost_models/aml-game-organizer-settings-v1
 COPY resources/catboost_models/registry.json ./resources/catboost_models/registry.json
 

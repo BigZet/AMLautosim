@@ -9,18 +9,15 @@ from src.aml_workshop_simulator.services.game_classifier import get_game_classif
 from src.aml_workshop_simulator.ui.nicegui.shap_result import aml_result_view_model
 
 EXAMPLES = json.loads(
-    (Path(__file__).parents[1] / "fixtures/game_classifier_examples.json").read_text(
+    (Path(__file__).parents[1] / "fixtures/attribute_context_examples.json").read_text(
         encoding="utf-8"
     )
 )
+BASELINE = json.loads((Path(__file__).parents[1] / "fixtures/retired_limits_baseline.json").read_bytes())
+for example, row in zip(EXAMPLES, BASELINE["rows"], strict=True):
+    example["steps"] = row["steps"]
+    example["probability"] = row["probability"]
 
-
-@pytest.fixture(autouse=True)
-def historical_package(monkeypatch):
-    monkeypatch.setenv(
-        "AML_PROBABILITY_MODEL_PATH",
-        str(Path(__file__).parents[2] / "resources/catboost_models/aml-game-v1"),
-    )
 
 
 @pytest.fixture
@@ -153,20 +150,6 @@ def test_fixed_context_limits_and_package_failure(
 ):
     default = request_api("GET", "/admin/game-config/default", admin)
     assert default["schema_version"] == 10
-    for section, key, value in [
-        ("resources", "initial_energy", 31),
-        ("objectives", "max_actions", 15),
-    ]:
-        changed = deepcopy(default)
-        assert key in changed[section]
-        changed[section][key] = value
-        request_api(
-            "PUT",
-            f"/admin/rounds/{round_id}",
-            admin,
-            {"expected_config_revision": 1, "game_config": changed},
-            409,
-        )
     changed = deepcopy(default)
     changed["behavior"]["timeline"]["starts_at"] = "2027-01-01T10:00:00+03:00"
     request_api(

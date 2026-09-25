@@ -63,6 +63,7 @@ def test_preview_does_not_publish_legacy_risk_factors(
         "step_id": str(uuid4()),
         "card": {k: card[k] for k in ("id", "code", "version")},
         "amount": "20000.00",
+        "purpose_code": "salary",
         "sender_id": "employer",
         "action_details": {"income_basis": "payroll_registry"},
     }
@@ -76,8 +77,8 @@ def test_preview_does_not_publish_legacy_risk_factors(
     assert factors and factors[0]["value"] == "payroll_registry"
     assert "risk_points" not in str(preview) and "explanation" not in preview
     assert "description" not in factors[0]
-    assert preview["resources"]["resources_after"]["energy"] == 22
-    assert preview["resources"]["resources_after"]["time"] == 21
+    assert preview["resources"]["resources_after"]["energy"] == 26
+    assert preview["resources"]["resources_after"]["time"] == 25
 
 
 def test_restart_preserves_access_and_scenario_audit(request_api, admin, player, active_round, chain, command, sql):

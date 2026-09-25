@@ -408,45 +408,23 @@ body:has(.profile-workspace) .brand { color:#2354D6; font-size:19px; }
  .fact-details-grid { grid-template-columns:minmax(0,1fr); }
  .chain-workspace .scenario-summary { grid-row:auto; }
 }
-
-/* Status transitions must not move the focused editor below the summary. */
-.submit-reason { min-height:3em; line-height:1.5; }
-.preview-status { min-height:18px; }
-/* Shared touch, keyboard and small-screen contract. */
-*, *::before, *::after { box-sizing:border-box; }
-.workspace, .panel, .q-tab-panel, .q-dialog__inner > div { min-width:0; }
-.workspace { overflow-wrap:anywhere; }
-button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
-.header-exit, .header-text-link, .participant-nav a, .q-btn { min-height:44px; min-width:44px; }
-.chain-workspace .operation-actions .operation-menu-button { width:auto; min-width:108px; height:44px; }
-.operation-picker-menu { padding:8px; width:min(440px,calc(100vw - 24px)); }
-.operation-menu { display:flex; flex-direction:column; padding:6px; max-width:calc(100vw - 24px); }
-.operation-menu .q-btn { justify-content:flex-start; min-height:44px; }
-.operation-menu .q-btn__content { justify-content:flex-start; }
-.q-dialog__inner > .q-card { max-height:calc(100dvh - 32px); overflow-y:auto; overflow-wrap:anywhere; }
-.q-table__container { max-width:100%; }
-.q-table__middle { overflow-x:auto; }
-.chain-workspace .save-indicator { font-size:13px; text-align:left; color:var(--ink); }
-.open-conditions > .q-expansion-item__container > .q-item { min-height:44px; padding:4px 0; }
-@media (max-width:700px) {
- .workspace { padding:16px max(12px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
- .chain-workspace .scenario-layout { display:flex; flex-direction:column; gap:16px; }
- .chain-workspace .scenario-summary { order:-1; width:100%; padding:14px; gap:8px; }
- .chain-workspace .scenario-editor { width:100%; min-width:0; }
- .chain-workspace .scenario-summary .goal-amount { font-size:22px; line-height:28px; }
- .chain-workspace .scenario-summary .scenario-fees { padding:0; font-size:12px; }
- .chain-workspace .operation-actions-slot { flex-basis:auto; margin-left:auto; }
- .chain-workspace .operation-card > .q-expansion-item__container > .q-item { padding:10px 12px; }
- .chain-catalog { grid-template-columns:repeat(2,minmax(0,1fr)); }
- .header-user-name { max-width:55%; overflow-wrap:anywhere; }
- .app-header { gap:8px; }
- .header-identity { flex-wrap:wrap; }
- .header-game-title { white-space:normal; border:0; padding-left:0; }
- .q-tab { min-width:0; padding:0 10px; }
- .auth-shell { padding:20px 12px max(56px,env(safe-area-inset-bottom)); }
- .auth-shell-with-bottom-link .auth-footer { position:static; margin-top:16px; }
- .auth-shell-with-bottom-link { flex-direction:column; }
+/* Shared authenticated header: explicit mobile rows prevent orphaned actions. */
+@media (max-width:800px) {
+ .app-header:has(.header-identity) { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; row-gap:4px; padding:14px 16px; align-items:center; }
+ .app-header:has(.header-identity) > .q-space { display:none; }
+ .app-header .header-identity { grid-column:1 / -1; grid-row:1; display:flex; flex-direction:column; align-items:flex-start; gap:4px; width:100%; min-width:0; margin-bottom:8px; }
+ .app-header .header-game-title { border:0; padding:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; font-size:13px; line-height:18px; }
+ .app-header .header-game-status { grid-column:1; grid-row:2; margin:0; }
+ .app-header .header-user-name { grid-column:1; grid-row:3; min-width:0; overflow-wrap:anywhere; line-height:18px; }
+ .app-header .header-actions { grid-column:2; grid-row:2 / 4; align-self:center; padding:0; border:0; gap:4px; }
+ .app-header .header-text-link { height:44px; padding:0 10px; }
+ .app-header .header-exit { width:44px; min-width:44px; height:44px; }
+ .app-header:not(:has(.header-game-status)) .header-user-name { grid-row:2; }
+ .app-header:not(:has(.header-game-status)) .header-actions { grid-row:2; }
+ .app-header:not(:has(.header-identity)) > .q-space { display:none; }
+ .app-header:not(:has(.header-identity)) { gap:12px; justify-content:space-between; }
 }
+
 """
 
 

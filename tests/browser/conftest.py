@@ -107,5 +107,5 @@ def participant(page, workshop, admin_api):
     page.get_by_label("Пароль", exact=True).fill(account["password"])
     page.get_by_role("button", name="Войти", exact=True).click()
     page.wait_for_url("**/play")
-    page.get_by_role("button", name="Добавить операцию", exact=True).wait_for()
+    page.get_by_role("button", name="Входящий перевод", exact=True).wait_for()
     return page

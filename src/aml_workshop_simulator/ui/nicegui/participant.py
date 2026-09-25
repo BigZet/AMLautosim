@@ -6,7 +6,7 @@ import time
 import json
 import re
 from copy import deepcopy
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from uuid import uuid4
 
 from nicegui import ui
@@ -821,46 +821,31 @@ class ParticipantScreen:
                         self.resource_overview = ui.column().classes(
                             "resource-overview"
                         )
-                        with (
-                            ui.button(
-                                "Добавить операцию",
-                                icon="add",
-                                on_click=lambda: self.operation_menu.open(),
-                            )
-                            .props("unelevated no-caps")
-                            .classes("chain-add w-full") as self.add_button
-                        ):
-                            self.operation_menu = (
-                                ui.menu()
-                                .props("auto-close")
-                                .classes("operation-picker-menu")
-                            )
-                        with self.operation_menu:
-                            with ui.column().classes("chain-catalog"):
-                                for card in editor.cards:
-                                    icon = {
-                                        "salary": "account_balance_wallet",
-                                        "incoming_transfer": "south_west",
-                                        "card_transfer": "credit_card",
-                                        "cash_withdrawal": "payments",
-                                        "purchase": "shopping_bag",
-                                    }.get(card["code"], "swap_horiz")
-                                    label = {
-                                        "salary": "Зарплата",
-                                        "incoming_transfer": "Входящий перевод",
-                                        "card_transfer": "Перевод по карте",
-                                        "cash_withdrawal": "Наличные",
-                                        "purchase": "Покупка",
-                                    }.get(card["code"], card["title"])
-                                    (
-                                        ui.button(
-                                            label,
-                                            on_click=lambda c=card: self.add(c),
-                                            icon=icon,
-                                        )
-                                        .props("flat no-caps align=center")
-                                        .classes("operation-choice")
+                        with ui.column().classes("chain-catalog"):
+                            for card in editor.cards:
+                                icon = {
+                                    "salary": "account_balance_wallet",
+                                    "incoming_transfer": "south_west",
+                                    "card_transfer": "credit_card",
+                                    "cash_withdrawal": "payments",
+                                    "purchase": "shopping_bag",
+                                }.get(card["code"], "swap_horiz")
+                                label = {
+                                    "salary": "Зарплата",
+                                    "incoming_transfer": "Входящий перевод",
+                                    "card_transfer": "Перевод по карте",
+                                    "cash_withdrawal": "Наличные",
+                                    "purchase": "Покупка",
+                                }.get(card["code"], card["title"])
+                                (
+                                    ui.button(
+                                        label,
+                                        on_click=lambda c=card: self.add(c),
+                                        icon=icon,
                                     )
+                                    .props("flat no-caps align=center")
+                                    .classes("operation-choice")
+                                )
                         self.chain_box = ui.column().classes("w-full gap-3")
                         self.render_chain()
                     with ui.card().classes("panel scenario-summary"):
@@ -868,17 +853,7 @@ class ParticipantScreen:
                         self.error_box = ui.label().classes("error-box")
                         self.error_box.set_visibility(False)
                         with ui.column().classes("scenario-submit-footer"):
-                            ui.label(
-                                "Отправьте сценарий до закрытия игры: неотправленный черновик будет удалён."
-                            ).classes("text-sm muted")
-                            self.save_status = (
-                                ui.label()
-                                .classes("save-indicator")
-                                .props("role=status aria-live=polite")
-                            )
-                            self.submit_reason = ui.label().classes(
-                                "submit-reason text-sm"
-                            )
+                            self.save_status = ui.label().classes("save-indicator")
                             self.retry_button = ui.button(
                                 "Повторить запрос", on_click=self.retry
                             ).props("outline no-caps")
@@ -913,8 +888,6 @@ class ParticipantScreen:
         self.update_status()
 
     def add(self, card):
-        if getattr(self, "operation_menu", None) is not None:
-            self.operation_menu.close()
         if self.submitting or not self.editor.editable:
             return
         max_actions = self.editor.state["round"]["game_config"]["objectives"][
@@ -1038,7 +1011,7 @@ class ParticipantScreen:
             if not self.editor.steps:
                 with ui.column().classes("chain-empty") as self.empty_chain:
                     ui.icon("playlist_add").classes("text-2xl")
-                    ui.label("Операций пока нет").classes("font-medium")
+                    ui.label("Добавьте первую операцию").classes("font-medium")
             for position, index in enumerate(reversed(range(len(self.editor.steps)))):
                 step = self.editor.steps[index]
                 component = registry.get(step["step_id"])
@@ -1059,33 +1032,11 @@ class ParticipantScreen:
         editor = self.editor
         ready = editor.can_submit and not self.submitting
         self.submit_button.set_enabled(ready)
-        self.submit_button.set_visibility(bool(editor.steps))
-        if getattr(self, "add_button", None) is not None:
-            self.add_button.classes(
-                add="chain-add" if not editor.steps else "",
-                remove="chain-add" if editor.steps else "",
-            )
-            self.add_button.props(
-                add="outline" if editor.steps else "unelevated",
-                remove="unelevated" if editor.steps else "outline",
-            )
         self.submit_button.props(
             "color=primary text-color=white"
             if ready
             else "color=grey-3 text-color=blue-grey-5"
         )
-        if getattr(self, "submit_reason", None) is not None:
-            self.submit_reason.set_text(
-                "Добавьте первую операцию"
-                if not editor.steps
-                else "Исправьте ошибку ниже"
-                if editor.error or not editor.transport_valid()
-                else "Дождитесь сохранения"
-                if editor.dirty or editor.lock.locked()
-                else "Проверьте условия отправки"
-                if not ready
-                else "Сценарий готов к отправке"
-            )
         self.save_status.set_text(
             "Не удалось сохранить"
             if editor.error and (editor.error.status == 0 or editor.error.status >= 500)
@@ -1098,41 +1049,6 @@ class ParticipantScreen:
             else "Сохранено"
         )
         error = editor.error
-        violations = list((editor.preview or {}).get("blockers", []))
-        if error:
-            violations += (error.details or {}).get("violations", [])
-        step_errors = {
-            v["step_id"]: v.get("field") for v in violations if v.get("step_id")
-        }
-        for step in editor.steps:
-            try:
-                value = Decimal(str(step.get("amount", "")))
-                valid = (
-                    value.is_finite()
-                    and value > 0
-                    and value == value.quantize(Decimal(".01"))
-                )
-            except (InvalidOperation, ValueError):
-                valid = False
-            if not valid:
-                step_errors[step["step_id"]] = "amount"
-        for identity, card in getattr(self, "step_cards", {}).items():
-            if hasattr(card, "error_button") and not card.element.is_deleted:
-                card.error_field = step_errors.get(identity)
-                card.error_button.set_visibility(identity in step_errors)
-        if (
-            getattr(self, "submit_reason", None) is not None
-            and not ready
-            and editor.preview
-            and not error
-        ):
-            blockers = editor.preview.get("blockers", [])
-            if blockers and editor.preview_version == editor.version:
-                self.submit_reason.set_text(
-                    "Не достигнута цель исходящих операций."
-                    if blockers[0]["reason"] == "target_outflow_not_reached"
-                    else blockers[0]["message"]
-                )
         self.error_box.set_visibility(error is not None or not editor.transport_valid())
         if error:
             violations = (error.details or {}).get("violations", [])
@@ -1179,6 +1095,8 @@ class ParticipantScreen:
         with self.resource_box:
             if editor.preview:
                 scenario_resources(editor.preview["resources"])
+                # Reserve the status row so a completed preview cannot move the
+                # focused input when this summary is above the editor on tablets.
                 ui.label(
                     (
                         "Пересчитываем…"
@@ -1187,12 +1105,8 @@ class ParticipantScreen:
                     )
                     if editor.preview_version != editor.version
                     else ""
-                ).classes("text-xs muted preview-status")
-                with ui.expansion(
-                    "Условия отправки",
-                    value=getattr(self, "conditions_open", False),
-                    on_value_change=lambda e: setattr(self, "conditions_open", e.value),
-                ).classes("w-full open-conditions"):
+                ).classes("text-xs muted").style("min-height:16px")
+                with ui.column().classes("w-full open-conditions"):
                     submission_conditions(
                         editor.preview,
                         current=editor.preview_version == editor.version,

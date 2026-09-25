@@ -91,7 +91,7 @@ def test_individual_window_shap_is_validated(example):
         GamePatternExplanationOut.model_validate(value)
 
 
-def test_game_explanation_is_collapsed_until_requested(example, tmp_path, monkeypatch):
+def test_game_explanation_shows_window_tables_directly(example, tmp_path, monkeypatch):
     import asyncio
     from nicegui import ui
     from nicegui.storage import Storage
@@ -108,15 +108,8 @@ def test_game_explanation_is_collapsed_until_requested(example, tmp_path, monkey
                 shap_result(example)
 
             await user.open("/collapsed-explanation")
-            panel = next(
-                e
-                for e in user.find(ui.expansion).elements
-                if e.text == "Что повлияло на оценку"
-            )
-            assert panel.value is False
-            with user:
-                panel.open()
-            assert panel.value is True
+            await user.should_see("Что повлияло на оценку")
+            assert not any(isinstance(e, ui.expansion) for e in user.client.elements.values())
             assert any(table.rows for table in user.find(ui.table).elements)
 
     asyncio.run(run())

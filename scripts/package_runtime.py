@@ -11,6 +11,7 @@ import tarfile
 import tempfile
 
 FILES = (
+    "RELEASE.json",
     ".dockerignore",
     ".env.example",
     "docker-compose.yml",
@@ -28,11 +29,6 @@ DIRECTORIES = (
     "scripts",
     "migrations",
     "config",
-    "resources/catboost_models/integration-v2-final",
-    "resources/catboost_models/aml-game-v1",
-    "resources/catboost_models/aml-game-relaxed-v1",
-    "resources/catboost_models/aml-game-attributes-v1",
-    "resources/catboost_models/aml-game-attribute-context-v1",
     "resources/catboost_models/aml-game-organizer-settings-v1",
 )
 

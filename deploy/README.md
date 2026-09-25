@@ -52,8 +52,7 @@ pg_dump/pg_restore в отдельную БД и повторную release-ко
 
 ## Пути и настройки
 
-`AML_MODEL_PATH` выбирает legacy v8; `AML_PROBABILITY_MODEL_PATH` — default v10.
-Относительные пути разрешаются от корня проекта, абсолютные сохраняются. v8
-загружается только при необходимости. Readiness проверяет default и пакет сохранённой
-игры; liveness не читает БД/модели. Настройки UI валидируются `UISettings`, включая URL,
-порт, cookie и каталог хранения. В production каталог `/home/app/nicegui` — private volume.
+`AML_PROBABILITY_MODEL_PATH` выбирает текущую модель v10. В образе находится
+только `aml-game-organizer-settings-v1`. Readiness проверяет текущую и закреплённую
+модель игры; liveness не читает БД и модели. UISettings проверяет URL, порт,
+cookie и каталог хранения. В production `/home/app/nicegui` — приватный том.
