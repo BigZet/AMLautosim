@@ -23,9 +23,20 @@ def test_edit_correct_reorder_submit_and_result(
     page.get_by_role("button", name="Исправить ошибку в операции", exact=True).wait_for(
         timeout=3000
     )
+    amount.fill("")
+    page.locator(".operation-name").click()
     capture(page, "invalid")
+    page.get_by_role("button", name="Исправить ошибку в операции", exact=True).click()
+    amount.wait_for()
+    page.wait_for_function(
+        "document.activeElement?.closest('.operation-amount') !== null"
+    )
     amount.fill("12345,67")
     saved(page)
+    amount.scroll_into_view_if_needed()
+    page.wait_for_function(
+        "!document.getAnimations().some(a => a.playState === 'running')"
+    )
     amount.fill("23456,78")
     page.locator(".operation-heading-amount").filter(has_text="23 456,78").wait_for()
     amount.evaluate("e => window.retainedAmount = e")

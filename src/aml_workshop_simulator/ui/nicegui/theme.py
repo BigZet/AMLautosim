@@ -409,6 +409,9 @@ body:has(.profile-workspace) .brand { color:#2354D6; font-size:19px; }
  .chain-workspace .scenario-summary { grid-row:auto; }
 }
 
+/* Status transitions must not move the focused editor below the summary. */
+.submit-reason { min-height:3em; line-height:1.5; }
+.preview-status { min-height:18px; }
 /* Shared touch, keyboard and small-screen contract. */
 *, *::before, *::after { box-sizing:border-box; }
 .workspace, .panel, .q-tab-panel, .q-dialog__inner > div { min-width:0; }

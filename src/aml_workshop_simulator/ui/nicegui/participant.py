@@ -1086,7 +1086,11 @@ class ParticipantScreen:
         ):
             blockers = editor.preview.get("blockers", [])
             if blockers and editor.preview_version == editor.version:
-                self.submit_reason.set_text(blockers[0]["message"])
+                self.submit_reason.set_text(
+                    "Не достигнута цель исходящих операций."
+                    if blockers[0]["reason"] == "target_outflow_not_reached"
+                    else blockers[0]["message"]
+                )
         self.error_box.set_visibility(error is not None or not editor.transport_valid())
         if error:
             violations = (error.details or {}).get("violations", [])
@@ -1133,12 +1137,15 @@ class ParticipantScreen:
         with self.resource_box:
             if editor.preview:
                 scenario_resources(editor.preview["resources"])
-                if editor.preview_version != editor.version:
-                    ui.label(
+                ui.label(
+                    (
                         "Пересчитываем…"
                         if not editor.error and editor.transport_valid()
                         else "Расчёт не обновлён"
-                    ).classes("text-xs muted")
+                    )
+                    if editor.preview_version != editor.version
+                    else ""
+                ).classes("text-xs muted preview-status")
                 with ui.expansion(
                     "Условия отправки",
                     value=getattr(self, "conditions_open", False),
