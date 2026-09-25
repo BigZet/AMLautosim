@@ -1,6 +1,8 @@
 {
   "version": 1,
   "modules": {
+    "tests/unit/test_backup_restore.py": "runtime",
+    "tests/api/test_backup_restore.py": "runtime",
     "tests/unit/test_aml_backend_dispatch.py": "runtime",
     "tests/unit/test_aml_chain_control.py": "research",
     "tests/unit/test_aml_chain_dataset.py": "research",

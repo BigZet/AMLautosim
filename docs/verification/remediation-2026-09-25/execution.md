@@ -77,3 +77,17 @@ T06–T15, final independent review, browser/device checks and final measured
 load/soak gates remain outstanding. The PR must remain draft until required
 acceptance is satisfied. Production probes and real-device results must never
 be inferred from local emulation.
+
+## T06 checkpoint — backup
+
+Seven backup/restore tests passed against PostgreSQL 16: online snapshots of
+editing and scored scenarios, preserved users/rounds/results/audit, revoked
+sessions, checksum rejection, no overwrite of existing target and retention.
+Restore durations: 0.960 s and 0.975 s; backup ages around 1.25 s, tiny test DBs.
+An additional image smoke started the matching image against the restored DB
+and passed readiness plus the HTTP/cookie/WebSocket checks. Off-host transfer
+is implemented with remote checksum verification but a real off-host destination
+and production-sized RPO/RTO have not been verified.
+
+Repository master protection now requires runtime-linux, runtime-windows, api
+and image, with strict status checks (GitHub API returned the applied settings).

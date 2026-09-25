@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import secrets
 import subprocess
+import time
 import urllib.request
 from uuid import uuid4
 
@@ -54,6 +55,23 @@ def smoke(image: str) -> None:
                         'aml_upgrade', '-Atc', query, capture=True).stdout
         if not before or before != after:
             raise RuntimeError('Release changed restored accounts')
+        recovery = project + '-recovery-api'
+        compose('run', '--rm', '--detach', '--no-deps', '--name', recovery,
+                '-e', 'POSTGRES_DB=aml_upgrade', 'api')
+        try:
+            for attempt in range(30):
+                ready = subprocess.run(
+                    ['docker', 'exec', recovery, 'python', '-c',
+                     "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready')"],
+                    capture_output=True,
+                )
+                if ready.returncode == 0:
+                    break
+                time.sleep(1)
+            else:
+                raise RuntimeError('Matching image failed readiness on restored database')
+        finally:
+            subprocess.run(['docker', 'stop', recovery], check=True, capture_output=True)
         asyncio.run(check_transport(f'http://{ui}'))
         print(json.dumps({'image': image, 'project': project, 'readiness': readiness,
                           'restored_copy_release': 'passed',
