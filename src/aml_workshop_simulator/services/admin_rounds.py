@@ -11,6 +11,7 @@ from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.queries import get_round
 from src.aml_workshop_simulator.domain.contract_versions import (
     require_playable_contract,
@@ -21,6 +22,7 @@ from src.aml_workshop_simulator.schemas.admin import (
     RoundAdminOut,
     RoundCreateIn,
     RoundUpdateIn,
+    AdmissionCountsOut,
 )
 from src.aml_workshop_simulator.schemas.round_config import (
     parse_game_config,
@@ -62,7 +64,25 @@ async def prepare_config(
 
 async def current(db: AsyncSession) -> RoundAdminOut | None:
     row = (await db.execute(select(Round))).scalar_one_or_none()
-    return round_out(row) if row else None
+    if row is None:
+        return None
+    result = round_out(row)
+    result.admission_counts = await admission_counts(db, row.id)
+    from src.aml_workshop_simulator.services.participant_state import results_version
+    result.results_version = await results_version(db, row)
+    return result
+
+
+async def admission_counts(db: AsyncSession, round_id: int) -> AdmissionCountsOut:
+    await get_round(db, round_id)
+    values = (await db.execute(select(
+        func.count(User.id).label('registered_total'),
+        *(func.count(Scenario.id).filter(Scenario.status == phase).label(phase)
+          for phase in ('editing', 'submitted', 'scored')),
+    ).select_from(User).outerjoin(Scenario,
+        (Scenario.participant_id == User.id) & (Scenario.round_id == round_id)
+    ).where(User.role == 'participant'))).mappings().one()
+    return AdmissionCountsOut(**values)
 
 
 async def create(

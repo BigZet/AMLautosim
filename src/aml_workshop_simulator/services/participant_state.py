@@ -1,11 +1,17 @@
 """Read participant state from one PostgreSQL statement, without row locks."""
 
-from sqlalchemy import and_, select
+import hashlib
+import json
+from functools import lru_cache
+
+from sqlalchemy import and_, select, func, true
+from sqlalchemy.orm import aliased
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import NotFound
 from src.aml_workshop_simulator.domain.contract_versions import is_playable_contract
 from src.aml_workshop_simulator.db.models.rounds import Round
+from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
 from src.aml_workshop_simulator.schemas.leaderboard import BaseResultOut, ResultOut
@@ -14,6 +20,41 @@ from src.aml_workshop_simulator.schemas.rounds import RoundPublicOut
 from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 from src.aml_workshop_simulator.services.leaderboard_service import ranked_scenarios
 from src.aml_workshop_simulator.services.projections import scenario_out
+from src.aml_workshop_simulator.schemas.round_status import RoundStatusOut
+
+
+def access_version_query():
+    users = aliased(User)
+    return select(func.coalesce(func.sum(users.access_revision), 0)).where(users.role == 'participant').correlate(None).scalar_subquery()
+
+
+def publication_version(round_id, completed_at, access_version):
+    return hashlib.sha256(f'{round_id}:{completed_at}:{access_version}'.encode()).hexdigest()
+
+
+async def results_version(db, row):
+    access = (await db.execute(select(access_version_query()))).scalar_one()
+    return publication_version(row.id, row.completed_at, access)
+
+
+async def status(db: AsyncSession, participant_id: int) -> RoundStatusOut:
+    record = (await db.execute(
+        select(User.access_revision, Round.id, Round.status,
+               Round.game_config['config_version'].as_string(), Scenario.revision,
+               Round.completed_at, access_version_query())
+        .select_from(User).outerjoin(Round, true())
+        .outerjoin(Scenario, and_(Scenario.round_id == Round.id, Scenario.participant_id == User.id))
+        .where(User.id == participant_id)
+    )).one()
+    access, round_id, phase, config, revision, completed, version = record
+    return RoundStatusOut(round_id=round_id, status=phase or 'none', config_version=config,
+                          scenario_revision=revision or 0, access_revision=access,
+                          results_version=publication_version(round_id, completed, version))
+
+
+@lru_cache(maxsize=64)
+def _validated_config(round_id, version, serialized):
+    return parse_game_config(json.loads(serialized), stored=True)
 
 
 def public_round_out(row: Round) -> RoundPublicOut:
@@ -24,7 +65,8 @@ def public_round_out(row: Round) -> RoundPublicOut:
             if key not in {"config_version", "game_config"}
         },
         config_version=row.game_config["config_version"],
-        game_config=parse_game_config(row.game_config, stored=True),
+        game_config=_validated_config(row.id, row.game_config['config_version'],
+                                      json.dumps(row.game_config, sort_keys=True)).model_copy(deep=True),
     )
 
 

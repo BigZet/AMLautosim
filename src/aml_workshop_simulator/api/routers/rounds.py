@@ -10,6 +10,7 @@ from src.aml_workshop_simulator.api.deps import (
 from src.aml_workshop_simulator.db.session import get_db
 from src.aml_workshop_simulator.schemas.leaderboard import LeaderboardPageOut, ResultOut
 from src.aml_workshop_simulator.schemas.participant_state import ParticipantStateOut
+from src.aml_workshop_simulator.schemas.round_status import RoundStatusOut
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut, RoundPublicOut
 from src.aml_workshop_simulator.schemas.scenarios import (
     ScenarioOut,
@@ -22,6 +23,11 @@ from src.aml_workshop_simulator.services import participant_state, results, scen
 from src.aml_workshop_simulator.services.catalog import round_cards
 
 router = APIRouter()
+
+
+@router.get('/current/status', response_model=RoundStatusOut)
+async def current_status(principal: CurrentPrincipal = Depends(get_current_participant), db: AsyncSession = Depends(get_db)):
+    return await participant_state.status(db, principal.user_id)
 
 
 @router.get("/current", response_model=RoundPublicOut | None, dependencies=[Depends(get_current_participant)])

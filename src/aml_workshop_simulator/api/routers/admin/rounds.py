@@ -11,6 +11,7 @@ from src.aml_workshop_simulator.schemas.admin import (
     RoundCreateIn,
     RoundUpdateIn,
     ScoringSummaryOut,
+    AdmissionCountsOut,
 )
 from src.aml_workshop_simulator.schemas.editor_metadata import EditorMetadataOut
 from src.aml_workshop_simulator.schemas.game_version import GameVersion
@@ -106,6 +107,11 @@ async def score_round(
     return await scoring_run.run(
         db, round_id, principal.user_id, request.state.request_id
     )
+
+
+@router.get('/rounds/{round_id}/admission', response_model=AdmissionCountsOut)
+async def admission_counts(round_id: int, db: AsyncSession = Depends(get_db)):
+    return await operations.admission_counts(db, round_id)
 
 
 @router.post(

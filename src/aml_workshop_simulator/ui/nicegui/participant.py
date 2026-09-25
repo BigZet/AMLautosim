@@ -512,6 +512,9 @@ def result_panel(
 
 
 def board_table(data, *, admin=False):
+    own = data.get('current_user_row')
+    if not admin and own and not any(row.get('is_current_user') for row in data['rows']):
+        data = {**data, 'rows': [*data['rows'], own]}
     from src.aml_workshop_simulator.ui.nicegui.shap_result import (
         aml_probability_display,
     )
@@ -616,6 +619,8 @@ class ParticipantScreen:
         self.submitting = False
         self.render_key = None
         self.board_at = 0
+        self.board_version = None
+        self.board_content = None
         self.result_tab = "summary"
         self.explanation_expanded = False
         self.resource_render_key = None
@@ -627,6 +632,8 @@ class ParticipantScreen:
 
     async def connect(self):
         if self.editor is not None:
+            self.editor.poll_status = None
+            self.board_version = None
             await self.poll()
             return
         tab_id = ui.context.client.tab_id
@@ -657,7 +664,8 @@ class ParticipantScreen:
             if (
                 self.editor.state.get("can_view_leaderboard")
                 and self.section != "profile"
-                and time.monotonic() - self.board_at > 3
+                and ((self.editor.poll_status or {}).get('results_version') != self.board_version
+                     or (not self.editor.status_supported and time.monotonic() - self.board_at > 3))
             ):
                 self.board_at = time.monotonic()
                 board = await self.api.request(
@@ -666,11 +674,20 @@ class ParticipantScreen:
                     session_id=self.token,
                     params={"limit": 200},
                 )
-                self.board.clear()
-                with self.board:
-                    board_table(board)
+                self.board_version = (self.editor.poll_status or {}).get('results_version')
+                content = {'rows': board['rows'], 'current_user_row': board.get('current_user_row')}
+                if content != self.board_content:
+                    self.board_content = content
+                    self.board.clear()
+                    with self.board:
+                        board_table(board)
+                        ui.button('Обновить', on_click=self.refresh_board).props('flat no-caps')
 
         await self.guarded(work)
+
+    async def refresh_board(self):
+        self.board_version = None
+        await self.poll()
 
     def changed(self):
         self.editor.changed()
@@ -704,6 +721,8 @@ class ParticipantScreen:
             return
         self.render_key = key
         self.body.clear()
+        self.board_version = None
+        self.board_content = None
         self.body.classes(
             add="chain-workspace" if editor.editable and self.section not in {"profile", "limits"} else "",
             remove="chain-workspace" if not editor.editable or self.section in {"profile", "limits"} else "",
@@ -810,6 +829,7 @@ class ParticipantScreen:
                         self.error_box = ui.label().classes("error-box")
                         self.error_box.set_visibility(False)
                         with ui.column().classes("scenario-submit-footer"):
+                            ui.label('Отправьте сценарий до закрытия игры: неотправленный черновик будет удалён.').classes('text-sm muted')
                             self.save_status = ui.label().classes("save-indicator")
                             self.retry_button = ui.button(
                                 "Повторить запрос", on_click=self.retry

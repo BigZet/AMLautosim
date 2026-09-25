@@ -1,6 +1,7 @@
 {
   "version": 1,
   "modules": {
+    "tests/api/test_round_status.py": "runtime",
     "tests/api/test_observability.py": "runtime",
     "tests/unit/test_observability.py": "runtime",
     "tests/unit/test_login_limiter.py": "runtime",

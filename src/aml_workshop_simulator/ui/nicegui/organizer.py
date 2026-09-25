@@ -33,6 +33,8 @@ class OrganizerScreen:
         self.tab_id = None
         self.restored = False
         self.read_versions = {}
+        self.results_content = None
+        self.results_version = None
         with ui.column().classes("w-full gap-4"):
             self.status = ui.label()
             self.controls = ui.row().classes("gap-2")
@@ -94,6 +96,7 @@ class OrganizerScreen:
 
     async def connect(self):
         self.tab_id = ui.context.client.tab_id
+        self.results_version = None
         await self.poll()
 
     def persist(self):
@@ -159,6 +162,8 @@ class OrganizerScreen:
             old_id = self.round["id"] if self.round else None
             new_id = current["id"] if current else None
             if old_id != new_id:
+                self.results_content = None
+                self.results_version = None
                 self.participants_box.clear()
                 self.results_box.clear()
                 self.audit_box.clear()
@@ -178,6 +183,8 @@ class OrganizerScreen:
                 )
                 self.catalog = await self.request("GET", "admin/action-cards")
             await self.render()
+            if current and current['status'] == 'completed' and self.tabs.value == 'results' and current.get('results_version') != self.results_version:
+                await self.load_results()
             if (
                 current
                 and current["status"] == "completed"
@@ -199,6 +206,9 @@ class OrganizerScreen:
             self.game_title.set_visibility(bool(current))
         status = current["status"] if current else "none"
         self.status.set_text(STATUS[status])
+        if current and current.get('admission_counts'):
+            counts = current['admission_counts']
+            self.status.set_text(f"{STATUS[status]} · Черновики: {counts['editing']} · Отправлено: {counts['submitted']} · Рассчитано: {counts['scored']} · Всего аккаунтов: {counts['registered_total']}")
         if current and current.get("scoring_summary"):
             summary = current["scoring_summary"]
             self.status.set_text(
@@ -500,10 +510,13 @@ class OrganizerScreen:
         messages = {
             "start": "Начать игру? После начала настройки нельзя изменить.",
             "score": "Закрыть приём и рассчитать результаты? Все неотправленные черновики будут удалены.",
-            "restart": "Создать новую игру? Сценарии, результаты и аудит текущей игры будут удалены. Аккаунты и входы сохранятся.",
+            "restart": "Создать новую игру? Сценарии и результаты текущей игры будут удалены. Аудит, аккаунты и входы сохранятся.",
         }
         self.busy = True
         try:
+            if command == 'score':
+                counts = await self.request('GET', f'admin/rounds/{round_id}/admission')
+                messages['score'] += f" Сейчас черновиков: {counts['editing']}, отправлено: {counts['submitted']}. Числа могут измениться до закрытия."
             choice = await self.confirm(
                 messages[command], versions=command == "restart"
             )
@@ -699,6 +712,11 @@ class OrganizerScreen:
             data = await self.request("GET", f"admin/rounds/{round_id}/leaderboard")
             if not current():
                 return
+            content = (round_id, data['rows'])
+            self.results_version = data.get('results_version')
+            if content == self.results_content:
+                return
+            self.results_content = deepcopy(content)
             self.results_box.clear()
             with self.results_box, ui.card().classes("panel"):
                 board_table(data, admin=True)

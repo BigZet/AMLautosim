@@ -26,6 +26,8 @@ class GameEditor:
         self.render_revision = 0
         self.poll_sequence = 0
         self.write_sequence = 0
+        self.poll_status = None
+        self.status_supported = True
 
     @property
     def steps(self):
@@ -74,11 +76,23 @@ class GameEditor:
         except (InvalidOperation, KeyError, TypeError):
             return False
 
-    async def poll(self):
+    async def poll(self, *, force=False):
         before = deepcopy(self.record)
         self.poll_sequence += 1
         sequence = self.poll_sequence
         write_sequence = self.write_sequence
+        status = None
+        if self.status_supported:
+            try:
+                status = await self.api.request('GET', 'rounds/current/status', session_id=self.token)
+            except APIError as exc:
+                if exc.status != 404:
+                    raise
+                self.status_supported = False  # rolling upgrade against the previous API
+            if sequence != self.poll_sequence or write_sequence != self.write_sequence:
+                return self.state
+            if not force and status is not None and status == self.poll_status and self.state:
+                return self.state
         state = await self.api.request(
             "GET", "rounds/current/state", session_id=self.token
         )
@@ -105,6 +119,7 @@ class GameEditor:
             self.version += 1
             self.render_revision += 1
         self.cards = cards
+        self.poll_status = status
         self.state = state
         scenario = state.get("scenario")
         if not self.lock.locked():
@@ -191,6 +206,8 @@ class GameEditor:
             self.write_sequence += 1
             self.record.pop("pending", None)
             self.record["revision"] = result["revision"]
+            if self.poll_status is not None and result['status'] == 'editing':
+                self.poll_status = {**self.poll_status, 'scenario_revision': result['revision']}
             # Edits made while awaiting the request are retained for the next save.
             if self.steps == pending["body"]["steps"]:
                 self.record["steps"] = deepcopy(result["steps"])

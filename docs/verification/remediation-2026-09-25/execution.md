@@ -151,3 +151,19 @@ Raw timestamped actions/metrics are preserved in T07-baseline-*.json.gz; summary
 and limitations are in T07-baseline-summary.json. Shared workstation background
 regression activity and lack of browser paint measurement preclude production
 capacity claims. Final acceptance needs controlled repeat runs and the 2h soak.
+
+## T08 — lightweight versions and admission counts
+
+Final targeted API/UI/race suite: 46 passed. Status, publication/access versions,
+no-round behavior, 201st participant outside top-200, session revocation and
+cutoff counts are covered. Both status-await and full-state-await save races
+are now explicit variants of the original regression. UI polls only status
+while unchanged; config validation cache is bounded to 64 content-keyed entries
+and returns independent copies. Ratings compare content/version, not generated_at.
+
+Ten unchanged reads: full state 191,210 bytes / 20 SQL statements; lightweight
+status 2,660 bytes / 20 statements (98.6% fewer bytes, SQL count unchanged).
+The status query omits full config, scenarios, results and ranking projections.
+Organizer counts distinguish all registered accounts from current-game editing,
+submitted and scored scenarios. Confirmation is provisional; cutoff audit records
+actual deleted drafts/submitted counts under the round lock.

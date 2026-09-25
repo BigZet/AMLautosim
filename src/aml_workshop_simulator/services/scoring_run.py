@@ -3,7 +3,7 @@
 import logging
 from datetime import UTC, datetime
 
-from sqlalchemy import delete
+from sqlalchemy import delete, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import ApplicationError, Conflict
@@ -43,17 +43,20 @@ async def close_admission(
         row.status = "closed"
         row.closed_at = datetime.now(UTC)
         await preserve_game_references(db, round_id, editing_only=True)
-        await db.execute(
+        removed = await db.execute(
             delete(Scenario).where(
                 Scenario.round_id == round_id, Scenario.status == "editing"
             )
         )
+        submitted = (await db.execute(select(func.count()).select_from(Scenario).where(
+            Scenario.round_id == round_id, Scenario.status == 'submitted'))).scalar_one()
         await record_event(
             db,
             actor_user_id=actor_id,
             round_id=round_id,
             event_type="round_closed",
             request_id=request_id,
+            metadata={'deleted_drafts_count': removed.rowcount, 'submitted_count': submitted},
         )
     await db.commit()
     return round_out(row)

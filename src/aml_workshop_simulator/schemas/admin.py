@@ -35,6 +35,13 @@ class RoundUpdateIn(BaseModel):
     game_config: RoundConfigInput | None = None
 
 
+class AdmissionCountsOut(BaseModel):
+    registered_total: int = 0
+    editing: int = 0
+    submitted: int = 0
+    scored: int = 0
+
+
 class RoundAdminOut(RoundContextOut):
     id: int
     title: str
@@ -48,6 +55,8 @@ class RoundAdminOut(RoundContextOut):
     created_at: datetime
     activated_at: datetime | None = None
     completed_at: datetime | None = None
+    admission_counts: AdmissionCountsOut | None = None
+    results_version: str | None = None
 
 
 class ScoringSummaryOut(BaseModel):
