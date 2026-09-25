@@ -17,17 +17,29 @@
   },
   "extractor_version": "aml-game-attributes-context-v1",
   "compatibility_sources": {
-    "src/aml_workshop_simulator/services/game_classifier.py": "657957b58142dac27e8df10bb048bfa97443ded740744eb82cf3f21be692f0b0",
-    "src/aml_workshop_simulator/schemas/round_config.py": "abcdb18f93f952e47ae295d9121af1b257d829f3aeb5bab717023e3198ea2f3c",
-    "src/aml_workshop_simulator/domain/game_models.py": "c4a911065b97096094dbd980680d49f03a6a2192a96b507dab257b44a934e43d",
-    "src/aml_workshop_simulator/domain/simulation.py": "c6acdf21b591bcc0a4b06be4ab1fbc14363c3be361798b128ddb99ebd36f57bf",
-    "config/base_round.json": "f2cd501ab7f3a4df43ac04c9f8a67358132bc63ef0dfd2d4dcde67b142fb7343",
-    "src/aml_workshop_simulator/schemas/expanded_contract.py": "d73ea446945b79ef5928a938e2de7cfa239156700d7fcb40f734293838211940",
-    "src/aml_workshop_simulator/services/counterparties.py": "30ac476cfeb7cf9a0b4b78e1c1b8cb74d6609f514071003791aa6b3ef0aec1e4",
+    "src/aml_workshop_simulator/services/game_classifier.py": "825adc094772fbf216053e92993c243ab0711577752d1fbee18be98909167545",
+    "src/aml_workshop_simulator/schemas/round_config.py": "11015032ee6cd2076312e1563520557d046c0564e3b5e7389c51922a87f07264",
+    "src/aml_workshop_simulator/domain/game_models.py": "2c084987cfdc1de41388dd587343f7038ddc0dad22025d15d94736e69ed9b714",
+    "src/aml_workshop_simulator/domain/simulation.py": "7f2a8e612b31139ccf33d72b3285dbb7aa43ede11dc2ce8367cca78e4d41d029",
+    "config/base_round.json": "c8d0c9b86d17fdd603ba99669f9bd0f792e9524c8f925954c4bcf2665f084dfd",
+    "src/aml_workshop_simulator/schemas/expanded_contract.py": "1eeeacc87bda5e8c3ee321aba2851b69239e6a491e7cbcadaa4d66fd1d7b52c0",
+    "src/aml_workshop_simulator/services/counterparties.py": "155dfb2b0e797c2e7e21da970e3b598c8431e98c38609f205f7e143ec87aef76",
     "src/aml_workshop_simulator/services/aml_context.py": "21b33926acded3948e22c4b0519ec0fe99cf1adbe96c253c2b6f9a54d4496615",
-    "src/aml_workshop_simulator/services/semantic_contract.py": "46270193c14e05092455c917779b591953ebc0b2fd714b7b072ec866868b9144"
+    "src/aml_workshop_simulator/services/semantic_contract.py": "e1f478a18162211afddc7ec0e91713f214b5267c3fad8c134a41267af7895ae5",
+    "src/aml_workshop_simulator/services/source_hashing.py": "eb48f1f2a59ce951793fbda3f80a81d5fe98000eeaaa75ca4583df7331b7168f"
   },
   "compatible_identities": [
+    {
+      "package_sha256": "6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+      "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+      "context_sha256": "e70d9bd62bed8bb270d377de7bb54e314018a639808fa15da99791c88a139cef",
+      "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+      "contract_version": 10,
+      "extractor_version": "aml-game-attributes-context-v1",
+      "score_kind": "educational_pattern_probability",
+      "model_version": "aml-game:sha256:6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+      "explanation_version": 5
+    },
     {
       "package_sha256": "0741a120d78f6be61a3cc4ef6206e6423759fc1262ee3df0b096806e641ea2a5",
       "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
@@ -60,28 +72,6 @@
       "score_kind": "educational_pattern_probability",
       "model_version": "aml-game:sha256:591ed567218d0d556e259938bbc20125cabc7b2646349c0aedb832c994b04a0b",
       "explanation_version": 5
-    },
-    {
-      "package_sha256": "0741a120d78f6be61a3cc4ef6206e6423759fc1262ee3df0b096806e641ea2a5",
-      "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
-      "context_sha256": "e70d9bd62bed8bb270d377de7bb54e314018a639808fa15da99791c88a139cef",
-      "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
-      "contract_version": 10,
-      "extractor_version": "aml-game-attributes-context-v1",
-      "score_kind": "educational_pattern_probability",
-      "model_version": "aml-game:sha256:0741a120d78f6be61a3cc4ef6206e6423759fc1262ee3df0b096806e641ea2a5",
-      "explanation_version": 5
-    },
-    {
-      "package_sha256": "eb686e2fede5f010f8e87f70785d600d477e508cabb72b154013e05b4200232b",
-      "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
-      "context_sha256": "caaa2171afba2852c467871bf8b2a0e18631645e9e8ca6112ba7f59e5b7b3d8c",
-      "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
-      "contract_version": 10,
-      "extractor_version": "aml-game-attributes-context-v1",
-      "score_kind": "educational_pattern_probability",
-      "model_version": "aml-game:sha256:eb686e2fede5f010f8e87f70785d600d477e508cabb72b154013e05b4200232b",
-      "explanation_version": 5
     }
   ],
   "compatibility": {
@@ -92,5 +82,11 @@
     "features_equal": true,
     "probabilities_equal": true
   },
-  "organizer_settings_version": 1
+  "organizer_settings_version": 1,
+  "source_hash_mode": "lf-v1",
+  "source_compatibility": {
+    "baseline_sha256": "14f427d88db87f0eb22435d08f16c81677e33996a3a9025a545bc109702f11c5",
+    "compared_chains": 25,
+    "features_probabilities_shap_equal": true
+  }
 }

@@ -15,3 +15,17 @@ src/aml_workshop_simulator/services/aml_game_window_model_v2.py text eol=lf
 
 # Released package hashes cover exact JSON bytes; never normalize them.
 resources/catboost_models/aml-game-*/*.json -text
+
+# Runtime compatibility sources use the lf-v1 contract on every checkout.
+src/aml_workshop_simulator/services/game_classifier.py text eol=lf
+src/aml_workshop_simulator/services/source_hashing.py text eol=lf
+src/aml_workshop_simulator/schemas/round_config.py text eol=lf
+src/aml_workshop_simulator/domain/game_models.py text eol=lf
+src/aml_workshop_simulator/domain/simulation.py text eol=lf
+src/aml_workshop_simulator/schemas/expanded_contract.py text eol=lf
+src/aml_workshop_simulator/services/counterparties.py text eol=lf
+src/aml_workshop_simulator/services/aml_context.py text eol=lf
+src/aml_workshop_simulator/services/semantic_contract.py text eol=lf
+config/base_round.json text eol=lf
+# Release replay evidence has a byte-exact identity as well.
+tests/fixtures/runtime_compatibility_baseline.json -text

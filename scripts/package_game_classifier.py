@@ -11,6 +11,7 @@ from src.aml_workshop_simulator.services.game_classifier import (
     file_hash,
 )
 from src.aml_workshop_simulator.services.aml_game_window_model_v2 import FEATURES
+from src.aml_workshop_simulator.services.source_hashing import source_sha256
 
 TITLES = [
     "Число получателей",
@@ -60,7 +61,11 @@ def package(dataset, model, output):
             raise ValueError("Dataset drift: " + name)
     if manifest["dataset_hashes"] != audit["artifact_hashes"]:
         raise ValueError("Model/dataset mismatch")
-    if manifest["inference_source_sha256"] != file_hash(ROOT / inference_files[-1]):
+    manifest_mode = manifest.get("source_hash_mode", "raw-v1")
+    if manifest_mode not in ("raw-v1", "lf-v1"):
+        raise ValueError("Unsupported source hash mode")
+    manifest_hash = source_sha256 if manifest_mode == "lf-v1" else file_hash
+    if manifest["inference_source_sha256"] != manifest_hash(ROOT / inference_files[-1]):
         raise ValueError("Inference source drift")
     output.mkdir(parents=True)
     for name in ("model.cbm", "manifest.json", "gameplay-audit.json"):
@@ -80,8 +85,9 @@ def package(dataset, model, output):
     )
     release = dict(
         format="aml-game-package-v1",
+        source_hash_mode="lf-v1",
         files={name: file_hash(output / name) for name in sorted(REQUIRED)},
-        inference_sources={name: file_hash(ROOT / name) for name in inference_files},
+        inference_sources={name: source_sha256(ROOT / name) for name in inference_files},
     )
     if extractor_version != 'aml-game-window-v2':
         release['extractor_version'] = extractor_version
