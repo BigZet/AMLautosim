@@ -652,7 +652,17 @@
     "tests/unit/test_password_migration.py::test_malformed_hash_fails_closed[broken]",
     "tests/unit/test_password_migration.py::test_malformed_hash_fails_closed[$argon2id$invalid]",
     "tests/unit/test_password_migration.py::test_malformed_hash_fails_closed[$bcrypt-sha256$bad]",
-    "tests/unit/test_password_migration.py::test_dual_reader_can_stage_before_enabling_new_writes"
+    "tests/unit/test_password_migration.py::test_dual_reader_can_stage_before_enabling_new_writes",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[1-\\u0448\\u0430\\u0433]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[2-\\u0448\\u0430\\u0433\\u0430]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[5-\\u0448\\u0430\\u0433\\u043e\\u0432]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[11-\\u0448\\u0430\\u0433\\u043e\\u0432]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[21-\\u0448\\u0430\\u0433]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[22-\\u0448\\u0430\\u0433\\u0430]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[25-\\u0448\\u0430\\u0433\\u043e\\u0432]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[0-\\u0448\\u0430\\u0433\\u043e\\u0432]",
+    "tests/unit/test_russian_plural.py::test_russian_integer_plural[-21-\\u0448\\u0430\\u0433]",
+    "tests/unit/test_russian_plural.py::test_scenario_message_uses_plural_without_changing_limit"
   ],
   "api": [
     "tests/api/test_all_operation_parameters.py::test_all_parameters_are_exposed_and_saved[salary]",

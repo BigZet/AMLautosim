@@ -239,3 +239,33 @@ separate add/reorder measurements and image metadata accompany the matrix.
 Actual iOS/Android devices, VoiceOver/TalkBack, OS text scaling, native macOS
 Safari and production checks remain unverified; the PR remains draft.
 T11 final capacity/soak gate follows all remaining runtime changes.
+
+### T11 preliminary comparison and T12
+
+The same 8ca3b45 image at 60 VU completed 1784/1824 actions with 1/2 API
+workers without failures. Edit p95 was 2.499/2.415 seconds, exceeding the 1.5s
+criterion in both; canary p95 0.550/0.518s. Both worker PIDs were sampled for
+2 workers. The small edit improvement does not justify 4 workers; default1
+is retained. These single preliminary runs do not establish final capacity.
+Full repetitions and soak must use the final runtime image.
+
+T12 accounts/search, retention, password migration and plural-copy regressions:
+58 passed (67.35s). Original audit and authentication tests are included.
+Pagination traversed 504 accounts including concurrent registration. Cleanup
+is dry-run by default, and dirty/pending/live-tab state survives retention.
+Argon2id migration supports staged dual-read rollout and legacy verification;
+concurrent successful logins rehash once. Runtime/ML/browser audit found no
+known vulnerabilities; uv checked all94 installed packages as compatible.
+The venv has no pip executable; dependency consistency used uv pip check.
+
+Changing simulation wording required controlled source publication:25 exact
+feature/probability/SHAP replays passed and old pins remained accepted. The new
+plural helper is included in the source compatibility hash map. Separate copy,
+retention and password commits preserve reviewability.
+
+Read-only production inventory at the time in T12-production-inventory.json
+found **0** candidates matching the review's `loadtest+*@amlplay.ru` pattern.
+This differs from the older review's approximately250; it does not establish
+that all possible test accounts are absent. No accounts were deleted. Exact
+inventory stays private; the report includes its checksum and linked-record
+aggregate counts. Prefix matching alone never authorizes deletion.

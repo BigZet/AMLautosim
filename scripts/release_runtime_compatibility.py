@@ -36,6 +36,9 @@ def refresh(package: Path, baseline_path: Path) -> dict:
     release.setdefault('compatibility_sources', {})[
         'src/aml_workshop_simulator/services/source_hashing.py'
     ] = None
+    release['compatibility_sources'][
+        'src/aml_workshop_simulator/domain/russian_plural.py'
+    ] = None
     changed = {}
     for section in ('inference_sources', 'compatibility_sources'):
         for name in release[section]:

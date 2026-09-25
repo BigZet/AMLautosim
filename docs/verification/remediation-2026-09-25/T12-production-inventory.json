@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-09-25T03:58:33.558028+00:00",
+  "read_only": true,
+  "deletions": 0,
+  "candidate_rule": "loadtest+*@amlplay.ru; prefix alone does not authorize deletion",
+  "candidate_count": 0,
+  "private_inventory_sha256": "0a94eaf57bd51a131e476c9a1298529115c5cf785aa5ad7ddd562c6e617e615f",
+  "totals": {
+    "sessions": 0,
+    "active_sessions": 0,
+    "scenarios": 0,
+    "results": 0,
+    "audit_events": 0,
+    "created_rounds": 0,
+    "blocked_accounts": 0
+  }
+}

@@ -27,6 +27,7 @@ from .game_models import (
     money,
 )
 from .structure import resolve_policy, validate_structure
+from .russian_plural import russian_plural
 
 
 def action_detail_effects(spec: CardSpec, details: dict[str, Any]) -> dict[str, Any]:
@@ -243,7 +244,7 @@ def _evaluate_validated(
                 current=str(len(steps)),
                 allowed=str(rules.max_actions),
                 message=(
-                    f"В цепочке {len(steps)} шагов, а раунд допускает не более "
+                    f"В цепочке {len(steps)} {russian_plural(len(steps), 'шаг', 'шага', 'шагов')}, а раунд допускает не более "
                     f"{rules.max_actions}. Удалите лишние шаги."
                 ),
             )
@@ -290,8 +291,9 @@ def _evaluate_validated(
                     current=str(identical_streak),
                     allowed=str(rules.max_identical_steps),
                     message=(
-                        f"{_step_label(index, spec)}: подряд идет {identical_streak} одинаковых "
-                        f"операций, допустимо не более {rules.max_identical_steps}. "
+                        f"{_step_label(index, spec)}: подряд {identical_streak} "
+                        f"{russian_plural(identical_streak, 'одинаковая операция', 'одинаковые операции', 'одинаковых операций')}, "
+                        f"допустимо не более {rules.max_identical_steps}. "
                         "Переставьте шаги так, чтобы между ними была другая операция."
                     ),
                 )
