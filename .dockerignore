@@ -75,6 +75,6 @@ Thumbs.db
 src/aml_workshop_simulator/services/catboost_features.py
 scripts/generate_catboost_sample_data.py
 
-!resources/catboost_models/aml-game-attribute-context-unlimited-v1/
+!resources/catboost_models/registry.json
 
 !resources/catboost_models/aml-game-organizer-settings-v1/

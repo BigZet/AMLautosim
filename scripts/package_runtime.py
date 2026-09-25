@@ -21,6 +21,7 @@ FILES = (
     "deploy/Dockerfile",
     "docs/deployment.md",
     "docs/operations.md",
+    "resources/catboost_models/registry.json",
 )
 DIRECTORIES = (
     "src",
@@ -32,7 +33,6 @@ DIRECTORIES = (
     "resources/catboost_models/aml-game-relaxed-v1",
     "resources/catboost_models/aml-game-attributes-v1",
     "resources/catboost_models/aml-game-attribute-context-v1",
-    "resources/catboost_models/aml-game-attribute-context-unlimited-v1",
     "resources/catboost_models/aml-game-organizer-settings-v1",
 )
 

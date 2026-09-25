@@ -39,6 +39,9 @@ def refresh(package: Path, baseline_path: Path) -> dict:
     release['compatibility_sources'][
         'src/aml_workshop_simulator/domain/russian_plural.py'
     ] = None
+    release['compatibility_sources'][
+        'src/aml_workshop_simulator/services/model_registry.py'
+    ] = None
     changed = {}
     for section in ('inference_sources', 'compatibility_sources'):
         for name in release[section]:
@@ -90,6 +93,15 @@ def refresh(package: Path, baseline_path: Path) -> dict:
                 os.replace(temporary, package / 'release.json')
             finally:
                 temporary.unlink(missing_ok=True)
+    # The server-owned index records identity as release metadata. Runtime still
+    # validates release/source/artifact hashes; this index is not an integrity cache.
+    registry = package.parent / 'registry.json'
+    if registry.is_file():
+        value = json.loads(registry.read_bytes())
+        for entry in value['packages']:
+            if entry['path'] == package.name:
+                entry['identity'] = result['identity']['package_sha256']
+        _write(registry, value)
     return result
 
 

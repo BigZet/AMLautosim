@@ -339,9 +339,10 @@ def get_pinned_game_classifier(config):
     pin = config.get("risk_model")
     if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
         return current
-    # Explicit release locations only; never construct a filesystem path from a pin.
-    for name in ("aml-game-v1", "aml-game-relaxed-v1", "aml-game-attributes-v1", "aml-game-attribute-context-v1"):
-        path = ROOT / "resources" / "catboost_models" / name
+    # Server-owned registry only; client pins never select filesystem locations.
+    from src.aml_workshop_simulator.services.model_registry import classifier_paths
+
+    for path in classifier_paths():
         release = path / "release.json"
         if not release.is_file():
             continue

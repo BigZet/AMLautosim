@@ -1,0 +1,355 @@
+{
+  "commit": "13e01a9e95b8eff711dd04f920ac602e0815d2b6",
+  "python": "3.13.15",
+  "python_hash_seed": 0,
+  "generator_seed": 2051900000,
+  "model_seed": 2026100400,
+  "dataset_rows": 600,
+  "repeat_artifact_hashes_equal": true,
+  "repeat_source_hashes_equal": true,
+  "lock_sha256": "493154111019864de8c8145b7c4f7ab9288ccf0a35659d2b09ae1e45e135031c",
+  "dataset_audit": {
+    "artifact_hashes": {
+      "casebook.jsonl": "1c82b1870d7b433ed1e1da88df71ea95078a543d3452120c0c29515345589cb5",
+      "context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+      "features.csv": "94aeb9ce5692e61de45e450a8f69feb7b963cb3f882106e92004c134a1dfad88",
+      "groups.json": "8d30e845de4b6931bc425589f90637259d27aacbc59e22336d839930b3a2990d",
+      "policy.json": "b38d83d0cceefe285d46aebe3868555b90e4a1a916582d22bdf70ee0f860527a",
+      "targets.csv": "0d0a4c49b5659079ab56f7d778169261821d032b67f95d763a28f1a4a85cc7e3"
+    },
+    "bands": {
+      "grey": 90,
+      "high": 255,
+      "low": 255
+    },
+    "context_sha256": "0e95f8df274a02cf71300071a0033ab6bb7e5b9eba7066041174bddba259041f",
+    "feature_count": 35,
+    "groups": 600,
+    "label_consistency": "deterministic panel votes; same observable features imply same distribution",
+    "rejected_reasons": {
+      "identical_streak_exceeded": 421,
+      "insufficient_balance": 381,
+      "insufficient_energy": 348,
+      "insufficient_time": 1621,
+      "max_occurrences_exceeded": 35,
+      "outside_requested_curriculum_band": 4664
+    },
+    "release_ready": false,
+    "rows": 600,
+    "rule_positive_votes": {
+      "cash_conversion": 52594,
+      "consolidation": 31734,
+      "fragmentation": 4254,
+      "matched_relay": 57941,
+      "repeated_fanout": 11512,
+      "repeated_returns": 87201
+    },
+    "source_hashes": {
+      "C:\\Users\\bigze\\.codex\\worktrees\\review-remediation\\AMLautosim\\.local-run\\research-13e01a9\\scripts\\build_aml_game_dataset_v9.py": "24996b33a10ee004bd03d2d08f415834e50dfea04da5be47a7203941581b4d19",
+      "config/base_round.json": "eeae65b961ada3e15ae17f07eb193784177292eabdbc5f86a1ffa531213eca2e",
+      "config/expanded_behavior.json": "0a08933e2c93cb886c55e64dc0a4f14de0c377613cbe4169367c3d1d557b704d",
+      "config/expanded_operations.json": "fa434794ad4af64efd0cb153dea11d9305ca17194567f7f6537f270420566b2c",
+      "config/game_curriculum_defaults_v1.json": "fa507b1ce00a85eb38fc3164c12787f741ca74a273b547702431f420fe908f1b",
+      "config/game_curriculum_defaults_v3.json": "2a968c665324baba40812d5f74f607820074a328140c7df6de59dd9296d1b505",
+      "config/game_curriculum_defaults_v4.json": "e61ced5e9099924c363cd22d57829fedb13b8f769092f17a0e0060e3e7588dbd",
+      "config/operations.json": "77c769045d3579bee83c82fc65ba17bc942c36be164aae177a453149533208c2",
+      "config/parameters.json": "4ffa0b47cec292349f8498d64c029f16f352f9cc70cbd7cf2468077527144c6c",
+      "config/resource_rules.json": "c0b2957c848df82d36b723bb4f1992869c753d7112e2ed45e593297c58294c83",
+      "docs/research/2026-09-16-aml-behavior-and-legitimate-context.md": "8491ab30963c627f663695654d7e73c52f7d3c5885f9e80d744c76a0cdc04dc7",
+      "docs/verification/semantic-interface-audit/fixtures.json": "91875715593b7d494dd8cd85fee679f84fba5f0a823a63d00a0923fdd5241129",
+      "scripts/aml_dataset/aml_casebook.py": "890f604515b1e3d3f166a111ab8a8981496ae3f88e9abdcfcb9d0615b16d1bef",
+      "scripts/aml_dataset/aml_labels.py": "4004d55d571bf59fb6baf7d582e8eaf3497ca4cd7f99f497684233436ed50c7c",
+      "scripts/aml_dataset/aml_origins.py": "3add5ca4badb4ef5f83972c8127387d08120be63cb0f33732bb9b34c1d4de1c3",
+      "scripts/aml_dataset/aml_population_author.py": "96ddea190614c71a89992122e942c5355ca285e1068af1623c281c44b0205d88",
+      "scripts/aml_dataset/aml_provenance.py": "10e98274837b7fda37a3c6a539af9081763ca086e42879a1ec440225319ecf91",
+      "scripts/aml_dataset/aml_review.py": "b0c3723bb7967e2184ae07635ca84e782f31e45e3edac4105109c1cfbc03ebda",
+      "scripts/aml_dataset/aml_training.py": "7ae18ec4e0fee9b82bb151e82ce6873c3d2a0b1d14c3e56a104336a0008dc0fe",
+      "scripts/aml_dataset/aml_world_graph.py": "3280593ee94e4fec5f967d1d0039d48b811fa00e4e5864718035e6444f0aee29",
+      "scripts/aml_game_curriculum.py": "0b0be6651873e7d5dbc5d3ade979662b802329dcad9a2fae1407a3a3225caff7",
+      "scripts/aml_game_curriculum_v3.py": "14767d00d0f2f229256de62a54fc239b8340b3d3b777eca1007930c0bc5a6b15",
+      "scripts/aml_game_curriculum_v4.py": "9d765d747e2fbbbcf6afa14f0ebd68306fdc7314b0de90a028613c2fa3a1c8ca",
+      "scripts/aml_game_curriculum_v5.py": "0252090523cc6a9527d60f4c332eddb4ecb26edecc66916b46033f6402300ac3",
+      "scripts/aml_game_curriculum_v7.py": "075c86a50472628cff150b670dae54823a4d317910e35456a0504b60d7c3b1d3",
+      "scripts/aml_game_curriculum_v8.py": "2ad3921f7aefa7f57655c290d8dfbce2b5a317f4d9bf22b3878e14619cdbe4d1",
+      "scripts/aml_game_curriculum_v9.py": "c835a1371af13a5b22796a97d8b8cfaa171991c2cc0cae0cc52bc84063a93071",
+      "src/aml_workshop_simulator/core/expanded_game.py": "3418536ab6c51f33db912c29d41f6cd8edac883f001cfdb83b617a209d77f70c",
+      "src/aml_workshop_simulator/core/game_config.py": "abbee90d42e444210f1a54fd89ece7b219a1eca1d151eecf49aa64203e2c26c3",
+      "src/aml_workshop_simulator/domain/catalog.py": "53f9acb99800f72109cc32d6e58584bcc2e90d3260fd09605d1ddb9186947901",
+      "src/aml_workshop_simulator/domain/game_models.py": "de469d9e6df2afa9b670f20226d648ef4f53415089d5f9f9a6ef63b4e3f1fe9a",
+      "src/aml_workshop_simulator/domain/operation_purposes.py": "e06707e7c1f21fc36ee4c7c17c56f746a2f150aac5c4c9eeb7c41ffe1dd559b1",
+      "src/aml_workshop_simulator/domain/operation_timeline.py": "e1b6b039d489aa9ec303e14aebc7a17b23727771d5025c105fa0aecea546ab41",
+      "src/aml_workshop_simulator/domain/round_policy.py": "dce1f5cf59a1eaf41550ad667ebc258b4414f772f1c4fdd192a966c2de920857",
+      "src/aml_workshop_simulator/domain/scoring.py": "632c492744ca4e5e253489e5b3a0743c619166413cf21ba10e12c595617b0388",
+      "src/aml_workshop_simulator/domain/simulation.py": "8e1d9cc30c583e8b83ccec46ea646dde7c11900d4912139f12134be082b68df9",
+      "src/aml_workshop_simulator/schemas/aml_context.py": "da032a0cbce381fc1a4d44389d1de328701dc97bf65ac13dc317333e7b021b96",
+      "src/aml_workshop_simulator/schemas/expanded_contract.py": "7009f79cf8f43901f3f1c7189429466567ed5253cb660e9ad4cf8229d6449953",
+      "src/aml_workshop_simulator/schemas/round_config.py": "1c5aa0e1fbf3ed39bb0afd7c91cfb79148d3b934383bb3985cc12b42e99042a2",
+      "src/aml_workshop_simulator/schemas/scenarios.py": "0c0f8a48a7d9cb83a47ccd6afdea2118531e32c8284f8e4a76537321ecb0f758",
+      "src/aml_workshop_simulator/services/aml_context.py": "21b33926acded3948e22c4b0519ec0fe99cf1adbe96c253c2b6f9a54d4496615",
+      "src/aml_workshop_simulator/services/aml_dataset_features_v2.py": "7cfddf1fdbf80ecbcf9f05686fdc6b6d352fee52be2ffe38df487b0e343f6c83",
+      "src/aml_workshop_simulator/services/aml_dataset_features_v3.py": "e9211cd86236a13644894c92934e53d953e31c2f696e99afc7a3ebfc838e979a",
+      "src/aml_workshop_simulator/services/aml_dataset_features_v4.py": "f7144038035d6802e40ada15ecd9967d1d0eff7928d705c12dfc49f3e7df141c",
+      "src/aml_workshop_simulator/services/aml_dataset_features_v5.py": "2870bddc473de4076223cae551d4ac465fc015a61d792df7bcbace20aebf02d7",
+      "src/aml_workshop_simulator/services/aml_episodes.py": "6b2109283adab693dcbfe256fd35e51190f39c062afdd489b08dd4bbc0fc148a",
+      "src/aml_workshop_simulator/services/aml_game_pattern_panel.py": "cc3fdf33bd5516b5747658673c1c14c55bfe6a0c7d3600b0a15324a8c4100dc4",
+      "src/aml_workshop_simulator/services/aml_game_pattern_panel_v2.py": "df68c71fd85bd9fa755e6435a20460952addf85ed5a94020cec51eea3ba97e03",
+      "src/aml_workshop_simulator/services/counterparties.py": "2a7b9cef3e69a542d7e67d3ebb40ea8ee990ee843e439eea8760dce864f4bc58",
+      "src/aml_workshop_simulator/services/semantic_contract.py": "e1f478a18162211afddc7ec0e91713f214b5267c3fad8c134a41267af7895ae5"
+    },
+    "source_policy_sha256": "27ea221548c54d7292b6991f190b212ef0b0bf4b75fe1851b5987d64478aa8e6",
+    "split_counts": {
+      "calibration-check": 30,
+      "calibration-fit": 60,
+      "test": 60,
+      "train": 360,
+      "validation": 90
+    }
+  },
+  "readback": {
+    "audit_script_sha256": "355edb2b9175298b695faf32f46bb77b8772e39a68df3b162232b4a8242ef5d2",
+    "checked": [
+      "all game constraints",
+      "immutable context",
+      "full feature replay",
+      "interpretation votes",
+      "actual leaderboard formula",
+      "source and artifact hashes",
+      "group and exact feature isolation",
+      "target consistency"
+    ],
+    "groups": 600,
+    "independent_human_label_review": false,
+    "passed": true,
+    "rows": 600,
+    "split_bands": {
+      "calibration-check": {
+        "grey": 8,
+        "high": 9,
+        "low": 13
+      },
+      "calibration-fit": {
+        "grey": 4,
+        "high": 29,
+        "low": 27
+      },
+      "test": {
+        "grey": 6,
+        "high": 27,
+        "low": 27
+      },
+      "train": {
+        "grey": 60,
+        "high": 151,
+        "low": 149
+      },
+      "validation": {
+        "grey": 12,
+        "high": 39,
+        "low": 39
+      }
+    }
+  },
+  "training_manifest": {
+    "architecture": "mean_of_three_shared_classifier_views",
+    "calibration": {
+      "a": 1.0027126019884796,
+      "b": -0.4032416023145038,
+      "method": "sigmoid"
+    },
+    "calibration_comparison": {
+      "raw": {
+        "agreement": 1.0,
+        "expected_brier": 0.06593609194830918,
+        "expected_log_loss": 0.20390173036270282,
+        "grey_row_share": 0.26666666666666666,
+        "high_row_share": 0.3,
+        "low_row_share": 0.43333333333333335,
+        "mean_absolute_target_error": 0.03424491617298343,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 30,
+        "target_mse": 0.005145517457578749
+      },
+      "sigmoid": {
+        "agreement": 1.0,
+        "expected_brier": 0.06591878161340682,
+        "expected_log_loss": 0.20240716187525745,
+        "grey_row_share": 0.3,
+        "high_row_share": 0.26666666666666666,
+        "low_row_share": 0.43333333333333335,
+        "mean_absolute_target_error": 0.042215586817345385,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 30,
+        "target_mse": 0.005128207122676381
+      }
+    },
+    "context_sha256": "0e95f8df274a02cf71300071a0033ab6bb7e5b9eba7066041174bddba259041f",
+    "dataset_hashes": {
+      "casebook.jsonl": "1c82b1870d7b433ed1e1da88df71ea95078a543d3452120c0c29515345589cb5",
+      "context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+      "features.csv": "94aeb9ce5692e61de45e450a8f69feb7b963cb3f882106e92004c134a1dfad88",
+      "groups.json": "8d30e845de4b6931bc425589f90637259d27aacbc59e22336d839930b3a2990d",
+      "policy.json": "b38d83d0cceefe285d46aebe3868555b90e4a1a916582d22bdf70ee0f860527a",
+      "targets.csv": "0d0a4c49b5659079ab56f7d778169261821d032b67f95d763a28f1a4a85cc7e3"
+    },
+    "failures": [],
+    "features": [
+      "recipient_count",
+      "precredit_outflow_share",
+      "cash_share",
+      "sender_count",
+      "max_recipient_share",
+      "second_return_ratio_all",
+      "third_return_ratio_all",
+      "card_count",
+      "second_split_ratio_all",
+      "amount_repetition_strength",
+      "second_match_error",
+      "fanout",
+      "cash",
+      "debit_episodes"
+    ],
+    "full_dataset_window_label_equivalence": true,
+    "inference_source_sha256": "26cd8086faa9216a27870a89cf3ac2246d3e911b2deada11f914bf78e29dbe5e",
+    "limitations": [
+      "Synthetic interpretation target, not expert consensus or crime probability",
+      "Runtime integration and live-game acceptance remain separate"
+    ],
+    "metrics": {
+      "calibration-check": {
+        "agreement": 1.0,
+        "expected_brier": 0.06591878161340682,
+        "expected_log_loss": 0.20240716187525745,
+        "grey_row_share": 0.3,
+        "high_row_share": 0.26666666666666666,
+        "low_row_share": 0.43333333333333335,
+        "mean_absolute_target_error": 0.042215586817345385,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 30,
+        "target_mse": 0.005128207122676381
+      },
+      "calibration-fit": {
+        "agreement": 0.9833333333333333,
+        "expected_brier": 0.025506706349761335,
+        "expected_log_loss": 0.08295540236005204,
+        "grey_row_share": 0.1,
+        "high_row_share": 0.4666666666666667,
+        "low_row_share": 0.43333333333333335,
+        "mean_absolute_target_error": 0.027649619928600797,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 60,
+        "target_mse": 0.00898392134352295
+      },
+      "test": {
+        "agreement": 1.0,
+        "expected_brier": 0.028080151138002683,
+        "expected_log_loss": 0.09961789415973157,
+        "grey_row_share": 0.13333333333333333,
+        "high_row_share": 0.43333333333333335,
+        "low_row_share": 0.43333333333333335,
+        "mean_absolute_target_error": 0.024265268089697742,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 60,
+        "target_mse": 0.0030705024952756483
+      },
+      "train": {
+        "agreement": 0.9888888888888889,
+        "expected_brier": 0.041011333308529095,
+        "expected_log_loss": 0.12500595280563226,
+        "grey_row_share": 0.16944444444444445,
+        "high_row_share": 0.4111111111111111,
+        "low_row_share": 0.41944444444444445,
+        "mean_absolute_target_error": 0.01851574023635133,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.0,
+        "rows": 360,
+        "target_mse": 0.0014033722539041774
+      },
+      "validation": {
+        "agreement": 0.9555555555555556,
+        "expected_brier": 0.04407063283970477,
+        "expected_log_loss": 0.13713003354668188,
+        "grey_row_share": 0.14444444444444443,
+        "high_row_share": 0.4111111111111111,
+        "low_row_share": 0.4444444444444444,
+        "mean_absolute_target_error": 0.030502043556237673,
+        "nonpattern_share_among_high": 0.0,
+        "pattern_share_among_low": 0.025,
+        "rows": 90,
+        "target_mse": 0.011299777943984972
+      }
+    },
+    "model_sha256": "2ef03cd09d06a0e9c28192ef8ee4cc03f583976e81212ab2e1dbb95050f03a2a",
+    "offline_quality_passed": true,
+    "panel_policy": {
+      "amount_tolerance_range": [
+        0.04,
+        0.2
+      ],
+      "interpretations": 603,
+      "meaning": "Probability across a disclosed teaching-interpretation grid; not criminal probability or human-expert consensus",
+      "near_repetition_scale": 0.05,
+      "return_ratio_range": [
+        0.45,
+        0.6
+      ],
+      "rules": [
+        "matched_relay",
+        "repeated_fanout",
+        "cash_conversion",
+        "consolidation",
+        "repeated_returns",
+        "fragmentation"
+      ],
+      "sensitivity_settings": 201,
+      "small_payment_ratio_range": [
+        0.65,
+        0.8
+      ],
+      "structural_rules_survive_waiting": [
+        "consolidation",
+        "repeated_returns",
+        "fragmentation"
+      ],
+      "target": "observable_educational_pattern",
+      "time_windows": [
+        2,
+        10,
+        60
+      ],
+      "version": "aml-game-pattern-panel-v2.1"
+    },
+    "quality_policy": {
+      "grey_denominator": "unweighted held-out chain rows, not selected demonstrations",
+      "grey_probability_high_exclusive": 0.9,
+      "grey_probability_low_inclusive": 0.1,
+      "maximum_confident_error": 0.05,
+      "minimum_agreement": 0.95,
+      "population_grey_share_max": 0.2,
+      "population_grey_share_min": 0.1,
+      "version": "pattern-quality-v2"
+    },
+    "release_ready": false,
+    "score_kind": "educational_pattern_interpretation_probability",
+    "trainer_sha256": "45bffbf389def81597f221d8afa5b653d843622e5e97bb60f0444c9555c3958c",
+    "training_weighting": "Equal family contribution; view probabilities averaged using the three equal policy windows"
+  },
+  "output_hashes": {
+    "game-v9-seed0\\audit.json": "c6d8e2c6eb363c2550e4eead5127c993c8a7bb1a482d6caf5f3acd6f17ce33fd",
+    "game-v9-seed0\\casebook.jsonl": "1c82b1870d7b433ed1e1da88df71ea95078a543d3452120c0c29515345589cb5",
+    "game-v9-seed0\\context.json": "b108faf22e234b3dad47d72bc01ca44790de5c13f19cdb53fba18ea97e3f2cca",
+    "game-v9-seed0\\features.csv": "94aeb9ce5692e61de45e450a8f69feb7b963cb3f882106e92004c134a1dfad88",
+    "game-v9-seed0\\groups.json": "8d30e845de4b6931bc425589f90637259d27aacbc59e22336d839930b3a2990d",
+    "game-v9-seed0\\policy.json": "b38d83d0cceefe285d46aebe3868555b90e4a1a916582d22bdf70ee0f860527a",
+    "game-v9-seed0\\readback-audit.json": "b31a1e946dbf9b031d4d81f34747ae306d035348a9542fc3d8c66633a1fb2349",
+    "game-v9-seed0\\targets.csv": "0d0a4c49b5659079ab56f7d778169261821d032b67f95d763a28f1a4a85cc7e3",
+    "window-v2-seed0\\manifest.json": "13440e535f02a774a707462c1a5fdee2cfbc1daa0662963ac55c6a60eddfb361",
+    "window-v2-seed0\\model.cbm": "2ef03cd09d06a0e9c28192ef8ee4cc03f583976e81212ab2e1dbb95050f03a2a",
+    "window-v2-seed0\\predictions.csv": "d82e7d088149457e0c8e758e845fd269199156ec6c767d81faec77a55a162007"
+  },
+  "scope": "600-row research process replay; not a reproduction or replacement of the released current model"
+}

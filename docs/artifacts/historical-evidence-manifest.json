@@ -1,0 +1,888 @@
+{
+  "version": 1,
+  "policy": "Retained in original locations for historical link and notebook working-directory compatibility; new machine outputs belong in CI artifacts or docs/artifacts, narrative reports in docs/verification.",
+  "files": [
+    {
+      "path": "docs/verification/aml-classifier-v1/linux-api-load.log",
+      "bytes": 1479,
+      "sha256": "d09adf4d6f209d0f85341841cf9633adc82f979a9e5de62ed577941869d326f6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/aml-classifier-v1/linux-native-api.log",
+      "bytes": 1134,
+      "sha256": "d5912651b5ffec02c341451478b83b7cdaeb627f7e90508f0d6ae5e56b56cbe6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/aml-classifier-v1/linux-unit-ml.log",
+      "bytes": 1699,
+      "sha256": "70d10c9b0706dd27d68c3a2f5ccc45f885779dd007810abb36ddfbb7e77b4035",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/aml-classifier-v1/operation-purpose-audit-2026-09-17.ipynb",
+      "bytes": 1635,
+      "sha256": "584a3e59a942ed824e0c9589eec4d3c8bb9021bec2e125bd9564c7ae56de586e",
+      "kind": "notebook"
+    },
+    {
+      "path": "docs/verification/aml-classifier-v1/windows-api-load.log",
+      "bytes": 1522,
+      "sha256": "52c4f7ae1bad4ff2349591e6275769b62541dd45d532eb7506c669c4c444d55a",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/aml-classifier-v1/windows-unit-ml.log",
+      "bytes": 1753,
+      "sha256": "bc2f37a884070cfb5eab9004e4290bd5f52a1d0cc604980e3466a2d77f19c2ee",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/audit-fixes/pytest.xml",
+      "bytes": 56264,
+      "sha256": "167b042df5b3e772291db4280295b6aa278fde3404da943b818e2765aa964ca0",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/actual-pins.log",
+      "bytes": 248,
+      "sha256": "7c89540fb1797498c5bdc92c0195d68b722db12aee6df8bb1905fe561cf331cd",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-admin-settings.log",
+      "bytes": 3083,
+      "sha256": "481cdf3b92c3896e6ad45616116c5b763f0de2fb8f67dc19414c8400fbe58b8e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-chain-fixture.log",
+      "bytes": 51,
+      "sha256": "1b5311bed30796140279ea3727d0b3a7dfee977ba48d91896398d5af86b9f058",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-editor.log",
+      "bytes": 175,
+      "sha256": "8dbfd424fa5d0643dc56a4f1c258c9f7b6de3f6af9a97a39b38dbc15717b897e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-failure-retry.log",
+      "bytes": 1538,
+      "sha256": "d6dd5f16c705d42255aca1128ed0ac1a0700aa71b341727106aa2f4262578031",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-failure.log",
+      "bytes": 2229,
+      "sha256": "69d4080cb51290dc6ef2397642338553c3e7eff71135da395900f12159ad9556",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-login-start.log",
+      "bytes": 2191,
+      "sha256": "056729f6779640529eab70b0db42ccaedd877e69fb3c3a906db921849a6ed193",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-restart.log",
+      "bytes": 2436,
+      "sha256": "f86ce913eab8115fc9a76e960cd58515dfcba4a11b4189ca76a38e4057e480ae",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-results.log",
+      "bytes": 145,
+      "sha256": "2a441b241a221b30f1c048c8151171723b6a4326450b139e25c45eb58650fd10",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-start-confirmed.log",
+      "bytes": 2895,
+      "sha256": "d32ce0f0f558abed7ec87c2b4141e3de142017f06f9c960f4b176bb57906183f",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/browser-start.log",
+      "bytes": 2589,
+      "sha256": "5487d54febc0b2746931747dd6a536552e7701c52a0983cd2fcda7b701e274c2",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/container-dependencies.log",
+      "bytes": 33,
+      "sha256": "f224655f1ff1d95e2b2a3014fe5560b31fa92ad15dac4fd90897e156ebeac2fd",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/container-probe.log",
+      "bytes": 240,
+      "sha256": "bbb5bac815fab78c87bd0ea10fb2e05ba13d78d1794bf1c503e9de71239aa6f7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/docker-build.log",
+      "bytes": 49953,
+      "sha256": "2b27ebe0eb1dd60d1825bc33327121adc0792fc9058fc74d687332954e9c0851",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/docker-db.log",
+      "bytes": 624,
+      "sha256": "0a13e37e5c29cdb093d15629853228dec88d86858c8575a6db3a899b646d6475",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/docker-start.log",
+      "bytes": 1163,
+      "sha256": "ef057915e795d613e96f7127b695a2f1d2062d097c7dacb1d3845223e74c3612",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/failure-fixture.log",
+      "bytes": 73,
+      "sha256": "1d46e4e48f008320b0fd4eec15e8d42287c56875263a18b25ad81dea7fee37e1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fastapi-concurrency-diagnosis.log",
+      "bytes": 3405,
+      "sha256": "60a7c905a0a5e610668101403ff2784055ee09af1a00a4cdb3167f52a3fd7132",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fastapi-error-cause.log",
+      "bytes": 2829,
+      "sha256": "d8560241e765bfa1b0ac4b30b295cf6b77d17c4ca35349f10cbfaaf92121b05d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fastapi-tests.log",
+      "bytes": 24528,
+      "sha256": "64d21d034f61d13b1475c36b418a60fa50e189020ea2027b3052da3fcf523c3d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fastapi-tests.xml",
+      "bytes": 64760,
+      "sha256": "b55b2a47c3e9465e31d566a8525461b705891d5d8ffaf2600dd5c2f6ad8a3f20",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fault-server.log",
+      "bytes": 551,
+      "sha256": "df3bfe52b83e08ee9ed8d266b2ea8cc41c984a3db32033f6c2315f6efa71f59d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/backup-restore-final.log",
+      "bytes": 445,
+      "sha256": "3207e487daf0b4cb853d384b02aa7a8abe4e5c5e72ad1d9eb59833e7baf43c54",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/backup-restore.log",
+      "bytes": 1678,
+      "sha256": "b8267cc89c201a9543218d790f5f938f565ea19e70a59f362d5982092d8d881d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-chain.log",
+      "bytes": 51,
+      "sha256": "1b5311bed30796140279ea3727d0b3a7dfee977ba48d91896398d5af86b9f058",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-disconnect.log",
+      "bytes": 135,
+      "sha256": "2e83355923ca9f9f69ce74af51340bbfe0d06d28a6781124eefadcf3f6830300",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-editor.log",
+      "bytes": 175,
+      "sha256": "8dbfd424fa5d0643dc56a4f1c258c9f7b6de3f6af9a97a39b38dbc15717b897e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-failure.log",
+      "bytes": 1538,
+      "sha256": "4402c5e62bf6e75ed015aa7d167d92ab00822789ce135dc3ba8fd4c66c94d6c3",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-final.log",
+      "bytes": 135,
+      "sha256": "2e83355923ca9f9f69ce74af51340bbfe0d06d28a6781124eefadcf3f6830300",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-results.log",
+      "bytes": 145,
+      "sha256": "2a441b241a221b30f1c048c8151171723b6a4326450b139e25c45eb58650fd10",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/browser-start.log",
+      "bytes": 2949,
+      "sha256": "2027c0ba637818f5dc3209007ceb6dee622865b9e60c3395cd65d67616e2e1a4",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/concurrency.log",
+      "bytes": 982,
+      "sha256": "8fc17f4634faa9be708bda53304504573b254cb6fab0f8f63764eaf150e50c15",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/dependencies.log",
+      "bytes": 33,
+      "sha256": "f224655f1ff1d95e2b2a3014fe5560b31fa92ad15dac4fd90897e156ebeac2fd",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/docker-build.log",
+      "bytes": 5356,
+      "sha256": "681ea0cbb5fe46a03d6f6bf03e310a5a36ba791fb8bfc4c6fe1b8b291b343907",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/docker-final.log",
+      "bytes": 6566,
+      "sha256": "234f6b33a65d791f800246300e558163e1aa03b295748d30d9e7862c906d4cce",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/docker-start.log",
+      "bytes": 1940,
+      "sha256": "8bc14db50776fcb4d768202b508adb6671ef1d2b1490dc697e156857d386f0ad",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/fastapi.log",
+      "bytes": 992,
+      "sha256": "684353c56a56d063f4ea5aa29a5b817bb231ba5f51a1197dd8da0e9d8faa84d7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/fastapi.xml",
+      "bytes": 7736,
+      "sha256": "8cdb074762e8ec7af1e7e3f0475829b24d9f264b379ca20de6e92725e2ef239f",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/fault-fixture.log",
+      "bytes": 73,
+      "sha256": "1d46e4e48f008320b0fd4eec15e8d42287c56875263a18b25ad81dea7fee37e1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/fault-start.log",
+      "bytes": 617,
+      "sha256": "d97200e9cd961e22429c85dea2b2b803244cbcb7f01249399c0ab83bccd128b1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/final-health.log",
+      "bytes": 748,
+      "sha256": "64aa6bfbe4f15bd987b432c90aa99def61afe6187c980e2138cbe7910f0336bc",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/final-ui-log.log",
+      "bytes": 76,
+      "sha256": "2c35ece8464d0eebb849d296940ae6d4369b462bd611f57d23e87401dadb964e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/linux-model-final.log",
+      "bytes": 323,
+      "sha256": "7f20004f56e56f7bdc78cc22e6e8f40f9903535f3963a25aa02eb309d8638f5d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/linux-model.log",
+      "bytes": 508,
+      "sha256": "e16fd0ff4141d153025f923497507b22d89f0a13158d973c0409573a9c9d1e5c",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/normal-api.log",
+      "bytes": 617,
+      "sha256": "833d23756e2b7931bda4cabe4d0f1f5d0cd7bfe35d6478866215dfab57cef436",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/package-tests.log",
+      "bytes": 6470,
+      "sha256": "57b28cd94245b955d9a93e3fa77187c4c556a43ed9e2fce41c0dd3cdc406e2d9",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/regressions-final.log",
+      "bytes": 992,
+      "sha256": "1c511f50698eb874b5b75144824cf635c78d2b0970b37c3c539043416b639797",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/regressions-final.xml",
+      "bytes": 7167,
+      "sha256": "29638dd6a58c92a4422869ef49dc6fba454b4e448827ded626e44e6b24c62887",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/restart-ui.log",
+      "bytes": 115,
+      "sha256": "0fb0d0aa8844b0cbfb452e44ca36c9f50460c0147d06ab6da62ac935a566e062",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ruff.log",
+      "bytes": 22,
+      "sha256": "881513cd027e0334026cfcbad052e34fecb3f2c1fef5ab000c86973bc0196cd7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/scoring.log",
+      "bytes": 993,
+      "sha256": "03a2e84e58681d6afc56731492eb5f80998f43437bb12b7027da996653b309b3",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/scoring.xml",
+      "bytes": 5593,
+      "sha256": "78c93ef96fc595a1a38e3bbbbc0f3ab0fa36dfbba17ba26c1ce8df3865c95b75",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ui-retry.log",
+      "bytes": 28677,
+      "sha256": "3fb0b9820145f1739a96504e12f90ed87b76496e47b7223aa1d5448bebab3bcc",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ui-retry2.log",
+      "bytes": 982,
+      "sha256": "806879aa662666eced6017bd797a567144ebf769c7fb5a5580f772d28ac104a6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ui-server-log.log",
+      "bytes": 150,
+      "sha256": "5c664a37b1195ea60e8194fd652f162896a386e05e3054567ad4773d50f1f896",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ui.log",
+      "bytes": 14854,
+      "sha256": "7ca7a9361102e0481e5658a08b8c676a7f53ed6d21e8ce93cc025b25b1ce0b9d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/fixes/ui.xml",
+      "bytes": 24586,
+      "sha256": "a606529bf3555cc9cb9c6315aa7980e8dafa0d439fe8132eb72c355a0c8ddae5",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/migrations.log",
+      "bytes": 229,
+      "sha256": "9c5f213373453ae0eda70263b8f2d4611db7b0571dd5d459491c094c923c809c",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/model-probe.log",
+      "bytes": 323,
+      "sha256": "ce1c72ffd9b9cc0437d002a78355b11d03116239a34be7c6fd931f3ae93d077d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/optimized-release-check.log",
+      "bytes": 84,
+      "sha256": "6e38f967ebd03aea475cf813e80bd261d35d5064962b1d5aec49ad081c8d23d4",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/pip-check.log",
+      "bytes": 88,
+      "sha256": "a007f1f0cabe2c8ef6e18afa01fc98ddf371ca495ddb7d424925b9b636b65cc2",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/restart-ui.log",
+      "bytes": 103,
+      "sha256": "02f5dae8a17236d1c6713f9e648ff0c94b6545f0ec98e454fdbf4c20f3dcdc4e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/restore-standard-api.log",
+      "bytes": 551,
+      "sha256": "41bf41cbeda75f91441ec33aa663991c4a198296e5a553ef3b2cae5dd2c3a423",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/ruff.log",
+      "bytes": 1493,
+      "sha256": "fa765650b4274829184543c1f30572cb287748e3e38195665142d6789fb164a0",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/scoring-tests.log",
+      "bytes": 6100,
+      "sha256": "8e57e1c7f02ce015f01ded22a197bd17ca816e595f61c6012e1db393a0454fdd",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/scoring-tests.xml",
+      "bytes": 9914,
+      "sha256": "fa2de0380996e49c89628c909bf9e500aba5336e25ed07a430f3e45951b8a825",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/ui-runtime-log.log",
+      "bytes": 3442,
+      "sha256": "92bf9fe4909983d1d40471394866281d62ba1c52268d4c2f26987e831a077e90",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/ui-tests.log",
+      "bytes": 12985,
+      "sha256": "81805be2cb04b04a47c5d0539377a4a44e7ac3ef79ea9cbb3a03bf6ff80538c7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/predeploy-2026-09-20/ui-tests.xml",
+      "bytes": 26279,
+      "sha256": "b018edefded6fa55710ca1e95d1fc733f9b6c1f8f9f04529bab3601142b6a3bf",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/api-load.log",
+      "bytes": 1484,
+      "sha256": "0c583707ec6be7214aa164109589b168c62918da2ab51b111801c4a225a1eb79",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/api-load.xml",
+      "bytes": 17556,
+      "sha256": "558346e39c8adf3457b6651ac59522f80d4714fdb833a0a15227c6a3a115407e",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/balance.log",
+      "bytes": 6618,
+      "sha256": "25590db4ab4c1b7b2ec51e9044c52d71855ef1736cc47d12a05faa9e309709d5",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/bandit.log",
+      "bytes": 1378,
+      "sha256": "636d7b274fcc9fa379b426a53eccb27fc1f576650679fbf5042bc364b30427f2",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/config.log",
+      "bytes": 48,
+      "sha256": "465345557236190cbbaeab42f9046df8819f3bc1eb299a3ca4f65f0f820c850c",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/dataset-audit.log",
+      "bytes": 638,
+      "sha256": "296335ec293bca1873d3ca7155ea119746a16a64cc332a84ccac3cdc3fb0026f",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/db-roundtrip.log",
+      "bytes": 1288,
+      "sha256": "081e85c975fd9a48a618a044200a21af7f8a3e56c6844230e37e5f0c77148964",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/dependency-audit.log",
+      "bytes": 281,
+      "sha256": "7b3f79b5a9e9018b4bc74282ca816036cafba5a5bec7ce9dc161e5e18af25199",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-acceptance.log",
+      "bytes": 4778,
+      "sha256": "2074020064a7d060f2adcc55024ec1475beef93db328c32b1fc45e905d808c10",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-api-load.log",
+      "bytes": 1473,
+      "sha256": "3aefe79f04faf709fd0af3c5491624de4c5e780729a47b200103fd5e90f282c1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-build-start.log",
+      "bytes": 112568,
+      "sha256": "5a6586d7f958d9d8e4bcc4eb5efb85cdc890c1be8fbc6135223bde4cc129666e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-cleanup.log",
+      "bytes": 2390,
+      "sha256": "eacc73abe26be57ac8957aae7dba93acec0c665efd0bb71c254acf09f5d23b15",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-ml-build.log",
+      "bytes": 54896,
+      "sha256": "101b0eded2976e2a9ba5682a694fed37fb6e7dac500c688996f7c63bed4d34e6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-services.log",
+      "bytes": 22172,
+      "sha256": "c352c1bd3eff1bf5505bac721707b3441bcfb901c7b71cf37c929c814a12835d",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-transport.log",
+      "bytes": 232,
+      "sha256": "ba2d404967c5712047b75b4fa539144c85060347a108a9add6b4600842b606a2",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/docker-unit-ml.log",
+      "bytes": 2526,
+      "sha256": "17456ee9a08c2397ce0160571012c12a9f5d651a3b6b61dc3764457693a2ef29",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/expanded-balance.log",
+      "bytes": 1656,
+      "sha256": "9f2010aea079144a21e609094fbbb05d790065bf40c1ae49ecbcebc0aaf19952",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/model-integration.log",
+      "bytes": 1530,
+      "sha256": "9901aa5eb8e82e768193d6098584ccafdf3cd2840b660e94234cb6e7de9f56d5",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/package.log",
+      "bytes": 208,
+      "sha256": "93cab8c64fbacefd7ed4862bec26e50dfee369e11f34bc1c891714efc46aec92",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/ruff.log",
+      "bytes": 42,
+      "sha256": "af352a86840ad0af3d37ea0d9197f868363a6dac6b1c2ef5d2722f6b41d2d9af",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/settings-api-probes.log",
+      "bytes": 735,
+      "sha256": "bd7789775e976187d2c064af6603650ea347dd5e8399512d0191de1410216702",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/transport.log",
+      "bytes": 232,
+      "sha256": "ba2d404967c5712047b75b4fa539144c85060347a108a9add6b4600842b606a2",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/unit-ml.log",
+      "bytes": 2566,
+      "sha256": "2b6994785f24d978d0e2be2fd02de60e04c4ba619723c3f3cf66ebdadf374381",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-2026-09-16/unit-ml.xml",
+      "bytes": 43927,
+      "sha256": "ad43dbab9319971754ffbed1616d9e701ee0bf2070d7b3cefdf3d9714d746703",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/api-load.log",
+      "bytes": 1484,
+      "sha256": "95a6d60f3d1ac66e24d8ffc76011b4abdf367e730fb8cc0583ee7aeae64d66b7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/api-load.xml",
+      "bytes": 17777,
+      "sha256": "3074e374b0606b83c176bfffed12e3dc0e859ca2dfb03522b313781d49a3bb06",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/auth.log",
+      "bytes": 946,
+      "sha256": "d9cbad9ab8262c40208af532d471149c0442cbc5a281fa444c974f64b32e9efb",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/balance.log",
+      "bytes": 3308,
+      "sha256": "6dc5eb2bf2a9e92395b0b04d28f5be8c67cdb2ff62918dcbe4b9413a8a2b8055",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/config.log",
+      "bytes": 42,
+      "sha256": "95eded08bd8a38092f9f91bc1ecf2fee9b1171c1a5c5f0b8dbdc0195bbe8aa64",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/dataset-validator-regression.log",
+      "bytes": 895,
+      "sha256": "1f923a830b700f391d805d38d5af975ae5a448d38aae2c69f8cde08a6ebbbb8c",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-acceptance.log",
+      "bytes": 2388,
+      "sha256": "78a497da430f723596404f3a939ca5e2d854d73016f3f895b91c2dad55317d8e",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-api-load.log",
+      "bytes": 1475,
+      "sha256": "d92a669db33f08b1264e40b9e1eb0131ea864afa96e71b2a3cbaa6e289aa8f16",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-build-start.log",
+      "bytes": 13852,
+      "sha256": "009c43551465ebedfdb0ea663d53fe4c5c27e37c38678df3f258a492901e1757",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-cleanup.log",
+      "bytes": 2606,
+      "sha256": "b39cdb4c1506a2d4d9e6bd7f0d3f6c7aa54ef34ad8a57ee9baee429052998f24",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-final-build.log",
+      "bytes": 11408,
+      "sha256": "e19670afa0ec9d3cb81bcaf99851e7c4b8cd94b36b7e0bf0542c50498fa4319a",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-transport.log",
+      "bytes": 115,
+      "sha256": "79d952bf19a906fab4e794ecf3f111e1f8ff3c24c87003e7e754c217a12fdea6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/docker-unit-ml.log",
+      "bytes": 1356,
+      "sha256": "edbb5902049a6bc2b8b7909fc83302d0b9204bb3692d0fb571d666af0ce115db",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/expanded-balance.log",
+      "bytes": 827,
+      "sha256": "4b3521c89e43da3f55583e548f0028f29579da8e2fc9dd38a2607ffc6f4596a9",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/ml-provenance-regression.log",
+      "bytes": 2171,
+      "sha256": "46f4a8cf84f27e877dc5814287f2c98cedc715c9134475398659076076abd221",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/model-integration.log",
+      "bytes": 762,
+      "sha256": "89831534319b074f2bcda8391e74edb1795b9773ae0713b5e62429d5ee7a2c40",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/ruff.log",
+      "bytes": 20,
+      "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/ui-regression.log",
+      "bytes": 1420,
+      "sha256": "bf17709c4cf6cbfc7dda1440f0b26cc2d0275494f4970f97cd23e3312df0b21a",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/unit-ml.log",
+      "bytes": 1374,
+      "sha256": "41786ca52051ac23c8cd3eb6259c7cad2ceada6538ac7785ba9d1e9ec8dc8b56",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/unit-ml.xml",
+      "bytes": 54227,
+      "sha256": "f64c413183c6e60ab88a03448a9d565f7c700339a6d523ee837204b29df41789",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/project-audit-fixes-2026-09-16/verifier-regression.log",
+      "bytes": 1314,
+      "sha256": "d8565a7db1b07069a3ed29779e0c58bbaa04725d93c48a7608e54c4c48df9dd1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/api-prepared-final.log",
+      "bytes": 66,
+      "sha256": "28550886047a693df0cf057e911f960a1bac3ca5fe26cdbe9a6c29c525bb2855",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/api-prepared.log",
+      "bytes": 1089,
+      "sha256": "722b9c638d3b75bfcd1a9980b760c62d55f4e47da6c956cb3b56ec94d33e6af3",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/backup-restore.log",
+      "bytes": 167,
+      "sha256": "3320a2e4066a64320960c907dc9301da5201e691ccc9a6f0a06436e8742e9be8",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/build.log",
+      "bytes": 3517,
+      "sha256": "d685600f774f44c5bd6af01bbb48b89e9dc38597751302be68b2605271878d46",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/dependencies.log",
+      "bytes": 33,
+      "sha256": "f224655f1ff1d95e2b2a3014fe5560b31fa92ad15dac4fd90897e156ebeac2fd",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/export.log",
+      "bytes": 2,
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/fault-start.log",
+      "bytes": 529,
+      "sha256": "11f4b77c5db6bcc4c08817ea831d0e09a2d85c8ac27b89e9d5e29b99bfad4db9",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/image-load.log",
+      "bytes": 38,
+      "sha256": "637dbaea6a3710ef7afb6a97aa7a9f977d7a3f7a9b388edcde67740a0df619f6",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/legacy-linux.log",
+      "bytes": 74,
+      "sha256": "5cacf7164c220fe79f7efd721f36f05ffab8544350c81ad7f9c53afcf7a510de",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/linux-package.log",
+      "bytes": 66,
+      "sha256": "e4c9b54bc7f7bfc857a2601897541872d7437b69b583050e77da5ea07691a585",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/migrations.log",
+      "bytes": 1736,
+      "sha256": "1b39f3a0a100ea2e6acfb6397f0e7d6ffbddb5e3ffb39a1a14f3261b746ef95a",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/model-final.log",
+      "bytes": 323,
+      "sha256": "bdcd34d08890a2f89625ee9940655f197f4102c8948667dadec9b2b8f04052a4",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/model.log",
+      "bytes": 508,
+      "sha256": "a75e1605c2b7ba6aa7939a6196b8ead0f8c9d239e16b3586891246ca10a8aec5",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/normal-runtime.log",
+      "bytes": 529,
+      "sha256": "11f4b77c5db6bcc4c08817ea831d0e09a2d85c8ac27b89e9d5e29b99bfad4db9",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/packaging-final.log",
+      "bytes": 991,
+      "sha256": "f5f8869c512011d466aef6f7ad51d4ff40eff05909df6c61f8b5cc3928b7f152",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/ruff-final.log",
+      "bytes": 22,
+      "sha256": "881513cd027e0334026cfcbad052e34fecb3f2c1fef5ab000c86973bc0196cd7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/ruff.log",
+      "bytes": 22,
+      "sha256": "881513cd027e0334026cfcbad052e34fecb3f2c1fef5ab000c86973bc0196cd7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/runtime-final.log",
+      "bytes": 1167,
+      "sha256": "72e040a04db9f43eaf0aa06d27ce850a9864ccbdb8875fceca21aa264830dc07",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/startup.log",
+      "bytes": 1668,
+      "sha256": "b57c6f8af590671f3303704d9589b7bbda29a0abbed1788df47e6ce8be685ff1",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/tests.log",
+      "bytes": 185523,
+      "sha256": "b83013ee8ef5448210abfc8348bf3086bcd9f9c280040182e0d4b32d068a95ff",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/release-2026-09-20/transport.log",
+      "bytes": 117,
+      "sha256": "7cde56088b9d46104dbfd2f45990f6af92fb01c0a5c853a40a1018849c3ef766",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/semantic-interface-audit/run.log",
+      "bytes": 5329,
+      "sha256": "5c87d69e8d18bc02f733b715e2bc0142cd41e739eafbd9f657c7fb205a819bb7",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/semantic-v9/pytest.xml",
+      "bytes": 59083,
+      "sha256": "b1ea891d6d35706b0844e3cd9d4c51028597eceed2cc58ee1eadb0546e1949f5",
+      "kind": "junit"
+    },
+    {
+      "path": "docs/verification/ui-interactive-2026-09-20/api-sanitized.log",
+      "bytes": 32587,
+      "sha256": "439900831804b7ba6cf1268c5e7c7e38730fde88a70e6bb1ed8fceab3f05cd73",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/ui-interactive-2026-09-20/setup.log",
+      "bytes": 1904,
+      "sha256": "0bf9198670c5c60df6fc8f3f53eea607e5b2e71cc472d7f4d594aad4261de160",
+      "kind": "log"
+    },
+    {
+      "path": "docs/verification/ui-interactive-2026-09-20/ui-sanitized.log",
+      "bytes": 150,
+      "sha256": "55896c270b9df254ae0c84825240caab644a92d19747a6537dab69d592abb1da",
+      "kind": "log"
+    }
+  ]
+}
