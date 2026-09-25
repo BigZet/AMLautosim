@@ -89,3 +89,34 @@ def test_individual_window_shap_is_validated(example):
     value["windows"][0]["shap_values"][0]["contribution"] += 1
     with pytest.raises(ValidationError):
         GamePatternExplanationOut.model_validate(value)
+
+
+def test_game_explanation_is_collapsed_until_requested(example, tmp_path, monkeypatch):
+    import asyncio
+    from nicegui import ui
+    from nicegui.storage import Storage
+    from nicegui.testing.user_simulation import user_simulation
+    from src.aml_workshop_simulator.ui.nicegui.shap_result import shap_result
+
+    monkeypatch.setattr(Storage, "path", tmp_path / "ui")
+
+    async def run():
+        async with user_simulation() as user:
+
+            @ui.page("/collapsed-explanation")
+            def page():
+                shap_result(example)
+
+            await user.open("/collapsed-explanation")
+            panel = next(
+                e
+                for e in user.find(ui.expansion).elements
+                if e.text == "Что повлияло на оценку"
+            )
+            assert panel.value is False
+            with user:
+                panel.open()
+            assert panel.value is True
+            assert any(table.rows for table in user.find(ui.table).elements)
+
+    asyncio.run(run())

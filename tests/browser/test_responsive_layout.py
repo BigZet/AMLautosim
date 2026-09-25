@@ -9,6 +9,7 @@ def test_editor_layout_and_touch_targets(participant, width, capture):
     page.set_viewport_size({"width": width, "height": 844})
     if width in (360, 390, 1280):
         capture(page, "empty")
+    page.get_by_role("button", name="Добавить операцию", exact=True).click()
     page.get_by_role("button", name="Входящий перевод", exact=True).click()
     page.get_by_label("Сумма", exact=True).wait_for()
     page.get_by_text("Сохранено", exact=True).wait_for()

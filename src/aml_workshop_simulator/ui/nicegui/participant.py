@@ -597,6 +597,7 @@ class ParticipantScreen:
         self.resource_overview = None
         self.last_change = 0
         self.ticking = False
+        self.polling = False
         self.submitting = False
         self.render_key = None
         self.board_at = 0
@@ -635,12 +636,21 @@ class ParticipantScreen:
         ui.timer(0.3, self.tick)
 
     async def poll(self):
-        if self.editor is None:
+        if self.editor is None or self.polling:
             return
+        self.polling = True
 
         async def work():
             version = self.editor.render_revision
             await self.editor.poll()
+            # Complete initial preview before exposing actions: otherwise its
+            # layout change can move a button between pointer-down and click.
+            if (
+                self.render_key is None
+                and self.editor.editable
+                and self.editor.preview is None
+            ):
+                await self.editor.evaluate()
             self.render(force=version != self.editor.render_revision)
             if (
                 self.editor.state.get("can_view_leaderboard")
@@ -677,7 +687,10 @@ class ParticipantScreen:
                             "flat no-caps"
                         )
 
-        await self.guarded(work)
+        try:
+            await self.guarded(work)
+        finally:
+            self.polling = False
 
     async def refresh_board(self):
         self.board_version = None
@@ -805,31 +818,46 @@ class ParticipantScreen:
                         self.resource_overview = ui.column().classes(
                             "resource-overview"
                         )
-                        with ui.column().classes("chain-catalog"):
-                            for card in editor.cards:
-                                icon = {
-                                    "salary": "account_balance_wallet",
-                                    "incoming_transfer": "south_west",
-                                    "card_transfer": "credit_card",
-                                    "cash_withdrawal": "payments",
-                                    "purchase": "shopping_bag",
-                                }.get(card["code"], "swap_horiz")
-                                label = {
-                                    "salary": "Зарплата",
-                                    "incoming_transfer": "Входящий перевод",
-                                    "card_transfer": "Перевод по карте",
-                                    "cash_withdrawal": "Наличные",
-                                    "purchase": "Покупка",
-                                }.get(card["code"], card["title"])
-                                (
-                                    ui.button(
-                                        label,
-                                        on_click=lambda c=card: self.add(c),
-                                        icon=icon,
+                        with (
+                            ui.button(
+                                "Добавить операцию",
+                                icon="add",
+                                on_click=lambda: self.operation_menu.open(),
+                            )
+                            .props("unelevated no-caps")
+                            .classes("chain-add w-full") as self.add_button
+                        ):
+                            self.operation_menu = (
+                                ui.menu()
+                                .props("auto-close")
+                                .classes("operation-picker-menu")
+                            )
+                        with self.operation_menu:
+                            with ui.column().classes("chain-catalog"):
+                                for card in editor.cards:
+                                    icon = {
+                                        "salary": "account_balance_wallet",
+                                        "incoming_transfer": "south_west",
+                                        "card_transfer": "credit_card",
+                                        "cash_withdrawal": "payments",
+                                        "purchase": "shopping_bag",
+                                    }.get(card["code"], "swap_horiz")
+                                    label = {
+                                        "salary": "Зарплата",
+                                        "incoming_transfer": "Входящий перевод",
+                                        "card_transfer": "Перевод по карте",
+                                        "cash_withdrawal": "Наличные",
+                                        "purchase": "Покупка",
+                                    }.get(card["code"], card["title"])
+                                    (
+                                        ui.button(
+                                            label,
+                                            on_click=lambda c=card: self.add(c),
+                                            icon=icon,
+                                        )
+                                        .props("flat no-caps align=center")
+                                        .classes("operation-choice")
                                     )
-                                    .props("flat no-caps align=center")
-                                    .classes("operation-choice")
-                                )
                         self.chain_box = ui.column().classes("w-full gap-3")
                         self.render_chain()
                     with ui.card().classes("panel scenario-summary"):
@@ -882,6 +910,8 @@ class ParticipantScreen:
         self.update_status()
 
     def add(self, card):
+        if getattr(self, "operation_menu", None) is not None:
+            self.operation_menu.close()
         if self.submitting or not self.editor.editable:
             return
         max_actions = self.editor.state["round"]["game_config"]["objectives"][
@@ -1005,7 +1035,7 @@ class ParticipantScreen:
             if not self.editor.steps:
                 with ui.column().classes("chain-empty") as self.empty_chain:
                     ui.icon("playlist_add").classes("text-2xl")
-                    ui.label("Добавьте первую операцию").classes("font-medium")
+                    ui.label("Операций пока нет").classes("font-medium")
             for position, index in enumerate(reversed(range(len(self.editor.steps)))):
                 step = self.editor.steps[index]
                 component = registry.get(step["step_id"])
@@ -1027,6 +1057,15 @@ class ParticipantScreen:
         ready = editor.can_submit and not self.submitting
         self.submit_button.set_enabled(ready)
         self.submit_button.set_visibility(bool(editor.steps))
+        if getattr(self, "add_button", None) is not None:
+            self.add_button.classes(
+                add="chain-add" if not editor.steps else "",
+                remove="chain-add" if editor.steps else "",
+            )
+            self.add_button.props(
+                add="outline" if editor.steps else "unelevated",
+                remove="unelevated" if editor.steps else "outline",
+            )
         self.submit_button.props(
             "color=primary text-color=white"
             if ready

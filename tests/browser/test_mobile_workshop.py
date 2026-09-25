@@ -14,6 +14,7 @@ def test_edit_correct_reorder_submit_and_result(
 ):
     page = scoring_participant
     page.set_viewport_size({"width": width, "height": 844})
+    page.get_by_role("button", name="Добавить операцию", exact=True).click()
     page.get_by_role("button", name="Входящий перевод", exact=True).click()
     amount = page.get_by_label("Сумма", exact=True)
     amount.fill("0")
@@ -51,6 +52,7 @@ def test_edit_correct_reorder_submit_and_result(
     assert abs(amount.bounding_box()["y"] - amount_y) < 3
     assert abs(page.evaluate("scrollY") - scroll) < 24
     capture(page, "editing")
+    page.get_by_role("button", name="Добавить операцию", exact=True).click()
     page.get_by_role("button", name="Перевод по карте", exact=True).click()
     page.wait_for_function("document.querySelectorAll('.operation-card').length === 2")
     saved(page)
@@ -87,7 +89,11 @@ def test_edit_correct_reorder_submit_and_result(
     organizer.get_by_role("button", name="Запустить скоринг", exact=True).click()
     organizer.get_by_role("button", name="Подтвердить", exact=True).click()
     page.get_by_text("Ваш результат", exact=False).first.wait_for(timeout=120000)
+    assert page.locator(".shap-table:visible").count() == 0
     capture(page, "result")
+    page.get_by_text("Что повлияло на оценку", exact=True).click()
+    page.locator(".shap-table:visible").first.wait_for()
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     page.reload()
     page.get_by_text("Ваш результат", exact=False).first.wait_for()
@@ -109,6 +115,7 @@ def test_registration_on_mobile(page, workshop):
 def test_saved_draft_reconnect_and_focus(participant):
     page = participant
     page.set_viewport_size({"width": 390, "height": 844})
+    page.get_by_role("button", name="Добавить операцию", exact=True).click()
     page.get_by_role("button", name="Входящий перевод", exact=True).click()
     amount = page.get_by_label("Сумма", exact=True)
     amount.fill("23456.78")
@@ -146,3 +153,12 @@ def test_organizer_small_screen(page, workshop):
     page.get_by_role("tab", name="Участники", exact=True).click()
     page.get_by_label("Поиск по имени или email", exact=True).wait_for()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+
+
+def test_empty_primary_action(participant):
+    page = participant
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.get_by_role("button", name="Добавить операцию", exact=True).is_visible()
+    assert not page.get_by_role(
+        "button", name="Отправить сценарий", exact=True
+    ).is_visible()

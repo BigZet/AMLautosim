@@ -162,6 +162,9 @@ class UIClient:
             title = ("Входящий перевод", "Перевод по карте", "Наличные", "Покупка")[
                 before % 4
             ]
+            opener = self.find(text="Добавить операцию", event="click")
+            if opener:
+                await self.emit(opener, "click")
             await self.emit(self.find(text=title, event="click"), "click")
             await self.wait(lambda: fields() > before)
             await self.wait(lambda: self.find(text="Сохранено"))
@@ -186,12 +189,23 @@ class UIClient:
 
     async def reorder(self):
         previous = self.update_count
-        found = next((k, e) for k, e in self.elements.items()
-                     if isinstance(e, dict) and e.get("props", {}).get("icon") == "arrow_upward"
-                     and not e.get("props", {}).get("disable", False))
+        found = next(
+            (k, e)
+            for k, e in self.elements.items()
+            if isinstance(e, dict)
+            and e.get("props", {}).get("icon") == "arrow_upward"
+            and not e.get("props", {}).get("disable", False)
+        )
         await self.emit(found, "click")
-        await self.wait(lambda: self.update_count > previous and
-                        (self.find(text="Есть несохранённые изменения") or self.find(text="Сохраняем…")))
+        await self.wait(
+            lambda: (
+                self.update_count > previous
+                and (
+                    self.find(text="Есть несохранённые изменения")
+                    or self.find(text="Сохраняем…")
+                )
+            )
+        )
         await self.wait(lambda: self.find(text="Сохранено"))
 
     async def close(self):
@@ -275,7 +289,13 @@ async def run(args):
         )
         prepared = await asyncio.gather(
             *(
-                measured("prepare", i, lambda u=u: u.prepare(max(0, args.steps - 1) if args.structural else args.steps))
+                measured(
+                    "prepare",
+                    i,
+                    lambda u=u: u.prepare(
+                        max(0, args.steps - 1) if args.structural else args.steps
+                    ),
+                )
                 if ready[i]
                 else asyncio.sleep(0, result=False)
                 for i, u in enumerate(users)
@@ -284,7 +304,9 @@ async def run(args):
         if args.structural:
             for i, user in enumerate(users):
                 if prepared[i]:
-                    prepared[i] = await measured("add", i, lambda u=user: u.prepare(args.steps))
+                    prepared[i] = await measured(
+                        "add", i, lambda u=user: u.prepare(args.steps)
+                    )
                     if args.steps > 1 and prepared[i]:
                         prepared[i] = await measured("reorder", i, user.reorder)
         deadline = time.monotonic() + args.seconds

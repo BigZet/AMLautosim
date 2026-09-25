@@ -419,6 +419,7 @@ body:has(.profile-workspace) .brand { color:#2354D6; font-size:19px; }
 button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .header-exit, .header-text-link, .participant-nav a, .q-btn { min-height:44px; min-width:44px; }
 .chain-workspace .operation-actions .operation-menu-button { width:auto; min-width:108px; height:44px; }
+.operation-picker-menu { padding:8px; width:min(440px,calc(100vw - 24px)); }
 .operation-menu { display:flex; flex-direction:column; padding:6px; max-width:calc(100vw - 24px); }
 .operation-menu .q-btn { justify-content:flex-start; min-height:44px; }
 .operation-menu .q-btn__content { justify-content:flex-start; }

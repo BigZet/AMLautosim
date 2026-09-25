@@ -4,7 +4,7 @@ The 390 px baseline places the save state and submission reason after eight
 cards (about 1800 px down the page). All six tested widths avoid horizontal
 overflow, but 33 visible buttons are smaller than the 44 px target. Secondary
 card commands are icon-only. Screenshots and `before-layout.json` preserve
-the observed baseline, using the T10 disposable image.
+the observed baseline, using the immutable T07 baseline image (the same initial visual layout).
 
 Use the same data and handlers at every width. At 320–700 px use one column:
 compact goal, save/error state and current primary action first; resource

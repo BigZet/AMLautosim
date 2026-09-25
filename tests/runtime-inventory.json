@@ -628,7 +628,8 @@
     "tests/unit/test_scenario_preparation.py::test_preparation_matches_frozen_outputs_and_preserves_inputs[v10-negative_amount-config16-steps16]",
     "tests/unit/test_scenario_preparation.py::test_preparation_matches_frozen_outputs_and_preserves_inputs[v10-overrides-config17-steps17]",
     "tests/unit/test_scenario_preparation.py::test_prepare_canonicalizes_each_contract_once[8]",
-    "tests/unit/test_scenario_preparation.py::test_prepare_canonicalizes_each_contract_once[10]"
+    "tests/unit/test_scenario_preparation.py::test_prepare_canonicalizes_each_contract_once[10]",
+    "tests/unit/test_game_classifier_release.py::test_game_explanation_is_collapsed_until_requested"
   ],
   "api": [
     "tests/api/test_all_operation_parameters.py::test_all_parameters_are_exposed_and_saved[salary]",
