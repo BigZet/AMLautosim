@@ -59,8 +59,7 @@ def test_probability_atomic_retry_storage_and_completed_reads(
         return original(*args, **kwargs)
 
     monkeypatch.setattr(probability_scorer, "score", fail_second)
-    error = request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=409)
-    assert error["code"] == "model_version_mismatch"
+    request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
     assert sql("SELECT * FROM scoring_results") == []
     assert [r["status"] for r in sql("SELECT status FROM scenarios")] == [
         "submitted",
@@ -118,5 +117,6 @@ def test_modified_pin_fails_atomically(
         "UPDATE rounds SET game_config=CAST(:config AS jsonb)",
         {"config": json.dumps(config)},
     )
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+    error = request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=409)
+    assert error["code"] == "model_version_mismatch"
     assert sql("SELECT * FROM scoring_results") == []
