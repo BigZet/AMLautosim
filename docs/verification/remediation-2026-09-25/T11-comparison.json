@@ -1,0 +1,77 @@
+{
+  "image": "sha256:3ddf7d91587f2567fb06a31afe74b33c18ccfc6f3871ce9a111db2ff527c147f",
+  "commit": "8ca3b45",
+  "seconds": 120,
+  "users": 60,
+  "pool_size": 5,
+  "overflow": 10,
+  "timeout": 5,
+  "runs": [
+    {
+      "workers": 1,
+      "failures": 0,
+      "api_pids": [
+        1
+      ],
+      "edit": {
+        "count": 1558,
+        "p95": 2.4994222999666817,
+        "max": 3.268795099982526
+      },
+      "canary": {
+        "count": 106,
+        "p95": 0.5503305000020191,
+        "max": 0.9650720999925397
+      },
+      "login": {
+        "count": 60,
+        "p95": 1.2733724999707192,
+        "max": 1.3530740999849513
+      },
+      "api": {
+        "rss_max": 210788352,
+        "loop_lag_max": 0.0920796190002875,
+        "inflight_max": 45
+      },
+      "ui": {
+        "rss_max": 190050304,
+        "loop_lag_max": 0.876275512000575,
+        "inflight_max": 71
+      }
+    },
+    {
+      "workers": 2,
+      "failures": 0,
+      "api_pids": [
+        8,
+        9
+      ],
+      "edit": {
+        "count": 1600,
+        "p95": 2.4150941999978386,
+        "max": 3.3729038999881595
+      },
+      "canary": {
+        "count": 104,
+        "p95": 0.5180547999916598,
+        "max": 1.0162917000125162
+      },
+      "login": {
+        "count": 60,
+        "p95": 0.712123499950394,
+        "max": 0.8077713000238873
+      },
+      "api": {
+        "rss_max": 206659584,
+        "loop_lag_max": 0.07743116399979044,
+        "inflight_max": 6
+      },
+      "ui": {
+        "rss_max": 191078400,
+        "loop_lag_max": 0.6679341750004824,
+        "inflight_max": 69
+      }
+    }
+  ],
+  "note": "Preliminary single comparison, not final repeated capacity gate. Both edit p95 exceed 1.5s; retain simplest 1-worker default pending final measurements."
+}
