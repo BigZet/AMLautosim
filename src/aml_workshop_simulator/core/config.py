@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "AML Workshop Simulator"
     GIT_SHA: str = Field(default="development", pattern=r"^(development|[0-9a-f]{40})$")
     IMAGE_REFERENCE: str = "local"
+    METRICS_TOKEN: SecretStr | None = None
     API_V1_STR: str = "/api/v1"
 
     EXPANDED_ROUNDS_ENABLED: bool = True

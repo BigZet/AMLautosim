@@ -17,6 +17,7 @@ class UISettings(BaseSettings):
     NICEGUI_STORAGE_SECRET: str | None = None
     NICEGUI_SESSION_COOKIE: str = Field(default="aml_ui", pattern=r"^[A-Za-z0-9_-]+$")
     COOKIE_SECURE: bool = False
+    METRICS_TOKEN: SecretStr | None = None
     AUTH_PAIR_PER_MINUTE: int = Field(default=10, gt=0)
     AUTH_IP_PER_MINUTE: int = Field(default=300, gt=0)
     AUTH_IP_BURST: int = Field(default=120, gt=0)

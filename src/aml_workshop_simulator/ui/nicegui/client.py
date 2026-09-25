@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
+import time
 
 import httpx
+from src.aml_workshop_simulator.core.observability import metrics
 
 SESSION_ERRORS = {
     "session_missing",
@@ -59,6 +61,8 @@ class APIClient:
             from src.aml_workshop_simulator.core.client_context import sign_context
             headers.update(sign_context(auth_client_ip, path.rsplit('/', 1)[-1],
                                         str((body or {}).get('email', '')), self.auth_context_secret))
+        started = time.monotonic()
+        metrics.add('ui_api_in_flight', 1)
         try:
             response = await self.http.request(
                 method,
@@ -74,6 +78,9 @@ class APIClient:
                 code="connection_error",
                 request_id=request_id,
             ) from exc
+        finally:
+            metrics.add('ui_api_in_flight', -1)
+            metrics.observe('ui_api_seconds', time.monotonic() - started)
         response_id = response.headers.get("X-Request-ID", request_id)
         if response.status_code == 204:
             return None

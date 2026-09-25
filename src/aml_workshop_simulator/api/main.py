@@ -1,9 +1,12 @@
 """FastAPI composition root."""
 
 import uuid
+import asyncio
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.routing import iter_route_contexts
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 
@@ -11,6 +14,7 @@ from src.aml_workshop_simulator.api import error_handlers
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
 from src.aml_workshop_simulator.core.errors import ApplicationError
+from src.aml_workshop_simulator.core.observability import metrics, correlation_id, request_log, sample_loop, stop_sampler, configure_logging
 from src.aml_workshop_simulator.db.session import async_engine
 from src.aml_workshop_simulator.schemas.catalog_config import (
     validate_configuration_files,
@@ -20,13 +24,16 @@ from src.aml_workshop_simulator.schemas.common import ErrorEnvelope
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_logging()
     validate_configuration_files()
     from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
 
     get_game_classifier()
+    sampler = asyncio.create_task(sample_loop())
     try:
         yield
     finally:
+        await stop_sampler(sampler)
         await async_engine.dispose()
 
 
@@ -62,18 +69,25 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):
-        candidate = request.headers.get("X-Request-ID", "")
-        request.state.request_id = (
-            candidate
-            if 0 < len(candidate) <= 128
-            and candidate.isascii()
-            and candidate.isprintable()
-            else str(uuid.uuid4())
-        )
-        response = await call_next(request)
-        response.headers["X-Request-ID"] = request.state.request_id
-        response.headers["Cache-Control"] = "no-store"
-        return response
+        request.state.request_id = str(uuid.uuid4())
+        client_id = correlation_id(request.headers.get("X-Request-ID", ""))
+        request.state.correlation_id = client_id
+        started = time.monotonic()
+        status = 500
+        metrics.add('http_in_flight', 1)
+        try:
+            response = await call_next(request)
+            status = response.status_code
+            response.headers["X-Request-ID"] = request.state.request_id
+            response.headers["Cache-Control"] = "no-store"
+            return response
+        finally:
+            duration = time.monotonic() - started
+            route = route_templates.get(request.scope.get('endpoint'), 'unmatched')
+            method = request.method if request.method in {'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'} else 'OTHER'
+            metrics.observe(f'http {method} {route} {status}', duration)
+            metrics.add('http_in_flight', -1)
+            request_log(request.state.request_id, client_id, route, status, duration)
 
     app.include_router(health.router, tags=["Health"])
     for prefix, router in (
@@ -84,6 +98,7 @@ def create_app() -> FastAPI:
         app.include_router(
             router, prefix=f"{settings.API_V1_STR}/{prefix}", tags=[prefix.title()]
         )
+    route_templates = {route.endpoint: route.path for route in iter_route_contexts(app.routes)}
     return app
 
 

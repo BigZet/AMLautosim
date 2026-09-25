@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 import secrets
+import asyncio
+from fastapi import Request
 from src.aml_workshop_simulator.core.ui_config import UISettings
 
 # NiceGUI reads its storage path at import time. Never store it in source folders.
@@ -21,6 +23,7 @@ from .client import SESSION_ERRORS, APIClient, APIError
 from .security_headers import install_security
 from .login_limiter import LoginLimiter
 from src.aml_workshop_simulator.core.client_context import forwarded_client
+from src.aml_workshop_simulator.core.observability import metrics, sample_loop, stop_sampler, require_metrics, configure_logging
 
 install_security(app, secure=ui_settings.COOKIE_SECURE)
 login_limiter = LoginLimiter(ui_settings.AUTH_PAIR_PER_MINUTE, ui_settings.AUTH_IP_PER_MINUTE, ui_settings.AUTH_IP_BURST)
@@ -30,6 +33,27 @@ api = APIClient(
     auth_context_secret=ui_settings.AUTH_CONTEXT_SECRET.get_secret_value() if ui_settings.AUTH_CONTEXT_SECRET else None,
 )
 app.on_shutdown(api.close)
+
+
+async def start_metrics():
+    from nicegui import Client
+    configure_logging()
+    app.state.metrics_sampler = asyncio.create_task(sample_loop(gauges=lambda: {
+        'ui_clients': len(Client.instances),
+        'ui_connected_clients': sum(client.has_socket_connection for client in list(Client.instances.values())),
+    }))
+
+
+async def stop_metrics():
+    task = getattr(app.state, 'metrics_sampler', None)
+    if task:
+        await stop_sampler(task)
+
+
+@app.get('/internal/metrics')
+async def internal_metrics(request: Request):
+    require_metrics(request, ui_settings.METRICS_TOKEN)
+    return metrics.snapshot()
 
 
 @ui.page("/")
@@ -405,6 +429,8 @@ def storage_secret():
 
 
 if __name__ == "__main__":
+    app.on_startup(start_metrics)
+    app.on_shutdown(stop_metrics)
     ui.run(
         host=ui_settings.UI_HOST,
         port=ui_settings.UI_PORT,
@@ -413,6 +439,7 @@ if __name__ == "__main__":
         reload=False,
         show=False,
         proxy_headers=False,
+        access_log=False,
         storage_secret=storage_secret(),
         session_middleware_kwargs={
             "session_cookie": ui_settings.NICEGUI_SESSION_COOKIE,

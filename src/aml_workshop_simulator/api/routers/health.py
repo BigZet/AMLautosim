@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, Request, status
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +15,19 @@ from src.aml_workshop_simulator.domain.scoring import (
 )
 from src.aml_workshop_simulator.schemas.health import LiveOut, ReadyOut
 
+from src.aml_workshop_simulator.core.observability import metrics, require_metrics, readiness_failure
+
 router = APIRouter()
+
+
+@router.get('/internal/metrics', include_in_schema=False)
+async def internal_metrics(request: Request):
+    from src.aml_workshop_simulator.db.session import pool_metrics
+    require_metrics(request, settings.METRICS_TOKEN)
+    for key, value in pool_metrics().items():
+        metrics.gauge(key, value)
+    return metrics.snapshot()
+
 
 MIGRATIONS_DIR = Path(__file__).resolve().parents[4] / "migrations" / "versions"
 
@@ -39,6 +51,7 @@ async def health_live() -> dict[str, str]:
     responses={503: {"model": ReadyOut, "description": "Сервис не готов"}},
 )
 async def health_ready(
+    request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
@@ -47,7 +60,8 @@ async def health_ready(
 
     try:
         scorer = get_game_classifier()
-    except Conflict:
+    except Conflict as exc:
+        readiness_failure(request.state.request_id, "model", exc)
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         return {
             "status": "not_ready",
@@ -64,7 +78,8 @@ async def health_ready(
         # соединение с Postgres вообще устанавливается и СУБД отвечает.
         await db.execute(text("SELECT 1"))
         checks["database"] = "connected"
-    except Exception:
+    except Exception as exc:
+        readiness_failure(request.state.request_id, "database", exc)
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         return {"status": "not_ready", "checks": {"database": "unavailable"}}
 
@@ -75,7 +90,8 @@ async def health_ready(
                 await db.execute(text("SELECT version_num FROM alembic_version"))
             ).all()
         }
-    except Exception:
+    except Exception as exc:
+        readiness_failure(request.state.request_id, "migrations", exc)
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         checks["migrations"] = "alembic_version missing"
         return {"status": "not_ready", "checks": checks}
@@ -95,7 +111,8 @@ async def health_ready(
             required = get_round_scorer(config)
             required.check_config(config, require_pin=True)
             checks["round_model"] = {"status": "available"}
-    except Exception:
+    except Exception as exc:
+        readiness_failure(request.state.request_id, "round_model", exc)
         # Package paths, database details and exception text are not public health data.
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         checks["round_model"] = {"status": "unavailable"}
