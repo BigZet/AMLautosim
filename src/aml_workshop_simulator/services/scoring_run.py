@@ -15,7 +15,7 @@ from src.aml_workshop_simulator.domain.contract_versions import (
 )
 from src.aml_workshop_simulator.domain.lifecycle import require_round_status
 from src.aml_workshop_simulator.schemas.admin import RoundAdminOut, ScoringSummaryOut
-from src.aml_workshop_simulator.services.audit import record_event
+from src.aml_workshop_simulator.services.audit import preserve_game_references, record_event
 from src.aml_workshop_simulator.services.round_configuration import round_out
 from src.aml_workshop_simulator.services.scoring_service import score_round
 
@@ -42,6 +42,7 @@ async def close_admission(
     if row.status == "active":
         row.status = "closed"
         row.closed_at = datetime.now(UTC)
+        await preserve_game_references(db, round_id, editing_only=True)
         await db.execute(
             delete(Scenario).where(
                 Scenario.round_id == round_id, Scenario.status == "editing"
@@ -83,25 +84,26 @@ async def run(
         async with db.begin_nested():
             await score_round(db, row, actor_id, request_id)
     except Exception as exc:
-        logger.exception(
-            "Scoring failed: round_id=%s request_id=%s", round_id, request_id
+        if not isinstance(exc, ApplicationError):
+            logger.exception("Scoring failed: round_id=%s request_id=%s", round_id, request_id)
+        error = exc if isinstance(exc, ApplicationError) else ApplicationError(
+            "Ошибка скоринга. Приём сценариев закрыт; организатор может повторить расчёт.",
+            code="scoring_failed", status_code=500,
         )
         row = await get_round(db, round_id, lock="update")
         row.status = "closed"
-        row.scoring_error = {"code": "scoring_failed", "request_id": request_id}
+        row.scoring_error = {"code": error.code, "message": error.message, "request_id": request_id}
         await record_event(
             db,
             actor_user_id=actor_id,
             round_id=round_id,
             event_type="scoring_failed",
             request_id=request_id,
-            metadata={"error_type": type(exc).__name__},
+            metadata={"error_type": type(exc).__name__, **row.scoring_error},
         )
         await db.commit()
-        raise ApplicationError(
-            "Ошибка скоринга. Приём сценариев закрыт; организатор может повторить расчёт.",
-            code="scoring_failed",
-            status_code=500,
-        ) from exc
+        if error is exc:
+            raise
+        raise error from exc
     await db.commit()
     return _summary(row)

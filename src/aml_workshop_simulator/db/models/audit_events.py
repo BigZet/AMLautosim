@@ -15,10 +15,10 @@ class AuditEvent(Base):
         BigIntVariant, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     round_id: Mapped[int | None] = mapped_column(
-        BigIntVariant, ForeignKey("rounds.id"), nullable=True
+        BigIntVariant, ForeignKey("rounds.id", ondelete="SET NULL"), nullable=True
     )
     scenario_id: Mapped[int | None] = mapped_column(
-        BigIntVariant, ForeignKey("scenarios.id"), nullable=True
+        BigIntVariant, ForeignKey("scenarios.id", ondelete="SET NULL"), nullable=True
     )
     event_type: Mapped[str] = mapped_column(String)
     target_type: Mapped[str | None] = mapped_column(String, nullable=True)

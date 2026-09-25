@@ -66,7 +66,14 @@ Purchase counts use the effective card override, versions are restricted to
 8/10 before loading config or acquiring restart locks. All 25 full model
 replays remained identical after the controlled source compatibility release.
 
-T05–T15, final independent review, browser/device checks and final measured
+T05: three regressions reproduced before changes. Main suite 35 passed; final
+audit/migration/restart/UI-auth suite 13 passed. Migration upgrades a populated
+old schema without changing audit rows. Failed restart rolls back ID metadata;
+cutoff preserves audit of discarded drafts. Account access works without a
+round and keeps legacy-route compatibility. Expected scoring errors retain
+their code/message/request ID while partial results roll back.
+
+T06–T15, final independent review, browser/device checks and final measured
 load/soak gates remain outstanding. The PR must remain draft until required
 acceptance is satisfied. Production probes and real-device results must never
 be inferred from local emulation.

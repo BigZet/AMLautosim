@@ -56,10 +56,8 @@ def test_state_response_matches_typed_contract(request_api, player):
 
 
 def test_migration_and_seed_are_current_and_idempotent(api, sql):
-    assert (
-        sql("SELECT version_num FROM alembic_version")[0]["version_num"]
-        == "0001_current_schema"
-    )
+    from src.aml_workshop_simulator.api.routers.health import _expected_heads
+    assert {row["version_num"] for row in sql("SELECT version_num FROM alembic_version")} == _expected_heads()
     before = sql("SELECT id, game_config FROM rounds")
     api.portal.call(seed)
     assert sql("SELECT id, game_config FROM rounds") == before
@@ -82,6 +80,7 @@ def test_migration_and_seed_are_current_and_idempotent(api, sql):
 
 
 def test_health_and_schema_readiness(api, sql):
+    previous = sql("SELECT version_num FROM alembic_version")[0]["version_num"]
     assert api.get("/health/live").json()["status"] == "ok"
     assert api.get("/health/ready").json()["status"] == "ready"
     try:
@@ -90,4 +89,4 @@ def test_health_and_schema_readiness(api, sql):
         assert response.status_code == 503 and response.json()["status"] == "not_ready"
         assert api.get("/health/live").json()["status"] == "ok"
     finally:
-        sql("UPDATE alembic_version SET version_num='0001_current_schema'")
+        sql("UPDATE alembic_version SET version_num=:version", {"version": previous})

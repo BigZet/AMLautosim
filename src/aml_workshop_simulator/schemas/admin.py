@@ -104,6 +104,14 @@ class AccessUpdateIn(BaseModel):
     expected_access_revision: int = Field(ge=0)
 
 
+class ParticipantAccessOut(BaseModel):
+    id: int
+    email: str
+    display_name: str
+    is_blocked: bool
+    access_revision: int
+
+
 class AuditEventOut(BaseModel):
     id: int
     actor_user_id: int | None = None

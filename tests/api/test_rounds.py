@@ -72,7 +72,7 @@ def test_restart_clears_game_preserves_accounts(
     assert sql("SELECT count(*) AS n FROM scenarios")[0]["n"] == 0
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 0
     assert {r["round_id"] for r in sql("SELECT round_id FROM audit_events")} == {
-        fresh["id"]
+        None, fresh["id"]
     }
 
 

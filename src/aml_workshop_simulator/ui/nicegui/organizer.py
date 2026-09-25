@@ -601,7 +601,7 @@ class OrganizerScreen:
         async def work():
             await self.request(
                 "PUT",
-                f"admin/rounds/{round_id}/participants/{person['id']}/access",
+                f"admin/participants/{person['id']}/access",
                 {
                     "blocked": not person["is_blocked"],
                     "reason": reason,

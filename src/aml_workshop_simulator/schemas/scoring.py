@@ -228,3 +228,4 @@ class ScoringCountsOut(BaseModel):
 class ScoringErrorOut(BaseModel):
     code: str
     request_id: str | None
+    message: str | None = None

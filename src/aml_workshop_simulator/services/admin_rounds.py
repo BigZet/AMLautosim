@@ -2,13 +2,12 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict
 from src.aml_workshop_simulator.services.game_classifier import game_config
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
@@ -27,7 +26,7 @@ from src.aml_workshop_simulator.schemas.round_config import (
     parse_game_config,
     RoundConfigInput,
 )
-from src.aml_workshop_simulator.services.audit import record_event
+from src.aml_workshop_simulator.services.audit import preserve_game_references, record_event
 from src.aml_workshop_simulator.services.configuration import freeze_game_config
 from src.aml_workshop_simulator.services.round_configuration import (
     config_version,
@@ -195,9 +194,12 @@ async def restart(
     )
     config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.
-    await db.execute(delete(AuditEvent))
-    await db.execute(delete(ScoringResult))
-    await db.execute(delete(Scenario))
+    scenario_ids = select(Scenario.id).where(Scenario.round_id == round_id)
+    deleted_scenarios = await db.scalar(select(func.count()).select_from(Scenario).where(Scenario.round_id == round_id))
+    deleted_results = await db.scalar(select(func.count()).select_from(ScoringResult).where(ScoringResult.scenario_id.in_(scenario_ids)))
+    await preserve_game_references(db, round_id)
+    await db.execute(delete(ScoringResult).where(ScoringResult.scenario_id.in_(scenario_ids)))
+    await db.execute(delete(Scenario).where(Scenario.round_id == round_id))
     await db.delete(row)
     await db.flush()
     fresh = Round(
@@ -214,8 +216,10 @@ async def restart(
         db,
         actor_user_id=actor_id,
         round_id=fresh.id,
-        event_type="round_created",
+        event_type="round_restarted",
         request_id=request_id,
+        metadata={"previous_round_id": round_id, "new_round_id": fresh.id,
+                  "deleted_scenarios": deleted_scenarios, "deleted_results": deleted_results},
     )
     await db.commit()
     return round_out(fresh)

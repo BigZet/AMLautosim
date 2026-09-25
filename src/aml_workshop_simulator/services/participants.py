@@ -40,8 +40,10 @@ def _summary(user, scenario=None, score=None) -> PlayerSummaryOut:
 
 
 async def player_summary(
-    db: AsyncSession, round_id: int, user: User
+    db: AsyncSession, round_id: int | None, user: User
 ) -> PlayerSummaryOut:
+    if round_id is None:
+        return _summary(user)
     record = (
         await db.execute(
             select(Scenario, ScoringResult)
@@ -114,14 +116,15 @@ async def detail(
 
 async def update_participant_access(
     *,
-    round_id: int,
+    round_id: int | None = None,
     participant_id: int,
     payload: AccessUpdateIn,
     request_id: str | None,
     principal: CurrentPrincipal,
     db: AsyncSession,
 ) -> PlayerSummaryOut:
-    await get_round(db, round_id, lock="share")
+    if round_id is not None:
+        await get_round(db, round_id, lock="share")
     if participant_id == principal.user_id:
         raise Forbidden(
             "Администратор не может заблокировать сам себя.", code="forbidden"
