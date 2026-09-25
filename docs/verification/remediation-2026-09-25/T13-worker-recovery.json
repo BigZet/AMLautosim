@@ -1,0 +1,1524 @@
+{
+  "image_id": "sha256:fc78241b2dcb14779f5173e5c103538d3f129628bbb0310aac93d99b8ce4e87d",
+  "fixture_sha256": "e04cda90b26eecc2e506ad127159b500b714d98c480ceb7eadd60ba1653e611f",
+  "fixture_setup": "direct disposable DB insert; real API enqueue, worker, publication",
+  "runs": [
+    {
+      "count": 60,
+      "seconds_including_queue_and_recovery": 23.640318800054956,
+      "worker_killed": false,
+      "summary": {
+        "round_id": 2,
+        "status": "completed",
+        "submitted_count": 60,
+        "scored_count": 60,
+        "duration_ms": 12996,
+        "scoring_version": "aml-game:sha256:dc7cd80e39e2cdf97ac67cbace1befd26eda1057cad1af52a2b67e61da6f6294",
+        "leaderboard_version": "leaderboard-aml-probability-v1",
+        "completed_at": "2026-09-25T04:37:01.766920Z"
+      },
+      "attempt": 1,
+      "results": 60,
+      "unique_results": 60,
+      "samples": [
+        {
+          "seconds": 6.501874700014014,
+          "state": "queued",
+          "done": 0,
+          "total": 60,
+          "attempt": 0
+        },
+        {
+          "seconds": 7.025130100024398,
+          "state": "queued",
+          "done": 0,
+          "total": 60,
+          "attempt": 0
+        },
+        {
+          "seconds": 7.536286300048232,
+          "state": "queued",
+          "done": 0,
+          "total": 60,
+          "attempt": 0
+        },
+        {
+          "seconds": 8.048833600012586,
+          "state": "queued",
+          "done": 0,
+          "total": 60,
+          "attempt": 0
+        },
+        {
+          "seconds": 8.557726700033527,
+          "state": "running",
+          "done": 0,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 9.06898620002903,
+          "state": "running",
+          "done": 0,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 9.593687100044917,
+          "state": "running",
+          "done": 0,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 10.105780900048558,
+          "state": "running",
+          "done": 4,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 10.619098600000143,
+          "state": "running",
+          "done": 8,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 11.136157400032971,
+          "state": "running",
+          "done": 10,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 11.645021700009238,
+          "state": "running",
+          "done": 12,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 12.1559724000399,
+          "state": "running",
+          "done": 16,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 12.665920400002506,
+          "state": "running",
+          "done": 18,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 13.17844150000019,
+          "state": "running",
+          "done": 22,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 13.690494000038598,
+          "state": "running",
+          "done": 24,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 14.203612600045744,
+          "state": "running",
+          "done": 26,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 14.726983800006565,
+          "state": "running",
+          "done": 28,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 15.236600200005341,
+          "state": "running",
+          "done": 32,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 15.74710670002969,
+          "state": "running",
+          "done": 34,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 16.258611700031906,
+          "state": "running",
+          "done": 38,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 16.767340500024147,
+          "state": "running",
+          "done": 40,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 17.275700199999847,
+          "state": "running",
+          "done": 44,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 17.788025500020012,
+          "state": "running",
+          "done": 46,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 18.305963500053622,
+          "state": "running",
+          "done": 48,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 18.838887900055852,
+          "state": "running",
+          "done": 50,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 19.352673600020353,
+          "state": "running",
+          "done": 52,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 19.86677060002694,
+          "state": "running",
+          "done": 54,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 20.382435900042765,
+          "state": "running",
+          "done": 56,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 20.932266200019512,
+          "state": "running",
+          "done": 58,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 21.460086700040847,
+          "state": "running",
+          "done": 60,
+          "total": 60,
+          "attempt": 1
+        },
+        {
+          "seconds": 22.102962400007527,
+          "state": "completed",
+          "done": 60,
+          "total": 60,
+          "attempt": 1
+        }
+      ]
+    },
+    {
+      "count": 300,
+      "seconds_including_queue_and_recovery": 108.61211809999077,
+      "worker_killed": true,
+      "summary": {
+        "round_id": 3,
+        "status": "completed",
+        "submitted_count": 300,
+        "scored_count": 300,
+        "duration_ms": 59229,
+        "scoring_version": "aml-game:sha256:dc7cd80e39e2cdf97ac67cbace1befd26eda1057cad1af52a2b67e61da6f6294",
+        "leaderboard_version": "leaderboard-aml-probability-v1",
+        "completed_at": "2026-09-25T04:38:57.280746Z"
+      },
+      "attempt": 2,
+      "results": 300,
+      "unique_results": 300,
+      "samples": [
+        {
+          "seconds": 7.5430611000047065,
+          "state": "queued",
+          "done": 0,
+          "total": 300,
+          "attempt": 0
+        },
+        {
+          "seconds": 8.051437099988107,
+          "state": "queued",
+          "done": 0,
+          "total": 300,
+          "attempt": 0
+        },
+        {
+          "seconds": 8.562781199987512,
+          "state": "queued",
+          "done": 0,
+          "total": 300,
+          "attempt": 0
+        },
+        {
+          "seconds": 9.070237300009467,
+          "state": "queued",
+          "done": 0,
+          "total": 300,
+          "attempt": 0
+        },
+        {
+          "seconds": 9.585771600017324,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 10.10004360001767,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 10.620679699990433,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 11.133618899970315,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 11.649572799971793,
+          "state": "running",
+          "done": 2,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 12.165480599971488,
+          "state": "running",
+          "done": 6,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 12.73501549998764,
+          "state": "running",
+          "done": 6,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 13.290905300003942,
+          "state": "running",
+          "done": 8,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 13.812135300016962,
+          "state": "running",
+          "done": 10,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 14.325225699984003,
+          "state": "running",
+          "done": 12,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 14.83476369996788,
+          "state": "running",
+          "done": 14,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 15.34530350001296,
+          "state": "running",
+          "done": 16,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 15.86002829996869,
+          "state": "running",
+          "done": 18,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 16.369896600022912,
+          "state": "running",
+          "done": 20,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 25.217708899988793,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 25.73049509996781,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 26.24030910001602,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 26.749776499986183,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 27.259368999977596,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 27.766859599971212,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 28.276068900013342,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 28.787406100018416,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 29.30002710002009,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 29.808392699982505,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 30.31684059998952,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 30.82413630001247,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 31.331952399981674,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 31.842392400023527,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 32.35128729999997,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 32.86009999999078,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 33.370679199986625,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 33.87941709998995,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 34.39755049999803,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 34.90673970000353,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 35.42054159997497,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 35.92961459996877,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 36.44092359999195,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 36.94930380000733,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 37.457167399988975,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 37.96428299997933,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 38.470964599982835,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 38.980221099976916,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 39.49023330002092,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 39.999687500006985,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 40.508797299989965,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 41.01703320001252,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 41.53226569999242,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 42.04257799999323,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 42.55140779999783,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 43.060016400006134,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 43.56808120000642,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 44.079032099980395,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 44.588264899968635,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 45.10058630001731,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 45.61131850001402,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 46.12009219999891,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 46.69242440001108,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 1
+        },
+        {
+          "seconds": 47.21672089997446,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 47.7254016000079,
+          "state": "running",
+          "done": 0,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 48.23348709999118,
+          "state": "running",
+          "done": 2,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 48.74144820001675,
+          "state": "running",
+          "done": 4,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 49.255693799990695,
+          "state": "running",
+          "done": 8,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 49.767009100003634,
+          "state": "running",
+          "done": 10,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 50.27469749999,
+          "state": "running",
+          "done": 14,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 50.784071400004905,
+          "state": "running",
+          "done": 18,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 51.30062559997896,
+          "state": "running",
+          "done": 20,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 51.82049150002422,
+          "state": "running",
+          "done": 22,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 52.33092639996903,
+          "state": "running",
+          "done": 24,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 52.83704969997052,
+          "state": "running",
+          "done": 28,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 53.35733789997175,
+          "state": "running",
+          "done": 30,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 53.867862300015986,
+          "state": "running",
+          "done": 32,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 54.38037339999573,
+          "state": "running",
+          "done": 34,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 54.89358239999274,
+          "state": "running",
+          "done": 36,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 55.402015800005756,
+          "state": "running",
+          "done": 38,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 55.914235099975485,
+          "state": "running",
+          "done": 42,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 56.43153679999523,
+          "state": "running",
+          "done": 42,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 56.944238999974914,
+          "state": "running",
+          "done": 44,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 57.46838189999107,
+          "state": "running",
+          "done": 46,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 57.98459509998793,
+          "state": "running",
+          "done": 48,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 58.493904799979646,
+          "state": "running",
+          "done": 50,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 59.002349800022785,
+          "state": "running",
+          "done": 54,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 59.512968399969395,
+          "state": "running",
+          "done": 56,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 60.02232609997736,
+          "state": "running",
+          "done": 60,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 60.53281880001305,
+          "state": "running",
+          "done": 62,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 61.04303850000724,
+          "state": "running",
+          "done": 66,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 61.55212200002279,
+          "state": "running",
+          "done": 68,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 62.069581700023264,
+          "state": "running",
+          "done": 70,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 62.60170689999359,
+          "state": "running",
+          "done": 72,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 63.11025740002515,
+          "state": "running",
+          "done": 74,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 63.61732750001829,
+          "state": "running",
+          "done": 78,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 64.12553010002011,
+          "state": "running",
+          "done": 81,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 64.63414139999077,
+          "state": "running",
+          "done": 84,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 65.17838579998352,
+          "state": "running",
+          "done": 87,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 65.68751399999019,
+          "state": "running",
+          "done": 90,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 66.20212689996697,
+          "state": "running",
+          "done": 92,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 66.71263259998523,
+          "state": "running",
+          "done": 96,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 67.22247390000848,
+          "state": "running",
+          "done": 98,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 67.73647900001379,
+          "state": "running",
+          "done": 100,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 68.25654610001948,
+          "state": "running",
+          "done": 102,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 68.76909259997774,
+          "state": "running",
+          "done": 104,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 69.27669869997771,
+          "state": "running",
+          "done": 108,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 69.78398090001428,
+          "state": "running",
+          "done": 110,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 70.30229909997433,
+          "state": "running",
+          "done": 114,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 70.8117603000137,
+          "state": "running",
+          "done": 116,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 71.32304200000362,
+          "state": "running",
+          "done": 118,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 71.83186029997887,
+          "state": "running",
+          "done": 122,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 72.33924329996808,
+          "state": "running",
+          "done": 126,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 72.8482049999875,
+          "state": "running",
+          "done": 128,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 73.36072459997376,
+          "state": "running",
+          "done": 130,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 73.87377609999385,
+          "state": "running",
+          "done": 132,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 74.38458509999327,
+          "state": "running",
+          "done": 134,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 74.89475320000201,
+          "state": "running",
+          "done": 138,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 75.43070329999318,
+          "state": "running",
+          "done": 140,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 75.9425272999797,
+          "state": "running",
+          "done": 142,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 76.45063029997982,
+          "state": "running",
+          "done": 146,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 76.96361470001284,
+          "state": "running",
+          "done": 148,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 77.47313609998673,
+          "state": "running",
+          "done": 152,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 77.9900384999928,
+          "state": "running",
+          "done": 154,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 78.49954079999588,
+          "state": "running",
+          "done": 156,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 79.01164839998819,
+          "state": "running",
+          "done": 160,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 79.52054240001598,
+          "state": "running",
+          "done": 162,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 80.03268559998833,
+          "state": "running",
+          "done": 164,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 80.54790840001078,
+          "state": "running",
+          "done": 166,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 81.05769619997591,
+          "state": "running",
+          "done": 170,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 81.5679805999971,
+          "state": "running",
+          "done": 172,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 82.08377450000262,
+          "state": "running",
+          "done": 174,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 82.59900280000875,
+          "state": "running",
+          "done": 176,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 83.1343967000139,
+          "state": "running",
+          "done": 180,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 83.64854620001279,
+          "state": "running",
+          "done": 182,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 84.17334159999155,
+          "state": "running",
+          "done": 183,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 84.68770339997718,
+          "state": "running",
+          "done": 186,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 85.1991603000206,
+          "state": "running",
+          "done": 188,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 85.73148259997834,
+          "state": "running",
+          "done": 188,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 86.24011670000618,
+          "state": "running",
+          "done": 192,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 86.75080019998131,
+          "state": "running",
+          "done": 194,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 87.26224740000907,
+          "state": "running",
+          "done": 196,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 87.7727541999775,
+          "state": "running",
+          "done": 198,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 88.28481530002318,
+          "state": "running",
+          "done": 202,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 88.80056930001592,
+          "state": "running",
+          "done": 204,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 89.31203500000993,
+          "state": "running",
+          "done": 206,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 89.823553299997,
+          "state": "running",
+          "done": 208,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 90.33266269997694,
+          "state": "running",
+          "done": 210,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 90.84261839999817,
+          "state": "running",
+          "done": 214,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 91.35057140002027,
+          "state": "running",
+          "done": 216,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 91.8610588000156,
+          "state": "running",
+          "done": 220,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 92.36889749998227,
+          "state": "running",
+          "done": 222,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 92.87632729997858,
+          "state": "running",
+          "done": 226,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 93.38529379997635,
+          "state": "running",
+          "done": 230,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 93.89936229999876,
+          "state": "running",
+          "done": 232,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 94.40718209999613,
+          "state": "running",
+          "done": 236,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 94.91811759996926,
+          "state": "running",
+          "done": 238,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 95.42665609996766,
+          "state": "running",
+          "done": 242,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 95.96004039997933,
+          "state": "running",
+          "done": 244,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 96.47099800000433,
+          "state": "running",
+          "done": 246,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 96.98146779998206,
+          "state": "running",
+          "done": 250,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 97.49134840001352,
+          "state": "running",
+          "done": 252,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 98.00216229999205,
+          "state": "running",
+          "done": 254,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 98.53939629998058,
+          "state": "running",
+          "done": 256,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 99.05381680000573,
+          "state": "running",
+          "done": 258,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 99.56565230002161,
+          "state": "running",
+          "done": 262,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 100.07338399998844,
+          "state": "running",
+          "done": 264,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 100.58412169996882,
+          "state": "running",
+          "done": 268,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 101.09116910002194,
+          "state": "running",
+          "done": 270,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 101.60084239998832,
+          "state": "running",
+          "done": 274,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 102.10865549999289,
+          "state": "running",
+          "done": 276,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 102.6196053000167,
+          "state": "running",
+          "done": 280,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 103.12547119997907,
+          "state": "running",
+          "done": 282,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 103.64432929997565,
+          "state": "running",
+          "done": 286,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 104.1646246999735,
+          "state": "running",
+          "done": 288,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 104.67219910002314,
+          "state": "running",
+          "done": 292,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 105.18123729998479,
+          "state": "running",
+          "done": 294,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 105.68776409997372,
+          "state": "running",
+          "done": 296,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 106.19749749999028,
+          "state": "running",
+          "done": 300,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 106.70521139999619,
+          "state": "running",
+          "done": 300,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 107.21772999997484,
+          "state": "running",
+          "done": 300,
+          "total": 300,
+          "attempt": 2
+        },
+        {
+          "seconds": 107.72840429999633,
+          "state": "completed",
+          "done": 300,
+          "total": 300,
+          "attempt": 2
+        }
+      ]
+    }
+  ]
+}

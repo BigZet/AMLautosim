@@ -8,7 +8,7 @@ def saved(page):
     page.get_by_text("Сохранено", exact=True).wait_for()
 
 
-@pytest.mark.parametrize("width", [390, 1280])
+@pytest.mark.parametrize("width", [320, 360, 390, 430, 768, 1280])
 def test_edit_correct_reorder_submit_and_result(
     scoring_participant, admin_api, workshop, width, capture
 ):
@@ -93,7 +93,6 @@ def test_edit_correct_reorder_submit_and_result(
     capture(page, "result")
     page.get_by_text("Что повлияло на оценку", exact=True).click()
     page.locator(".shap-table:visible").first.wait_for()
-    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     page.reload()
     page.get_by_text("Ваш результат", exact=False).first.wait_for()

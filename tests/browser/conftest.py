@@ -16,6 +16,9 @@ def capture(request):
         directory = os.environ.get("BROWSER_EVIDENCE_DIR")
         if directory:
             destination = Path(directory)
+            channel = request.config.getoption("--browser-channel")
+            if channel:
+                destination = destination / channel
             destination.mkdir(parents=True, exist_ok=True)
             name = re.sub(r"[^a-zA-Z0-9_-]", "-", request.node.name)
             page.screenshot(

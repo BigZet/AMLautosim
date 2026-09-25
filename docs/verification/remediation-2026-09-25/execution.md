@@ -269,3 +269,23 @@ This differs from the older review's approximately250; it does not establish
 that all possible test accounts are absent. No accounts were deleted. Exact
 inventory stays private; the report includes its checksum and linked-record
 aggregate counts. Prefix matching alone never authorizes deletion.
+
+### T13 and expanded browser checkpoint
+
+On immutable6d0b2c3 image sha256:fc78241b2dcb14779f5173e5c103538d3f129628bbb0310aac93d99b8ce4e87d,
+60scenarios took12.996s calculation;300 took59.229s after a real worker SIGKILL
+and lease recovery,108.612s including queue/recovery. Same job attempt2,
+300unique results, no partial results before restart. Both initial queued jobs
+survived a stopped worker. Full progress samples accompanyT13-worker-recovery.json.
+These are disposable calculation fixtures, not registration throughput evidence.
+
+Expanded browser matrix covers complete edit/correct/reorder/submit/result flows
+at320/360/390/430/768/1280px across Chromium/Firefox/WebKit:48passed481.45s
+on that same image. Existing Chromium screenshots were recaptured in actual
+Chromium after identifying that native Edge had overwritten same-named files;
+channel captures now have separate directories. Native/device limits remain.
+
+Initial complete API run:236passed,15failed990.51s. Failures identify old test
+models/fault injection bypassing the new per-thread instances, four wrapper
+modules missing their consumer fixture, and expected schema lackingscoring_jobs.
+Targeted corrected fault-injection/model tests11passed201.16s; final suite pending.
