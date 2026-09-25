@@ -1,7 +1,6 @@
 {
   "version": 1,
   "modules": {
-    "tests/api/test_audit_regressions.py": "runtime",
     "tests/unit/test_aml_backend_dispatch.py": "runtime",
     "tests/unit/test_aml_chain_control.py": "research",
     "tests/unit/test_aml_chain_dataset.py": "research",
