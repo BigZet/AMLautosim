@@ -19,11 +19,15 @@ from starlette.responses import RedirectResponse
 from . import auth, theme
 from .client import SESSION_ERRORS, APIClient, APIError
 from .security_headers import install_security
+from .login_limiter import LoginLimiter
+from src.aml_workshop_simulator.core.client_context import forwarded_client
 
 install_security(app, secure=ui_settings.COOKIE_SECURE)
+login_limiter = LoginLimiter(ui_settings.AUTH_PAIR_PER_MINUTE, ui_settings.AUTH_IP_PER_MINUTE, ui_settings.AUTH_IP_BURST)
 
 api = APIClient(
-    str(ui_settings.API_URL).rstrip("/") + "/api/v1"
+    str(ui_settings.API_URL).rstrip("/") + "/api/v1",
+    auth_context_secret=ui_settings.AUTH_CONTEXT_SECRET.get_secret_value() if ui_settings.AUTH_CONTEXT_SECRET else None,
 )
 app.on_shutdown(api.close)
 
@@ -64,6 +68,10 @@ async def auth_page(audience="play", register=False):
         return RedirectResponse("/" + audience)
     theme.setup()
     storage = app.storage.user
+    request = ui.context.client.request
+    peer = request.client.host if request and request.client else 'unknown'
+    client_ip = forwarded_client(peer, request.headers.get('x-forwarded-for') if request else None,
+                                 ui_settings.TRUSTED_PROXY_CIDRS)
     owns_page = page_owner(storage, audience)
     form = theme.auth_layout(audience)
     busy = False
@@ -165,9 +173,13 @@ async def auth_page(audience="play", register=False):
             for field in fields.values():
                 field.disable()
             try:
+                retry = login_limiter.check(client_ip, email)
+                if retry:
+                    raise APIError("Слишком много попыток входа. Повторите позже.",
+                                   code="login_temporarily_locked", status=429, retry_after=retry)
                 if register:
                     await api.request(
-                        "POST", "auth/register", body=payload.model_dump()
+                        "POST", "auth/register", body=payload.model_dump(), auth_client_ip=client_ip,
                     )
                     # A failed login must not repeat registration on the next click.
                     register = False
@@ -176,7 +188,7 @@ async def auth_page(audience="play", register=False):
                     button.set_text("Войти")
                     fields["display_name"].set_visibility(False)
                     fields["confirmation"].set_visibility(False)
-                if await auth.login(api, storage, audience, email, password):
+                if await auth.login(api, storage, audience, email, password, client_ip=client_ip):
                     fields["password"].set_value("")
                     if "confirmation" in fields:
                         fields["confirmation"].set_value("")
@@ -400,6 +412,7 @@ if __name__ == "__main__":
         language="ru",
         reload=False,
         show=False,
+        proxy_headers=False,
         storage_secret=storage_secret(),
         session_middleware_kwargs={
             "session_cookie": ui_settings.NICEGUI_SESSION_COOKIE,

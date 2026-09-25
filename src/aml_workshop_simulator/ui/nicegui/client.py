@@ -28,7 +28,8 @@ class APIError(Exception):
 
 
 class APIClient:
-    def __init__(self, base_url: str, *, transport=None):
+    def __init__(self, base_url: str, *, transport=None, auth_context_secret=None):
+        self.auth_context_secret = auth_context_secret
         self.http = httpx.AsyncClient(
             base_url=base_url.rstrip("/") + "/",
             transport=transport,
@@ -48,11 +49,16 @@ class APIClient:
         body: dict | None = None,
         params: dict | None = None,
         timeout: float = 15,
+        auth_client_ip: str | None = None,
     ) -> Any:
         request_id = str(uuid4())
         headers = {"X-Request-ID": request_id}
         if session_id:
             headers["X-Session-ID"] = session_id
+        if auth_client_ip and self.auth_context_secret and path.strip('/') in ('auth/login', 'auth/register'):
+            from src.aml_workshop_simulator.core.client_context import sign_context
+            headers.update(sign_context(auth_client_ip, path.rsplit('/', 1)[-1],
+                                        str((body or {}).get('email', '')), self.auth_context_secret))
         try:
             response = await self.http.request(
                 method,

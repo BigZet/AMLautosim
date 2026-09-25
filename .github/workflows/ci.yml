@@ -70,7 +70,7 @@ jobs:
           POSTGRES_DB: postgres
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U aml_ci"
+          --health-cmd "pg_isready -U aml_ci -d postgres"
           --health-interval 5s --health-timeout 5s --health-retries 20
     env:
       TEST_ADMIN_DATABASE_URL: postgresql://aml_ci:ci-disposable-database-only@127.0.0.1:5432/postgres
@@ -148,7 +148,7 @@ jobs:
           POSTGRES_DB: postgres
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U aml_ci"
+          --health-cmd "pg_isready -U aml_ci -d postgres"
           --health-interval 5s --health-timeout 5s --health-retries 20
     env:
       TEST_ADMIN_DATABASE_URL: postgresql://aml_ci:ci-disposable-database-only@127.0.0.1:5432/postgres

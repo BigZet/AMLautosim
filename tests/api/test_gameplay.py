@@ -23,7 +23,7 @@ def test_incoming_profiles_complete_game(
 ):
     path = f"/rounds/{active_round}"
     headers = player["headers"]
-    cards = request_api("GET", path + "/cards")
+    cards = request_api("GET", path + "/cards", player["headers"])
     incoming = next(c for c in cards if c["code"] == "incoming_transfer")
     assert [p["key"] for p in incoming["visible_params"]] == [
         "channel",

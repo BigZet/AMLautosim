@@ -11,7 +11,7 @@ def test_freeze_preview_save_submit_score_and_result(
 ):
     original = sql("SELECT game_config FROM rounds")[0]["game_config"]
     frozen = request_api("GET", "/admin/rounds/current", admin)["game_config"]
-    catalog = request_api("GET", f"/rounds/{active_round}/cards")
+    catalog = request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
     assert next(c for c in catalog if c["code"] == "purchase")["max_occurrences"] == 3
     path = f"/rounds/{active_round}/scenario"
     values = demo_steps(frozen, "purchase")
@@ -74,7 +74,7 @@ def test_only_purchases_cannot_submit_and_limits_are_visible(
     assert not sql("SELECT * FROM scenarios")
 
 
-def test_duplicate_purchase_configuration_is_rejected(request_api, admin, round_id):
+def test_duplicate_purchase_configuration_is_rejected(request_api, admin, round_id, player):
     config = request_api("GET", "/admin/game-config/default", admin)
     config["operations"].append(
         {"code": "purchase", "version": 1, "visible_params": []}
@@ -87,5 +87,5 @@ def test_duplicate_purchase_configuration_is_rejected(request_api, admin, round_
         422,
     )
     assert "purchase" in [
-        c["code"] for c in request_api("GET", f"/rounds/{round_id}/cards")
+        c["code"] for c in request_api("GET", f"/rounds/{round_id}/cards", player["headers"])
     ]

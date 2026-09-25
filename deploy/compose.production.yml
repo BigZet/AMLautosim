@@ -15,6 +15,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    networks:
+      default:
+        ipv4_address: 172.30.23.5
   api:
     restart: unless-stopped
     depends_on:
@@ -31,6 +34,11 @@ services:
       AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
       LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
+      AUTH_CONTEXT_SECRET: ${AUTH_CONTEXT_SECRET:?set a private UI-to-API signing secret}
+      AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
+      AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
+      AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
+      AUTH_TRUSTED_UI_CIDRS: '["172.30.23.4/32"]'
     healthcheck:
       test:
       - CMD-SHELL
@@ -40,6 +48,9 @@ services:
       timeout: 5s
       retries: 20
     image: ${AML_IMAGE:?set an immutable registry image digest}
+    networks:
+      default:
+        ipv4_address: 172.30.23.3
   ui:
     restart: unless-stopped
     depends_on:
@@ -52,6 +63,11 @@ services:
       COOKIE_SECURE: 'true'
       NICEGUI_STORAGE_SECRET: ${NICEGUI_STORAGE_SECRET:?set NICEGUI_STORAGE_SECRET in .env}
       NICEGUI_STORAGE_PATH: /home/app/nicegui
+      AUTH_CONTEXT_SECRET: ${AUTH_CONTEXT_SECRET:?set a private UI-to-API signing secret}
+      AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
+      AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
+      AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
+      TRUSTED_PROXY_CIDRS: '["172.30.23.2/32"]'
     volumes:
     - nicegui_data:/home/app/nicegui
     command: python -m src.aml_workshop_simulator.ui.nicegui.app
@@ -63,6 +79,9 @@ services:
       timeout: 5s
       retries: 10
     image: ${AML_IMAGE:?set an immutable registry image digest}
+    networks:
+      default:
+        ipv4_address: 172.30.23.4
   release:
     environment:
       POSTGRES_HOST: db
@@ -100,6 +119,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      default:
+        ipv4_address: 172.30.23.2
 volumes:
   postgres_data: null
   nicegui_data: null
+networks:
+  default:
+    ipam:
+      config:
+      - subnet: 172.30.23.0/24

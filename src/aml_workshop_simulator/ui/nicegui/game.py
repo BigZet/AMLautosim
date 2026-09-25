@@ -89,7 +89,7 @@ class GameEditor:
         cards = self.cards
         if key != self.record.get("key") or (key and not cards):
             cards = (
-                await self.api.request("GET", f"rounds/{key[0]}/cards") if key else []
+                await self.api.request("GET", f"rounds/{key[0]}/cards", session_id=self.token) if key else []
             )
         # Fetch the complete snapshot before changing any editor state. A newer
         # poll or write can finish while the cards request is still in flight.

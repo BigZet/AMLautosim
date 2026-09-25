@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from pydantic import Field
+from ipaddress import ip_network
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
@@ -30,6 +31,16 @@ class Settings(BaseSettings):
     SESSION_TTL_MINUTES: int = Field(default=240, gt=0)
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=10, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=5, gt=0)
+    AUTH_PAIR_PER_MINUTE: int = Field(default=10, gt=0)
+    AUTH_IP_PER_MINUTE: int = Field(default=300, gt=0)
+    AUTH_IP_BURST: int = Field(default=120, gt=0)
+    AUTH_CONTEXT_SECRET: SecretStr | None = None
+    AUTH_TRUSTED_UI_CIDRS: list[str] = []
+
+    @field_validator("AUTH_TRUSTED_UI_CIDRS")
+    @classmethod
+    def validate_networks(cls, value):
+        return [str(ip_network(network)) for network in value]
 
     # Explicit URL takes precedence for local tooling and disposable test DBs.
     DATABASE_URL: str | None = None

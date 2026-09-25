@@ -57,6 +57,8 @@ async def login(
     audience: Audience,
     email: str,
     password: str,
+    *,
+    client_ip: str | None = None,
 ) -> bool:
     generation_key = f"auth_generation_{audience}"
     generation = storage.get(generation_key, 0) + 1
@@ -70,6 +72,7 @@ async def login(
                 "password": password,
                 "audience": audience,
             },
+            **({"auth_client_ip": client_ip} if client_ip else {}),
         )
     )
     expected_role = "participant" if audience == "play" else "admin"

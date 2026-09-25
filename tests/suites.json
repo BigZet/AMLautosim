@@ -1,6 +1,7 @@
 {
   "version": 1,
   "modules": {
+    "tests/unit/test_login_limiter.py": "runtime",
     "tests/unit/test_ui_security_headers.py": "runtime",
     "tests/unit/test_backup_restore.py": "runtime",
     "tests/api/test_backup_restore.py": "runtime",

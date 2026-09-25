@@ -16,7 +16,7 @@ def test_incoming_card_preview_save_submit_and_score(
         client = APIClient("http://test/api/v1", transport=httpx.ASGITransport(api.app))
         path = f"rounds/{active_round}/scenario"
         try:
-            cards = await client.request("GET", f"rounds/{active_round}/cards")
+            cards = await client.request("GET", f"rounds/{active_round}/cards", session_id=player["headers"]["X-Session-ID"])
             assert {c["code"] for c in cards} == {
                 "salary",
                 "incoming_transfer",

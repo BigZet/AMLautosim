@@ -70,8 +70,11 @@ def seeded_game_version():
 
 @pytest.fixture
 def api(database, seeded_game_version):
+    front = sys.modules.get('src.aml_workshop_simulator.ui.nicegui.app')
+    if front is not None:
+        front.login_limiter.states.clear()
     asyncio.run(
-        execute("TRUNCATE action_cards, users, rounds RESTART IDENTITY CASCADE")
+        execute("TRUNCATE action_cards, users, rounds, auth_rate_limits RESTART IDENTITY CASCADE")
     )
     if seeded_game_version == 8:
         from unittest.mock import patch

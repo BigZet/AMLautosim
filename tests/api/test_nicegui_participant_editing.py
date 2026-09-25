@@ -40,7 +40,7 @@ def test_parameters_and_amount_remain_editable_after_autosave(
                 app.storage.user["auth_play"] = {"session_id": token}
             await user.open("/play")
             await user.should_see("Входящий перевод", retries=40)
-            cards = await front.api.request("GET", f"rounds/{active_round}/cards")
+            cards = await front.api.request("GET", f"rounds/{active_round}/cards", session_id=token)
             assert any(c["code"] == "incoming_transfer" for c in cards)
             user.find(kind=ui.button, content="Входящий перевод").click()
             await asyncio.sleep(1.6)

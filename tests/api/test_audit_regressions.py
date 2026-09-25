@@ -56,7 +56,7 @@ def test_preview_does_not_publish_legacy_risk_factors(
 
     card = next(
         c
-        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        for c in request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
         if c["code"] == "salary"
     )
     step = {

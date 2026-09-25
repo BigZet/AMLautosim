@@ -103,3 +103,20 @@ verified external 403 and a real WebSocket handshake through the trusted path.
 Two header/404 unit regressions and six NiceGUI integration tests passed.
 Production redirect, source-header sanitation and real browser CSP behavior
 remain rollout/browser acceptance items.
+
+## T06 checkpoint — authentication
+
+Early process-wide UI limits and durable PostgreSQL API limits now use the
+verified proxy peer and short-lived signed UI context. Defaults: pair 10/min,
+IP 300/min, burst 120. Sixty registration/login pairs on one NAT completed
+in 13.052 s without 429. Known/unknown wrong-login responses match; spoofed
+IP headers do not bypass the gate. Account-global failed-login lockout is
+removed; administrative blocking remains. Duplicate registration retains 409
+and its documented account-enumeration limitation. Current/cards require auth.
+
+Targeted auth/scoring: 24 passed; limiter/settings: 5 passed; catalog/UI and
+audit regressions: 43 passed. Full runtime: 604 passed, one expected Windows
+symlink skip. Full API run pending. Inventory retains every previous runtime
+case except two intentionally replaced account-global lockout tests, now
+covered by per-IP isolation tests. Production ingress rollout, real off-host
+backup destination and production-sized recovery are not verified.

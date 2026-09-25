@@ -1,8 +1,9 @@
 """Validated UI process settings, independent of the launch directory."""
 
 from pathlib import Path
+from ipaddress import ip_network
 
-from pydantic import AnyHttpUrl, Field, field_validator
+from pydantic import AnyHttpUrl, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .config import PROJECT_ROOT, project_path
@@ -16,6 +17,16 @@ class UISettings(BaseSettings):
     NICEGUI_STORAGE_SECRET: str | None = None
     NICEGUI_SESSION_COOKIE: str = Field(default="aml_ui", pattern=r"^[A-Za-z0-9_-]+$")
     COOKIE_SECURE: bool = False
+    AUTH_PAIR_PER_MINUTE: int = Field(default=10, gt=0)
+    AUTH_IP_PER_MINUTE: int = Field(default=300, gt=0)
+    AUTH_IP_BURST: int = Field(default=120, gt=0)
+    AUTH_CONTEXT_SECRET: SecretStr | None = None
+    TRUSTED_PROXY_CIDRS: list[str] = []
+
+    @field_validator("TRUSTED_PROXY_CIDRS")
+    @classmethod
+    def validate_networks(cls, value):
+        return [str(ip_network(network)) for network in value]
 
     @field_validator("NICEGUI_STORAGE_PATH", mode="before")
     @classmethod

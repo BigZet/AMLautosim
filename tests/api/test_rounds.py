@@ -8,7 +8,7 @@ def seeded_game_version():
 
 def test_no_game_and_creation(request_api, player, admin, sql):
     sql("TRUNCATE rounds CASCADE")
-    assert request_api("GET", "/rounds/current") is None
+    assert request_api("GET", "/rounds/current", player["headers"]) is None
     assert request_api("GET", "/rounds/current/state", player["headers"]) == dict(
         round=None,
         scenario=None,

@@ -23,7 +23,7 @@ def test_all_parameters_are_exposed_and_saved(
         {"id": active_round, "config": json.dumps(config)},
     )
     path = f"/rounds/{active_round}"
-    card = next(c for c in request_api("GET", path + "/cards") if c["code"] == code)
+    card = next(c for c in request_api("GET", path + "/cards", player["headers"]) if c["code"] == code)
     expected = (
         ({"channel"} if card["channels"] else set())
         | {f"context.{f['key']}" for f in card["context_fields"]}
@@ -91,7 +91,7 @@ def test_removed_parameters_are_rejected_without_saving(
 ):
     card = next(
         c
-        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        for c in request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
         if c["code"] == code
     )
     step = {
@@ -130,7 +130,7 @@ def test_null_salary_channel_is_canonicalized_as_absent(
 ):
     card = next(
         c
-        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        for c in request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
         if c["code"] == "salary"
     )
     step = {

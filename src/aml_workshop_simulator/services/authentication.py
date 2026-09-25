@@ -15,7 +15,6 @@ from src.aml_workshop_simulator.core.errors import (
     Conflict,
     Forbidden,
     NotAuthenticated,
-    RateLimited,
 )
 from src.aml_workshop_simulator.core.principal import (
     CurrentPrincipal,
@@ -90,38 +89,16 @@ async def login(*, payload: LoginIn, db: AsyncSession) -> SessionCreatedOut:
     )
     now = datetime.now(UTC)
 
-    if user is not None:
-        locked_until = user.locked_until
-        if locked_until is not None and locked_until.tzinfo is None:
-            locked_until = locked_until.replace(tzinfo=UTC)
-        if locked_until is not None and locked_until > now:
-            raise RateLimited(
-                "Слишком много неудачных попыток входа. Повторите позже.",
-                code="login_temporarily_locked",
-                headers={"Retry-After": str(int((locked_until - now).total_seconds()))},
-            )
-
     verified = await asyncio.to_thread(
         verify_password,
         payload.password,
         user.hashed_password if user else DUMMY_PASSWORD_HASH,
     )
     if user is None or not verified:
-        if user is not None:
-            user.failed_login_count = int(user.failed_login_count or 0) + 1
-            if user.failed_login_count >= settings.LOGIN_MAX_FAILED_ATTEMPTS:
-                user.locked_until = now + timedelta(
-                    minutes=settings.LOGIN_LOCKOUT_MINUTES
-                )
-                user.failed_login_count = 0
-            # commit только неудачной попытки — сессия при этом не создаётся.
-            await db.commit()
         raise NotAuthenticated(INVALID_CREDENTIALS, code="invalid_credentials")
 
     if user.is_blocked:
-        # Ручная блокировка администратором — отдельный от lockout механизм:
-        # lockout временный и снимается сам по истечении времени, is_blocked
-        # держится, пока администратор явно не снимет блокировку.
+        # Administrative access is independent of IP-scoped admission limits.
         raise AccountBlocked(
             "Доступ к учетной записи заблокирован организатором.",
             code="account_blocked",
@@ -148,9 +125,7 @@ async def login(*, payload: LoginIn, db: AsyncSession) -> SessionCreatedOut:
             expires_at=expires_at,
         )
     )
-    # Успешный вход полностью сбрасывает историю неудачных попыток и любую
-    # временную блокировку — иначе пользователь мог бы залогиниться, а через
-    # секунду словить lockout из-за старого счётчика.
+    # Clear obsolete account-wide lockout fields on successful migration/login.
     user.failed_login_count = 0
     user.locked_until = None
     if user.first_login_at is None:

@@ -24,7 +24,7 @@ from src.aml_workshop_simulator.services.catalog import round_cards
 router = APIRouter()
 
 
-@router.get("/current", response_model=RoundPublicOut | None)
+@router.get("/current", response_model=RoundPublicOut | None, dependencies=[Depends(get_current_participant)])
 async def current_round(db: AsyncSession = Depends(get_db)):
     return await participant_state.current_round(db)
 
@@ -37,7 +37,7 @@ async def current_state(
     return await participant_state.read(db, principal.user_id)
 
 
-@router.get("/{round_id}/cards", response_model=list[ActionCardOut])
+@router.get("/{round_id}/cards", response_model=list[ActionCardOut], dependencies=[Depends(get_current_participant)])
 async def cards(round_id: int, db: AsyncSession = Depends(get_db)):
     return await round_cards(db, round_id)
 
