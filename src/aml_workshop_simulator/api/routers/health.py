@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from functools import lru_cache
 
 from fastapi import APIRouter, Depends, Response, Request, status
 from sqlalchemy import select, text
@@ -9,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.aml_workshop_simulator.db.session import get_db
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.version import SERVICE_VERSION
 from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
 from src.aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
@@ -32,16 +34,17 @@ async def internal_metrics(request: Request):
 MIGRATIONS_DIR = Path(__file__).resolve().parents[4] / "migrations" / "versions"
 
 
-def _expected_heads() -> set[str]:
+@lru_cache(maxsize=1)
+def _expected_heads() -> frozenset[str]:
     from alembic.script import ScriptDirectory
 
-    return set(ScriptDirectory(str(MIGRATIONS_DIR.parent)).get_heads())
+    return frozenset(ScriptDirectory(str(MIGRATIONS_DIR.parent)).get_heads())
 
 
 @router.get("/health/live", operation_id="health_live", response_model=LiveOut)
 async def health_live() -> dict[str, str]:
     """Liveness only: never touches the database."""
-    return {"status": "ok", "service": "api", "version": "2.0.0", "git_sha": settings.GIT_SHA}
+    return {"status": "ok", "service": "api", "version": SERVICE_VERSION, "git_sha": settings.GIT_SHA}
 
 
 @router.get(

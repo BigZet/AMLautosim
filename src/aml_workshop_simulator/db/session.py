@@ -77,6 +77,12 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Request-scoped session; services explicitly commit transaction boundaries.
+
+    Exceptions roll back pending writes. Normal exit closes the session and also
+    rolls back any uncommitted work; this dependency never commits implicitly.
+    CPU executors must not receive this session or any ORM instances.
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session

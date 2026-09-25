@@ -14,6 +14,7 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 from src.aml_workshop_simulator.api import error_handlers
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
 from src.aml_workshop_simulator.core.config import settings
+from src.aml_workshop_simulator.core.version import SERVICE_VERSION
 from src.aml_workshop_simulator.core.errors import ApplicationError
 from src.aml_workshop_simulator.core.observability import metrics, correlation_id, request_log, sample_loop, stop_sampler, configure_logging
 from src.aml_workshop_simulator.db.session import async_engine
@@ -41,7 +42,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.PROJECT_NAME,
-        version="2.0.0",
+        version=SERVICE_VERSION,
         lifespan=lifespan,
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         docs_url=f"{settings.API_V1_STR}/docs",

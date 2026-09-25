@@ -416,7 +416,7 @@ async def execute_claimed(sessions, claimed):
                     for s in batch
                 ]
                 results = await asyncio.gather(*futures, return_exceptions=True)
-                for item, result in zip(batch, results):
+                for item, result in zip(batch, results, strict=True):
                     if isinstance(result, BaseException):
                         raise result
                     snapshot, values = result

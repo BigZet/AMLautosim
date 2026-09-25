@@ -37,11 +37,14 @@ iniconfig==2.3.0
 itsdangerous==2.2.0
 jinja2==3.1.6
 kiwisolver==1.5.1
+librt==0.15.0 ; platform_python_implementation != 'PyPy'
 mako==1.4.1
 markdown2==2.5.5
 markupsafe==3.0.3
 matplotlib==3.11.2
 multidict==6.8.0
+mypy==1.19.1
+mypy-extensions==1.1.0
 narwhals==2.26.0
 nicegui==3.16.0
 numpy==2.5.3
@@ -49,6 +52,7 @@ orjson==3.12.0 ; platform_machine != 'i386' and platform_machine != 'i686' and p
 packaging==26.3
 pandas==3.0.5
 passlib==1.7.4
+pathspec==1.1.1
 pillow==12.3.0
 plotly==7.0.0
 pluggy==1.6.0

@@ -45,11 +45,20 @@ DECIMAL_OVERRIDE_KEYS = frozenset(
 class CardContract(Protocol):
     """The part of a card version this module needs."""
 
-    code: str
-    version: int
-    channels: tuple[str, ...]
-    context_fields: tuple[dict[str, Any], ...]
-    fields: tuple[dict[str, Any], ...]
+    @property
+    def code(self) -> str: ...
+
+    @property
+    def version(self) -> int: ...
+
+    @property
+    def channels(self) -> tuple[str, ...]: ...
+
+    @property
+    def context_fields(self) -> tuple[dict[str, Any], ...]: ...
+
+    @property
+    def fields(self) -> tuple[dict[str, Any], ...]: ...
 
 
 def context_param(key: str) -> str:
