@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     ECHO_SQL: bool = False
     DB_POOL_DISABLED: bool = False
+    DB_POOL_SIZE: int = Field(default=5, ge=1, le=100)
+    DB_POOL_OVERFLOW: int = Field(default=10, ge=0, le=100)
+    DB_POOL_TIMEOUT: float = Field(default=5, gt=0, le=120)
+    DB_POOL_RECYCLE: int = Field(default=1800, ge=1, le=86400)
+    API_WORKERS: int = Field(default=1, ge=1, le=4)
 
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
     BOOTSTRAP_ADMIN_PASSWORD: str = ""

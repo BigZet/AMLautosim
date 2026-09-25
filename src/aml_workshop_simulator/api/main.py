@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.routing import iter_route_contexts
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from src.aml_workshop_simulator.api import error_handlers
 from src.aml_workshop_simulator.api.routers import admin, auth, health, rounds
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
         },
     )
     app.add_exception_handler(ApplicationError, error_handlers.api_error_handler)
+    app.add_exception_handler(PoolTimeout, error_handlers.database_busy_handler)
     app.add_exception_handler(HTTPException, error_handlers.http_exception_handler)
     app.add_exception_handler(
         RequestValidationError, error_handlers.validation_exception_handler

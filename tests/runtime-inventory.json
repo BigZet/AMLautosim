@@ -629,7 +629,18 @@
     "tests/unit/test_scenario_preparation.py::test_preparation_matches_frozen_outputs_and_preserves_inputs[v10-overrides-config17-steps17]",
     "tests/unit/test_scenario_preparation.py::test_prepare_canonicalizes_each_contract_once[8]",
     "tests/unit/test_scenario_preparation.py::test_prepare_canonicalizes_each_contract_once[10]",
-    "tests/unit/test_game_classifier_release.py::test_game_explanation_is_collapsed_until_requested"
+    "tests/unit/test_game_classifier_release.py::test_game_explanation_is_collapsed_until_requested",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_SIZE-0]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_SIZE-101]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_OVERFLOW--1]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_OVERFLOW-101]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_TIMEOUT-0]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_TIMEOUT-121]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_RECYCLE-0]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_RECYCLE-86401]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[API_WORKERS-0]",
+    "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[API_WORKERS-5]",
+    "tests/unit/test_runtime_settings.py::test_pool_options_respect_nullpool"
   ],
   "api": [
     "tests/api/test_all_operation_parameters.py::test_all_parameters_are_exposed_and_saved[salary]",
@@ -844,6 +855,8 @@
     "tests/api/test_scenarios.py::test_invalid_cards_and_chains[missing_goal-400]",
     "tests/api/test_scoring.py::test_ranking_ties_access_and_shared_results",
     "tests/api/test_scoring.py::test_scoring_failure_rolls_back_scores_but_keeps_cutoff",
-    "tests/api/test_semantic_v9.py::test_v9_http_matrix_and_saved_observations"
+    "tests/api/test_semantic_v9.py::test_v9_http_matrix_and_saved_observations",
+    "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[8]",
+    "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[10]"
   ]
 }

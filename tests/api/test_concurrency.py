@@ -12,6 +12,66 @@ from src.aml_workshop_simulator.db.session import async_engine
 from src.aml_workshop_simulator.services import scoring_run
 
 
+def test_pool_exhaustion_returns_retryable_503_without_losing_command(
+    api,
+    player,
+    active_round,
+    chain,
+    command,
+):
+    import time
+    import httpx
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+    from src.aml_workshop_simulator.core.config import settings
+    from src.aml_workshop_simulator.db.session import get_db
+
+    payload = command(chain())
+    path = f"/api/v1/rounds/{active_round}/scenario"
+
+    async def run():
+        engine = create_async_engine(
+            settings.database_url, pool_size=1, max_overflow=0, pool_timeout=3
+        )
+        sessions = async_sessionmaker(engine, expire_on_commit=False)
+
+        async def bounded_db():
+            async with sessions() as session:
+                try:
+                    yield session
+                except Exception:
+                    await session.rollback()
+                    raise
+
+        api.app.dependency_overrides[get_db] = bounded_db
+        try:
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(api.app, raise_app_exceptions=False),
+                base_url="http://test",
+                headers=player["headers"],
+            ) as client:
+                async with engine.connect():
+                    started = time.monotonic()
+                    response = await client.put(path, json=payload)
+                    assert 2.8 <= time.monotonic() - started < 8
+                    assert response.status_code == 503, response.text
+                    assert response.json()["code"] == "database_busy"
+                    assert response.headers["Retry-After"] == "1"
+                    assert response.json()["request_id"]
+                    assert "QueuePool" not in response.text
+                accepted = await client.put(path, json=payload)
+                assert accepted.status_code == 200, accepted.text
+                replay = await client.put(path, json=payload)
+                assert replay.status_code == 200, replay.text
+                assert replay.json() == accepted.json()
+                stored = await client.get(path)
+                assert stored.json()["revision"] == 1
+        finally:
+            api.app.dependency_overrides.pop(get_db, None)
+            await engine.dispose()
+
+    asyncio.run(run())
+
+
 @pytest.fixture(params=[8, 10])
 def seeded_game_version(request):
     return request.param

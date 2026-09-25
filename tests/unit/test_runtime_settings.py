@@ -54,8 +54,16 @@ def test_ui_settings_resolve_paths_and_validate_environment(tmp_path, monkeypatc
     monkeypatch.chdir(tmp_path)
     settings = UISettings(_env_file=None, NICEGUI_STORAGE_PATH="private-ui")
     assert settings.NICEGUI_STORAGE_PATH == PROJECT_ROOT / "private-ui"
-    assert UISettings(_env_file=None, NICEGUI_STORAGE_PATH=tmp_path).NICEGUI_STORAGE_PATH == tmp_path
-    for values in ({"UI_PORT": 0}, {"UI_PORT": 65536}, {"API_URL": "not-a-url"}, {"COOKIE_SECURE": "invalid"}):
+    assert (
+        UISettings(_env_file=None, NICEGUI_STORAGE_PATH=tmp_path).NICEGUI_STORAGE_PATH
+        == tmp_path
+    )
+    for values in (
+        {"UI_PORT": 0},
+        {"UI_PORT": 65536},
+        {"API_URL": "not-a-url"},
+        {"COOKIE_SECURE": "invalid"},
+    ):
         with pytest.raises(ValidationError):
             UISettings(_env_file=None, **values)
 
@@ -66,3 +74,49 @@ def test_legacy_default_paths_do_not_depend_on_working_directory(tmp_path, monke
     monkeypatch.chdir(tmp_path)
     assert model_scoring.PACKAGE.is_absolute()
     assert model_scoring.DICTIONARY.is_file()
+
+
+@pytest.mark.parametrize(
+    "name,value",
+    [
+        ("DB_POOL_SIZE", 0),
+        ("DB_POOL_SIZE", 101),
+        ("DB_POOL_OVERFLOW", -1),
+        ("DB_POOL_OVERFLOW", 101),
+        ("DB_POOL_TIMEOUT", 0),
+        ("DB_POOL_TIMEOUT", 121),
+        ("DB_POOL_RECYCLE", 0),
+        ("DB_POOL_RECYCLE", 86401),
+        ("API_WORKERS", 0),
+        ("API_WORKERS", 5),
+    ],
+)
+def test_database_concurrency_settings_are_bounded(name, value):
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **{name: value})
+
+
+def test_pool_options_respect_nullpool():
+    from sqlalchemy.pool import NullPool
+    from src.aml_workshop_simulator.db.session import engine_options
+
+    settings = Settings(
+        _env_file=None,
+        DB_POOL_DISABLED=False,
+        DB_POOL_SIZE=3,
+        DB_POOL_OVERFLOW=2,
+        DB_POOL_TIMEOUT=4,
+        DB_POOL_RECYCLE=900,
+    )
+    options = engine_options(settings)
+    assert options["pool_size"] == 3
+    assert options["max_overflow"] == 2
+    assert options["pool_timeout"] == 4
+    assert options["pool_recycle"] == 900
+    assert options["pool_pre_ping"] is True
+    options = engine_options(settings.model_copy(update={"DB_POOL_DISABLED": True}))
+    assert options["poolclass"] is NullPool
+    assert (
+        not {"pool_size", "max_overflow", "pool_timeout", "pool_recycle"}
+        & options.keys()
+    )

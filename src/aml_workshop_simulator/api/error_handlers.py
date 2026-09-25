@@ -44,6 +44,17 @@ async def api_error_handler(request: Request, exc: ApplicationError) -> JSONResp
     )
 
 
+async def database_busy_handler(request: Request, exc: Exception) -> JSONResponse:
+    from src.aml_workshop_simulator.core.observability import metrics
+
+    metrics.add('pool_timeouts', 1)
+    return _envelope(
+        request, 503, 'database_busy',
+        'Сервис занят. Повторите запрос через секунду.',
+        headers={'Retry-After': '1'},
+    )
+
+
 async def http_exception_handler(
     request: Request, exc: StarletteHTTPException
 ) -> JSONResponse:

@@ -263,7 +263,9 @@ async def run(args):
                         response = await client.get(
                             origin + "/internal/metrics",
                             headers={
-                                "Authorization": "Bearer " + os.environ["METRICS_TOKEN"]
+                                "Authorization": "Bearer " + os.environ["METRICS_TOKEN"],
+                                # Do not pin metrics to one worker's keepalive socket.
+                                "Connection": "close",
                             },
                         )
                         response.raise_for_status()

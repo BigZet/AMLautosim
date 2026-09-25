@@ -14,7 +14,7 @@ import httpx
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def start(image, destination, count):
+def start(image, destination, count, *, workers=1, pool_size=5, overflow=10):
     destination.mkdir(parents=True, exist_ok=False)
     os.chmod(destination, 0o700)
     project = "aml-load-" + uuid4().hex[:10]
@@ -33,7 +33,14 @@ def start(image, destination, count):
     )
     override = {
         "services": {
-            "api": {"environment": {"METRICS_TOKEN": token}},
+            "api": {
+                "environment": {
+                    "METRICS_TOKEN": token,
+                    "API_WORKERS": workers,
+                    "DB_POOL_SIZE": pool_size,
+                    "DB_POOL_OVERFLOW": overflow,
+                }
+            },
             "ui": {"environment": {"METRICS_TOKEN": token}},
             "ingress": {
                 "volumes": [
@@ -59,6 +66,11 @@ def start(image, destination, count):
         "command": command,
         "environment": {k: v for k, v in env.items() if k.startswith("AML_CI_")},
         "metrics_token": token,
+        "api_settings": {
+            "workers": workers,
+            "pool_size": pool_size,
+            "overflow": overflow,
+        },
     }
     state_path = destination / "private-state.json"
     state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
@@ -148,8 +160,18 @@ if __name__ == "__main__":
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--image", default="aml-remediation:t07")
     parser.add_argument("--accounts", type=int, default=60)
+    parser.add_argument("--workers", type=int, choices=[1, 2, 4], default=1)
+    parser.add_argument("--pool-size", type=int, choices=range(1, 101), default=5)
+    parser.add_argument("--overflow", type=int, choices=range(0, 101), default=10)
     args = parser.parse_args()
     if args.mode == "start":
-        start(args.image, args.directory.resolve(), args.accounts)
+        start(
+            args.image,
+            args.directory.resolve(),
+            args.accounts,
+            workers=args.workers,
+            pool_size=args.pool_size,
+            overflow=args.overflow,
+        )
     else:
         stop(args.directory.resolve())
