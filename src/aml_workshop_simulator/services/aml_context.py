@@ -152,4 +152,8 @@ def resolve_evidence(steps: list, config: dict) -> list[dict]:
 
 def evaluate(steps: list, config: dict) -> dict:
     canonical = canonical_steps(steps, config)
-    return semantic_contract.evaluate(semantic_steps(canonical), semantic_config(config))
+    return _evaluate_canonical(canonical, config)
+
+
+def _evaluate_canonical(canonical, config, specs=None, policy=None):
+    return semantic_contract._evaluate_canonical(semantic_steps(canonical), semantic_config(config), specs, policy)

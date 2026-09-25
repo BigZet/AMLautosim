@@ -167,3 +167,19 @@ The status query omits full config, scenarios, results and ranking projections.
 Organizer counts distinguish all registered accounts from current-game editing,
 submitted and scored scenarios. Confirmation is provisional; cutoff audit records
 actual deleted drafts/submitted counts under the round lock.
+
+## T09 — canonical preparation reuse
+
+Before editing, 18 v8/v10 outputs (empty/1/9/16 steps, duplicate IDs, invalid
+fields/parties/amounts and organizer resources) were frozen. Two RED tests
+confirmed double canonicalization. All 20 preparation regressions now pass;
+the full target bundle passed 108 tests. Public evaluators still validate raw
+input; only internal prepared values use the canonical snapshot kernel. No
+caller-controlled already_validated flag or mutable ORM cache was added.
+
+Median preparation across 30 local samples (ms), before -> after:
+v8 1/9/16 steps: 1.253/1.707/2.299 -> 0.835/0.916/1.437;
+v10: 6.706/8.532/10.410 -> 4.034/3.787/4.498.
+These are microbenchmarks, not end-to-end capacity. No thread offload was added
+without a separate measured benefit. Controlled compatibility publication
+replayed all 25 original chains unchanged and retained previous saved pins.

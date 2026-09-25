@@ -116,6 +116,14 @@ def prepare_scenario(
     return canonical, checked_snapshot(canonical, specs, round_obj.game_config, policy)
 
 
+def build_snapshot_from_canonical(steps, specs, config, policy) -> dict[str, Any]:
+    """Internal preparation path: input came from canonical_round_steps only."""
+    if contract_version(config) in (8, 9, 10):
+        from src.aml_workshop_simulator.services.expanded_simulation import _evaluate_canonical
+        return _evaluate_canonical(steps, config, specs, policy)
+    return evaluate_scenario(steps, specs, config, policy)
+
+
 def canonical_round_steps(round_obj, steps, specs, policy):
     if contract_version(round_obj.game_config) in (8, 9, 10):
         from src.aml_workshop_simulator.services.counterparties import (
@@ -131,7 +139,7 @@ def checked_snapshot(steps, specs, config, policy) -> dict[str, Any]:
     from src.aml_workshop_simulator.domain.rules import StructuralError
 
     try:
-        return build_snapshot(steps, specs, config, policy)
+        return build_snapshot_from_canonical(steps, specs, config, policy)
     except StructuralError as exc:
         violations = [item.as_dict() for item in exc.violations]
         raise ValidationFailed(

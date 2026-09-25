@@ -1,0 +1,5216 @@
+[
+  {
+    "name": "v8-0",
+    "expected": {
+      "steps": [],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "180000.00",
+          "energy": 30,
+          "time": 30,
+          "available_steps": 14
+        },
+        "totals": {
+          "gross_inflow": "0.00",
+          "gross_outflow": "0.00",
+          "fees": "0.00",
+          "target_outflow": "0.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": false
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 0
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "0",
+            "limit": "14",
+            "remaining": "14"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": []
+        }
+      },
+      "payload_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  {
+    "name": "v8-1",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "260000.00",
+          "energy": 27,
+          "time": 27,
+          "available_steps": 13
+        },
+        "totals": {
+          "gross_inflow": "80000.00",
+          "gross_outflow": "0.00",
+          "fees": "0.00",
+          "target_outflow": "0.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": false
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 1
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "1",
+            "limit": "14",
+            "remaining": "13"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            }
+          ]
+        }
+      },
+      "payload_hash": "7f023e757e28ac42b202f263e3a73927e933151be485e63be696bf38aa4eb709"
+    }
+  },
+  {
+    "name": "v8-9",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "7950.00",
+          "energy": 9,
+          "time": 10,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2050.00",
+          "target_outflow": "400000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "10000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "10000.00",
+            "limit": "120000.00",
+            "remaining": "110000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            }
+          ]
+        }
+      },
+      "payload_hash": "e2e6779a2eee8dc870ab20dee034f8abaff42e106b138172c40c37754b6f107e"
+    }
+  },
+  {
+    "name": "v8-16",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000a",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000c",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000e",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000f",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000010",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": false,
+        "resources_after": {
+          "balance": "-7320.00",
+          "energy": -8,
+          "time": -6,
+          "available_steps": 0
+        },
+        "totals": {
+          "gross_inflow": "460000.00",
+          "gross_outflow": "644000.00",
+          "fees": "3320.00",
+          "target_outflow": "644000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "20000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 16
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "20000.00",
+            "limit": "120000.00",
+            "remaining": "100000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "16",
+            "limit": "14",
+            "remaining": "0"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [
+          {
+            "reason": "max_actions_exceeded",
+            "message": "В цепочке 16 шагов, а раунд допускает не более 14. Удалите лишние шаги.",
+            "field": "steps",
+            "current": "16",
+            "allowed": "14"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 10 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 4 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-00000000000a",
+            "step_index": 10,
+            "field": "card",
+            "current": "4",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 12 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -68 830 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000c",
+            "step_index": 12,
+            "field": "amount",
+            "current": "-68830.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 13 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 5 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "field": "card",
+            "current": "5",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 13 «Получить входящий перевод»: не хватает энергии (остаток -1). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "field": "card",
+            "current": "-1",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 14 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -67 220 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "amount",
+            "current": "-67220.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 14 «Перевести по карте»: не хватает энергии (остаток -3). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "card",
+            "current": "-3",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 14 «Перевести по карте»: не хватает времени раунда (остаток -2). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "card",
+            "current": "-2",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 15 «Снять наличные», поле «Сумма»: после операции и комиссии баланс становится -77 320 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "amount",
+            "current": "-77320.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 15 «Снять наличные»: не хватает энергии (остаток -5). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "card",
+            "current": "-5",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 15 «Снять наличные»: не хватает времени раунда (остаток -3). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "card",
+            "current": "-3",
+            "allowed": "0"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 16 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 6 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "6",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 16 «Получить входящий перевод», поле «Сумма»: после операции и комиссии баланс становится -7 320 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "amount",
+            "current": "-7320.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 16 «Получить входящий перевод»: не хватает энергии (остаток -8). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "-8",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 16 «Получить входящий перевод»: не хватает времени раунда (остаток -6). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "-6",
+            "allowed": "0"
+          }
+        ],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000a",
+            "step_index": 10,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "resources_after": {
+              "balance": "87950.00",
+              "energy": 6,
+              "time": 7
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000b",
+            "step_index": 11,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "87950.00",
+              "energy": 6,
+              "time": 7
+            },
+            "resources_after": {
+              "balance": "9560.00",
+              "energy": 4,
+              "time": 5
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000c",
+            "step_index": 12,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "9560.00",
+              "energy": 4,
+              "time": 5
+            },
+            "resources_after": {
+              "balance": "-68830.00",
+              "energy": 2,
+              "time": 3
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-68830.00",
+              "energy": 2,
+              "time": 3
+            },
+            "resources_after": {
+              "balance": "11170.00",
+              "energy": -1,
+              "time": 0
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "11170.00",
+              "energy": -1,
+              "time": 0
+            },
+            "resources_after": {
+              "balance": "-67220.00",
+              "energy": -3,
+              "time": -2
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "-67220.00",
+              "energy": -3,
+              "time": -2
+            },
+            "resources_after": {
+              "balance": "-77320.00",
+              "energy": -5,
+              "time": -3
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-77320.00",
+              "energy": -5,
+              "time": -3
+            },
+            "resources_after": {
+              "balance": "-7320.00",
+              "energy": -8,
+              "time": -6
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000a",
+              "step_index": 10,
+              "occurred_at": "2026-09-13T09:09:00+03:00",
+              "elapsed_minutes": 9,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000b",
+              "step_index": 11,
+              "occurred_at": "2026-09-13T09:10:00+03:00",
+              "elapsed_minutes": 10,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000c",
+              "step_index": 12,
+              "occurred_at": "2026-09-13T09:11:00+03:00",
+              "elapsed_minutes": 11,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000d",
+              "step_index": 13,
+              "occurred_at": "2026-09-13T09:12:00+03:00",
+              "elapsed_minutes": 12,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000e",
+              "step_index": 14,
+              "occurred_at": "2026-09-13T09:13:00+03:00",
+              "elapsed_minutes": 13,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000f",
+              "step_index": 15,
+              "occurred_at": "2026-09-13T09:14:00+03:00",
+              "elapsed_minutes": 14,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000010",
+              "step_index": 16,
+              "occurred_at": "2026-09-13T09:15:00+03:00",
+              "elapsed_minutes": 15,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            }
+          ]
+        }
+      },
+      "payload_hash": "27ccb2b7ed7ac16d58b30d120b156f73039999eb89529ac81c5f6d6af0fa9d44"
+    }
+  },
+  {
+    "name": "v8-duplicate",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "counterparty_contract_invalid",
+      "message": "Повторный ID шага.",
+      "details": {
+        "step_index": 2,
+        "field": "step_id"
+      }
+    }
+  },
+  {
+    "name": "v8-unknown_field",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "counterparty_contract_invalid",
+      "message": "Неизвестные или производные характеристики операции.",
+      "details": {
+        "step_index": 1,
+        "field": "action_details"
+      }
+    }
+  },
+  {
+    "name": "v8-unknown_party",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "counterparty_contract_invalid",
+      "message": "Выберите сторону из каталога этого раунда.",
+      "details": {
+        "step_index": 1,
+        "field": "sender_id"
+      }
+    }
+  },
+  {
+    "name": "v8-negative_amount",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "counterparty_contract_invalid",
+      "message": "1 validation error for ExpandedScenarioStepIn\namount\n  Input should be greater than 0 [type=greater_than, input_value='-1', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/greater_than",
+      "details": {
+        "step_index": 1,
+        "field": "step"
+      }
+    }
+  },
+  {
+    "name": "v8-overrides",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "transfer_source": "domestic_bank"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": false,
+        "resources_after": {
+          "balance": "-122050.00",
+          "energy": 9,
+          "time": 10,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2050.00",
+          "target_outflow": "400000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "10000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "10000.00",
+            "limit": "120000.00",
+            "remaining": "110000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 3 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -26 780 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "field": "amount",
+            "current": "-26780.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 5 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -25 170 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "field": "amount",
+            "current": "-25170.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 6 «Снять наличные», поле «Сумма»: после операции и комиссии баланс становится -35 270 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "field": "amount",
+            "current": "-35270.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 8 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -43 660 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "field": "amount",
+            "current": "-43660.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 9 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -122 050 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "field": "amount",
+            "current": "-122050.00",
+            "allowed": "0.00"
+          }
+        ],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "50000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "130000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "130000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "51610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "51610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "-26780.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-26780.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "53220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "53220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "-25170.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "-25170.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "-35270.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-35270.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "34730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "transfer_source",
+                "field_label": "Источник перевода",
+                "value": "domestic_bank",
+                "value_label": "Российский банк",
+                "risk_points": "-2",
+                "description": "Стандартный банковский источник: требуется время на сверку перевода"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "34730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "-43660.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "-43660.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "-122050.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            }
+          ]
+        }
+      },
+      "payload_hash": "e2e6779a2eee8dc870ab20dee034f8abaff42e106b138172c40c37754b6f107e"
+    }
+  },
+  {
+    "name": "v10-0",
+    "expected": {
+      "steps": [],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "180000.00",
+          "energy": 30,
+          "time": 30,
+          "available_steps": 14
+        },
+        "totals": {
+          "gross_inflow": "0.00",
+          "gross_outflow": "0.00",
+          "fees": "0.00",
+          "target_outflow": "0.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": false
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 0
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "0",
+            "limit": "14",
+            "remaining": "14"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": []
+        }
+      },
+      "payload_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  {
+    "name": "v10-1",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "260000.00",
+          "energy": 27,
+          "time": 27,
+          "available_steps": 13
+        },
+        "totals": {
+          "gross_inflow": "80000.00",
+          "gross_outflow": "0.00",
+          "fees": "0.00",
+          "target_outflow": "0.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": false
+        },
+        "limit_usage": {
+          "cash": "0.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 1
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "120000.00",
+            "remaining": "120000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "1",
+            "limit": "14",
+            "remaining": "13"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            }
+          ]
+        }
+      },
+      "payload_hash": "70795b28a9c32229ce603298c38519e1712ce24e13265fa87f5eb9a31eb7ce89"
+    }
+  },
+  {
+    "name": "v10-9",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": true,
+        "resources_after": {
+          "balance": "7950.00",
+          "energy": 9,
+          "time": 10,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2050.00",
+          "target_outflow": "400000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "10000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "10000.00",
+            "limit": "120000.00",
+            "remaining": "110000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            }
+          ]
+        }
+      },
+      "payload_hash": "198e77efc1a7191002eef1202860436f80318ce523877dc57405fe31686233c9"
+    }
+  },
+  {
+    "name": "v10-16",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000a",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000b",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000c",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000d",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000e",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-00000000000f",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000010",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": false,
+        "resources_after": {
+          "balance": "-7320.00",
+          "energy": -8,
+          "time": -6,
+          "available_steps": 0
+        },
+        "totals": {
+          "gross_inflow": "460000.00",
+          "gross_outflow": "644000.00",
+          "fees": "3320.00",
+          "target_outflow": "644000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "20000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 16
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "20000.00",
+            "limit": "120000.00",
+            "remaining": "100000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "16",
+            "limit": "14",
+            "remaining": "0"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [
+          {
+            "reason": "max_actions_exceeded",
+            "message": "В цепочке 16 шагов, а раунд допускает не более 14. Удалите лишние шаги.",
+            "field": "steps",
+            "current": "16",
+            "allowed": "14"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 10 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 4 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-00000000000a",
+            "step_index": 10,
+            "field": "card",
+            "current": "4",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 12 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -68 830 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000c",
+            "step_index": 12,
+            "field": "amount",
+            "current": "-68830.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 13 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 5 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "field": "card",
+            "current": "5",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 13 «Получить входящий перевод»: не хватает энергии (остаток -1). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "field": "card",
+            "current": "-1",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 14 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -67 220 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "amount",
+            "current": "-67220.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 14 «Перевести по карте»: не хватает энергии (остаток -3). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "card",
+            "current": "-3",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 14 «Перевести по карте»: не хватает времени раунда (остаток -2). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "field": "card",
+            "current": "-2",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 15 «Снять наличные», поле «Сумма»: после операции и комиссии баланс становится -77 320 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "amount",
+            "current": "-77320.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 15 «Снять наличные»: не хватает энергии (остаток -5). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "card",
+            "current": "-5",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 15 «Снять наличные»: не хватает времени раунда (остаток -3). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "field": "card",
+            "current": "-3",
+            "allowed": "0"
+          },
+          {
+            "reason": "max_occurrences_exceeded",
+            "message": "Шаг 16 «Получить входящий перевод»: суммарно по карточке «Получить входящий перевод» набрано 6 карточек за раунд, лимит — 3. Удалите лишние карточки этой операции.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "6",
+            "allowed": "3"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 16 «Получить входящий перевод», поле «Сумма»: после операции и комиссии баланс становится -7 320 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "amount",
+            "current": "-7320.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_energy",
+            "message": "Шаг 16 «Получить входящий перевод»: не хватает энергии (остаток -8). Удалите один из шагов или выберите менее затратную операцию.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "-8",
+            "allowed": "0"
+          },
+          {
+            "reason": "insufficient_time",
+            "message": "Шаг 16 «Получить входящий перевод»: не хватает времени раунда (остаток -6). Уберите шаг, ускорьте темп или откажитесь от обслуживания в отделении.",
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "field": "card",
+            "current": "-6",
+            "allowed": "0"
+          }
+        ],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "180000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "260000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "181610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "103220.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "183220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "104830.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "94730.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "164730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "86340.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000a",
+            "step_index": 10,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "7950.00",
+              "energy": 9,
+              "time": 10
+            },
+            "resources_after": {
+              "balance": "87950.00",
+              "energy": 6,
+              "time": 7
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000b",
+            "step_index": 11,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "87950.00",
+              "energy": 6,
+              "time": 7
+            },
+            "resources_after": {
+              "balance": "9560.00",
+              "energy": 4,
+              "time": 5
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000c",
+            "step_index": 12,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "9560.00",
+              "energy": 4,
+              "time": 5
+            },
+            "resources_after": {
+              "balance": "-68830.00",
+              "energy": 2,
+              "time": 3
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000d",
+            "step_index": 13,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-68830.00",
+              "energy": 2,
+              "time": 3
+            },
+            "resources_after": {
+              "balance": "11170.00",
+              "energy": -1,
+              "time": 0
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000e",
+            "step_index": 14,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "11170.00",
+              "energy": -1,
+              "time": 0
+            },
+            "resources_after": {
+              "balance": "-67220.00",
+              "energy": -3,
+              "time": -2
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-00000000000f",
+            "step_index": 15,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "-67220.00",
+              "energy": -3,
+              "time": -2
+            },
+            "resources_after": {
+              "balance": "-77320.00",
+              "energy": -5,
+              "time": -3
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000010",
+            "step_index": 16,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-77320.00",
+              "energy": -5,
+              "time": -3
+            },
+            "resources_after": {
+              "balance": "-7320.00",
+              "energy": -8,
+              "time": -6
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000a",
+              "step_index": 10,
+              "occurred_at": "2026-09-13T09:09:00+03:00",
+              "elapsed_minutes": 9,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000b",
+              "step_index": 11,
+              "occurred_at": "2026-09-13T09:10:00+03:00",
+              "elapsed_minutes": 10,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000c",
+              "step_index": 12,
+              "occurred_at": "2026-09-13T09:11:00+03:00",
+              "elapsed_minutes": 11,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000d",
+              "step_index": 13,
+              "occurred_at": "2026-09-13T09:12:00+03:00",
+              "elapsed_minutes": 12,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000e",
+              "step_index": 14,
+              "occurred_at": "2026-09-13T09:13:00+03:00",
+              "elapsed_minutes": 13,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-00000000000f",
+              "step_index": 15,
+              "occurred_at": "2026-09-13T09:14:00+03:00",
+              "elapsed_minutes": 14,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000010",
+              "step_index": 16,
+              "occurred_at": "2026-09-13T09:15:00+03:00",
+              "elapsed_minutes": 15,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            }
+          ]
+        }
+      },
+      "payload_hash": "aaa5bbd5aac49054ecc59f63172028946c51ccc9cb9b3134352cfba3a8f24ad1"
+    }
+  },
+  {
+    "name": "v10-duplicate",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "counterparty_contract_invalid",
+      "message": "Повторный ID шага.",
+      "details": {
+        "step_index": 2,
+        "field": "step_id"
+      }
+    }
+  },
+  {
+    "name": "v10-unknown_field",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "aml_context_invalid",
+      "message": "Поля поступления не соответствуют выбранному типу",
+      "details": null
+    }
+  },
+  {
+    "name": "v10-unknown_party",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "aml_context_invalid",
+      "message": "Сторона не соответствует типу операции",
+      "details": null
+    }
+  },
+  {
+    "name": "v10-negative_amount",
+    "expected": {
+      "error": "ValidationFailed",
+      "code": "aml_context_invalid",
+      "message": "1 validation error for AMLScenarioStepIn\namount\n  Input should be greater than 0 [type=greater_than, input_value='-1', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/greater_than",
+      "details": null
+    }
+  },
+  {
+    "name": "v10-overrides",
+    "expected": {
+      "steps": [
+        {
+          "step_id": "00000000-0000-0000-0000-000000000001",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": null,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000002",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000003",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000004",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "80000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000005",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000006",
+          "card": {
+            "id": 4,
+            "code": "cash_withdrawal",
+            "version": 1
+          },
+          "amount": "10000.00",
+          "context": {
+            "channel": "atm"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000007",
+          "card": {
+            "id": 2,
+            "code": "incoming_transfer",
+            "version": 1
+          },
+          "amount": "70000.00",
+          "context": {
+            "channel": "bank"
+          },
+          "action_details": {
+            "incoming_kind": "bank_transfer",
+            "bank_country": "RU"
+          },
+          "sender_id": "A",
+          "recipient_id": null,
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000008",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        },
+        {
+          "step_id": "00000000-0000-0000-0000-000000000009",
+          "card": {
+            "id": 3,
+            "code": "card_transfer",
+            "version": 1
+          },
+          "amount": "78000.00",
+          "context": {
+            "channel": "mobile"
+          },
+          "action_details": {},
+          "sender_id": null,
+          "recipient_id": "A",
+          "interval_minutes": 1,
+          "purpose_code": "shared_expense",
+          "claim_id": "shared"
+        }
+      ],
+      "snapshot": {
+        "schema_version": 7,
+        "ruleset_version": "expanded-rules-stage04-v1",
+        "valid": false,
+        "resources_after": {
+          "balance": "-122050.00",
+          "energy": 9,
+          "time": 10,
+          "available_steps": 5
+        },
+        "totals": {
+          "gross_inflow": "230000.00",
+          "gross_outflow": "400000.00",
+          "fees": "2050.00",
+          "target_outflow": "400000.00",
+          "purchase_outflow": "0.00"
+        },
+        "objective": {
+          "target_outflow": "400000.00",
+          "reached": true
+        },
+        "limit_usage": {
+          "cash": "10000.00",
+          "anonymous": "0.00",
+          "night_operations": 0,
+          "anonymous_operations": 0,
+          "actions": 9
+        },
+        "limits": [
+          {
+            "code": "cash",
+            "label": "Наличные операции",
+            "kind": "money",
+            "used": "10000.00",
+            "limit": "120000.00",
+            "remaining": "110000.00"
+          },
+          {
+            "code": "actions",
+            "label": "Действия в раунде",
+            "kind": "count",
+            "used": "9",
+            "limit": "14",
+            "remaining": "5"
+          },
+          {
+            "code": "purchase_total",
+            "label": "Сумма покупок",
+            "kind": "money",
+            "used": "0.00",
+            "limit": "30000.00",
+            "remaining": "30000.00"
+          },
+          {
+            "code": "purchase_count",
+            "label": "Количество покупок",
+            "kind": "count",
+            "used": "0",
+            "limit": "3",
+            "remaining": "3"
+          }
+        ],
+        "violations": [
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 3 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -26 780 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "field": "amount",
+            "current": "-26780.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 5 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -25 170 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "field": "amount",
+            "current": "-25170.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 6 «Снять наличные», поле «Сумма»: после операции и комиссии баланс становится -35 270 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "field": "amount",
+            "current": "-35270.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 8 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -43 660 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "field": "amount",
+            "current": "-43660.00",
+            "allowed": "0.00"
+          },
+          {
+            "reason": "insufficient_balance",
+            "message": "Шаг 9 «Перевести по карте», поле «Сумма»: после операции и комиссии баланс становится -122 050 ₽ — денег не хватает. Уменьшите сумму или добавьте поступление раньше по цепочке.",
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "field": "amount",
+            "current": "-122050.00",
+            "allowed": "0.00"
+          }
+        ],
+        "per_step": [
+          {
+            "step_id": "00000000-0000-0000-0000-000000000001",
+            "step_index": 1,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "50000.00",
+              "energy": 30,
+              "time": 30
+            },
+            "resources_after": {
+              "balance": "130000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000002",
+            "step_index": 2,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "130000.00",
+              "energy": 27,
+              "time": 27
+            },
+            "resources_after": {
+              "balance": "51610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000003",
+            "step_index": 3,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "51610.00",
+              "energy": 25,
+              "time": 25
+            },
+            "resources_after": {
+              "balance": "-26780.00",
+              "energy": 23,
+              "time": 23
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000004",
+            "step_index": 4,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-26780.00",
+              "energy": 23,
+              "time": 23
+            },
+            "resources_after": {
+              "balance": "53220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "gross": "80000.00",
+            "fee": "0.00",
+            "money_delta": "80000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000005",
+            "step_index": 5,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "53220.00",
+              "energy": 20,
+              "time": 20
+            },
+            "resources_after": {
+              "balance": "-25170.00",
+              "energy": 18,
+              "time": 18
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000006",
+            "step_index": 6,
+            "card_code": "cash_withdrawal",
+            "card_version": 1,
+            "card_title": "Снять наличные",
+            "resources_before": {
+              "balance": "-25170.00",
+              "energy": 18,
+              "time": 18
+            },
+            "resources_after": {
+              "balance": "-35270.00",
+              "energy": 16,
+              "time": 17
+            },
+            "gross": "10000.00",
+            "fee": "100.00",
+            "money_delta": "-10100.00",
+            "energy_cost": 2,
+            "time_cost": 1,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000007",
+            "step_index": 7,
+            "card_code": "incoming_transfer",
+            "card_version": 1,
+            "card_title": "Получить входящий перевод",
+            "resources_before": {
+              "balance": "-35270.00",
+              "energy": 16,
+              "time": 17
+            },
+            "resources_after": {
+              "balance": "34730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "gross": "70000.00",
+            "fee": "0.00",
+            "money_delta": "70000.00",
+            "energy_cost": 3,
+            "time_cost": 3,
+            "detail_factors": [
+              {
+                "field_key": "incoming_kind",
+                "field_label": "Тип поступления",
+                "value": "bank_transfer",
+                "value_label": "Банковский перевод",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              },
+              {
+                "field_key": "bank_country",
+                "field_label": "Банк отправителя",
+                "value": "RU",
+                "value_label": "Российский банк",
+                "risk_points": "0",
+                "description": "Наблюдаемый параметр поступления; не правило риска"
+              }
+            ]
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000008",
+            "step_index": 8,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "34730.00",
+              "energy": 13,
+              "time": 14
+            },
+            "resources_after": {
+              "balance": "-43660.00",
+              "energy": 11,
+              "time": 12
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          },
+          {
+            "step_id": "00000000-0000-0000-0000-000000000009",
+            "step_index": 9,
+            "card_code": "card_transfer",
+            "card_version": 1,
+            "card_title": "Перевести по карте",
+            "resources_before": {
+              "balance": "-43660.00",
+              "energy": 11,
+              "time": 12
+            },
+            "resources_after": {
+              "balance": "-122050.00",
+              "energy": 9,
+              "time": 10
+            },
+            "gross": "78000.00",
+            "fee": "390.00",
+            "money_delta": "-78390.00",
+            "energy_cost": 2,
+            "time_cost": 2,
+            "detail_factors": []
+          }
+        ],
+        "timeline": {
+          "version": "operation-timeline-v1",
+          "timezone": "Europe/Moscow",
+          "steps": [
+            {
+              "step_id": "00000000-0000-0000-0000-000000000001",
+              "step_index": 1,
+              "occurred_at": "2026-09-13T09:00:00+03:00",
+              "elapsed_minutes": 0,
+              "interval_minutes": null,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": null,
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000002",
+              "step_index": 2,
+              "occurred_at": "2026-09-13T09:01:00+03:00",
+              "elapsed_minutes": 1,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000003",
+              "step_index": 3,
+              "occurred_at": "2026-09-13T09:02:00+03:00",
+              "elapsed_minutes": 2,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000004",
+              "step_index": 4,
+              "occurred_at": "2026-09-13T09:03:00+03:00",
+              "elapsed_minutes": 3,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000005",
+              "step_index": 5,
+              "occurred_at": "2026-09-13T09:04:00+03:00",
+              "elapsed_minutes": 4,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000006",
+              "step_index": 6,
+              "occurred_at": "2026-09-13T09:05:00+03:00",
+              "elapsed_minutes": 5,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 1
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000007",
+              "step_index": 7,
+              "occurred_at": "2026-09-13T09:06:00+03:00",
+              "elapsed_minutes": 6,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 3
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000008",
+              "step_index": 8,
+              "occurred_at": "2026-09-13T09:07:00+03:00",
+              "elapsed_minutes": 7,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            },
+            {
+              "step_id": "00000000-0000-0000-0000-000000000009",
+              "step_index": 9,
+              "occurred_at": "2026-09-13T09:08:00+03:00",
+              "elapsed_minutes": 8,
+              "interval_minutes": 1,
+              "waiting_time_cost": 0,
+              "time_of_day": "day",
+              "pace": "rapid",
+              "operation_time_cost": 2
+            }
+          ]
+        }
+      },
+      "payload_hash": "198e77efc1a7191002eef1202860436f80318ce523877dc57405fe31686233c9"
+    }
+  }
+]

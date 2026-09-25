@@ -224,13 +224,18 @@ def resource_steps(steps, config):
 
 
 def evaluate(steps, config):
+    return _evaluate_canonical(canonical_steps(steps, config), config)
+
+
+def _evaluate_canonical(canonical, config, specs=None, policy=None):
     from src.aml_workshop_simulator.services.expanded_simulation import (
-        evaluate_expanded_scenario,
+        _evaluate_canonical as evaluate_resources,
     )
-    canonical = canonical_steps(steps, config)
-    result = evaluate_expanded_scenario(
-        resource_steps(steps, config), resource_config(config)
-    )
+    projected = deepcopy(canonical)
+    for step in projected:
+        if step['card']['code'] == 'incoming_transfer':
+            step['action_details'] = {'transfer_source': source_for(step['action_details'])}
+    result = evaluate_resources(projected, resource_config(config), specs, policy)
     for row, step in zip(result["per_step"], canonical):
         if step["card"]["code"] == "incoming_transfer":
             row["detail_factors"] = [dict(field_key=key, field_label=next(f["label"] for f in fields_for("incoming_transfer") if f["key"] == key), value=value,
