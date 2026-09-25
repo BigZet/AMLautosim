@@ -1,0 +1,119 @@
+{
+  "before": {
+    "1": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 15974,
+          "max_bytes": 15974
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 13165,
+          "max_bytes": 13165
+        }
+      }
+    },
+    "8": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 79890,
+          "max_bytes": 79890
+        },
+        "reorder": {
+          "count": 1,
+          "median_bytes": 80144,
+          "max_bytes": 80144
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 13539,
+          "max_bytes": 13540
+        }
+      }
+    },
+    "16": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 149423,
+          "max_bytes": 149423
+        },
+        "reorder": {
+          "count": 1,
+          "median_bytes": 150807,
+          "max_bytes": 150807
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 16025,
+          "max_bytes": 16026
+        }
+      }
+    }
+  },
+  "after": {
+    "1": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 15976,
+          "max_bytes": 15976
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 13165,
+          "max_bytes": 13165
+        }
+      }
+    },
+    "8": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 20503,
+          "max_bytes": 20503
+        },
+        "reorder": {
+          "count": 1,
+          "median_bytes": 16464,
+          "max_bytes": 16464
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 13545,
+          "max_bytes": 13545
+        }
+      }
+    },
+    "16": {
+      "failures": 0,
+      "actions": {
+        "add": {
+          "count": 1,
+          "median_bytes": 22210,
+          "max_bytes": 22210
+        },
+        "reorder": {
+          "count": 1,
+          "median_bytes": 19012,
+          "max_bytes": 19012
+        },
+        "edit": {
+          "count": 5,
+          "median_bytes": 16030,
+          "max_bytes": 16030
+        }
+      }
+    }
+  },
+  "measurement": "Bidirectional Socket.IO application messages including Engine.IO prefix; excludes WebSocket framing, compression, heartbeat; includes concurrent UI updates within action.",
+  "after_image": "sha256:319033265bcd7f96f315444bef3fa9d9f8aca8340c5a1d3f708ced5d8d407ac2",
+  "limitation": "Working image before final reconnect value refresh regression fix; repeat final payload gate after T15. Not browser paint timing."
+}

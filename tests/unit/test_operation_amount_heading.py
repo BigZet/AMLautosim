@@ -70,5 +70,32 @@ def test_amount_heading_updates_without_rebuilding_cards(tmp_path, monkeypatch):
                     assert screen.operation_elements == operations
                     assert operations[current["step_id"]].value is True
             assert screen.changed.call_count == 20
+            with user:
+                screen.editor.steps.append(step(config, 'card_transfer'))
+                screen.render_chain()
+            assert all(screen.operation_elements[key] is value for key, value in operations.items())
+            assert all(not field.is_deleted for field in fields)
+            with user:
+                screen.editor.steps.reverse()
+                screen.render_chain()
+            assert all(screen.operation_elements[key] is value for key, value in operations.items())
+            removed = screen.editor.steps.pop()
+            with user:
+                screen.render_chain()
+            assert screen.operation_elements.get(removed['step_id']) is None
+            assert all(not value.is_deleted for key, value in operations.items() if key != removed['step_id'])
+            # A fresh authoritative state can replace a card's values after reconnect.
+            from copy import deepcopy
+            refreshed = deepcopy(screen.editor.steps[0])
+            refreshed['amount'] = '34567.89'
+            screen.editor.steps[0] = refreshed
+            unchanged = dict(screen.operation_elements)
+            with user:
+                screen.render_chain()
+            card = screen.operation_elements[refreshed['step_id']]
+            amount_field = next(e for e in card.descendants() if isinstance(e, ui.number))
+            assert amount_field.value == 34567.89
+            assert all(screen.operation_elements[key] is value for key, value in unchanged.items()
+                       if key != refreshed['step_id'])
 
     asyncio.run(run())

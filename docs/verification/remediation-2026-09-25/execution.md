@@ -183,3 +183,29 @@ v10: 6.706/8.532/10.410 -> 4.034/3.787/4.498.
 These are microbenchmarks, not end-to-end capacity. No thread offload was added
 without a separate measured benefit. Controlled compatibility publication
 replayed all 25 original chains unchanged and retained previous saved pins.
+
+## T10 — persistent operation cards
+
+StepCard owns one step's elements; GameEditor remains the only state/autosave
+owner. Add/delete/copy/reorder keep unaffected element identities. Timeline
+controls and captions follow the new order; moving a waiting operation first
+explains the wait reset. Resources were extracted into their own module.
+Authoritative replacement values refresh the affected card after reconnect;
+its regression failed with stale 10000 and now passes with 34567.89.
+The required editing/navigation/amount/poll/timeline suite passed 18 tests.
+Timeline test selectors now follow step identity rather than creation order.
+
+Measured bidirectional application-message bytes (1/8/16 steps): ordinary edit
+max 13165 / 13545 / 16030; 8-step target <=25000 passed. At 8 steps add changed
+79890 -> 20503, reorder 80144 -> 16464. At 16 steps add 149423 -> 22210,
+reorder 150807 -> 19012. Five edits and one structural action per case, zero
+failures in final runs. Ordinary edits already updated headings incrementally,
+so their payload is essentially unchanged. Raw reports and summary accompany
+this record. The probe excludes transport framing/compression/heartbeat, and
+includes all concurrent application messages during the action. It is not a
+browser paint measurement. Initial probes that violated purchase limits were
+retained in the local ledger and replaced with fresh-account bounded inputs.
+
+The measured working image precedes the final reconnect regression fix.
+Final payload, focus/caret/scroll and real browser gates continue in T15;
+no real-device completion is claimed here.

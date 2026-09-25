@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import importlib.metadata
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -26,12 +27,15 @@ class UIClient:
         self.updates = asyncio.Event()
         self.tab = str(uuid4())
         self.received = 0
+        self.sent = 0
+        self.socket.eio.on("message", self.on_message)
+        self.original_send = self.socket.eio.send
+        self.socket.eio.send = self.send_message
         self.update_count = 0
         self.socket.on("update", self.on_update)
         self.socket.on("open", self.on_open)
 
     async def on_update(self, data):
-        self.received += len(json.dumps(data).encode())
         self.update_count += 1
         for key, value in data.items():
             if key == "_id":
@@ -41,7 +45,18 @@ class UIClient:
             else:
                 self.elements[str(key)] = value
         self.updates.set()
-        await self.socket.emit("ack", {"client_id": self.client_id, "next_message_id": data.get("_id", 0) + 1})
+        await self.socket.emit(
+            "ack",
+            {"client_id": self.client_id, "next_message_id": data.get("_id", 0) + 1},
+        )
+
+    async def on_message(self, data):
+        self.received += len(data if isinstance(data, bytes) else data.encode()) + 1
+        await self.socket._handle_eio_message(data)
+
+    async def send_message(self, data):
+        self.sent += len(data if isinstance(data, bytes) else data.encode()) + 1
+        await self.original_send(data)
 
     async def on_open(self, data):
         await self.navigation.put(data["path"])
@@ -85,7 +100,10 @@ class UIClient:
                 continue
             if label is not None and element.get("props", {}).get("label") != label:
                 continue
-            if text is not None and element.get("text", element.get('props', {}).get('label')) != text:
+            if (
+                text is not None
+                and element.get("text", element.get("props", {}).get("label")) != text
+            ):
                 continue
             if event and not any(e["type"] == event for e in element.get("events", [])):
                 continue
@@ -132,19 +150,29 @@ class UIClient:
             lambda: self.find(text="Входящий перевод", event="click"), timeout=30
         )
 
-    async def prepare(self):
-        if not self.find(label="Сумма", event="update:modelValue"):
-            await self.emit(self.find(text="Входящий перевод", event="click"), "click")
-            await self.wait(lambda: self.find(label="Сумма", event="update:modelValue"))
+    async def prepare(self, count=1):
+        def fields():
+            return sum(
+                isinstance(e, dict) and e.get("props", {}).get("label") == "Сумма"
+                for e in self.elements.values()
+            )
+
+        while fields() < count:
+            before = fields()
+            title = ("Входящий перевод", "Перевод по карте", "Наличные", "Покупка")[
+                before % 4
+            ]
+            await self.emit(self.find(text=title, event="click"), "click")
+            await self.wait(lambda: fields() > before)
+            await self.wait(lambda: self.find(text="Сохранено"))
         await self.wait(lambda: self.find(text="Сохранено"))
 
     async def edit(self, amount):
         previous = self.update_count
-        await self.emit(
-            self.find(label="Сумма", event="update:modelValue"),
-            "update:modelValue",
-            amount,
-        )
+        field = self.find(label="Сумма", event="update:modelValue")
+        props = field[1]["props"]
+        value = min(float(props["max"]), float(props["min"]) + amount % 100 + 1)
+        await self.emit(field, "update:modelValue", value)
         await self.wait(
             lambda: (
                 self.update_count > previous
@@ -154,6 +182,16 @@ class UIClient:
                 )
             )
         )
+        await self.wait(lambda: self.find(text="Сохранено"))
+
+    async def reorder(self):
+        previous = self.update_count
+        found = next((k, e) for k, e in self.elements.items()
+                     if isinstance(e, dict) and e.get("props", {}).get("icon") == "arrow_upward"
+                     and not e.get("props", {}).get("disable", False))
+        await self.emit(found, "click")
+        await self.wait(lambda: self.update_count > previous and
+                        (self.find(text="Есть несохранённые изменения") or self.find(text="Сохраняем…")))
         await self.wait(lambda: self.find(text="Сохранено"))
 
     async def close(self):
@@ -174,6 +212,7 @@ async def run(args):
 
     async def measured(kind, index, action):
         started = time.monotonic()
+        previous_bytes = users[index].received + users[index].sent if index >= 0 else 0
         failure = None
         try:
             await asyncio.wait_for(action(), 40)
@@ -186,6 +225,11 @@ async def run(args):
                 "at": time.time(),
                 "seconds": time.monotonic() - started,
                 "failure": failure,
+                "ws_message_bytes": users[index].received
+                + users[index].sent
+                - previous_bytes
+                if index >= 0
+                else 0,
             }
         )
         return failure is None
@@ -227,19 +271,22 @@ async def run(args):
 
     try:
         ready = await asyncio.gather(
-            *(
-                login(i, u, a)
-                for i, (u, a) in enumerate(zip(users, accounts))
-            )
+            *(login(i, u, a) for i, (u, a) in enumerate(zip(users, accounts)))
         )
         prepared = await asyncio.gather(
             *(
-                measured("prepare", i, u.prepare)
+                measured("prepare", i, lambda u=u: u.prepare(max(0, args.steps - 1) if args.structural else args.steps))
                 if ready[i]
                 else asyncio.sleep(0, result=False)
                 for i, u in enumerate(users)
             )
         )
+        if args.structural:
+            for i, user in enumerate(users):
+                if prepared[i]:
+                    prepared[i] = await measured("add", i, lambda u=user: u.prepare(args.steps))
+                    if args.steps > 1 and prepared[i]:
+                        prepared[i] = await measured("reorder", i, user.reorder)
         deadline = time.monotonic() + args.seconds
 
         async def exercise(i, user):
@@ -249,7 +296,7 @@ async def run(args):
                 await measured("edit", i, lambda: user.edit(20000 + iteration % 1000))
                 if args.reconnect_every and iteration % args.reconnect_every == 0:
                     await measured("reconnect", i, lambda: user.open("/play"))
-                    await measured("prepare", i, user.prepare)
+                    await measured("prepare", i, lambda: user.prepare(args.steps))
                 await asyncio.sleep(args.interval)
 
         async def canary():
@@ -282,7 +329,9 @@ async def run(args):
             },
             "network_bytes_sent": net.bytes_sent - start_net.bytes_sent,
             "network_bytes_received": net.bytes_recv - start_net.bytes_recv,
-            "ws_update_bytes": sum(u.received for u in users),
+            "ws_message_payload_bytes": sum(u.received + u.sent for u in users),
+            "steps": args.steps,
+            "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "actions": results,
             "samples": samples,
             "note": "Socket.IO UI events through proxy; no DOM/render-time claims. Network counters are host-wide.",
@@ -306,6 +355,8 @@ if __name__ == "__main__":
         "--accounts", required=True, help="Private JSON file of precreated accounts"
     )
     parser.add_argument("--users", type=int, default=20)
+    parser.add_argument("--structural", action="store_true")
+    parser.add_argument("--steps", type=int, default=1)
     parser.add_argument("--login-concurrency", type=int, default=5)
     parser.add_argument("--seconds", type=int, default=120)
     parser.add_argument("--interval", type=float, default=3)

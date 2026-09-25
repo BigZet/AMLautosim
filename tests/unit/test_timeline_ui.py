@@ -92,52 +92,32 @@ def test_interval_reorder_delete_and_reload(tmp_path, monkeypatch):
             with user:
                 intervals()[0].set_value(1440)
             await user.should_see("15.09.2026, 00:30")
-            # Actions must work while every operation is collapsed.
+            # Select actions by step identity: element IDs no longer encode visual order.
+            def action(index, icon):
+                element = screen.operation_elements[screen.editor.steps[index]['step_id']]
+                return next(child for child in element.descendants() if isinstance(child, ui.button) and child._props.get('icon') == icon)
+
             with user:
                 screen.open_steps.clear()
                 screen.render_chain()
                 assert all(not e.value for e in user.find(ui.expansion).elements)
-                copies = sorted(
-                    (b for b in user.find(ui.button).elements if b._props.get("icon") == "content_copy"),
-                    key=lambda b: b.id,
-                )
-                copies[0].mark("copy-collapsed")
+                action(-1, 'content_copy').mark('copy-collapsed')
             previous_count = len(screen.editor.steps)
-            user.find("copy-collapsed").click()
+            user.find('copy-collapsed').click()
             assert len(screen.editor.steps) == previous_count + 1
             assert not screen.open_steps
             with user:
-                deletes = sorted(
-                    (b for b in user.find(ui.button).elements if b._props.get("icon") == "delete_outline"),
-                    key=lambda b: b.id,
-                )
-                deletes[0].mark("delete-copy")
-            user.find("delete-copy").click()
+                action(-1, 'delete_outline').mark('delete-copy')
+            user.find('delete-copy').click()
             assert len(screen.editor.steps) == previous_count
             with user:
-                buttons = sorted(
-                    (
-                        b
-                        for b in user.find(ui.button).elements
-                        if b._props.get("icon") == "arrow_upward"
-                    ),
-                    key=lambda b: b.id,
-                )
-                buttons[-1].mark("move-first")
-            user.find("move-first").click()
-            assert screen.editor.steps[0]["interval_minutes"] is None
-            assert screen.editor.steps[1]["interval_minutes"] == 1
+                action(0, 'arrow_upward').mark('move-first')
+            user.find('move-first').click()
+            assert screen.editor.steps[0]['interval_minutes'] is None
+            assert screen.editor.steps[1]['interval_minutes'] == 1
             with user:
-                deletes = sorted(
-                    (
-                        b
-                        for b in user.find(ui.button).elements
-                        if b._props.get("icon") == "delete_outline"
-                    ),
-                    key=lambda b: b.id,
-                )
-                deletes[1].mark("remove-second")
-            user.find("remove-second").click()
+                action(1, 'delete_outline').mark('remove-second')
+            user.find('remove-second').click()
             assert await screen.editor.write()
             expected = deepcopy(screen.editor.steps)
             expected_resources = state["scenario"]["resources"]

@@ -41,3 +41,12 @@ workers retain samples for every PID rather than treating one as aggregate.
 SQL durations omit statements/parameters. Acquisition timing includes connection
 creation/pre-ping and near-zero reuse within a transaction. Histograms retain
 the last 1024 samples plus lifetime count/sum; percentile windows are explicit.
+
+For card payload comparison use fresh accounts with `--steps 1`, `8`, `16`
+and `--structural`. The last add and a reorder are separate actions. Edits
+respect the field's published min/max. `ws_message_bytes` counts incoming
+and outgoing Socket.IO application envelopes plus Engine.IO message prefixes;
+it excludes WebSocket framing/compression and heartbeat packets. Concurrent
+application updates in the measurement interval are included. The exact driver
+hash is recorded. Legacy T07 reports counted only update-event payloads and
+must not be compared directly with this complete application-message counter.
