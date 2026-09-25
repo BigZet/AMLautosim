@@ -1,0 +1,58 @@
+{
+  "1": {
+    "edit": {
+      "count": 8,
+      "failures": 0,
+      "max_bytes": 14886,
+      "median_seconds": 1.1967558999895118
+    },
+    "add": {
+      "count": 1,
+      "failures": 0,
+      "max_bytes": 26548,
+      "median_seconds": 1.2191260000108741
+    }
+  },
+  "8": {
+    "edit": {
+      "count": 8,
+      "failures": 0,
+      "max_bytes": 15262,
+      "median_seconds": 1.1937517000187654
+    },
+    "add": {
+      "count": 1,
+      "failures": 0,
+      "max_bytes": 24591,
+      "median_seconds": 1.2141040000133216
+    },
+    "reorder": {
+      "count": 1,
+      "failures": 0,
+      "max_bytes": 43935,
+      "median_seconds": 1.1896411000052467
+    }
+  },
+  "16": {
+    "edit": {
+      "count": 8,
+      "failures": 0,
+      "max_bytes": 18655,
+      "median_seconds": 1.195946499996353
+    },
+    "add": {
+      "count": 1,
+      "failures": 0,
+      "max_bytes": 27329,
+      "median_seconds": 1.2007821999723092
+    },
+    "reorder": {
+      "count": 1,
+      "failures": 0,
+      "max_bytes": 47903,
+      "median_seconds": 1.19788689998677
+    }
+  },
+  "image": "sha256:4e51e23853e444596fe758d4c27a6d56d2fcc805e26018c5dc8833026f2e3250",
+  "commit": "ac11c78"
+}

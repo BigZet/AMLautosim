@@ -220,3 +220,22 @@ without re-canonicalizing steps. The current-read test still compares all
 persisted fields and separately checks its newly enriched metadata. UI test
 selection follows the newly added card and explicitly expands conditions.
 The combined purchase/preparation/rounds/full UI regression run passed 43 tests.
+
+### T15 mobile/browser evidence
+
+UI commit ac11c78, immutable image
+`sha256:4e51e23853e444596fe758d4c27a6d56d2fcc805e26018c5dc8833026f2e3250`.
+Full Chromium/Firefox/WebKit matrix: 36 passed in 242.17s; installed Windows
+Chrome: 12 passed in 65.46s; Edge: 12 passed in 64.08s. Prior working-overlay
+matrix also passed 36/36. Source guards serialize overlapping screen polls;
+62 targeted API/UI/unit regressions passed. Earlier WebKit first-click failures
+and their diagnostic limits remain described in browser-matrix.md.
+
+Screenshots and layout evidence cover 320/360/390/430/768/1280 CSS px; no page
+horizontal overflow or visible buttons smaller than 44px in the captured chain.
+On 1/8/16-step chains ordinary edit maximum application-message sizes were
+14886/15262/18655 bytes, zero failed payload actions. Raw compressed reports,
+separate add/reorder measurements and image metadata accompany the matrix.
+Actual iOS/Android devices, VoiceOver/TalkBack, OS text scaling, native macOS
+Safari and production checks remain unverified; the PR remains draft.
+T11 final capacity/soak gate follows all remaining runtime changes.
