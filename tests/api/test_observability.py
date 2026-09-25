@@ -39,3 +39,27 @@ def test_unknown_path_never_becomes_metric_label(api):
 
     api.get("/private-email@example.com")
     assert all("private-email" not in name for name in metrics.snapshot()["histograms"])
+
+
+def test_readiness_error_logs_type_and_request_id_without_secret(api, caplog):
+    from src.aml_workshop_simulator.db.session import get_db
+
+    class Unavailable:
+        async def execute(self, *args, **kwargs):
+            raise RuntimeError('password=do-not-log-this session=private-token')
+
+    async def unavailable():
+        yield Unavailable()
+
+    api.app.dependency_overrides[get_db] = unavailable
+    try:
+        with caplog.at_level('ERROR', logger='aml.telemetry'):
+            response = api.get('/health/ready')
+        assert response.status_code == 503
+        assert response.headers['X-Request-ID'] in caplog.text
+        assert 'RuntimeError' in caplog.text
+        assert 'do-not-log-this' not in caplog.text
+        assert 'private-token' not in caplog.text
+        assert api.get('/health/live').status_code == 200
+    finally:
+        api.app.dependency_overrides.pop(get_db)

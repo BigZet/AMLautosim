@@ -1,0 +1,151 @@
+{
+  "image_id": "sha256:070668a28329c7f4f85309010b5e2f800d0b9b651ae82859dd53047b18aab84f",
+  "measurements": [
+    {
+      "users": 20,
+      "actions": {
+        "login": {
+          "count": 20,
+          "failed": 0,
+          "p95_seconds": 0.7533718000049703
+        },
+        "prepare": {
+          "count": 20,
+          "failed": 0,
+          "p95_seconds": 1.6582571000326425
+        },
+        "edit": {
+          "count": 560,
+          "failed": 0,
+          "p95_seconds": 1.700778700003866
+        },
+        "canary": {
+          "count": 118,
+          "failed": 0,
+          "p95_seconds": 0.03275140002369881
+        }
+      },
+      "peak_connected_clients": 20,
+      "api": {
+        "rss_peak_bytes": 204517376,
+        "lag_window_max_seconds": 0.07296605000010459
+      },
+      "ui": {
+        "rss_peak_bytes": 146526208,
+        "lag_window_max_seconds": 0.14166203799959476
+      },
+      "generator_cpu_peak": 21.3
+    },
+    {
+      "users": 30,
+      "actions": {
+        "login": {
+          "count": 30,
+          "failed": 0,
+          "p95_seconds": 0.8837146000005305
+        },
+        "prepare": {
+          "count": 30,
+          "failed": 0,
+          "p95_seconds": 1.3960935000213794
+        },
+        "edit": {
+          "count": 817,
+          "failed": 0,
+          "p95_seconds": 1.771262900030706
+        },
+        "canary": {
+          "count": 116,
+          "failed": 0,
+          "p95_seconds": 0.15969509998103604
+        }
+      },
+      "peak_connected_clients": 30,
+      "api": {
+        "rss_peak_bytes": 206368768,
+        "lag_window_max_seconds": 0.07620391500040569
+      },
+      "ui": {
+        "rss_peak_bytes": 160591872,
+        "lag_window_max_seconds": 0.14166203799959476
+      },
+      "generator_cpu_peak": 20.7
+    },
+    {
+      "users": 45,
+      "actions": {
+        "login": {
+          "count": 45,
+          "failed": 0,
+          "p95_seconds": 1.0424620999838226
+        },
+        "prepare": {
+          "count": 45,
+          "failed": 0,
+          "p95_seconds": 1.5132833999814466
+        },
+        "edit": {
+          "count": 1159,
+          "failed": 0,
+          "p95_seconds": 2.383311400015373
+        },
+        "canary": {
+          "count": 115,
+          "failed": 0,
+          "p95_seconds": 0.21357290004380047
+        }
+      },
+      "peak_connected_clients": 45,
+      "api": {
+        "rss_peak_bytes": 207785984,
+        "lag_window_max_seconds": 0.08086374599952251
+      },
+      "ui": {
+        "rss_peak_bytes": 177270784,
+        "lag_window_max_seconds": 0.273515148000115
+      },
+      "generator_cpu_peak": 24.6
+    },
+    {
+      "users": 60,
+      "actions": {
+        "login": {
+          "count": 60,
+          "failed": 0,
+          "p95_seconds": 1.2424182000104338
+        },
+        "prepare": {
+          "count": 60,
+          "failed": 0,
+          "p95_seconds": 1.7868718999670818
+        },
+        "edit": {
+          "count": 1500,
+          "failed": 0,
+          "p95_seconds": 3.036919999984093
+        },
+        "canary": {
+          "count": 109,
+          "failed": 0,
+          "p95_seconds": 0.5863489999901503
+        }
+      },
+      "peak_connected_clients": 60,
+      "api": {
+        "rss_peak_bytes": 209088512,
+        "lag_window_max_seconds": 0.10005195399935474
+      },
+      "ui": {
+        "rss_peak_bytes": 190705664,
+        "lag_window_max_seconds": 0.34197715500067716
+      },
+      "generator_cpu_peak": 19.4
+    }
+  ],
+  "limitations": [
+    "Single-operation server UI edits; Socket.IO driver does not measure browser rendering.",
+    "Shared Windows/Docker workstation; implementation API regressions ran concurrently outside this lab.",
+    "Histogram windows retain preceding measurements; raw timestamps/counts are included.",
+    "Not production hardware and not a capacity guarantee."
+  ]
+}

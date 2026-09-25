@@ -120,3 +120,34 @@ symlink skip. Full API run pending. Inventory retains every previous runtime
 case except two intentionally replaced account-global lockout tests, now
 covered by per-IP isolation tests. Production ingress rollout, real off-host
 backup destination and production-sized recovery are not verified.
+
+## T07 — instrumentation and measured baseline
+
+Private token-gated metrics expose route/status timing, SQL timing, connection
+acquisition, pool state, API/UI event-loop lag, CPU/RSS, UI HTTP in-flight and
+connected client count. Request IDs are generated server-side; validated client
+correlation is separate. Readiness failures log type and request ID, not exception
+message/SQL/password. Telemetry regressions: 6 passed; contract bundle: 12 passed;
+UI save compatibility: 6 passed. The runtime lock adds only psutil 7.2.2.
+
+The real cookie/HTTP/Socket.IO driver exercised nginx -> NiceGUI -> API -> PG16
+on local image sha256:070668a28329c7f4f85309010b5e2f800d0b9b651ae82859dd53047b18aab84f.
+Each steady-state series lasted 120 seconds after login/prepare. Login warmup
+concurrency was 5; these are not simultaneous-login figures. Sixty precreated
+accounts took 12.12 seconds to register separately.
+
+| VU | edits | failed actions | edit p95 (s) | canary p95 (s) |
+|---:|---:|---:|---:|---:|
+| 20 | 560 | 0 | 1.701 | 0.033 |
+| 30 | 817 | 0 | 1.771 | 0.160 |
+| 45 | 1159 | 0 | 2.383 | 0.214 |
+| 60 | 1500 | 0 | 3.037 | 0.586 |
+
+Peak connected clients matched requested VU. At 60 VU maximum sampled UI lag
+was 0.342 s and API lag 0.100 s; generator CPU peak was 19.4% of one core.
+Increasing UI lag correlates with edit latency; exact CPU attribution remains
+unknown pending profiling. The 1.5-second target does not pass this baseline.
+Raw timestamped actions/metrics are preserved in T07-baseline-*.json.gz; summary
+and limitations are in T07-baseline-summary.json. Shared workstation background
+regression activity and lack of browser paint measurement preclude production
+capacity claims. Final acceptance needs controlled repeat runs and the 2h soak.
