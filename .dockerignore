@@ -69,6 +69,7 @@ Thumbs.db
 
 # Local execution state and private verification artifacts
 .local-run/
+.superpowers/
 
 # Deferred CatBoost tooling is retained in source only
 src/aml_workshop_simulator/services/catboost_features.py

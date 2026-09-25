@@ -34,8 +34,8 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(package))
     monkeypatch.setattr(
-        'src.aml_workshop_simulator.services.game_classifier.get_game_classifier',
-        lambda: model_scoring._probability_scorer(str(package)),
+        'src.aml_workshop_simulator.services.game_classifier.get_pinned_game_classifier',
+        lambda config: model_scoring._probability_scorer(str(package)),
     )
     public = deepcopy(observations[0])
     config, steps = public["config"], public["steps"]

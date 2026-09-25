@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
+import pytest
 from scripts.aml_game_curriculum import candidate
 from src.aml_workshop_simulator.services.aml_game_pattern_panel_v2 import extract_panel_features, assess_panel
 from src.aml_workshop_simulator.services import aml_game_window_model_v2 as window
 
 
+@pytest.mark.research
 def test_window_targets_equal_original_chain_policy():
     features = [extract_panel_features(candidate(s)[1]) for s in range(120)]
     targets = np.array([assess_panel(f)['target_probability'] for f in features])

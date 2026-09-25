@@ -23,8 +23,8 @@ def installed_aml_round(active_round, sql, monkeypatch, probability_scorer):  # 
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", "test-package")
     monkeypatch.setattr(
-        'src.aml_workshop_simulator.services.game_classifier.get_game_classifier',
-        lambda: probability_scorer,
+        'src.aml_workshop_simulator.services.game_classifier.get_pinned_game_classifier',
+        lambda config: probability_scorer,
     )
     return active_round, config, steps
 

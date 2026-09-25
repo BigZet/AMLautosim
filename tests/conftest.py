@@ -12,6 +12,7 @@ from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+pytest_plugins = ['scripts.ci_test_policy']
 ADMIN_URL = make_url(
     os.getenv("TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres")
 ).set(drivername="postgresql")

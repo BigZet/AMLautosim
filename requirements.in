@@ -11,3 +11,4 @@ pydantic-settings==2.15.0
 httpx==0.28.1
 nicegui==3.16.0
 catboost==1.2.10
+tzdata==2026.4

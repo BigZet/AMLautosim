@@ -32,6 +32,7 @@ def runtime():
 @pytest.fixture(scope="module")
 def observations():
     from src.aml_workshop_simulator.domain.operation_purposes import allowed_purposes
+    from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
     # Use existing compatible cases; retired purposes remain rejected by runtime.
     rows = [
@@ -39,7 +40,18 @@ def observations():
         if r["aml_label"] is not None
         and all(s["purpose_code"] in allowed_purposes(s) for s in r["public_snapshot"]["steps"])
     ][:8]
-    return [r["public_snapshot"] for r in rows]
+    snapshots = [deepcopy(r["public_snapshot"]) for r in rows]
+    # The archived authoring corpus still carries retired limit fields. Exercise
+    # native inference with the same public config normalization used by the API;
+    # reproduction of the archived generator has its own research tests.
+    for snapshot in snapshots:
+        config = snapshot['config']
+        snapshot['config'] = {
+            **parse_game_config({k: v for k, v in config.items()
+                                 if k not in ('card_snapshots', 'risk_model', 'config_version')}).dump(),
+            'card_snapshots': config['card_snapshots'],
+        }
+    return snapshots
 
 
 @pytest.fixture

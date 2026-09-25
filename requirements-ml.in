@@ -1,3 +1,5 @@
 # Isolated offline training and its tests. Does not change runtime requirements.
 -r requirements-dev.txt
 catboost==1.2.10
+scikit-learn==1.9.1
+cloudpickle==3.1.2
