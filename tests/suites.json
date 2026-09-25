@@ -142,6 +142,8 @@
     "tests/api/test_scenarios.py": "runtime",
     "tests/api/test_scoring.py": "runtime",
     "tests/api/test_semantic_v9.py": "runtime",
-    "tests/load/test_nicegui_workshop.py": "load"
+    "tests/load/test_nicegui_workshop.py": "load",
+    "tests/browser/test_responsive_layout.py": "browser",
+    "tests/browser/test_mobile_workshop.py": "browser"
   }
 }
