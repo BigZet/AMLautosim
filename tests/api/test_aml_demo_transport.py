@@ -29,7 +29,9 @@ def test_frozen_demo_survives_real_creation_submit_storage_and_retry(
     request_api,
     admin,
     player_factory,
+    install_test_worker_calculator,
 ):
+    install_test_worker_calculator(lambda: probability_scorer)
     # Both overrides are isolated in this fixture. Public release remains closed.
     monkeypatch.setattr(router, "require_new_round_allowed", lambda config: None)
     monkeypatch.setattr(admin_rounds, "require_new_round_allowed", lambda config: None)

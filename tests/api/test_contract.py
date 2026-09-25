@@ -74,6 +74,7 @@ def test_migration_and_seed_are_current_and_idempotent(api, sql):
         "rounds",
         "scenarios",
         "scoring_results",
+        "scoring_jobs",
         "action_cards",
         "audit_events",
         "auth_rate_limits",

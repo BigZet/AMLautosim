@@ -110,7 +110,7 @@ def test_published_examples_end_to_end(
             raise ValueError("Injected scoring failure")
         return original(*args, **kwargs)
 
-    with patch.object(scorer, "score", side_effect=fail_second):
+    with patch.object(type(scorer), "score", side_effect=fail_second):
         request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 0
     request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
@@ -138,7 +138,7 @@ def test_published_examples_end_to_end(
     assert len(board) == 25
     assert all(row["score_kind"] == "educational_pattern_probability" for row in board)
     with patch.object(
-        scorer, "score", side_effect=AssertionError("must not recalculate")
+        type(scorer), "score", side_effect=AssertionError("must not recalculate")
     ):
         request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 25

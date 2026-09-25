@@ -26,6 +26,18 @@ def installed_aml_round(active_round, sql, monkeypatch, probability_scorer):  # 
         'src.aml_workshop_simulator.services.game_classifier.get_pinned_game_classifier',
         lambda config: probability_scorer,
     )
+    # Schema-4 compatibility fixture is synthetic and has no released package.
+    # Install it explicitly in the worker; production only accepts real8/10 models.
+    from types import SimpleNamespace
+    from src.aml_workshop_simulator.services import scoring_jobs
+    from src.aml_workshop_simulator.services.scenario_service import load_round_card_specs, round_policy
+
+    def initialize_worker(snapshot):
+        row = SimpleNamespace(game_config=snapshot)
+        specs = load_round_card_specs(row)
+        scoring_jobs._thread.calculator = (specs, snapshot, round_policy(row, specs), probability_scorer)
+
+    monkeypatch.setattr(scoring_jobs, 'initialize_calculator', initialize_worker)
     return active_round, config, steps
 
 

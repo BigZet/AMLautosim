@@ -20,6 +20,7 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
     player,
     admin,
     command,
+    install_test_worker_calculator,
 ):
     package, _, _ = candidate
     native_factory = aml_probability_model.AMLProbabilityModel
@@ -33,6 +34,7 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         lambda path: native_factory(path, offline_candidate=True),
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(package))
+    install_test_worker_calculator(lambda: model_scoring.ProbabilityScorer(str(package)))
     monkeypatch.setattr(
         'src.aml_workshop_simulator.services.game_classifier.get_pinned_game_classifier',
         lambda config: model_scoring._probability_scorer(str(package)),

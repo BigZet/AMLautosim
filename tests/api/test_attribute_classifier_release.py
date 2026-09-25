@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import pytest
 
+
 from tests.api import test_game_classifier_release as historical
 
 
@@ -24,3 +25,5 @@ def test_attribute_examples_end_to_end(request_api, admin, round_id, player_fact
 
 def test_attribute_context_remains_frozen(request_api,admin,round_id,monkeypatch,tmp_path):
     historical.test_fixed_context_limits_and_package_failure(request_api,admin,round_id,monkeypatch,tmp_path)
+
+pytestmark = pytest.mark.usefixtures("scoring_worker")

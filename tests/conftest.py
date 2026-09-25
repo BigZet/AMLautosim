@@ -226,6 +226,22 @@ def command():
 
 
 @pytest.fixture
+def install_test_worker_calculator(monkeypatch):
+    """Explicit offline/schema-4 fixture support, never a production fallback."""
+    from types import SimpleNamespace
+    from src.aml_workshop_simulator.services import scoring_jobs
+    from src.aml_workshop_simulator.services.scenario_service import load_round_card_specs, round_policy
+
+    def install(factory):
+        def initialize(config):
+            row = SimpleNamespace(game_config=config)
+            specs = load_round_card_specs(row)
+            scoring_jobs._thread.calculator = (specs, config, round_policy(row, specs), factory())
+        monkeypatch.setattr(scoring_jobs, 'initialize_calculator', initialize)
+    return install
+
+
+@pytest.fixture
 def sql(api):
     return lambda statement, parameters=None: api.portal.call(
         execute, statement, parameters

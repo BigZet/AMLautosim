@@ -40,7 +40,7 @@ def test_model_round_atomic_retry_and_no_early_explanation(
             raise ValueError("SHAP unavailable")
         return original(*args, **kwargs)
 
-    with patch.object(scorer, "score", side_effect=fail_second):
+    with patch.object(type(scorer), "score", side_effect=fail_second):
         request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT * FROM scoring_results") == []
     assert sql("SELECT status FROM rounds")[0]["status"] == "closed"
@@ -60,7 +60,7 @@ def test_model_round_atomic_retry_and_no_early_explanation(
         board = request_api("GET", f"/rounds/{round_id}/leaderboard", player["headers"])
         assert "explanation" not in str(board)
     with patch.object(
-        scorer, "score", side_effect=AssertionError("must not recalculate")
+        type(scorer), "score", side_effect=AssertionError("must not recalculate")
     ):
         request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert len(sql("SELECT * FROM scoring_results")) == 2
