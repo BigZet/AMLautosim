@@ -91,3 +91,15 @@ and production-sized RPO/RTO have not been verified.
 
 Repository master protection now requires runtime-linux, runtime-windows, api
 and image, with strict status checks (GitHub API returned the applied settings).
+
+## T06 checkpoint — perimeter
+
+Read-only LB inspection and SYN header observation confirmed source
+80.90.184.166 for backend 94.241.141.158:8080. HTTPS domain and direct public
+HTTP both returned 200: production bypass is confirmed and remains unfixed
+because deployment is excluded. The new compose publishes nginx only and
+restricts original peer IP; UI/API/DB are private. Disposable ingress smoke
+verified external 403 and a real WebSocket handshake through the trusted path.
+Two header/404 unit regressions and six NiceGUI integration tests passed.
+Production redirect, source-header sanitation and real browser CSP behavior
+remain rollout/browser acceptance items.

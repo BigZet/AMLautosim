@@ -23,8 +23,9 @@ Workflow `Release image` запускается вручную для выбра
 
 Production использует `compose.production.yml` и отдельный защищённый env-файл
 по образцу `.env.production.example`. `AML_IMAGE` должен содержать `@sha256:`
-из проверенного выпуска. Host config не монтируется поверх образа. UI доступен
-только на loopback и требует HTTPS reverse proxy; API/БД не публикуют порты.
+из проверенного выпуска. Host config не монтируется поверх образа. UI/API/БД не публикуют порты. Отдельный nginx ingress на 8080 принимает только
+проверенный source IP балансировщика и локальные health probes. TLS завершается
+на внешнем балансировщике; прямой доступ должен возвращать 403.
 До обновления сохранить предыдущий **registry digest** и совместимую резервную копию.
 На обследованном старом сервере registry digest не установлен: известны только
 локальные image IDs, см. production-inventory.json. Их нельзя выдавать за digest.
@@ -35,7 +36,7 @@ Production использует `compose.production.yml` и отдельный �
 docker compose --env-file /secure/aml.env -f deploy/compose.production.yml pull
 docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d db
 docker compose --env-file /secure/aml.env -f deploy/compose.production.yml run --rm release
-docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d --no-deps --wait api ui
+docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d --no-deps --wait api ui ingress
 ```
 
 `release` — единственный одноразовый процесс миграции и seed, без демонстрационного

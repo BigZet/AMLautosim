@@ -9,6 +9,7 @@ import secrets
 import subprocess
 import time
 import urllib.request
+import urllib.error
 from uuid import uuid4
 
 from scripts.check_nicegui_transport import main as check_transport
@@ -32,6 +33,18 @@ def smoke(image: str) -> None:
         compose('up', '--detach', '--wait', '--wait-timeout', '180')
         api = compose('port', 'api', '8000', capture=True).stdout.strip()
         ui = compose('port', 'ui', '8080', capture=True).stdout.strip()
+        ingress = compose('port', 'ingress', '80', capture=True).stdout.strip()
+        try:
+            urllib.request.urlopen(f'http://{ingress}/health/live', timeout=15)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 403:
+                raise
+        else:
+            raise RuntimeError('Ingress accepted an untrusted external source')
+        ingress_id = compose('ps', '-q', 'ingress', capture=True).stdout.strip()
+        subprocess.run(['docker', 'run', '--rm', '--network', 'container:' + ingress_id,
+                        image, 'python', '-m', 'scripts.check_nicegui_transport',
+                        '--url', 'http://127.0.0.1:80'], check=True)
         with urllib.request.urlopen(f'http://{api}/health/ready', timeout=15) as response:
             readiness = json.load(response)
         if readiness['status'] != 'ready':
@@ -75,6 +88,7 @@ def smoke(image: str) -> None:
         asyncio.run(check_transport(f'http://{ui}'))
         print(json.dumps({'image': image, 'project': project, 'readiness': readiness,
                           'restored_copy_release': 'passed',
+                          'ingress_source_restriction_and_websocket': 'passed',
                           'http_cookie_websocket': 'passed'}))
     except Exception:
         subprocess.run([*command, 'logs', '--no-color', '--tail', '80'], env=env, cwd=root)

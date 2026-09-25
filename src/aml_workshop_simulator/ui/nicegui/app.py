@@ -18,6 +18,9 @@ from starlette.responses import RedirectResponse
 
 from . import auth, theme
 from .client import SESSION_ERRORS, APIClient, APIError
+from .security_headers import install_security
+
+install_security(app, secure=ui_settings.COOKIE_SECURE)
 
 api = APIClient(
     str(ui_settings.API_URL).rstrip("/") + "/api/v1"

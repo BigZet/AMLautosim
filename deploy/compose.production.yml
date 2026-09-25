@@ -55,8 +55,6 @@ services:
     volumes:
     - nicegui_data:/home/app/nicegui
     command: python -m src.aml_workshop_simulator.ui.nicegui.app
-    ports:
-    - 127.0.0.1:${UI_PORT:-8080}:8080
     healthcheck:
       test:
       - CMD-SHELL
@@ -85,6 +83,23 @@ services:
     command: python -m scripts.seed_database --wait-for-db --migrate --no-demo-round
     restart: 'no'
     image: ${AML_IMAGE:?set an immutable registry image digest}
+  ingress:
+    image: nginx:stable-alpine@sha256:985220252f3863977e468f611ef118ebd01421289dd86ee1ae99cb068c3bce2b
+    restart: unless-stopped
+    depends_on:
+      ui:
+        condition: service_healthy
+    ports:
+    - ${INGRESS_BIND:-0.0.0.0}:${UI_PORT:-8080}:80
+    volumes:
+    - ./nicegui.nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1/health/live
+      interval: 10s
+      timeout: 5s
+      retries: 10
 volumes:
   postgres_data: null
   nicegui_data: null
