@@ -23,6 +23,7 @@ from src.aml_workshop_simulator.core.security import (
     get_password_hash,
     hash_session_id,
     new_session_id,
+    password_needs_rehash,
     verify_password,
 )
 from src.aml_workshop_simulator.db.models.sessions import Session
@@ -113,6 +114,11 @@ async def login(*, payload: LoginIn, db: AsyncSession) -> SessionCreatedOut:
             "Административная учетная запись не участвует в игровом раунде.",
             code="forbidden",
         )
+
+    # The user row lock serializes concurrent successful logins. Rehash only
+    # after credentials, account access and audience authorization all succeed.
+    if password_needs_rehash(user.hashed_password):
+        user.hashed_password = await asyncio.to_thread(get_password_hash, payload.password)
 
     raw_session_id = new_session_id()
     expires_at = now + timedelta(minutes=settings.SESSION_TTL_MINUTES)

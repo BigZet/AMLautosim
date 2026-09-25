@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     DB_POOL_TIMEOUT: float = Field(default=5, gt=0, le=120)
     DB_POOL_RECYCLE: int = Field(default=1800, ge=1, le=86400)
     API_WORKERS: int = Field(default=1, ge=1, le=4)
+    PASSWORD_ARGON2_ENABLED: bool = True
 
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
     BOOTSTRAP_ADMIN_PASSWORD: str = ""
