@@ -6,8 +6,11 @@ asyncpg==0.31.0
 alembic==1.19.1
 passlib[bcrypt]==1.7.4
 bcrypt==3.2.2
+argon2-cffi==25.1.0
 pydantic[email]==2.13.5
 pydantic-settings==2.15.0
 httpx==0.28.1
 nicegui==3.16.0
 catboost==1.2.10
+tzdata==2026.4
+psutil==7.2.2

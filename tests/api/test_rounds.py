@@ -8,7 +8,7 @@ def seeded_game_version():
 
 def test_no_game_and_creation(request_api, player, admin, sql):
     sql("TRUNCATE rounds CASCADE")
-    assert request_api("GET", "/rounds/current") is None
+    assert request_api("GET", "/rounds/current", player["headers"]) is None
     assert request_api("GET", "/rounds/current/state", player["headers"]) == dict(
         round=None,
         scenario=None,
@@ -35,7 +35,7 @@ def test_configuration_only_before_start(
         command(chain()),
         409,
     )
-    request_api("POST", path + "/score", admin, status=409)
+    request_api("POST", path + "/score?wait=true", admin, status=409)
     updated = request_api(
         "PUT", path, admin, {"expected_config_revision": 1, "title": "Изменено"}
     )
@@ -55,7 +55,7 @@ def test_restart_clears_game_preserves_accounts(
 ):
     h = player["headers"]
     request_api("POST", f"/rounds/{active_round}/scenario/submit", h, command(chain()))
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     fresh = request_api(
         "POST", f"/admin/rounds/{active_round}/restart", admin, status=201
     )
@@ -72,7 +72,7 @@ def test_restart_clears_game_preserves_accounts(
     assert sql("SELECT count(*) AS n FROM scenarios")[0]["n"] == 0
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 0
     assert {r["round_id"] for r in sql("SELECT round_id FROM audit_events")} == {
-        fresh["id"]
+        None, fresh["id"]
     }
 
 
@@ -85,7 +85,7 @@ def test_unsent_chain_hidden_from_admin_and_deleted_at_cutoff(
         "GET", f"/admin/rounds/{active_round}/participants/{player['id']}", admin
     )
     assert detail["scenario"] is None
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     state = request_api("GET", "/rounds/current/state", player["headers"])
     assert state["scenario"] is None and state["result"] is None
     assert (
@@ -105,4 +105,14 @@ def test_organizer_energy_change_is_saved_with_revision(request_api, admin, roun
                           {"expected_config_revision": before["config_revision"], "game_config": config})
     assert updated["config_revision"] == before["config_revision"] + 1
     assert updated["game_config"]["resources"]["initial_energy"] == 1
-    assert request_api("GET", "/admin/rounds/current", admin) == updated
+    current = request_api("GET", "/admin/rounds/current", admin)
+    # The current-round read adds live admission/publication metadata (T08).
+    live_fields = {"admission_counts", "results_version"}
+    assert {k: v for k, v in current.items() if k not in live_fields} == {
+        k: v for k, v in updated.items() if k not in live_fields
+    }
+    assert current["admission_counts"] is not None
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

@@ -34,6 +34,10 @@ def test_draft_settings_and_scoring(request_api, admin, round_id, player_factory
     for step in steps:
         step["card"]["id"] = ids[(step["card"]["code"],step["card"]["version"])]
     request_api("POST", f"/rounds/{round_id}/scenario/submit", player["headers"], command(steps))
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     result = request_api("GET", "/rounds/current/state", player["headers"])["result"]
     assert result["explanation"]["aml_probability"] == baseline["probability"]
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import os
 import secrets
-from pathlib import Path
+import asyncio
+from fastapi import Request
+from src.aml_workshop_simulator.core.ui_config import UISettings
 
 # NiceGUI reads its storage path at import time. Never store it in source folders.
-STORAGE_PATH = Path(os.environ.setdefault("NICEGUI_STORAGE_PATH", ".nicegui")).resolve()
+ui_settings = UISettings()
+STORAGE_PATH = ui_settings.NICEGUI_STORAGE_PATH
+os.environ["NICEGUI_STORAGE_PATH"] = str(STORAGE_PATH)
 STORAGE_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 from nicegui import app, ui
@@ -16,11 +20,40 @@ from starlette.responses import RedirectResponse
 
 from . import auth, theme
 from .client import SESSION_ERRORS, APIClient, APIError
+from .security_headers import install_security
+from .login_limiter import LoginLimiter
+from src.aml_workshop_simulator.core.client_context import forwarded_client
+from src.aml_workshop_simulator.core.observability import metrics, sample_loop, stop_sampler, require_metrics, configure_logging
+
+install_security(app, secure=ui_settings.COOKIE_SECURE)
+login_limiter = LoginLimiter(ui_settings.AUTH_PAIR_PER_MINUTE, ui_settings.AUTH_IP_PER_MINUTE, ui_settings.AUTH_IP_BURST)
 
 api = APIClient(
-    os.environ.get("API_URL", "http://127.0.0.1:8000").rstrip("/") + "/api/v1"
+    str(ui_settings.API_URL).rstrip("/") + "/api/v1",
+    auth_context_secret=ui_settings.AUTH_CONTEXT_SECRET.get_secret_value() if ui_settings.AUTH_CONTEXT_SECRET else None,
 )
 app.on_shutdown(api.close)
+
+
+async def start_metrics():
+    from nicegui import Client
+    configure_logging()
+    app.state.metrics_sampler = asyncio.create_task(sample_loop(gauges=lambda: {
+        'ui_clients': len(Client.instances),
+        'ui_connected_clients': sum(client.has_socket_connection for client in list(Client.instances.values())),
+    }))
+
+
+async def stop_metrics():
+    task = getattr(app.state, 'metrics_sampler', None)
+    if task:
+        await stop_sampler(task)
+
+
+@app.get('/internal/metrics')
+async def internal_metrics(request: Request):
+    require_metrics(request, ui_settings.METRICS_TOKEN)
+    return metrics.snapshot()
 
 
 @ui.page("/")
@@ -49,6 +82,9 @@ def page_owner(storage, audience):
         pages = dict(storage.get("pages", {}))
         pages[client.tab_id] = client.id
         storage["pages"] = pages
+        from .storage_retention import retain_live_tabs
+
+        retain_live_tabs(storage, client.tab_id)
 
     client.on_connect(claim)
     return lambda: storage.get("pages", {}).get(client.tab_id) == client.id
@@ -59,6 +95,10 @@ async def auth_page(audience="play", register=False):
         return RedirectResponse("/" + audience)
     theme.setup()
     storage = app.storage.user
+    request = ui.context.client.request
+    peer = request.client.host if request and request.client else 'unknown'
+    client_ip = forwarded_client(peer, request.headers.get('x-forwarded-for') if request else None,
+                                 ui_settings.TRUSTED_PROXY_CIDRS)
     owns_page = page_owner(storage, audience)
     form = theme.auth_layout(audience)
     busy = False
@@ -160,9 +200,13 @@ async def auth_page(audience="play", register=False):
             for field in fields.values():
                 field.disable()
             try:
+                retry = login_limiter.check(client_ip, email)
+                if retry:
+                    raise APIError("Слишком много попыток входа. Повторите позже.",
+                                   code="login_temporarily_locked", status=429, retry_after=retry)
                 if register:
                     await api.request(
-                        "POST", "auth/register", body=payload.model_dump()
+                        "POST", "auth/register", body=payload.model_dump(), auth_client_ip=client_ip,
                     )
                     # A failed login must not repeat registration on the next click.
                     register = False
@@ -171,7 +215,7 @@ async def auth_page(audience="play", register=False):
                     button.set_text("Войти")
                     fields["display_name"].set_visibility(False)
                     fields["confirmation"].set_visibility(False)
-                if await auth.login(api, storage, audience, email, password):
+                if await auth.login(api, storage, audience, email, password, client_ip=client_ip):
                     fields["password"].set_value("")
                     if "confirmation" in fields:
                         fields["confirmation"].set_value("")
@@ -373,7 +417,7 @@ def about(audience: str = "play"):
 
 
 def storage_secret():
-    configured = os.environ.get("NICEGUI_STORAGE_SECRET")
+    configured = ui_settings.NICEGUI_STORAGE_SECRET
     if configured:
         return configured
     # A stable local secret makes reloads and process restarts keep the UI cookie.
@@ -388,17 +432,21 @@ def storage_secret():
 
 
 if __name__ == "__main__":
+    app.on_startup(start_metrics)
+    app.on_shutdown(stop_metrics)
     ui.run(
-        host=os.environ.get("UI_HOST", "127.0.0.1"),
-        port=int(os.environ.get("UI_PORT", "8080")),
+        host=ui_settings.UI_HOST,
+        port=ui_settings.UI_PORT,
         title="AML Практикум",
         language="ru",
         reload=False,
         show=False,
+        proxy_headers=False,
+        access_log=False,
         storage_secret=storage_secret(),
         session_middleware_kwargs={
-            "session_cookie": os.environ.get("NICEGUI_SESSION_COOKIE", "aml_ui"),
+            "session_cookie": ui_settings.NICEGUI_SESSION_COOKIE,
             "same_site": "lax",
-            "https_only": os.environ.get("COOKIE_SECURE", "false").lower() == "true",
+            "https_only": ui_settings.COOKIE_SECURE,
         },
     )

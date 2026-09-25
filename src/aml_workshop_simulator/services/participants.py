@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import exists, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict, Forbidden, NotFound
@@ -40,8 +40,10 @@ def _summary(user, scenario=None, score=None) -> PlayerSummaryOut:
 
 
 async def player_summary(
-    db: AsyncSession, round_id: int, user: User
+    db: AsyncSession, round_id: int | None, user: User
 ) -> PlayerSummaryOut:
+    if round_id is None:
+        return _summary(user)
     record = (
         await db.execute(
             select(Scenario, ScoringResult)
@@ -57,7 +59,15 @@ async def player_summary(
 
 
 async def list_participants(
-    db: AsyncSession, round_id: int, query: str | None, limit: int
+    db: AsyncSession,
+    round_id: int,
+    query: str | None,
+    limit: int,
+    *,
+    cursor: int | None = None,
+    has_current_scenario: bool = False,
+    access: str = "all",
+    scenario_status: str = "all",
 ) -> PlayerSummaryPageOut:
     await get_round(db, round_id)
     stmt = (
@@ -71,14 +81,37 @@ async def list_participants(
         .outerjoin(ScoringResult, ScoringResult.scenario_id == Scenario.id)
         .where(User.role == "participant")
         .order_by(User.id)
-        .limit(limit)
+        .limit(limit + 1)
     )
-    if query:
+    if cursor is not None:
+        stmt = stmt.where(User.id > cursor)
+    if has_current_scenario:
         stmt = stmt.where(
-            or_(User.email.ilike(f"%{query}%"), User.display_name.ilike(f"%{query}%"))
+            exists()
+            .where(
+                Scenario.participant_id == User.id,
+                Scenario.round_id == round_id,
+            )
+            .correlate(User)
         )
+    if access != "all":
+        stmt = stmt.where(User.is_blocked == (access == "blocked"))
+    if scenario_status == "none":
+        stmt = stmt.where(Scenario.id.is_(None))
+    elif scenario_status != "all":
+        stmt = stmt.where(Scenario.status == scenario_status)
+    if query:
+        escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        stmt = stmt.where(
+            or_(
+                User.email.ilike(f"%{escaped}%", escape="\\"),
+                User.display_name.ilike(f"%{escaped}%", escape="\\"),
+            )
+        )
+    rows = (await db.execute(stmt)).all()
     return PlayerSummaryPageOut(
-        rows=[_summary(*row) for row in (await db.execute(stmt)).all()]
+        rows=[_summary(*row) for row in rows[:limit]],
+        next_cursor=rows[limit - 1][0].id if len(rows) > limit else None,
     )
 
 
@@ -114,14 +147,15 @@ async def detail(
 
 async def update_participant_access(
     *,
-    round_id: int,
+    round_id: int | None = None,
     participant_id: int,
     payload: AccessUpdateIn,
     request_id: str | None,
     principal: CurrentPrincipal,
     db: AsyncSession,
 ) -> PlayerSummaryOut:
-    await get_round(db, round_id, lock="share")
+    if round_id is not None:
+        await get_round(db, round_id, lock="share")
     if participant_id == principal.user_id:
         raise Forbidden(
             "Администратор не может заблокировать сам себя.", code="forbidden"

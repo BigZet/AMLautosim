@@ -74,6 +74,8 @@ class LeaderboardRowOut(LeaderboardSemanticsOut):
 class LeaderboardPageOut(BaseModel):
     rows: list[LeaderboardRowOut]
     generated_at: datetime
+    results_version: str | None = None
+    current_user_row: LeaderboardRowOut | None = None
 
 
 class AdminLeaderboardRowOut(LeaderboardSemanticsOut):
@@ -93,3 +95,4 @@ class AdminLeaderboardRowOut(LeaderboardSemanticsOut):
 class AdminLeaderboardPageOut(BaseModel):
     rows: list[AdminLeaderboardRowOut]
     generated_at: datetime
+    results_version: str | None = None

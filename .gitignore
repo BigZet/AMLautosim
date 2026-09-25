@@ -48,11 +48,9 @@ Thumbs.db
 # Local execution state and private verification artifacts
 .local-run/
 
-# Generated research corpora: keep reports, avoid accidental bulk LFS ingestion.
-/resources/aml_dataset/aml-fixed-history-v1/**/*.jsonl
-/resources/aml_dataset/aml-fixed-history-v1/**/*.csv
-/resources/aml_dataset/aml-v1/population-draft/**/*.jsonl
-/resources/aml_dataset/aml-v1/population-draft/**/*.csv
+# Generated research outputs are not part of the fixed release.
+/resources/aml_dataset/
+/resources/catboost_sample_data/
 
 # Local code navigation configuration
 .serena/

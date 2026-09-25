@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.api.deps import (
@@ -19,6 +19,7 @@ from src.aml_workshop_simulator.schemas.auth import (
     UserSessionOut,
 )
 from src.aml_workshop_simulator.services import authentication as operations
+from src.aml_workshop_simulator.services.login_limits import admit
 
 router = APIRouter()
 
@@ -31,16 +32,20 @@ router = APIRouter()
 )
 async def register(
     payload: RegisterIn,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> UserRegisteredOut:
+    await admit(request, str(payload.email), 'register', db)
     return await operations.register(payload=payload, db=db)
 
 
 @router.post("/login", response_model=SessionCreatedOut, operation_id="auth_login")
 async def login(
     payload: LoginIn,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> SessionCreatedOut:
+    await admit(request, str(payload.email), 'login', db)
     return await operations.login(payload=payload, db=db)
 
 

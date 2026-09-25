@@ -44,6 +44,12 @@ class Transport:
         self.release_cards = asyncio.Event()
 
     async def request(self, method, path, **kwargs):
+        if method == "GET" and path == "rounds/current/status":
+            value = self.states[0]
+            return {'round_id': value['round']['id'], 'status': value['round']['status'],
+                    'config_version': value['round']['config_version'],
+                    'scenario_revision': value['scenario']['revision'], 'access_revision': 0,
+                    'results_version': 'initial'}
         if method == "GET" and path == "rounds/current/state":
             return deepcopy(self.states.pop(0))
         if method == "GET" and path.endswith("/cards"):
@@ -75,6 +81,29 @@ def loaded_editor(api):
     editor = GameEditor(api, "test-session", record, lambda: persisted.append(deepcopy(record)))
     editor.state = initial
     return editor, persisted
+
+
+def test_unchanged_poll_uses_only_light_status():
+    async def run():
+        class Stable:
+            def __init__(self):
+                self.calls = []
+
+            async def request(self, method, path, **kwargs):
+                self.calls.append(path)
+                if path.endswith('/status'):
+                    return {'round_id': 1, 'status': 'active', 'config_version': 'v1',
+                            'scenario_revision': 1, 'access_revision': 0, 'results_version': 'v1'}
+                if path.endswith('/state'):
+                    return state(1, '100.00')
+                return []
+        transport = Stable()
+        editor = GameEditor(transport, 'session', {}, lambda: None)
+        await editor.poll()
+        transport.calls.clear()
+        await editor.poll()
+        assert transport.calls == ['rounds/current/status']
+    asyncio.run(run())
 
 
 def test_older_cards_response_cannot_replace_newer_round():

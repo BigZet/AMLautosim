@@ -1,3 +1,4 @@
+from tests.research_support import pilot_path
 import hashlib
 import json
 from copy import deepcopy
@@ -8,7 +9,7 @@ import pytest
 
 def review_fixture(tmp_path):
     rows = [json.loads(line) for line in
-            Path("resources/aml_dataset/aml-v1/pilot/casebook.jsonl")
+            pilot_path()
             .read_text(encoding="utf-8").splitlines()]
     # Retain review/hash tests on a case supported by the released purpose contract.
     row = next(row for row in rows if row['scenario_id'] == 'P01-4-0')

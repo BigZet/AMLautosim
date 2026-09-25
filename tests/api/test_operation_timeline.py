@@ -1,5 +1,7 @@
 """Real resource engine/HTTP/PostgreSQL; only launch guards are isolated in tests."""
 
+import pytest
+
 import json
 from copy import deepcopy
 
@@ -72,7 +74,7 @@ def test_preview_save_submit_replay_share_timeline(
     assert "occurred_at" not in str(stored["steps"])
     # Production start and score guards were never replaced.
     assert (
-        request_api("POST", f"/admin/rounds/{active_round}/score", admin, status=409)[
+        request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin, status=409)[
             "code"
         ]
         == "round_contract_not_ready"
@@ -94,3 +96,7 @@ def test_external_v8_preview_stays_blocked(request_api, player, active_round, sq
         409,
     )
     assert error["code"] == "round_contract_not_ready"
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

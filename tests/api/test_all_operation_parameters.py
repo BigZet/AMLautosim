@@ -23,7 +23,7 @@ def test_all_parameters_are_exposed_and_saved(
         {"id": active_round, "config": json.dumps(config)},
     )
     path = f"/rounds/{active_round}"
-    card = next(c for c in request_api("GET", path + "/cards") if c["code"] == code)
+    card = next(c for c in request_api("GET", path + "/cards", player["headers"]) if c["code"] == code)
     expected = (
         ({"channel"} if card["channels"] else set())
         | {f"context.{f['key']}" for f in card["context_fields"]}
@@ -35,6 +35,7 @@ def test_all_parameters_are_exposed_and_saved(
         "step_id": str(uuid4()),
         "card": {k: card[k] for k in ("id", "code", "version")},
         "amount": card["min_amount"],
+        "purpose_code": "salary" if card["code"] == "salary" else "unknown",
         "context": {},
         "action_details": {},
     }
@@ -54,6 +55,8 @@ def test_all_parameters_are_exposed_and_saved(
             else step["context"]
         )
         target[param["key"]] = value
+    if code == "incoming_transfer" and step["action_details"].get("incoming_kind") != "bank_transfer":
+        step["action_details"].pop("bank_country", None)
     saved = request_api("PUT", path + "/scenario", player["headers"], command([step]))
     reloaded = request_api("GET", path + "/scenario", player["headers"])
     assert saved == reloaded
@@ -91,13 +94,14 @@ def test_removed_parameters_are_rejected_without_saving(
 ):
     card = next(
         c
-        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        for c in request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
         if c["code"] == code
     )
     step = {
         "step_id": str(uuid4()),
         "card": {k: card[k] for k in ("id", "code", "version")},
         "amount": card["min_amount"],
+        "purpose_code": "salary" if card["code"] == "salary" else "unknown",
         "context": {},
         "action_details": {f["key"]: f["default"] for f in card["fields"]},
     }
@@ -121,7 +125,7 @@ def test_removed_parameters_are_rejected_without_saving(
             body,
             status=422,
         )
-        assert error["details"]  # field-specific or whole-step schema rejection
+        assert error["details"] or error["code"] == "aml_context_invalid"
     assert request_api("GET", path, player["headers"]) is None
 
 
@@ -130,16 +134,17 @@ def test_null_salary_channel_is_canonicalized_as_absent(
 ):
     card = next(
         c
-        for c in request_api("GET", f"/rounds/{active_round}/cards")
+        for c in request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
         if c["code"] == "salary"
     )
     step = {
         "step_id": str(uuid4()),
         "card": {k: card[k] for k in ("id", "code", "version")},
         "amount": card["min_amount"],
+        "purpose_code": "salary" if card["code"] == "salary" else "unknown",
         "sender_id": "employer",
         "context": {"channel": None},
-        "action_details": {},
+        "action_details": {"income_basis": "payroll_registry"},
     }
     path = f"/rounds/{active_round}/scenario"
     saved = request_api("PUT", path, player["headers"], command([step]))

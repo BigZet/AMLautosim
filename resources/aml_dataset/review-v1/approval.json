@@ -1,8 +1,0 @@
-{
-  "status": "pending",
-  "reviewer": null,
-  "rubric_hash": "72cfdbf6503b068964cc82fcffb26dc05edb5fe36983677e165ed75798c0b3c6",
-  "reference_hash": "e3de57fcb18ba5e6095d1559c9eae71431e939d0c05685d183f89dce6e5a1530",
-  "config_hash": "75f0d287e4bf85da1ac31b1e51b98b41ac45b7e272ba7bb3fb19ea42099f0771",
-  "notes": "Заполняется только по результату совместной проверки, не автоматически."
-}

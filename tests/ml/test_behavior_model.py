@@ -10,6 +10,7 @@ from scripts.behavior_model import weights, pair_errors
 from src.aml_workshop_simulator.services.aml_dataset_features_v3 import extract_features
 
 
+@pytest.mark.research
 def test_group_partition_is_disjoint_with_zero_cash_support():
     groups = build_groups(2026091501, set())
     assert len(groups) == 144 and len({g["shape"] for g in groups}) == 144
@@ -57,6 +58,7 @@ def test_features_observe_salary_without_reading_rubric():
     assert extract_features(steps + [extra], renamed) == after
 
 
+@pytest.mark.research
 def test_balancing_assigns_equal_total_weight_to_each_observed_cell():
     x = pd.DataFrame(
         {
@@ -69,6 +71,7 @@ def test_balancing_assigns_equal_total_weight_to_each_observed_cell():
     assert w[:10].sum() == pytest.approx(w[10:].sum())
 
 
+@pytest.mark.research
 def test_pair_evaluation_measures_magnitude_not_only_sign():
     data = {
         "pairs": [
@@ -83,6 +86,7 @@ def test_pair_evaluation_measures_magnitude_not_only_sign():
     assert result["salary"]["delta_mae"] == 19
 
 
+@pytest.mark.research
 def test_generator_reads_card_channels_and_keeps_parent_for_salary_variants():
     import random
 

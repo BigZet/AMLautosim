@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from src.aml_workshop_simulator.core.errors import Conflict
+from src.aml_workshop_simulator.services.source_hashing import source_sha256
 from src.aml_workshop_simulator.services.aml_game_pattern_panel_v2 import (
     extract_panel_features,
 )
@@ -162,17 +163,21 @@ class GameClassifier:
         current = json.loads((self.package / "release.json").read_bytes())
         if current != self.release:
             raise ValueError("Classifier release changed")
+        mode = self.release.get("source_hash_mode", "raw-v1")
+        if mode not in ("raw-v1", "lf-v1"):
+            raise ValueError("Unsupported source hash mode")
+        source_hash = source_sha256 if mode == "lf-v1" else file_hash
         for name, expected in self.release["files"].items():
             if file_hash(self.package / name) != expected:
                 raise ValueError("Classifier artifact changed: " + name)
         if set(self.release["inference_sources"]) != set(self.inference_files):
             raise ValueError("Incomplete inference source contract")
         for name, expected in self.release["inference_sources"].items():
-            if file_hash(ROOT / name) != expected:
+            if source_hash(ROOT / name) != expected:
                 raise ValueError("Classifier feature implementation changed")
 
         for name, expected in self.release.get("compatibility_sources", {}).items():
-            if file_hash(ROOT / name) != expected:
+            if source_hash(ROOT / name) != expected:
                 raise ValueError("Classifier compatibility implementation changed")
 
     def pin_identity(self, config):
@@ -303,9 +308,11 @@ def _load(package):
 
 
 def get_game_classifier():
-    path = Path(
+    from src.aml_workshop_simulator.core.config import project_path
+
+    path = project_path(
         os.environ.get("AML_PROBABILITY_MODEL_PATH", str(DEFAULT_PACKAGE))
-    ).resolve()
+    )
     try:
         model = _load(str(path))
         model.verify_integrity()
@@ -332,9 +339,10 @@ def get_pinned_game_classifier(config):
     pin = config.get("risk_model")
     if not pin or pin == current.identity or pin in current.release.get("compatible_identities", []):
         return current
-    # Explicit release locations only; never construct a filesystem path from a pin.
-    for name in ("aml-game-v1", "aml-game-relaxed-v1", "aml-game-attributes-v1", "aml-game-attribute-context-v1"):
-        path = ROOT / "resources" / "catboost_models" / name
+    # Server-owned registry only; client pins never select filesystem locations.
+    from src.aml_workshop_simulator.services.model_registry import classifier_paths
+
+    for path in classifier_paths():
         release = path / "release.json"
         if not release.is_file():
             continue

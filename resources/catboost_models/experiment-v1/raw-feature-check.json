@@ -1,6 +1,0 @@
-{
-  "status": "passed",
-  "rows": 20000,
-  "extractor": "aml-observable-v2.6",
-  "absolute_tolerance": 1e-08
-}

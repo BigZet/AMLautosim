@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
+import time
 
 import httpx
+from src.aml_workshop_simulator.core.observability import metrics
 
 SESSION_ERRORS = {
     "session_missing",
@@ -28,7 +30,8 @@ class APIError(Exception):
 
 
 class APIClient:
-    def __init__(self, base_url: str, *, transport=None):
+    def __init__(self, base_url: str, *, transport=None, auth_context_secret=None):
+        self.auth_context_secret = auth_context_secret
         self.http = httpx.AsyncClient(
             base_url=base_url.rstrip("/") + "/",
             transport=transport,
@@ -48,11 +51,18 @@ class APIClient:
         body: dict | None = None,
         params: dict | None = None,
         timeout: float = 15,
+        auth_client_ip: str | None = None,
     ) -> Any:
         request_id = str(uuid4())
         headers = {"X-Request-ID": request_id}
         if session_id:
             headers["X-Session-ID"] = session_id
+        if auth_client_ip and self.auth_context_secret and path.strip('/') in ('auth/login', 'auth/register'):
+            from src.aml_workshop_simulator.core.client_context import sign_context
+            headers.update(sign_context(auth_client_ip, path.rsplit('/', 1)[-1],
+                                        str((body or {}).get('email', '')), self.auth_context_secret))
+        started = time.monotonic()
+        metrics.add('ui_api_in_flight', 1)
         try:
             response = await self.http.request(
                 method,
@@ -68,6 +78,9 @@ class APIClient:
                 code="connection_error",
                 request_id=request_id,
             ) from exc
+        finally:
+            metrics.add('ui_api_in_flight', -1)
+            metrics.observe('ui_api_seconds', time.monotonic() - started)
         response_id = response.headers.get("X-Request-ID", request_id)
         if response.status_code == 204:
             return None

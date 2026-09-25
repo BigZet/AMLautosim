@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "current_runtime": "aml-game-organizer-settings-v1",
+  "packages": [
+    {
+      "path": "aml-game-organizer-settings-v1",
+      "identity": "19ebf3a7c286e94ac9d77d0f01340d7a65468980430205f82006b5f8495702a0",
+      "identity_kind": "release-json-canonical-sha256",
+      "kind": "game-classifier",
+      "support": "current",
+      "runtime_consumers": [
+        "default-v10",
+        "saved-v10-compatible-pins"
+      ]
+    }
+  ]
+}

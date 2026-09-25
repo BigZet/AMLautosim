@@ -872,7 +872,7 @@ def _validate_ledger(root):
 def _configuration(root):
     # Reuse immutable mechanics, never an old scenario's story/steps/history/labels.
     fixture = json.loads(
-        (ROOT / "docs/verification/semantic-interface-audit/fixtures.json").read_text(
+        (ROOT / "config/aml_scenario_templates.json").read_text(
             encoding="utf-8"
         )
     )

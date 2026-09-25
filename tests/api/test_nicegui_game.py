@@ -121,8 +121,9 @@ def test_restart_discards_old_pending_commands(api, player, admin, active_round,
     asyncio.run(run())
 
 
+@pytest.mark.parametrize('delayed_endpoint', ['status', 'state'])
 def test_poll_started_before_save_cannot_restore_old_steps(
-    api, player, active_round, chain
+    api, player, active_round, chain, delayed_endpoint
 ):
     async def run():
         backend = httpx.ASGITransport(api.app)
@@ -132,7 +133,7 @@ def test_poll_started_before_save_cannot_restore_old_steps(
         async def route(request):
             response = await backend.handle_async_request(request)
             await response.aread()
-            if delay and request.url.path.endswith("/rounds/current/state"):
+            if delay and request.url.path.endswith('/rounds/current/' + delayed_endpoint):
                 captured.set()
                 await release.wait()
             return response
@@ -145,8 +146,8 @@ def test_poll_started_before_save_cannot_restore_old_steps(
             editor.changed()
             await editor.write()
             delay = True
-            pending = asyncio.create_task(editor.poll())
-            await captured.wait()
+            pending = asyncio.create_task(editor.poll(force=delayed_endpoint == 'state'))
+            await asyncio.wait_for(captured.wait(), 5)
             editor.steps[0]["amount"] = "15000.01"
             editor.changed()
             await editor.write()

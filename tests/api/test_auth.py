@@ -4,6 +4,8 @@ import pytest
 @pytest.mark.parametrize(
     "path",
     [
+        "/rounds/current",
+        "/rounds/1/cards",
         "/rounds/current/state",
         "/rounds/1/scenario",
         "/rounds/1/result",
@@ -89,35 +91,85 @@ def test_participant_data_is_private(
 
 
 @pytest.mark.parametrize("attempts", [1, 2])
-def test_login_lockout_and_recovery(
-    request_api, api, player, monkeypatch, sql, attempts
-):
-    from src.aml_workshop_simulator.core.config import Settings, settings
+def test_ip_scoped_limit_does_not_lock_account_for_other_ips(request_api, api, player, monkeypatch, sql, attempts):
+    from fastapi.testclient import TestClient
+    from src.aml_workshop_simulator.core.config import settings
 
-    validated = Settings(
-        _env_file=None, LOGIN_MAX_FAILED_ATTEMPTS=attempts, LOGIN_LOCKOUT_MINUTES=1
-    )
-    monkeypatch.setattr(
-        settings, "LOGIN_MAX_FAILED_ATTEMPTS", validated.LOGIN_MAX_FAILED_ATTEMPTS
-    )
-    monkeypatch.setattr(
-        settings, "LOGIN_LOCKOUT_MINUTES", validated.LOGIN_LOCKOUT_MINUTES
-    )
+    monkeypatch.setattr(settings, "AUTH_PAIR_PER_MINUTE", attempts)
+    sql("TRUNCATE auth_rate_limits")
     for _ in range(attempts):
-        request_api(
-            "POST",
-            "/auth/login",
-            body={"email": player["email"], "password": "wrong"},
-            status=401,
-        )
+        request_api("POST", "/auth/login", body={"email": player["email"], "password": "wrong"}, status=401)
     payload = {"email": player["email"], "password": "participant123"}
     response = api.post("/api/v1/auth/login", json=payload)
     assert response.status_code == 429 and int(response.headers["Retry-After"]) > 0
-    sql(
-        "UPDATE users SET locked_until=now() - interval '1 second' WHERE id=:id",
-        {"id": player["id"]},
-    )
+    assert sql("SELECT locked_until FROM users WHERE id=:id", {"id": player["id"]})[0]["locked_until"] is None
+    with TestClient(api.app, client=("192.0.2.12", 1234)) as other:
+        assert other.post("/api/v1/auth/login", json=payload).status_code == 200
+    sql("TRUNCATE auth_rate_limits")
     assert request_api("POST", "/auth/login", body=payload)["session_id"]
+
+
+def test_spoofed_client_headers_do_not_bypass_early_limit(api, player, monkeypatch, sql):
+    from src.aml_workshop_simulator.core.config import settings
+    from src.aml_workshop_simulator.services import authentication
+
+    monkeypatch.setattr(settings, "AUTH_PAIR_PER_MINUTE", 1)
+    sql("TRUNCATE auth_rate_limits")
+    payload = {"email": player["email"], "password": "wrong"}
+    assert api.post("/api/v1/auth/login", json=payload).status_code == 401
+    monkeypatch.setattr(authentication, "verify_password", lambda *a: pytest.fail("Hash verification must be after the gate"))
+    response = api.post("/api/v1/auth/login", json=payload,
+                        headers={"X-Forwarded-For": "203.0.113.12", "X-AML-Client-IP": "203.0.113.12", "X-AML-Client-Signature": "forged"})
+    assert response.status_code == 429
+
+
+def test_known_unknown_invalid_login_has_same_contract(api, player):
+    responses = [api.post("/api/v1/auth/login", json={"email": email, "password": "wrong"})
+                 for email in (player["email"], "unknown@example.com")]
+    assert [r.status_code for r in responses] == [401, 401]
+    assert responses[0].json()["code"] == responses[1].json()["code"]
+    assert responses[0].json()["message"] == responses[1].json()["message"]
+
+
+def test_trusted_ui_signed_context_keeps_client_ips_separate(api, player, monkeypatch, sql):
+    from fastapi.testclient import TestClient
+    from pydantic import SecretStr
+    from src.aml_workshop_simulator.core.client_context import sign_context
+    from src.aml_workshop_simulator.core.config import settings
+
+    monkeypatch.setattr(settings, 'AUTH_CONTEXT_SECRET', SecretStr('test-signing-secret'))
+    monkeypatch.setattr(settings, 'AUTH_TRUSTED_UI_CIDRS', ['192.0.2.10/32'])
+    monkeypatch.setattr(settings, 'AUTH_PAIR_PER_MINUTE', 1)
+    sql('TRUNCATE auth_rate_limits')
+    with TestClient(api.app, client=('192.0.2.10', 1234)) as ui:
+        payload = {'email': player['email'], 'password': 'wrong'}
+        headers = sign_context('203.0.113.7', 'login', player['email'], 'test-signing-secret')
+        assert ui.post('/api/v1/auth/login', json=payload, headers=headers).status_code == 401
+        assert ui.post('/api/v1/auth/login', json=payload, headers=headers).status_code == 429
+        headers = sign_context('203.0.113.8', 'login', player['email'], 'test-signing-secret')
+        payload['password'] = 'participant123'
+        assert ui.post('/api/v1/auth/login', json=payload, headers=headers).status_code == 200
+
+
+def test_sixty_registrations_and_logins_share_nat(api):
+    from concurrent.futures import ThreadPoolExecutor
+    from uuid import uuid4
+    import time
+    import json
+
+    def enter(index):
+        email = f"{uuid4().hex}@example.com"
+        registered = api.post("/api/v1/auth/register", json={"email": email, "display_name": f"Участник {index}", "password": "participant123"})
+        logged = api.post("/api/v1/auth/login", json={"email": email, "password": "participant123"})
+        return registered.status_code, logged.status_code
+
+    started = time.monotonic()
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        statuses = list(pool.map(enter, range(60)))
+    elapsed = time.monotonic() - started
+    assert statuses == [(201, 200)] * 60
+    assert elapsed < 60
+    print(json.dumps({"nat_participants": 60, "registration_and_login_seconds": elapsed}))
 
 
 def test_minimum_session_lifetime_allows_login_and_expires(

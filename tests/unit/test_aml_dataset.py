@@ -1,3 +1,4 @@
+from tests.research_support import pilot_path
 import csv
 import hashlib
 import json
@@ -209,7 +210,7 @@ def source(tmp_path):
     # The historical pilot also contains purposes retired from the editor.
     # Exercise the current export contract with an explicitly compatible case.
     rows = [json.loads(line) for line in
-            (ROOT / "resources/aml_dataset/aml-v1/pilot/casebook.jsonl")
+            (pilot_path())
             .read_text(encoding="utf-8").splitlines()]
     row = next(row for row in rows if row['scenario_id'] == 'P01-4-0')
     row.update(

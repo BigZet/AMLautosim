@@ -1439,7 +1439,7 @@ def build_pilot(output):
             for name in [
                 "scripts/aml_dataset/aml_world_graph.py",
                 "scripts/aml_dataset/aml_origins.py",
-                "docs/verification/semantic-interface-audit/fixtures.json",
+                "config/aml_scenario_templates.json",
                 "scripts/aml_dataset/aml_casebook.py",
                 "docs/research/2026-09-16-aml-behavior-and-legitimate-context.md",
             ]

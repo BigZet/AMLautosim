@@ -64,6 +64,12 @@ def demo_steps(config, variant="baseline"):
                 else 1,
             }
         )
+    if config["schema_version"] == 10:
+        from src.aml_workshop_simulator.domain.operation_purposes import default_purpose
+        for step in values:
+            step["purpose_code"] = default_purpose(step)
+            if step["card"]["code"] == "incoming_transfer":
+                step["action_details"] = {"incoming_kind": "bank_transfer", "bank_country": "RU"}
     return values
 
 

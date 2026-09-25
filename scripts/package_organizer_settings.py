@@ -12,6 +12,7 @@ from src.aml_workshop_simulator.services.game_classifier import (
     file_hash,
 )
 from scripts.package_retired_limits import SOURCES
+from src.aml_workshop_simulator.services.source_hashing import source_sha256
 
 
 def _build(source, baseline_path, output):
@@ -57,6 +58,10 @@ def _build(source, baseline_path, output):
     else:
         shutil.copytree(source, output)
     release["organizer_settings_version"] = 1
+    release["source_hash_mode"] = "lf-v1"
+    release["inference_sources"] = {
+        name: source_sha256(ROOT / name) for name in release["inference_sources"]
+    }
     sources = (
         *SOURCES,
         "src/aml_workshop_simulator/schemas/expanded_contract.py",
@@ -65,13 +70,16 @@ def _build(source, baseline_path, output):
         "src/aml_workshop_simulator/services/semantic_contract.py",
     )
     release["compatibility_sources"] = {
-        name: file_hash(ROOT / name) for name in sources
+        name: source_sha256(ROOT / name) for name in sources
     }
     release["compatible_identities"] = [
         baseline["identity"],
         *release.get("compatible_identities", []),
         *previous_pins,
     ]
+    release["compatible_identities"] = list({
+        digest(pin): pin for pin in release["compatible_identities"]
+    }.values())
     release["compatibility"] = dict(
         version="organizer-settings-v1",
         source_package_sha256=digest(

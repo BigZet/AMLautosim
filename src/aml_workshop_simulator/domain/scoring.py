@@ -78,7 +78,13 @@ def score_scenario(
     return _score_validated(steps, card_specs, game_config)
 
 
-def _score_validated(steps, card_specs, game_config, *, timeline=None):
+def _score_validated(
+    steps: Sequence[dict[str, Any]],
+    card_specs: dict[tuple[str, int], CardSpec],
+    game_config: dict[str, Any] | None,
+    *,
+    timeline: Sequence[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     config = game_config or {}
     scoring_cfg = config["scoring"]
     rules = scoring_cfg["rules"]
@@ -236,7 +242,7 @@ def _sequence_factors(
     card_specs: dict[tuple[str, int], CardSpec],
     rules: dict[str, Any],
     *,
-    timed=False,
+    timed: bool = False,
 ) -> list[dict[str, Any]]:
     factors: list[dict[str, Any]] = []
 
@@ -333,7 +339,7 @@ def resource_score(
 def leaderboard_scores(
     risk: Decimal,
     resources: Decimal,
-    game_config: dict[str, Any] | None,
+    game_config: dict[str, Any],
 ) -> dict[str, Decimal]:
     """Stealth and composite game score from the round's leaderboard weights."""
     weights = game_config["leaderboard"]["weights"]
@@ -360,7 +366,11 @@ def weights_sum_to_one(game_config: dict[str, Any]) -> bool:
 AML_LEADERBOARD_VERSION = "leaderboard-aml-probability-v1"
 
 
-def probability_leaderboard_scores(probability, resources, game_config):
+def probability_leaderboard_scores(
+    probability: float | Decimal,
+    resources: Decimal,
+    game_config: dict[str, Any],
+) -> dict[str, Decimal]:
     """Apply existing resource weights with unrounded calibrated probability."""
     probability = Decimal(str(probability))
     if not probability.is_finite() or not ZERO <= probability <= ONE:

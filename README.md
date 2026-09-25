@@ -1,14 +1,16 @@
 # AML Workshop Simulator
 
-> Датасеты JSONL/CSV и модели CBM хранятся через Git LFS. Перед сборкой или проверками установите Git LFS и выполните `git lfs install`, затем `git lfs pull` в клонированном репозитории.
+> Текущая модель CBM хранится через Git LFS. Перед сборкой или проверками установите Git LFS и выполните `git lfs install`, затем `git lfs pull` в клонированном репозитории.
 
 Учебный симулятор для мастер-класса: участники собирают цепочки операций,
 FastAPI рассчитывает ресурсы и риск, организатор управляет игрой и рейтингом.
 
-Текущий выпуск: `aml-game-attribute-context-v1`, 28 признаков, контракт v10.
+Зафиксированный выпуск: **2.0.0**, модель `aml-game-organizer-settings-v1`,
+28 признаков, контракт v10.
 Новые игры оцениваются по соответствию учебным AML-паттернам. История общая
-и неизменная; прежние раунды сохраняют закреплённые модели.
-[Итоговые проверки и актуальные артефакты](docs/verification/aml-classifier-v1/README.md).
+и неизменная в пределах игры. Поддерживается только текущая модель;
+прежние раунды и пакеты выведены из эксплуатации.
+[Итоговые проверки и актуальные артефакты](docs/current-release.md).
 
 ```text
 Браузер → NiceGUI (:8080, /play и /admin) → FastAPI (:8000) → PostgreSQL 16
@@ -78,13 +80,9 @@ uv pip install --python .venv/Scripts/python.exe -r requirements-dev.txt
 - [Конфигурация](config/README.md), [баланс](config/BALANCE.md), [тесты](tests/README.md).
 - [Все документы](docs/README.md) и [структура проекта](docs/project-structure.md).
 
-Текущий выпуск игры использует CatBoost для оценки риска и SHAP для объяснений.
-Пакет `resources/catboost_models/integration-v2-final` входит в серверный образ
-и проверяется при старте API; без исправного пакета приложение не запускается.
-Обучающий датасет в runtime-образ не включён. Ресурсы и итоговая формула рейтинга
-рассчитываются по правилам снимка игры.
+Текущий выпуск использует CatBoost и SHAP. Единственный пакет
+`resources/catboost_models/aml-game-organizer-settings-v1` входит в серверный образ
+и проверяется при старте API. Прежние модели, датасеты и архивные результаты
+экспериментов удалены. Перечень моделей — `resources/catboost_models/registry.json`.
 
-[Качество и ограничения модели](docs/verification/catboost-behavior-v2.md),
-[команды воспроизведения и пакет](docs/catboost-behavior-model.md),
-[отчёт интеграции CatBoost и SHAP](docs/verification/catboost-shap-integration.md).
-[Первая офлайн-модель](docs/verification/catboost-training-v1.md) сохранена как исторический эксперимент.
+[Состав выпуска](docs/current-release.md), [контракт модели](docs/operations/model-support.md).

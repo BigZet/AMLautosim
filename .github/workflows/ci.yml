@@ -1,0 +1,199 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      run_load:
+        description: Run the separate controller load test
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: '1'
+  PYTHONUNBUFFERED: '1'
+  RUNTIME_LFS: resources/catboost_models/aml-game-organizer-settings-v1/**
+
+jobs:
+  runtime:
+    name: runtime-${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pip check
+      - run: python -m ruff check src scripts tests migrations
+      - run: python -m ruff check --config ruff-runtime.toml
+      - run: python -m mypy
+      - run: python -m pytest tests/unit tests/ml -m runtime -q --junitxml=runtime.xml --suite-report=runtime.json
+      - if: always()
+        run: python -m scripts.ci_test_policy runtime runtime.json tests/runtime-inventory.json --group unit
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: runtime-${{ matrix.platform }}
+          path: |
+            runtime.xml
+            runtime.json
+
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aml_ci
+          POSTGRES_PASSWORD: ci-disposable-database-only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aml_ci -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_ADMIN_DATABASE_URL: postgresql://aml_ci:ci-disposable-database-only@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-dev.txt
+      # The fixture creates its own DB, runs Alembic and seeds before API access.
+      - run: python -m pytest tests/api -q --junitxml=api.xml --suite-report=api.json
+        env:
+          TEST_PG_CONTAINER: ${{ job.services.postgres.id }}
+      - if: always()
+        run: python -m scripts.ci_test_policy runtime api.json tests/runtime-inventory.json --group api
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: api
+          path: |
+            api.xml
+            api.json
+
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-dev.txt
+      - run: docker build -f deploy/Dockerfile -t aml-ci:${{ github.sha }} .
+      - run: python -m scripts.ci_smoke --image aml-ci:${{ github.sha }}
+
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-ml.txt
+      - id: research
+        continue-on-error: true
+        run: python -m pytest tests/unit tests/ml -m research -q --junitxml=research.xml --suite-report=research.json
+      - if: always()
+        run: python -m scripts.ci_test_policy research research.json tests/research-baseline.json
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: research-baseline
+          path: |
+            research.xml
+            research.json
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BROWSER_LAB_DIRECTORY: .local-run/browser-ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-browser.txt
+      - run: python -m playwright install --with-deps chromium firefox webkit
+      - run: docker build -f deploy/Dockerfile --build-arg GIT_SHA=${{ github.sha }} -t aml-browser:ci .
+      - run: python tests/load/nicegui_driver/lab.py start --image aml-browser:ci --directory .local-run/browser-ci --accounts 1
+      - run: python -m pytest tests/browser -q --browser chromium --browser firefox --browser webkit --junitxml=browser.xml --suite-report=browser.json --screenshot=only-on-failure
+      - if: always()
+        run: |
+          if test -f .local-run/browser-ci/private-state.json; then
+            python tests/load/nicegui_driver/lab.py stop --directory .local-run/browser-ci
+          fi
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browser-matrix
+          path: |
+            browser.xml
+            browser.json
+            test-results/**/test-failed-*.png
+
+  load:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_load
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aml_ci
+          POSTGRES_PASSWORD: ci-disposable-database-only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aml_ci -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_ADMIN_DATABASE_URL: postgresql://aml_ci:ci-disposable-database-only@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+      - run: git lfs pull --include="${{ env.RUNTIME_LFS }}"
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest tests/load -m load -q --junitxml=load.xml
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: controller-load
+          path: load.xml

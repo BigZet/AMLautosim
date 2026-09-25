@@ -20,6 +20,7 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
     player,
     admin,
     command,
+    install_test_worker_calculator,
 ):
     package, _, _ = candidate
     native_factory = aml_probability_model.AMLProbabilityModel
@@ -33,9 +34,10 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         lambda path: native_factory(path, offline_candidate=True),
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(package))
+    install_test_worker_calculator(lambda: model_scoring.ProbabilityScorer(str(package)))
     monkeypatch.setattr(
-        'src.aml_workshop_simulator.services.game_classifier.get_game_classifier',
-        lambda: model_scoring._probability_scorer(str(package)),
+        'src.aml_workshop_simulator.services.game_classifier.get_pinned_game_classifier',
+        lambda config: model_scoring._probability_scorer(str(package)),
     )
     public = deepcopy(observations[0])
     config, steps = public["config"], public["steps"]
@@ -54,7 +56,7 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         command(steps),
     )
     assert submitted["status"] == "submitted"
-    summary = request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert summary["scored_count"] == 1
     result = request_api("GET", f"/rounds/{active_round}/result", player["headers"])
     explanation = result["explanation"]
@@ -73,9 +75,13 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         "get_round_scorer",
         lambda *args: pytest.fail("Completed result/retry attempted fresh inference"),
     )
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert (
         request_api("GET", f"/rounds/{active_round}/result", player["headers"])
         == result
     )
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 1
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

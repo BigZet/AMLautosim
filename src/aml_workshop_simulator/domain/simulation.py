@@ -27,6 +27,7 @@ from .game_models import (
     money,
 )
 from .structure import resolve_policy, validate_structure
+from .russian_plural import russian_plural
 
 
 def action_detail_effects(spec: CardSpec, details: dict[str, Any]) -> dict[str, Any]:
@@ -243,7 +244,7 @@ def _evaluate_validated(
                 current=str(len(steps)),
                 allowed=str(rules.max_actions),
                 message=(
-                    f"В цепочке {len(steps)} шагов, а раунд допускает не более "
+                    f"В цепочке {len(steps)} {russian_plural(len(steps), 'шаг', 'шага', 'шагов')}, а раунд допускает не более "
                     f"{rules.max_actions}. Удалите лишние шаги."
                 ),
             )
@@ -290,8 +291,9 @@ def _evaluate_validated(
                     current=str(identical_streak),
                     allowed=str(rules.max_identical_steps),
                     message=(
-                        f"{_step_label(index, spec)}: подряд идет {identical_streak} одинаковых "
-                        f"операций, допустимо не более {rules.max_identical_steps}. "
+                        f"{_step_label(index, spec)}: подряд {identical_streak} "
+                        f"{russian_plural(identical_streak, 'одинаковая операция', 'одинаковые операции', 'одинаковых операций')}, "
+                        f"допустимо не более {rules.max_identical_steps}. "
                         "Переставьте шаги так, чтобы между ними была другая операция."
                     ),
                 )
@@ -510,6 +512,14 @@ def _evaluate_validated(
             ],
         }
     if purchase_policy is not None:
+        purchase_spec = next(
+            (
+                card_specs[key].with_overrides(policy.for_card(key).overrides)
+                for key in policy.enabled_keys()
+                if key[0] == "purchase" and key in card_specs
+            ),
+            None,
+        )
         snapshot["schema_version"] = 7
         snapshot["ruleset_version"] = "expanded-rules-stage04-v1"
         snapshot["totals"].update(
@@ -528,9 +538,11 @@ def _evaluate_validated(
                 "Количество покупок",
                 "count",
                 card_counts.get("purchase", 0),
-                3,
+                purchase_spec.max_occurrences if purchase_spec else 0,
             ),
         ]:
+            if code == "purchase_count" and purchase_spec is None:
+                continue
             snapshot["limits"].append(
                 {
                     "code": code,

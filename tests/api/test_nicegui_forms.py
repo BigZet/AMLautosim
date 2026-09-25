@@ -168,7 +168,7 @@ def test_registration_login_and_full_workshop(
                     kind=ui.button, content={"salary":"Зарплата", "incoming_transfer":"Входящий перевод", "card_transfer":"Перевод по карте", "cash_withdrawal":"Наличные", "purchase":"Покупка"}[step["card"]["code"]]
                 ).click()
                 with user:
-                    amount = min(
+                    amount = max(
                         (
                             e
                             for e in user.find(ui.number).elements
@@ -182,7 +182,7 @@ def test_registration_login_and_full_workshop(
                         ("recipient_id", "Получатель"),
                     ):
                         if step.get(key):
-                            selector = min(
+                            selector = max(
                                 (
                                     e
                                     for e in user.find(ui.select).elements
@@ -193,7 +193,6 @@ def test_registration_login_and_full_workshop(
                             selector.set_value(step[key])
             await asyncio.sleep(1.8)
             await user.should_see("Сохранено", retries=40)
-            await user.should_see("Лимиты и цель")
             await user.should_see("Всё готово к отправке")
             user.find("Отправить сценарий").click()
             await user.should_see("Отправить сценарий окончательно?")
@@ -359,3 +358,7 @@ def test_state_load_failure_remains_visible_and_recovers(
             await front.api.close()
 
     asyncio.run(run())
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

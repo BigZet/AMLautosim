@@ -10,6 +10,7 @@ from src.aml_workshop_simulator.api.deps import (
 from src.aml_workshop_simulator.db.session import get_db
 from src.aml_workshop_simulator.schemas.leaderboard import LeaderboardPageOut, ResultOut
 from src.aml_workshop_simulator.schemas.participant_state import ParticipantStateOut
+from src.aml_workshop_simulator.schemas.round_status import RoundStatusOut
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut, RoundPublicOut
 from src.aml_workshop_simulator.schemas.scenarios import (
     ScenarioOut,
@@ -24,7 +25,12 @@ from src.aml_workshop_simulator.services.catalog import round_cards
 router = APIRouter()
 
 
-@router.get("/current", response_model=RoundPublicOut | None)
+@router.get('/current/status', response_model=RoundStatusOut)
+async def current_status(principal: CurrentPrincipal = Depends(get_current_participant), db: AsyncSession = Depends(get_db)):
+    return await participant_state.status(db, principal.user_id)
+
+
+@router.get("/current", response_model=RoundPublicOut | None, dependencies=[Depends(get_current_participant)])
 async def current_round(db: AsyncSession = Depends(get_db)):
     return await participant_state.current_round(db)
 
@@ -37,7 +43,7 @@ async def current_state(
     return await participant_state.read(db, principal.user_id)
 
 
-@router.get("/{round_id}/cards", response_model=list[ActionCardOut])
+@router.get("/{round_id}/cards", response_model=list[ActionCardOut], dependencies=[Depends(get_current_participant)])
 async def cards(round_id: int, db: AsyncSession = Depends(get_db)):
     return await round_cards(db, round_id)
 

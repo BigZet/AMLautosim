@@ -33,3 +33,24 @@ def test_participant_api_cost_shape():
     _, rows, _, _ = limits_view(config, [card])
     assert rows[0]["energy"] == card["costs"]["energy"]
     assert rows[0]["time"] == card["costs"]["time"]
+
+
+def test_legacy_purchase_report_and_disabled_card():
+    from src.aml_workshop_simulator.domain.game_models import card_spec_from_catalog
+    from src.aml_workshop_simulator.domain.round_policy import RoundPolicy
+    from src.aml_workshop_simulator.domain.simulation import _evaluate_validated
+
+    config = expanded_game_config()
+    specs = {spec.key: spec for i, row in enumerate(SEED_CARD_CATALOG, 1)
+             for spec in [card_spec_from_catalog(row, i)]}
+    for enabled in (True, False):
+        if not enabled:
+            config["operations"] = [op for op in config["operations"] if op["code"] != "purchase"]
+        policy = RoundPolicy.from_config(config, specs)
+        snapshot = _evaluate_validated([], specs, config, policy,
+                                       purchase_policy=config["behavior"]["purchases"])
+        reports = [row for row in snapshot["limits"] if row["code"] == "purchase_count"]
+        if enabled:
+            assert reports[0]["limit"] == "3"
+        else:
+            assert reports == []

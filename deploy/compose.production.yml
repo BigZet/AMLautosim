@@ -1,0 +1,163 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-aml} -d ${POSTGRES_DB:-aml_simulator}
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      default:
+        ipv4_address: 172.30.23.5
+  api:
+    restart: unless-stopped
+    depends_on:
+      release:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-240}
+      EXPANDED_ROUNDS_ENABLED: ${EXPANDED_ROUNDS_ENABLED:-true}
+      API_WORKERS: ${API_WORKERS:-1}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      DB_POOL_OVERFLOW: ${DB_POOL_OVERFLOW:-10}
+      DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-5}
+      DB_POOL_RECYCLE: ${DB_POOL_RECYCLE:-1800}
+      PASSWORD_ARGON2_ENABLED: ${PASSWORD_ARGON2_ENABLED:-false}
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
+      LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      AUTH_CONTEXT_SECRET: ${AUTH_CONTEXT_SECRET:?set a private UI-to-API signing secret}
+      AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
+      AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
+      AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
+      AUTH_TRUSTED_UI_CIDRS: '["172.30.23.4/32"]'
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status==200
+        else 1)"
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    image: ${AML_IMAGE:?set an immutable registry image digest}
+    networks:
+      default:
+        ipv4_address: 172.30.23.3
+  scoring-worker:
+    image: ${AML_IMAGE:?set an immutable registry image digest}
+    restart: unless-stopped
+    stop_grace_period: 60s
+    depends_on:
+      release:
+        condition: service_completed_successfully
+    command: python -m scripts.ops.scoring_worker
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      DB_POOL_SIZE: 2
+      DB_POOL_OVERFLOW: 0
+      SCORING_THREADS: ${SCORING_THREADS:-2}
+      SCORING_LEASE_SECONDS: ${SCORING_LEASE_SECONDS:-30}
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
+    networks:
+      default:
+        ipv4_address: 172.30.23.6
+  ui:
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      API_URL: http://api:8000
+      UI_HOST: 0.0.0.0
+      UI_PORT: 8080
+      COOKIE_SECURE: 'true'
+      NICEGUI_STORAGE_SECRET: ${NICEGUI_STORAGE_SECRET:?set NICEGUI_STORAGE_SECRET in .env}
+      NICEGUI_STORAGE_PATH: /home/app/nicegui
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      AUTH_CONTEXT_SECRET: ${AUTH_CONTEXT_SECRET:?set a private UI-to-API signing secret}
+      AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
+      AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
+      AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
+      TRUSTED_PROXY_CIDRS: '["172.30.23.2/32"]'
+    volumes:
+    - nicegui_data:/home/app/nicegui
+    command: python -m src.aml_workshop_simulator.ui.nicegui.app
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/live')"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    image: ${AML_IMAGE:?set an immutable registry image digest}
+    networks:
+      default:
+        ipv4_address: 172.30.23.4
+  release:
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-240}
+      EXPANDED_ROUNDS_ENABLED: ${EXPANDED_ROUNDS_ENABLED:-true}
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
+      LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?set BOOTSTRAP_ADMIN_EMAIL in .env}
+      PASSWORD_ARGON2_ENABLED: ${PASSWORD_ARGON2_ENABLED:-false}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?set BOOTSTRAP_ADMIN_PASSWORD in .env, 10-128 characters}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python -m scripts.seed_database --wait-for-db --migrate --no-demo-round
+    restart: 'no'
+    image: ${AML_IMAGE:?set an immutable registry image digest}
+  ingress:
+    image: nginx:stable-alpine@sha256:985220252f3863977e468f611ef118ebd01421289dd86ee1ae99cb068c3bce2b
+    restart: unless-stopped
+    depends_on:
+      ui:
+        condition: service_healthy
+    ports:
+    - ${INGRESS_BIND:-0.0.0.0}:${UI_PORT:-8080}:80
+    volumes:
+    - ./nicegui.nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -q -O /dev/null http://127.0.0.1/health/live
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      default:
+        ipv4_address: 172.30.23.2
+volumes:
+  postgres_data: null
+  nicegui_data: null
+networks:
+  default:
+    ipam:
+      config:
+      - subnet: 172.30.23.0/24

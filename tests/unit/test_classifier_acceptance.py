@@ -1,15 +1,15 @@
 from copy import deepcopy
-import json
 from src.aml_workshop_simulator.services.classifier_acceptance import gameplay_accepted
-from src.aml_workshop_simulator.services.game_classifier import ROOT, file_hash
 
-DEFAULT_PACKAGE = ROOT / 'resources/catboost_models/aml-game-attributes-v1'
 
 
 def test_exception_is_bound_to_reviewed_report_and_only_grey_error():
-    report=json.loads((DEFAULT_PACKAGE/'gameplay-audit.json').read_bytes())
-    exception=json.loads((DEFAULT_PACKAGE/'acceptance.json').read_bytes())['gameplay_exception']
-    digest=file_hash(DEFAULT_PACKAGE/'gameplay-audit.json')
+    case = {"probability": .6, "target": .3}
+    report = {"passed": False, "failures": ["individual_probability_error_above_0.25"],
+              "largest_errors": [case], "max_target_error": .3}
+    digest = "test-report-sha256"
+    exception = {"approval": "explicit_user_approval", "report_sha256": digest,
+                 "reviewed_case": case, "approved_max_error": .3}
     assert not gameplay_accepted(report,digest)
     assert gameplay_accepted(report,digest,exception)
     assert not gameplay_accepted(report,'changed-report',exception)

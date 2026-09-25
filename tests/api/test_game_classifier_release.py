@@ -9,18 +9,15 @@ from src.aml_workshop_simulator.services.game_classifier import get_game_classif
 from src.aml_workshop_simulator.ui.nicegui.shap_result import aml_result_view_model
 
 EXAMPLES = json.loads(
-    (Path(__file__).parents[1] / "fixtures/game_classifier_examples.json").read_text(
+    (Path(__file__).parents[1] / "fixtures/attribute_context_examples.json").read_text(
         encoding="utf-8"
     )
 )
+BASELINE = json.loads((Path(__file__).parents[1] / "fixtures/retired_limits_baseline.json").read_bytes())
+for example, row in zip(EXAMPLES, BASELINE["rows"], strict=True):
+    example["steps"] = row["steps"]
+    example["probability"] = row["probability"]
 
-
-@pytest.fixture(autouse=True)
-def historical_package(monkeypatch):
-    monkeypatch.setenv(
-        "AML_PROBABILITY_MODEL_PATH",
-        str(Path(__file__).parents[2] / "resources/catboost_models/aml-game-v1"),
-    )
 
 
 @pytest.fixture
@@ -96,7 +93,7 @@ def test_published_examples_end_to_end(
             is None
         )
         request_api(
-            "POST", f"/admin/rounds/{round_id}/score", player["headers"], status=403
+            "POST", f"/admin/rounds/{round_id}/score?wait=true", player["headers"], status=403
         )
         players.append(player)
     scorer = get_game_classifier()
@@ -110,10 +107,10 @@ def test_published_examples_end_to_end(
             raise ValueError("Injected scoring failure")
         return original(*args, **kwargs)
 
-    with patch.object(scorer, "score", side_effect=fail_second):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+    with patch.object(type(scorer), "score", side_effect=fail_second):
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 0
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     saved_results = []
     for player, example in zip(players, EXAMPLES):
         result = request_api("GET", "/rounds/current/state", player["headers"])[
@@ -138,9 +135,9 @@ def test_published_examples_end_to_end(
     assert len(board) == 25
     assert all(row["score_kind"] == "educational_pattern_probability" for row in board)
     with patch.object(
-        scorer, "score", side_effect=AssertionError("must not recalculate")
+        type(scorer), "score", side_effect=AssertionError("must not recalculate")
     ):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 25
     if os.environ.get("AML_PLAYTEST_RESULTS_OUTPUT"):
         Path(os.environ["AML_PLAYTEST_RESULTS_OUTPUT"]).write_text(
@@ -153,20 +150,6 @@ def test_fixed_context_limits_and_package_failure(
 ):
     default = request_api("GET", "/admin/game-config/default", admin)
     assert default["schema_version"] == 10
-    for section, key, value in [
-        ("resources", "initial_energy", 31),
-        ("objectives", "max_actions", 15),
-    ]:
-        changed = deepcopy(default)
-        assert key in changed[section]
-        changed[section][key] = value
-        request_api(
-            "PUT",
-            f"/admin/rounds/{round_id}",
-            admin,
-            {"expected_config_revision": 1, "game_config": changed},
-            409,
-        )
     changed = deepcopy(default)
     changed["behavior"]["timeline"]["starts_at"] = "2027-01-01T10:00:00+03:00"
     request_api(
@@ -178,3 +161,7 @@ def test_fixed_context_limits_and_package_failure(
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(tmp_path / "missing"))
     request_api("POST", f"/admin/rounds/{round_id}/start", admin, status=409)
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

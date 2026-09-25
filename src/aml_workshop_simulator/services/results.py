@@ -29,18 +29,22 @@ async def public_board(
     limit: int,
 ) -> LeaderboardPageOut:
     round_obj = await get_round(db, round_id)
+    version = await participant_state.results_version(db, round_obj)
     rows = (
-        (await build_leaderboard(db, round_id, current_user_id=participant_id))[:limit]
+        await build_leaderboard(db, round_id, current_user_id=participant_id)
         if round_obj.status == "completed"
         else []
     )
     return LeaderboardPageOut(
-        rows=[LeaderboardRowOut(**row) for row in rows], generated_at=datetime.now(UTC)
+        rows=[LeaderboardRowOut(**row) for row in rows[:limit]], generated_at=datetime.now(UTC),
+        results_version=version,
+        current_user_row=next((LeaderboardRowOut(**row) for row in rows if row.get('is_current_user')), None),
     )
 
 
 async def admin_board(db: AsyncSession, round_id: int) -> AdminLeaderboardPageOut:
     round_obj = await get_round(db, round_id)
+    version = await participant_state.results_version(db, round_obj)
     rows = (
         await build_leaderboard(db, round_id, include_blocked=True)
         if round_obj.status == "completed"
@@ -49,4 +53,5 @@ async def admin_board(db: AsyncSession, round_id: int) -> AdminLeaderboardPageOu
     return AdminLeaderboardPageOut(
         rows=[AdminLeaderboardRowOut(**row) for row in rows],
         generated_at=datetime.now(UTC),
+        results_version=version,
     )

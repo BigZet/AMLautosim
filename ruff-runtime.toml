@@ -1,0 +1,11 @@
+# Incremental strict gate. The general ruff.toml still checks every source file.
+extend = "ruff.toml"
+include = [
+  "src/aml_workshop_simulator/domain/scoring.py",
+  "src/aml_workshop_simulator/domain/russian_plural.py",
+  "src/aml_workshop_simulator/services/model_registry.py",
+  "src/aml_workshop_simulator/services/scoring_jobs.py",
+]
+
+[lint]
+extend-select = ["B", "ASYNC", "UP"]

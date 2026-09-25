@@ -12,7 +12,67 @@ from src.aml_workshop_simulator.db.session import async_engine
 from src.aml_workshop_simulator.services import scoring_run
 
 
-@pytest.fixture(params=[8, 10])
+def test_pool_exhaustion_returns_retryable_503_without_losing_command(
+    api,
+    player,
+    active_round,
+    chain,
+    command,
+):
+    import time
+    import httpx
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+    from src.aml_workshop_simulator.core.config import settings
+    from src.aml_workshop_simulator.db.session import get_db
+
+    payload = command(chain())
+    path = f"/api/v1/rounds/{active_round}/scenario"
+
+    async def run():
+        engine = create_async_engine(
+            settings.database_url, pool_size=1, max_overflow=0, pool_timeout=3
+        )
+        sessions = async_sessionmaker(engine, expire_on_commit=False)
+
+        async def bounded_db():
+            async with sessions() as session:
+                try:
+                    yield session
+                except Exception:
+                    await session.rollback()
+                    raise
+
+        api.app.dependency_overrides[get_db] = bounded_db
+        try:
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(api.app, raise_app_exceptions=False),
+                base_url="http://test",
+                headers=player["headers"],
+            ) as client:
+                async with engine.connect():
+                    started = time.monotonic()
+                    response = await client.put(path, json=payload)
+                    assert 2.8 <= time.monotonic() - started < 8
+                    assert response.status_code == 503, response.text
+                    assert response.json()["code"] == "database_busy"
+                    assert response.headers["Retry-After"] == "1"
+                    assert response.json()["request_id"]
+                    assert "QueuePool" not in response.text
+                accepted = await client.put(path, json=payload)
+                assert accepted.status_code == 200, accepted.text
+                replay = await client.put(path, json=payload)
+                assert replay.status_code == 200, replay.text
+                assert replay.json() == accepted.json()
+                stored = await client.get(path)
+                assert stored.json()["revision"] == 1
+        finally:
+            api.app.dependency_overrides.pop(get_db, None)
+            await engine.dispose()
+
+    asyncio.run(run())
+
+
+@pytest.fixture(params=[10])
 def seeded_game_version(request):
     return request.param
 
@@ -57,7 +117,7 @@ def test_submission_races_cutoff(
 
     def score():
         barrier.wait(timeout=10)
-        return api.post(f"/api/v1/admin/rounds/{active_round}/score", headers=admin)
+        return api.post(f"/api/v1/admin/rounds/{active_round}/score?wait=true", headers=admin)
 
     with ThreadPoolExecutor(2) as pool:
         submitted, scored = pool.submit(submit), pool.submit(score)
@@ -96,7 +156,7 @@ def test_state_is_one_nonblocking_snapshot_during_scoring(
 
     with ThreadPoolExecutor(2) as pool:
         score = pool.submit(
-            request_api, "POST", f"/admin/rounds/{active_round}/score", admin
+            request_api, "POST", f"/admin/rounds/{active_round}/score?wait=true", admin
         )
         try:
             assert started.wait(10)
@@ -159,7 +219,7 @@ def test_concurrent_scorers_publish_once(
 
     def score():
         barrier.wait(timeout=10)
-        return api.post(f"/api/v1/admin/rounds/{active_round}/score", headers=admin)
+        return api.post(f"/api/v1/admin/rounds/{active_round}/score?wait=true", headers=admin)
 
     with ThreadPoolExecutor(2) as pool:
         first, second = pool.submit(score), pool.submit(score)
@@ -167,3 +227,7 @@ def test_concurrent_scorers_publish_once(
     assert a.status_code == b.status_code == 200
     assert a.json() == b.json()
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 1
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

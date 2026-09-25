@@ -1,3 +1,4 @@
+from tests.research_support import pilot_path
 import json
 from pathlib import Path
 import pytest
@@ -5,7 +6,7 @@ from scripts.aml_dataset.aml_labels import validate_label
 from scripts.check_aml_casebook import audit_casebook
 
 ROOT = Path(__file__).resolve().parents[2]
-PILOT = ROOT / "resources/aml_dataset/aml-v1/pilot/casebook.jsonl"
+PILOT = pilot_path()
 PROTOCOL = ROOT / "config/ml/aml-classifier-v1-protocol.json"
 
 def test_unresolved_cannot_be_negative():
@@ -17,19 +18,6 @@ def test_confirmed_requires_integer_binary(label):
     with pytest.raises(ValueError):
         validate_label({"aml_label": label, "label_status": "confirmed"})
 
-def test_historical_pilot_retains_labels_but_retired_purposes_fail_current_contract():
-    rows = [json.loads(line) for line in PILOT.read_text(encoding='utf8').splitlines()]
-    assert len(rows) == 120
-    assert all(row['review_status'] == 'authored_unreviewed' for row in rows)
-    for label in (0, 1, None):
-        assert sum(row['aml_label'] == label for row in rows) == 40
-    report = audit_casebook(PILOT, PROTOCOL)
-    assert report["case_count"] == 87
-    rejected = [error for error in report['errors'] if 'line' in error]
-    assert len(rejected) == 33
-    assert all('Назначение' in error['error'] for error in rejected)
-    assert report["release_eligible"] is False
-    assert report["review_counts"] == {"authored_unreviewed": 87}
 
 def test_resource_failure_detected(tmp_path):
     record = json.loads(PILOT.read_text(encoding="utf-8").splitlines()[0])

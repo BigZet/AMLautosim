@@ -119,7 +119,7 @@ def protocol():
 
 def build_casebook():
     fixture = json.loads(
-        (ROOT / "docs/verification/semantic-interface-audit/fixtures.json").read_text(
+        (ROOT / "config/aml_scenario_templates.json").read_text(
             encoding="utf-8"
         )
     )

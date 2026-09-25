@@ -1,5 +1,7 @@
 """New contract through the UI HTTP client, plus saved-round compatibility."""
 
+import pytest
+
 import asyncio
 from uuid import uuid4
 
@@ -16,7 +18,7 @@ def test_incoming_card_preview_save_submit_and_score(
         client = APIClient("http://test/api/v1", transport=httpx.ASGITransport(api.app))
         path = f"rounds/{active_round}/scenario"
         try:
-            cards = await client.request("GET", f"rounds/{active_round}/cards")
+            cards = await client.request("GET", f"rounds/{active_round}/cards", session_id=player["headers"]["X-Session-ID"])
             assert {c["code"] for c in cards} == {
                 "salary",
                 "incoming_transfer",
@@ -27,7 +29,8 @@ def test_incoming_card_preview_save_submit_and_score(
             incoming = next(c for c in cards if c["code"] == "incoming_transfer")
             assert [p["key"] for p in incoming["visible_params"]] == [
                 "channel",
-                "transfer_source",
+                "incoming_kind",
+        "bank_country",
             ]
             assert (
                 incoming["channels"] == ["bank"] and incoming["quota_category"] is None
@@ -36,8 +39,9 @@ def test_incoming_card_preview_save_submit_and_score(
             for step in steps:
                 if step["card"]["code"] == "incoming_transfer":
                     step["action_details"] = {
-                        "transfer_source": "crypto_exchange",
+                        "incoming_kind": "crypto_p2p",
                     }
+                    step["purpose_code"] = "unknown"
             sid = player["headers"]["X-Session-ID"]
             preview = await client.request(
                 "POST", path + "/preview", session_id=sid, body={"steps": steps}
@@ -76,7 +80,7 @@ def test_incoming_card_preview_save_submit_and_score(
             assert submitted["status"] == "submitted"
             await client.request(
                 "POST",
-                f"admin/rounds/{active_round}/score",
+                f"admin/rounds/{active_round}/score?wait=true",
                 session_id=admin["X-Session-ID"],
             )
             result = await client.request(
@@ -110,3 +114,7 @@ def test_explicit_seed_reset_replaces_game_but_keeps_accounts_and_sessions(
     assert sql("SELECT id, email FROM users ORDER BY id") == users
     assert sql("SELECT id FROM sessions ORDER BY id") == sessions
     request_api("GET", "/auth/session", player["headers"])
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

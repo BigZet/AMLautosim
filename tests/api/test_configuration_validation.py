@@ -2,6 +2,7 @@
 
 import pytest
 from sqlalchemy import select
+from decimal import Decimal
 
 from scripts import seed_database
 from src.aml_workshop_simulator.core.errors import Conflict
@@ -14,6 +15,7 @@ def test_invalid_update_keeps_round_and_audit_unchanged(
     invalid_expanded_game_config, request_api, admin, round_id, sql
 ):
     config, message = invalid_expanded_game_config
+    invalid_range = any(Decimal(o["min_amount"]) > Decimal(o["max_amount"]) for o in config["operations"] if "min_amount" in o and "max_amount" in o)
     path = f"/admin/rounds/{round_id}"
     before = request_api("GET", path, admin)
     audit = sql("SELECT * FROM audit_events ORDER BY id")
@@ -22,10 +24,13 @@ def test_invalid_update_keeps_round_and_audit_unchanged(
         path,
         admin,
         {"expected_config_revision": before["config_revision"], "game_config": config},
-        status=409,
+        status=422 if invalid_range else 409,
     )
-    assert error["code"] == "round_configuration_invalid"
-    assert message in error["message"]
+    assert error["code"] == ("validation_error" if invalid_range else "round_configuration_invalid")
+    if invalid_range:
+        assert any(message in v["message"] for v in error["details"]["violations"])
+    else:
+        assert message in error["message"]
     assert request_api("GET", path, admin) == before
     assert sql("SELECT * FROM audit_events ORDER BY id") == audit
 
@@ -34,16 +39,20 @@ def test_invalid_create_does_not_write_round(
     invalid_expanded_game_config, request_api, admin, sql
 ):
     config, message = invalid_expanded_game_config
+    invalid_range = any(Decimal(o["min_amount"]) > Decimal(o["max_amount"]) for o in config["operations"] if "min_amount" in o and "max_amount" in o)
     sql("TRUNCATE rounds, audit_events CASCADE")
     error = request_api(
         "POST",
         "/admin/rounds",
         admin,
         {"title": "Invalid configuration", "game_config": config},
-        status=409,
+        status=422 if invalid_range else 409,
     )
-    assert error["code"] == "round_configuration_invalid"
-    assert message in error["message"]
+    assert error["code"] == ("validation_error" if invalid_range else "round_configuration_invalid")
+    if invalid_range:
+        assert any(message in v["message"] for v in error["details"]["violations"])
+    else:
+        assert message in error["message"]
     assert sql("SELECT id FROM rounds") == []
     assert sql("SELECT id FROM audit_events") == []
 

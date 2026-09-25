@@ -12,6 +12,7 @@ from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+pytest_plugins = ['scripts.ci_test_policy']
 ADMIN_URL = make_url(
     os.getenv("TEST_ADMIN_DATABASE_URL", "postgresql://aml:aml@localhost:5432/postgres")
 ).set(drivername="postgresql")
@@ -41,6 +42,13 @@ async def execute(statement, parameters=None):
         return rows
 
 
+@pytest.fixture(autouse=True)
+def isolated_ui_storage(tmp_path, monkeypatch):
+    """User simulation must never clear a developer's real NiceGUI sessions."""
+    from nicegui.storage import Storage
+    monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+
+
 @pytest.fixture(scope="session")
 def database():
     async def manage(create):
@@ -63,37 +71,20 @@ def database():
 
 @pytest.fixture
 def seeded_game_version():
-    """Existing contract-v8 regression tests keep an explicitly legacy round."""
-    return 8
+    """All API regressions use the current v10 release."""
+    return 10
 
 
 @pytest.fixture
 def api(database, seeded_game_version):
+    front = sys.modules.get('src.aml_workshop_simulator.ui.nicegui.app')
+    if front is not None:
+        front.login_limiter.states.clear()
     asyncio.run(
-        execute("TRUNCATE action_cards, users, rounds RESTART IDENTITY CASCADE")
+        execute("TRUNCATE action_cards, users, rounds, auth_rate_limits RESTART IDENTITY CASCADE")
     )
-    if seeded_game_version == 8:
-        from unittest.mock import patch
-        from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
-        from src.aml_workshop_simulator.services.configuration import freeze_game_config
-        from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
-        from src.aml_workshop_simulator.services.round_configuration import (
-            config_version,
-        )
-
-        def legacy_config(cards):
-            config = freeze_game_config(expanded_game_config(), cards)
-            scorer = get_model_scorer()
-            scorer.check_config(config)
-            config["risk_model"] = scorer.identity.copy()
-            config["config_version"] = config_version(config)
-            return config
-
-        with patch("scripts.seed_database.reference_game_config", legacy_config):
-            asyncio.run(seed())
-    else:
-        assert seeded_game_version == 10
-        asyncio.run(seed())
+    assert seeded_game_version == 10
+    asyncio.run(seed())
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
 
@@ -106,6 +97,29 @@ def request_api(api):
         return response.json() if response.content else None
 
     return request
+
+
+@pytest.fixture
+def scoring_worker(api):
+    """Real queue consumer for explicit legacy wait-mode and UI regressions.
+
+    The default202 contract and crash tests deliberately do not use this fixture.
+    """
+    from src.aml_workshop_simulator.services.scoring_jobs import worker_loop
+
+    async def start():
+        stop = asyncio.Event()
+        task = asyncio.create_task(worker_loop(AsyncSessionLocal, stop, 0.1))
+        return stop, task
+
+    stop, task = api.portal.call(start)
+    yield
+
+    async def finish():
+        stop.set()
+        await asyncio.wait_for(task, 15)
+
+    api.portal.call(finish)
 
 
 @pytest.fixture
@@ -199,6 +213,22 @@ def command():
 
 
 @pytest.fixture
+def install_test_worker_calculator(monkeypatch):
+    """Explicit offline/schema-4 fixture support, never a production fallback."""
+    from types import SimpleNamespace
+    from src.aml_workshop_simulator.services import scoring_jobs
+    from src.aml_workshop_simulator.services.scenario_service import load_round_card_specs, round_policy
+
+    def install(factory):
+        def initialize(config):
+            row = SimpleNamespace(game_config=config)
+            specs = load_round_card_specs(row)
+            scoring_jobs._thread.calculator = (specs, config, round_policy(row, specs), factory())
+        monkeypatch.setattr(scoring_jobs, 'initialize_calculator', initialize)
+    return install
+
+
+@pytest.fixture
 def sql(api):
     return lambda statement, parameters=None: api.portal.call(
         execute, statement, parameters
@@ -228,10 +258,10 @@ def invalid_game_config(request):
 
 @pytest.fixture
 def invalid_expanded_game_config(invalid_game_config):
-    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
+    from src.aml_workshop_simulator.services.game_classifier import game_config
 
     invalid, message = invalid_game_config
-    config = expanded_game_config()
+    config = game_config()
     for operation in invalid["operations"]:
         if (
             operation.get("visible_params") in (["action.funds_source"], ["channel"])
@@ -241,7 +271,8 @@ def invalid_expanded_game_config(invalid_game_config):
                 o for o in config["operations"] if o["code"] == operation["code"]
             )
             if operation.get("min_amount") == "90000.00":
-                target["min_amount"] = "90000.00"
+                from decimal import Decimal
+                target["min_amount"] = str(Decimal(target["max_amount"]) + 1)
             else:
                 target["visible_params"] = operation["visible_params"]
     return config, message

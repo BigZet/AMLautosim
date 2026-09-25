@@ -2,13 +2,15 @@
 
 Python 3.13, `pip install -r requirements-dev.txt`, PostgreSQL 16.
 Runtime-зависимости полностью зафиксированы в `requirements.txt`.
+На Windows задайте `PYTHONUTF8=1` (PowerShell: `$env:PYTHONUTF8='1'`).
+`tzdata` входит в runtime lock, поэтому `Europe/Moscow` доступен и на Windows.
 
 ```bash
 python -m ruff check src scripts tests migrations
 python -m pip check
 python -m scripts.validate_config
 python -m scripts.check_game_balance
-python -m pytest -q tests/unit
+python -m pytest -q tests/unit tests/ml -m runtime
 ```
 
 Режим `importlib` уже задан в `pytest.ini`, поэтому unit, ML и API можно
@@ -58,19 +60,70 @@ python scripts/check_nicegui_transport.py --url http://127.0.0.1:8080
 
 Сборка, первый запуск, повторный seed и восстановление резервной копии входят
 в контейнерную проверку. Инструкции: [deployment](../docs/deployment.md) и
-[operations](../docs/operations.md). Результаты фиксируются в `docs/verification/`.
+[operations](../docs/operations.md). Результаты выпуска фиксируются в `docs/current-release.md`.
 
-## Офлайн CatBoost
+## Текущая модель
 
-Тесты `tests/ml` выполняются отдельно в образе `deploy/Dockerfile.ml` с
-`requirements-ml.txt`. Они не требуют БД. Команды и отдельная интеграционная
-проверка оценки без вызова fit: [обучение CatBoost](../docs/catboost-training.md).
+Пакет `aml-game-organizer-settings-v1` проверяется через `test_model_registry`,
+`test_game_classifier_release`, `test_package_publication` и API-тесты.
+Численные регрессии сверяют 25 цепочек, признаки, вероятности и SHAP.
+Архивные модели и их приёмочные тесты сняты с поддержки. Общие API-сценарии
+и проверки worker перенесены на v10. Research-тесты генерируют пилотные входы
+во временном каталоге; прежние датасеты в репозитории не нужны.
 
-## Интеграция CatBoost и SHAP
+## Контуры и обязательный CI
 
-Для текущего выпуска: `tests/ml/test_model_scoring.py`, `tests/api/test_model_integration.py`, `tests/unit/test_expanded_result_ui.py`. Нужны CatBoost 1.2.10 и отдельная PostgreSQL. Проверка всех 4413 прогнозов и SHAP — `python -m scripts.verify_model_integration`; параметры приведены в [отчёте](../docs/verification/catboost-shap-integration.md).
+`suites.json` содержит явную классификацию существующих модулей. В смешанных
+модулях отдельные offline-тесты помечены `research`. Новый тест обязан иметь
+назначение в реестре или явный `pytestmark = pytest.mark.runtime` (либо другой
+один контур). Collection отклоняет отсутствие классификации и двойные назначения.
+Inference, package integrity, сохранённые версии, API и UI остаются runtime,
+даже если лежат в `tests/ml`. Обучение и генерация датасетов — research.
 
-Регрессии ML-верификатора проверяют ошибки входных данных и обязательные пороги
-также в `python -O` и при `PYTHONOPTIMIZE=1`. Успешный отчёт записывается только
-после всех проверок, в новый файл. Сбор окружения обучения проверяется без `fit`
-и без зависимости от наличия `pip` или другого `python` в `PATH`.
+`--suite-report=run.json` сохраняет выбранные node IDs, ошибки и exit code.
+`runtime-inventory.json` защищает от исчезновения обязательных тестов. При
+намеренном удалении/переименовании теста изменение inventory должно объясняться
+в том же PR. Добавленные тесты обновляют inventory после успешной collection.
+
+```bash
+python -m pytest tests/unit tests/ml -m runtime -q --suite-report=runtime.json
+python -m scripts.ci_test_policy runtime runtime.json tests/runtime-inventory.json --group unit
+python -m pytest tests/api -q --suite-report=api.json
+python -m scripts.ci_test_policy runtime api.json tests/runtime-inventory.json --group api
+```
+
+Research запускается в отдельном окружении с `requirements-ml.txt`. В
+`research-baseline.json` сохранены конкретные известные ошибки, а не широкие
+исключения файлов. Новая ошибка, collection failure, исчезновение или пропуск
+ранее падавшего теста отклоняются сравнением. Известный долг виден в артефактах;
+успех сравнения не означает, что все research-тесты прошли.
+
+```bash
+python -m pytest tests/unit tests/ml -m research -q --suite-report=research.json
+python -m scripts.ci_test_policy research research.json tests/research-baseline.json
+```
+
+CI запускает `runtime-linux`, `runtime-windows`, `api`, `image` и проверку
+research-регрессий. После появления jobs эти имена назначаются required checks
+ветки master. Отдельный controller load job запускается вручную через `run_load`;
+он не подтверждает ёмкость браузерного мастер-класса.
+
+Контейнерный smoke собирает один образ и проверяет migration/seed, readiness,
+HTTP, cookie и настоящий WebSocket на disposable Compose-стенде. Команда:
+
+```bash
+docker build -f deploy/Dockerfile -t aml-local:verify .
+python -m scripts.ci_smoke --image aml-local:verify
+```
+
+Пароли smoke генерируются в памяти, порты назначаются на loopback, ресурсы
+уникального Compose-проекта удаляются в конце. Рабочие БД не используются.
+
+Аудит зависимостей использует отдельный `requirements-audit.txt` и проверяет
+runtime/ML locks при их изменении и по расписанию. Ошибка сети/инструмента
+оставляет job неуспешным; отсутствие JSON-отчёта не считается чистым аудитом.
+
+Lockfiles пересобираются с `uv pip compile --universal --python-version 3.13`:
+runtime из `requirements.in`, dev из `requirements-dev.in`, ML из
+`requirements-ml.in`, audit из `requirements-audit.in`. Режим `--universal`
+сохраняет платформенные зависимости, включая Linux uvloop и Windows colorama.

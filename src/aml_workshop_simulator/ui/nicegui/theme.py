@@ -408,6 +408,23 @@ body:has(.profile-workspace) .brand { color:#2354D6; font-size:19px; }
  .fact-details-grid { grid-template-columns:minmax(0,1fr); }
  .chain-workspace .scenario-summary { grid-row:auto; }
 }
+/* Shared authenticated header: explicit mobile rows prevent orphaned actions. */
+@media (max-width:800px) {
+ .app-header:has(.header-identity) { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; row-gap:4px; padding:14px 16px; align-items:center; }
+ .app-header:has(.header-identity) > .q-space { display:none; }
+ .app-header .header-identity { grid-column:1 / -1; grid-row:1; display:flex; flex-direction:column; align-items:flex-start; gap:4px; width:100%; min-width:0; margin-bottom:8px; }
+ .app-header .header-game-title { border:0; padding:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; font-size:13px; line-height:18px; }
+ .app-header .header-game-status { grid-column:1; grid-row:2; margin:0; }
+ .app-header .header-user-name { grid-column:1; grid-row:3; min-width:0; overflow-wrap:anywhere; line-height:18px; }
+ .app-header .header-actions { grid-column:2; grid-row:2 / 4; align-self:center; padding:0; border:0; gap:4px; }
+ .app-header .header-text-link { height:44px; padding:0 10px; }
+ .app-header .header-exit { width:44px; min-width:44px; height:44px; }
+ .app-header:not(:has(.header-game-status)) .header-user-name { grid-row:2; }
+ .app-header:not(:has(.header-game-status)) .header-actions { grid-row:2; }
+ .app-header:not(:has(.header-identity)) > .q-space { display:none; }
+ .app-header:not(:has(.header-identity)) { gap:12px; justify-content:space-between; }
+}
+
 """
 
 

@@ -41,7 +41,7 @@ def test_counterparty_autosave_replay_reload_and_catalog_snapshot(
         "POST", path + "/preview", player["headers"], {"steps": chain()}
     )["resources"]
     config = install(sql, active_round)
-    catalog = request_api("GET", f"/rounds/{active_round}/cards")
+    catalog = request_api("GET", f"/rounds/{active_round}/cards", player["headers"])
     for card in catalog:
         assert not card["context_fields"]
         assert all(f["key"] != "sender_relationship" for f in card["fields"])

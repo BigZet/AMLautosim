@@ -1,9 +1,0 @@
-{
-  "audit.json": "cbbed19ef09dae7ff788b6ec1ac6426887d1a768565ea2f795168656cc1287d4",
-  "casebook.json": "b688cac51fc5a25dca9e4c767bed642a297f8cfc0aaa0d2582cb0d40088218fc",
-  "dossiers.json": "2efb340ae5feef19e032eb65df1f5bccab69123dcf4e9081b586f3e32c261db3",
-  "engine-audit.json": "0e3e218519d5415c2a70bc39e2b9366053177146701bbf84a7ff170c88bbe347",
-  "historical-v1-provenance.json": "767cf8168e02bbacffce207baa813f8efa444c719b7e787082f74b3336ac249a",
-  "provenance.json": "008976352dbbdda03ca20b9a7f17f635aba952b1d3259a71729e37ac25b6be37",
-  "records.jsonl": "d6b9b5b8311844398be8e85d4e865f51089d2e1bfc10ba402a920265e4cc112f"
-}

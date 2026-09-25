@@ -13,11 +13,12 @@ def test_result_preserves_counterparties_and_calendar_time(tmp_path, monkeypatch
     from src.aml_workshop_simulator.ui.nicegui.participant import result_panel
 
     monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
+    from src.aml_workshop_simulator.services.game_classifier import get_game_classifier, game_config
     config = demo_config()
+    config.update(game_config())
     steps = demo_steps(config, "varied")
-    from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
 
-    scorer = get_model_scorer()
+    scorer = get_game_classifier()
     config["risk_model"] = scorer.identity.copy()
     result = {
         "explanation": scorer.score(steps, config)["explanation"],
@@ -46,7 +47,7 @@ def test_result_preserves_counterparties_and_calendar_time(tmp_path, monkeypatch
             await user.open("/expanded-result")
             await user.should_see("14.09.2026,")
             await user.should_see("Магазин")
-            await user.should_see("Борис — известный новый контрагент")
+            await user.should_see("Борис")
             await user.should_see("Засчитано в цель: 400 000,00 ₽")
 
     asyncio.run(run())

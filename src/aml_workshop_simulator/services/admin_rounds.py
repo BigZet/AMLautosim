@@ -2,16 +2,17 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict
 from src.aml_workshop_simulator.services.game_classifier import game_config
 from src.aml_workshop_simulator.db.models.action_cards import ActionCard
-from src.aml_workshop_simulator.db.models.audit_events import AuditEvent
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from src.aml_workshop_simulator.db.models.scoring_jobs import ScoringJob
+from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.queries import get_round
 from src.aml_workshop_simulator.domain.contract_versions import (
     require_playable_contract,
@@ -22,12 +23,13 @@ from src.aml_workshop_simulator.schemas.admin import (
     RoundAdminOut,
     RoundCreateIn,
     RoundUpdateIn,
+    AdmissionCountsOut,
 )
 from src.aml_workshop_simulator.schemas.round_config import (
     parse_game_config,
     RoundConfigInput,
 )
-from src.aml_workshop_simulator.services.audit import record_event
+from src.aml_workshop_simulator.services.audit import preserve_game_references, record_event
 from src.aml_workshop_simulator.services.configuration import freeze_game_config
 from src.aml_workshop_simulator.services.round_configuration import (
     config_version,
@@ -63,7 +65,28 @@ async def prepare_config(
 
 async def current(db: AsyncSession) -> RoundAdminOut | None:
     row = (await db.execute(select(Round))).scalar_one_or_none()
-    return round_out(row) if row else None
+    if row is None:
+        return None
+    result = round_out(row)
+    result.scoring_job_id = (await db.execute(select(ScoringJob.id).where(
+        ScoringJob.round_id == row.id,
+    ).order_by(ScoringJob.created_at.desc()).limit(1))).scalar_one_or_none()
+    result.admission_counts = await admission_counts(db, row.id)
+    from src.aml_workshop_simulator.services.participant_state import results_version
+    result.results_version = await results_version(db, row)
+    return result
+
+
+async def admission_counts(db: AsyncSession, round_id: int) -> AdmissionCountsOut:
+    await get_round(db, round_id)
+    values = (await db.execute(select(
+        func.count(User.id).label('registered_total'),
+        *(func.count(Scenario.id).filter(Scenario.status == phase).label(phase)
+          for phase in ('editing', 'submitted', 'scored')),
+    ).select_from(User).outerjoin(Scenario,
+        (Scenario.participant_id == User.id) & (Scenario.round_id == round_id)
+    ).where(User.role == 'participant'))).mappings().one()
+    return AdmissionCountsOut(**values)
 
 
 async def create(
@@ -182,21 +205,28 @@ async def restart(
     request_id: str | None,
     schema_version: int = 10,
 ) -> RoundAdminOut:
+    from src.aml_workshop_simulator.schemas.game_version import require_game_version
+
+    schema_version = int(require_game_version(schema_version))
     await db.execute(text("SELECT pg_advisory_xact_lock(73419001)"))
     row = await get_round(db, round_id, lock="update")
-    from src.aml_workshop_simulator.core.expanded_game import expanded_game_config
     from src.aml_workshop_simulator.schemas.round_config import parse_game_config
 
-    if schema_version not in (8, 10):
-        raise Conflict("Версия игры не поддерживается.", code="model_contract_mismatch")
-    selected = parse_game_config(
-        expanded_game_config() if schema_version == 8 else game_config()
-    )
+    selected = parse_game_config(game_config())
     config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.
-    await db.execute(delete(AuditEvent))
-    await db.execute(delete(ScoringResult))
-    await db.execute(delete(Scenario))
+    await db.execute(update(ScoringJob).where(
+        ScoringJob.round_id == round_id, ScoringJob.state.in_(['queued', 'running']),
+    ).values(state='cancelled', owner=None, lease_until=None, finished_at=func.now()))
+    # Jobs keep lifecycle metadata, never copies of deleted game scenarios.
+    await db.execute(update(ScoringJob).where(ScoringJob.round_id == round_id)
+                     .values(snapshot={}))
+    scenario_ids = select(Scenario.id).where(Scenario.round_id == round_id)
+    deleted_scenarios = await db.scalar(select(func.count()).select_from(Scenario).where(Scenario.round_id == round_id))
+    deleted_results = await db.scalar(select(func.count()).select_from(ScoringResult).where(ScoringResult.scenario_id.in_(scenario_ids)))
+    await preserve_game_references(db, round_id)
+    await db.execute(delete(ScoringResult).where(ScoringResult.scenario_id.in_(scenario_ids)))
+    await db.execute(delete(Scenario).where(Scenario.round_id == round_id))
     await db.delete(row)
     await db.flush()
     fresh = Round(
@@ -213,8 +243,10 @@ async def restart(
         db,
         actor_user_id=actor_id,
         round_id=fresh.id,
-        event_type="round_created",
+        event_type="round_restarted",
         request_id=request_id,
+        metadata={"previous_round_id": round_id, "new_round_id": fresh.id,
+                  "deleted_scenarios": deleted_scenarios, "deleted_results": deleted_results},
     )
     await db.commit()
     return round_out(fresh)

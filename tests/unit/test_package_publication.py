@@ -26,7 +26,6 @@ def snapshot(path):
 @pytest.mark.parametrize(
     "script,source_name",
     [
-        ("package_retired_limits", "aml-game-attribute-context-v1"),
         ("package_organizer_settings", "aml-game-organizer-settings-v1"),
     ],
 )

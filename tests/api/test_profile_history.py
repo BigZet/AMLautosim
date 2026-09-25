@@ -1,15 +1,15 @@
 from copy import deepcopy
 
 from tests.profile_history_support import profile_config
-from tests.purchase_support import mixed_goal
+from scripts.check_expanded_balance import demo_steps
 
 
 def test_draft_freeze_two_players_reload_and_immutable_after_start(
     monkeypatch, request_api, admin, round_id, player_factory, command, sql
 ):
-    config = request_api("GET", "/admin/game-config/default?schema_version=8", admin)
+    config = request_api("GET", "/admin/game-config/default?schema_version=10", admin)
     history_config = profile_config()
-    for key in ("counterparties", "profile", "history", "timeline"):
+    for key in ("history",):
         config["behavior"][key] = history_config["behavior"][key]
     saved = request_api(
         "PUT",
@@ -40,7 +40,7 @@ def test_draft_freeze_two_players_reload_and_immutable_after_start(
     empty = request_api("POST", path + "/preview", first["headers"], {"steps": []})
     assert empty["resources"]["totals"]["target_outflow"] == "0.00"
     assert empty["resources"]["resources_after"]["balance"] == "180000.00"
-    values = mixed_goal(frozen)
+    values = demo_steps(frozen, "purchase")
     result = request_api("PUT", path, first["headers"], command(values))
     assert result["resources"]["totals"]["target_outflow"] == "400000.00"
     assert read(first)["round"] == read(second)["round"] == one["round"]

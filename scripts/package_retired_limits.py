@@ -15,6 +15,7 @@ from src.aml_workshop_simulator.services.game_classifier import (
     digest,
     file_hash,
 )
+from src.aml_workshop_simulator.services.source_hashing import source_sha256
 
 SOURCES = (
     "src/aml_workshop_simulator/services/game_classifier.py",
@@ -22,6 +23,7 @@ SOURCES = (
     "src/aml_workshop_simulator/domain/game_models.py",
     "src/aml_workshop_simulator/domain/simulation.py",
     "config/base_round.json",
+    "src/aml_workshop_simulator/services/source_hashing.py",
 )
 
 
@@ -56,8 +58,12 @@ def _build(source, baseline_path, output):
         raise FileExistsError(output)
     shutil.copytree(source, output)
     release = json.loads((output / "release.json").read_bytes())
+    release["source_hash_mode"] = "lf-v1"
+    release["inference_sources"] = {
+        name: source_sha256(ROOT / name) for name in release["inference_sources"]
+    }
     release["compatibility_sources"] = {
-        name: file_hash(ROOT / name) for name in SOURCES
+        name: source_sha256(ROOT / name) for name in SOURCES
     }
     release["compatible_identities"] = [baseline["identity"]]
     release["compatibility"] = {

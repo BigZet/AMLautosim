@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
@@ -35,6 +36,13 @@ class RoundUpdateIn(BaseModel):
     game_config: RoundConfigInput | None = None
 
 
+class AdmissionCountsOut(BaseModel):
+    registered_total: int = 0
+    editing: int = 0
+    submitted: int = 0
+    scored: int = 0
+
+
 class RoundAdminOut(RoundContextOut):
     id: int
     title: str
@@ -48,6 +56,9 @@ class RoundAdminOut(RoundContextOut):
     created_at: datetime
     activated_at: datetime | None = None
     completed_at: datetime | None = None
+    admission_counts: AdmissionCountsOut | None = None
+    results_version: str | None = None
+    scoring_job_id: UUID | None = None
 
 
 class ScoringSummaryOut(BaseModel):
@@ -59,6 +70,18 @@ class ScoringSummaryOut(BaseModel):
     scoring_version: str
     leaderboard_version: str
     completed_at: datetime
+
+
+class ScoringJobOut(BaseModel):
+    job_id: UUID
+    round_id: int | None
+    original_round_id: int
+    state: Literal['queued', 'running', 'completed', 'failed', 'cancelled']
+    done: int
+    total: int
+    attempt: int
+    error: dict[str, JsonValue] | None = None
+    summary: ScoringSummaryOut | None = None
 
 
 class PlayerSummaryOut(BaseModel):
@@ -76,6 +99,7 @@ class PlayerSummaryOut(BaseModel):
 
 class PlayerSummaryPageOut(BaseModel):
     rows: list[PlayerSummaryOut]
+    next_cursor: int | None = None
 
 
 class PlayerDetailUserOut(BaseModel):
@@ -102,6 +126,14 @@ class AccessUpdateIn(BaseModel):
     blocked: bool
     reason: str = Field(min_length=10, max_length=500)
     expected_access_revision: int = Field(ge=0)
+
+
+class ParticipantAccessOut(BaseModel):
+    id: int
+    email: str
+    display_name: str
+    is_blocked: bool
+    access_revision: int
 
 
 class AuditEventOut(BaseModel):

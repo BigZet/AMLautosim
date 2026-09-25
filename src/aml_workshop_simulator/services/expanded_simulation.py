@@ -6,7 +6,6 @@ from src.aml_workshop_simulator.domain.simulation import _evaluate_validated
 from src.aml_workshop_simulator.services.configuration import snapshot_specs
 from src.aml_workshop_simulator.services.counterparties import (
     canonical_expanded_steps,
-    behavior_for,
 )
 
 
@@ -18,18 +17,30 @@ def evaluate_expanded_scenario(steps, config):
         from src.aml_workshop_simulator.services.semantic_contract import evaluate
         return evaluate(steps, config)
     canonical = canonical_expanded_steps(steps, config)
-    specs = snapshot_specs(config)
+    return _evaluate_canonical(canonical, config)
+
+
+def _evaluate_canonical(canonical, config, specs=None, policy=None):
+    """Private kernel dispatch; public entry points still canonicalize raw input."""
+    if config.get('schema_version') == 10:
+        from src.aml_workshop_simulator.services.aml_context import _evaluate_canonical as evaluate
+        return evaluate(canonical, config, specs, policy)
+    if config.get('schema_version') == 9:
+        from src.aml_workshop_simulator.services.semantic_contract import _evaluate_canonical as evaluate
+        return evaluate(canonical, config, specs, policy)
+    specs = snapshot_specs(config) if specs is None else specs
     timeline = operation_timeline(canonical, config["behavior"]["timeline"])
-    purchase_policy = behavior_for(config).purchases
+    purchase_policy = config['behavior'].get('purchases')
+    if purchase_policy is not None:
+        from src.aml_workshop_simulator.schemas.expanded_contract import PurchasePolicy
+        purchase_policy = PurchasePolicy.model_validate(purchase_policy).model_dump(mode="json")
     return _evaluate_validated(
         canonical,
         specs,
         config,
-        RoundPolicy.from_config(config, specs),
+        policy or RoundPolicy.from_config(config, specs),
         timeline=timeline,
-        purchase_policy=purchase_policy.model_dump(mode="json")
-        if purchase_policy is not None
-        else None,
+        purchase_policy=purchase_policy,
     )
 
 

@@ -53,7 +53,7 @@ def require_review(approval, rules, rows):
 
 def review_cases():
     fixture = json.loads(
-        Path("docs/verification/semantic-interface-audit/fixtures.json").read_text()
+        Path("config/aml_scenario_templates.json").read_text()
     )
     old_config = fixture["config"]
     old_rules = json.loads(Path("config/synthetic_dataset/v2/rubric.json").read_text())

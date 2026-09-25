@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tag": "release-2026-09-25",
+  "base_commit": "38b32a74be7906661a245af2f8ad36fbcaf09203",
+  "contract_version": 10,
+  "model_package": "aml-game-organizer-settings-v1",
+  "package_identity": "19ebf3a7c286e94ac9d77d0f01340d7a65468980430205f82006b5f8495702a0",
+  "release_file_sha256": "421f51bb1b75d279a9d500d0a772a3d1891e099d72fa55399cca5d9358fabec5",
+  "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+  "historical_packages_supported": false
+}

@@ -1,6 +1,7 @@
 """Submission and scoring through the updated package in a disposable database."""
 from pathlib import Path
 import pytest
+
 from tests.api import test_game_classifier_release as historical
 
 
@@ -23,3 +24,5 @@ def test_submission_and_scoring(request_api, admin, round_id, player_factory, co
         example['probability'] = before['probability']
     monkeypatch.setattr(historical, 'EXAMPLES', examples)
     historical.test_published_examples_end_to_end(request_api, admin, round_id, player_factory, command, sql)
+
+pytestmark = pytest.mark.usefixtures("scoring_worker")
