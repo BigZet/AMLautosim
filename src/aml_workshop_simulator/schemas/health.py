@@ -9,10 +9,12 @@ class LiveOut(BaseModel):
     status: Literal["ok"]
     service: Literal["api"]
     version: str
+    git_sha: str = "development"
 
 
 class ReadinessChecks(BaseModel):
     model: dict[str, JsonValue] | None = None
+    round_model: dict[str, JsonValue] | None = None
     database: Literal["connected", "unavailable", "not_checked"]
     ruleset_versions: list[str] | None = None
     migrations: Literal["head", "behind head", "alembic_version missing"] | None = None

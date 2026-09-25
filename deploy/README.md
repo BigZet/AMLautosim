@@ -11,3 +11,48 @@ NiceGUI пишет состояние в том `/home/app/nicegui`, режим 
 В образ входят код, конфигурация, миграции и служебные скрипты.
 Тесты, документация, локальные данные, секреты и отложенные CatBoost-адаптер
 и генератор исключены. Подробности: [развёртывание](../docs/deployment.md).
+
+## Выпуск по commit
+
+Workflow `Release image` запускается вручную для выбранного ref. Он делает checkout
+точного SHA, один раз собирает образ на закреплённом Python 3.13.15 image digest,
+проверяет его с PostgreSQL 16 и публикует тот же образ с commit tag в GHCR.
+Артефакт `release-provenance` содержит digest и OCI revision/source. Проверять SHA
+артефакта против выбранного commit; не создавать исправления поверх старого образа.
+`/health/live` сообщает безопасный `git_sha`; секреты и пути в health не возвращаются.
+
+Production использует `compose.production.yml` и отдельный защищённый env-файл
+по образцу `.env.production.example`. `AML_IMAGE` должен содержать `@sha256:`
+из проверенного выпуска. Host config не монтируется поверх образа. UI доступен
+только на loopback и требует HTTPS reverse proxy; API/БД не публикуют порты.
+До обновления сохранить предыдущий **registry digest** и совместимую резервную копию.
+На обследованном старом сервере registry digest не установлен: известны только
+локальные image IDs, см. production-inventory.json. Их нельзя выдавать за digest.
+
+Порядок команд (из корня checkout, env-файл вне репозитория):
+
+```sh
+docker compose --env-file /secure/aml.env -f deploy/compose.production.yml pull
+docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d db
+docker compose --env-file /secure/aml.env -f deploy/compose.production.yml run --rm release
+docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d --no-deps --wait api ui
+```
+
+`release` — единственный одноразовый процесс миграции и seed, без демонстрационного
+раунда. API workers не мигрируют схему. Для чистой установки нужен bootstrap пароль;
+повторный seed сохраняет существующие аккаунты и игру. Smoke проверяет установку,
+pg_dump/pg_restore в отдельную БД и повторную release-команду с сохранением аккаунтов.
+Это проверка disposable-стенда, не восстановление production backup.
+
+Откат: остановить новые API/UI, вернуть предыдущий проверенный `AML_IMAGE`, затем
+запустить API/UI без downgrade только если старая версия совместима с новой схемой.
+При несовместимой схеме восстановить backup в новую БД, проверить миграции/readiness
+и целостность игры, переключить подключение. Не выполнять слепой Alembic downgrade.
+
+## Пути и настройки
+
+`AML_MODEL_PATH` выбирает legacy v8; `AML_PROBABILITY_MODEL_PATH` — default v10.
+Относительные пути разрешаются от корня проекта, абсолютные сохраняются. v8
+загружается только при необходимости. Readiness проверяет default и пакет сохранённой
+игры; liveness не читает БД/модели. Настройки UI валидируются `UISettings`, включая URL,
+порт, cookie и каталог хранения. В production каталог `/home/app/nicegui` — private volume.

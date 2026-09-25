@@ -1,0 +1,46 @@
+name: Release image
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: release-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+      - run: git lfs pull --include="resources/catboost_models/**"
+      - name: Build exact commit once
+        env:
+          REVISION: ${{ github.sha }}
+        run: |
+          docker build -f deploy/Dockerfile --build-arg GIT_SHA="$REVISION" -t "ghcr.io/bigzet/amlautosim:$REVISION" .
+          python -m pip install -r requirements-dev.txt
+          python -m scripts.ci_smoke --image "ghcr.io/bigzet/amlautosim:$REVISION"
+      - name: Publish verified image and record digest
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+          REVISION: ${{ github.sha }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+          docker push "ghcr.io/bigzet/amlautosim:$REVISION"
+          docker inspect "ghcr.io/bigzet/amlautosim:$REVISION" --format '{{index .RepoDigests 0}}' > image-reference.txt
+          docker inspect "ghcr.io/bigzet/amlautosim:$REVISION" --format '{{json .Config.Labels}}' > build-labels.json
+          cat image-reference.txt >> "$GITHUB_STEP_SUMMARY"
+          docker logout ghcr.io
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-provenance
+          path: |
+            image-reference.txt
+            build-labels.json

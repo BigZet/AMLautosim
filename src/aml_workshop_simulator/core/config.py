@@ -1,8 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+
+def project_path(value: str | Path) -> Path:
+    path = Path(value).expanduser()
+    return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
 
 
 class Settings(BaseSettings):
@@ -13,6 +21,8 @@ class Settings(BaseSettings):
     """
 
     PROJECT_NAME: str = "AML Workshop Simulator"
+    GIT_SHA: str = Field(default="development", pattern=r"^(development|[0-9a-f]{40})$")
+    IMAGE_REFERENCE: str = "local"
     API_V1_STR: str = "/api/v1"
 
     EXPANDED_ROUNDS_ENABLED: bool = True
@@ -47,7 +57,7 @@ class Settings(BaseSettings):
             database=self.POSTGRES_DB,
         )
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=PROJECT_ROOT / ".env", extra="ignore")
 
 
 settings = Settings()

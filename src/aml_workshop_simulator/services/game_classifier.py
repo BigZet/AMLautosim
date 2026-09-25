@@ -308,9 +308,11 @@ def _load(package):
 
 
 def get_game_classifier():
-    path = Path(
+    from src.aml_workshop_simulator.core.config import project_path
+
+    path = project_path(
         os.environ.get("AML_PROBABILITY_MODEL_PATH", str(DEFAULT_PACKAGE))
-    ).resolve()
+    )
     try:
         model = _load(str(path))
         model.verify_integrity()

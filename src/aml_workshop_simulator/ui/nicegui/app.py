@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import os
 import secrets
-from pathlib import Path
+from src.aml_workshop_simulator.core.ui_config import UISettings
 
 # NiceGUI reads its storage path at import time. Never store it in source folders.
-STORAGE_PATH = Path(os.environ.setdefault("NICEGUI_STORAGE_PATH", ".nicegui")).resolve()
+ui_settings = UISettings()
+STORAGE_PATH = ui_settings.NICEGUI_STORAGE_PATH
+os.environ["NICEGUI_STORAGE_PATH"] = str(STORAGE_PATH)
 STORAGE_PATH.mkdir(mode=0o700, parents=True, exist_ok=True)
 
 from nicegui import app, ui
@@ -18,7 +20,7 @@ from . import auth, theme
 from .client import SESSION_ERRORS, APIClient, APIError
 
 api = APIClient(
-    os.environ.get("API_URL", "http://127.0.0.1:8000").rstrip("/") + "/api/v1"
+    str(ui_settings.API_URL).rstrip("/") + "/api/v1"
 )
 app.on_shutdown(api.close)
 
@@ -373,7 +375,7 @@ def about(audience: str = "play"):
 
 
 def storage_secret():
-    configured = os.environ.get("NICEGUI_STORAGE_SECRET")
+    configured = ui_settings.NICEGUI_STORAGE_SECRET
     if configured:
         return configured
     # A stable local secret makes reloads and process restarts keep the UI cookie.
@@ -389,16 +391,16 @@ def storage_secret():
 
 if __name__ == "__main__":
     ui.run(
-        host=os.environ.get("UI_HOST", "127.0.0.1"),
-        port=int(os.environ.get("UI_PORT", "8080")),
+        host=ui_settings.UI_HOST,
+        port=ui_settings.UI_PORT,
         title="AML Практикум",
         language="ru",
         reload=False,
         show=False,
         storage_secret=storage_secret(),
         session_middleware_kwargs={
-            "session_cookie": os.environ.get("NICEGUI_SESSION_COOKIE", "aml_ui"),
+            "session_cookie": ui_settings.NICEGUI_SESSION_COOKIE,
             "same_site": "lax",
-            "https_only": os.environ.get("COOKIE_SECURE", "false").lower() == "true",
+            "https_only": ui_settings.COOKIE_SECURE,
         },
     )

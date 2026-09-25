@@ -45,3 +45,24 @@ def test_auth_settings_accept_minimum_positive_values():
     assert settings.SESSION_TTL_MINUTES == 1
     assert settings.LOGIN_MAX_FAILED_ATTEMPTS == 1
     assert settings.LOGIN_LOCKOUT_MINUTES == 1
+
+
+def test_ui_settings_resolve_paths_and_validate_environment(tmp_path, monkeypatch):
+    from src.aml_workshop_simulator.core.ui_config import UISettings
+    from src.aml_workshop_simulator.core.config import PROJECT_ROOT
+
+    monkeypatch.chdir(tmp_path)
+    settings = UISettings(_env_file=None, NICEGUI_STORAGE_PATH="private-ui")
+    assert settings.NICEGUI_STORAGE_PATH == PROJECT_ROOT / "private-ui"
+    assert UISettings(_env_file=None, NICEGUI_STORAGE_PATH=tmp_path).NICEGUI_STORAGE_PATH == tmp_path
+    for values in ({"UI_PORT": 0}, {"UI_PORT": 65536}, {"API_URL": "not-a-url"}, {"COOKIE_SECURE": "invalid"}):
+        with pytest.raises(ValidationError):
+            UISettings(_env_file=None, **values)
+
+
+def test_legacy_default_paths_do_not_depend_on_working_directory(tmp_path, monkeypatch):
+    from src.aml_workshop_simulator.services import model_scoring
+
+    monkeypatch.chdir(tmp_path)
+    assert model_scoring.PACKAGE.is_absolute()
+    assert model_scoring.DICTIONARY.is_file()

@@ -35,8 +35,28 @@ def smoke(image: str) -> None:
             readiness = json.load(response)
         if readiness['status'] != 'ready':
             raise RuntimeError('Image readiness failed')
+        # Re-run the release command against a restored copy, never the live DB.
+        dump = subprocess.run(
+            [*command, 'exec', '-T', 'db', 'pg_dump', '-U', 'aml_ci', '-Fc', 'aml_ci'],
+            env=env, cwd=root, check=True, capture_output=True,
+        ).stdout
+        compose('exec', '-T', 'db', 'createdb', '-U', 'aml_ci', 'aml_upgrade')
+        subprocess.run(
+            [*command, 'exec', '-T', 'db', 'pg_restore', '-U', 'aml_ci',
+             '--exit-on-error', '-d', 'aml_upgrade'],
+            input=dump, env=env, cwd=root, check=True,
+        )
+        query = 'SELECT id, email, hashed_password FROM users ORDER BY id'
+        before = compose('exec', '-T', 'db', 'psql', '-U', 'aml_ci', '-d',
+                         'aml_upgrade', '-Atc', query, capture=True).stdout
+        compose('run', '--rm', '--no-deps', '-e', 'POSTGRES_DB=aml_upgrade', 'release')
+        after = compose('exec', '-T', 'db', 'psql', '-U', 'aml_ci', '-d',
+                        'aml_upgrade', '-Atc', query, capture=True).stdout
+        if not before or before != after:
+            raise RuntimeError('Release changed restored accounts')
         asyncio.run(check_transport(f'http://{ui}'))
         print(json.dumps({'image': image, 'project': project, 'readiness': readiness,
+                          'restored_copy_release': 'passed',
                           'http_cookie_websocket': 'passed'}))
     except Exception:
         subprocess.run([*command, 'logs', '--no-color', '--tail', '80'], env=env, cwd=root)

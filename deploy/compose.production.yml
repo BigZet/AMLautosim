@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
       POSTGRES_USER: ${POSTGRES_USER:-aml}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
-    ports:
-    - 127.0.0.1:${POSTGRES_PORT:-5432}:5432
     volumes:
     - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,9 +16,6 @@ services:
       timeout: 5s
       retries: 20
   api:
-    build:
-      context: .
-      dockerfile: deploy/Dockerfile
     restart: unless-stopped
     depends_on:
       release:
@@ -36,8 +31,6 @@ services:
       AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
       LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
-    ports:
-    - 127.0.0.1:${API_PORT:-8000}:8000
     healthcheck:
       test:
       - CMD-SHELL
@@ -46,7 +39,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
-    image: ${AML_IMAGE:-aml-local:development}
+    image: ${AML_IMAGE:?set an immutable registry image digest}
   ui:
     restart: unless-stopped
     depends_on:
@@ -56,7 +49,7 @@ services:
       API_URL: http://api:8000
       UI_HOST: 0.0.0.0
       UI_PORT: 8080
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SECURE: 'true'
       NICEGUI_STORAGE_SECRET: ${NICEGUI_STORAGE_SECRET:?set NICEGUI_STORAGE_SECRET in .env}
       NICEGUI_STORAGE_PATH: /home/app/nicegui
     volumes:
@@ -71,7 +64,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    image: ${AML_IMAGE:-aml-local:development}
+    image: ${AML_IMAGE:?set an immutable registry image digest}
   release:
     environment:
       POSTGRES_HOST: db
@@ -91,7 +84,7 @@ services:
         condition: service_healthy
     command: python -m scripts.seed_database --wait-for-db --migrate --no-demo-round
     restart: 'no'
-    image: ${AML_IMAGE:-aml-local:development}
+    image: ${AML_IMAGE:?set an immutable registry image digest}
 volumes:
   postgres_data: null
   nicegui_data: null

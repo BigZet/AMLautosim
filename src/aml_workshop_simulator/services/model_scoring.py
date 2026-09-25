@@ -11,6 +11,7 @@ from pathlib import Path
 from catboost import Pool
 
 from src.aml_workshop_simulator.core.errors import Conflict
+from src.aml_workshop_simulator.core.config import project_path
 from src.aml_workshop_simulator.services.aml_risk_model import (
     AMLRiskModel,
     contract_signature,
@@ -19,10 +20,10 @@ from src.aml_workshop_simulator.services.aml_risk_model import (
 from src.aml_workshop_simulator.services.aml_dataset_features_v3 import extract_features
 
 EXPLANATION_VERSION = 3
-PACKAGE = Path(
+PACKAGE = project_path(
     os.environ.get("AML_MODEL_PATH", "resources/catboost_models/integration-v2-final")
 )
-DICTIONARY = Path("config/model/feature-descriptions.json")
+DICTIONARY = project_path("config/model/feature-descriptions.json")
 
 
 def rounded(value):
@@ -36,7 +37,7 @@ class LegacyOnlineModel(AMLRiskModel):
         # Retired limits are irrelevant to inference, but remain in the archived
         # v8 signature. Project only those keys to its frozen reference values.
         signature_config = deepcopy(config)
-        frozen = json.loads(Path("config/model/smoke-scenario.json").read_text())["config"]["constraints"]
+        frozen = json.loads(project_path("config/model/smoke-scenario.json").read_bytes())["config"]["constraints"]
         constraints = signature_config["constraints"]
         for key in ("max_night_operations", "max_anonymous_operations"):
             constraints[key] = frozen[key]
@@ -70,7 +71,7 @@ class ModelScorer:
             dictionary_sha256=file_sha(DICTIONARY),
         )
         # A packaged, valid scenario checks both feature extraction and native SHAP.
-        smoke = json.loads(Path("config/model/smoke-scenario.json").read_text())
+        smoke = json.loads(project_path("config/model/smoke-scenario.json").read_bytes())
         self.check_config(smoke["config"])
         self.score(smoke["steps"], smoke["config"], require_pin=False)
 

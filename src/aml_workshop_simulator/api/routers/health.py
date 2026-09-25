@@ -3,10 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.db.session import get_db
+from src.aml_workshop_simulator.db.models.rounds import Round
+from src.aml_workshop_simulator.core.config import settings
 from src.aml_workshop_simulator.domain.rules import RULESET_VERSION
 from src.aml_workshop_simulator.domain.scoring import (
     LEADERBOARD_VERSION,
@@ -27,7 +29,7 @@ def _expected_heads() -> set[str]:
 @router.get("/health/live", operation_id="health_live", response_model=LiveOut)
 async def health_live() -> dict[str, str]:
     """Liveness only: never touches the database."""
-    return {"status": "ok", "service": "api", "version": "2.0.0"}
+    return {"status": "ok", "service": "api", "version": "2.0.0", "git_sha": settings.GIT_SHA}
 
 
 @router.get(
@@ -85,4 +87,17 @@ async def health_ready(
         return {"status": "not_ready", "checks": checks}
 
     checks["migrations"] = "head"
+    from src.aml_workshop_simulator.services.model_scoring import get_round_scorer
+
+    try:
+        config = (await db.execute(select(Round.game_config))).scalar_one_or_none()
+        if config is not None:
+            required = get_round_scorer(config)
+            required.check_config(config, require_pin=True)
+            checks["round_model"] = {"status": "available"}
+    except Exception:
+        # Package paths, database details and exception text are not public health data.
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        checks["round_model"] = {"status": "unavailable"}
+        return {"status": "not_ready", "checks": checks}
     return {"status": "ready", "checks": checks}
