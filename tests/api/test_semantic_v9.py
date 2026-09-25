@@ -32,7 +32,7 @@ def test_v9_http_matrix_and_saved_observations(request_api, admin, player, activ
     loaded = request_api('GET',path,player['headers'])
     assert loaded['steps'] == saved['steps']
     assert loaded['steps'][0]['action_details'] == {'incoming_kind':'crypto_p2p'}
-    cards = request_api('GET',f'/rounds/{active_round}/cards')
+    cards = request_api('GET',f'/rounds/{active_round}/cards',player['headers'])
     assert {f['key'] for c in cards if c['code']=='incoming_transfer' for f in c['fields']} == {'incoming_kind','bank_country'}
     sql("UPDATE rounds SET status='draft' WHERE id=:id",{'id':active_round})
     request_api('POST',f'/admin/rounds/{active_round}/start',admin,status=409)
