@@ -31,6 +31,9 @@ def _evaluate_canonical(canonical, config, specs=None, policy=None):
     specs = snapshot_specs(config) if specs is None else specs
     timeline = operation_timeline(canonical, config["behavior"]["timeline"])
     purchase_policy = config['behavior'].get('purchases')
+    if purchase_policy is not None:
+        from src.aml_workshop_simulator.schemas.expanded_contract import PurchasePolicy
+        purchase_policy = PurchasePolicy.model_validate(purchase_policy).model_dump(mode="json")
     return _evaluate_validated(
         canonical,
         specs,

@@ -209,3 +209,14 @@ retained in the local ledger and replaced with fresh-account bounded inputs.
 The measured working image precedes the final reconnect regression fix.
 Final payload, focus/caret/scroll and real browser gates continue in T15;
 no real-device completion is claimed here.
+
+### Full CI follow-up during T15
+
+CI on 84cde65 passed image/research/audit but exposed a legacy empty purchase
+policy default lost in T09, a current-round comparison expecting pre-T08 read
+metadata, and the full NiceGUI workflow selecting the oldest persistent card.
+All three failures reproduced locally. PurchasePolicy now supplies defaults
+without re-canonicalizing steps. The current-read test still compares all
+persisted fields and separately checks its newly enriched metadata. UI test
+selection follows the newly added card and explicitly expands conditions.
+The combined purchase/preparation/rounds/full UI regression run passed 43 tests.

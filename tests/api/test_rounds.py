@@ -105,4 +105,10 @@ def test_organizer_energy_change_is_saved_with_revision(request_api, admin, roun
                           {"expected_config_revision": before["config_revision"], "game_config": config})
     assert updated["config_revision"] == before["config_revision"] + 1
     assert updated["game_config"]["resources"]["initial_energy"] == 1
-    assert request_api("GET", "/admin/rounds/current", admin) == updated
+    current = request_api("GET", "/admin/rounds/current", admin)
+    # The current-round read adds live admission/publication metadata (T08).
+    live_fields = {"admission_counts", "results_version"}
+    assert {k: v for k, v in current.items() if k not in live_fields} == {
+        k: v for k, v in updated.items() if k not in live_fields
+    }
+    assert current["admission_counts"] is not None
