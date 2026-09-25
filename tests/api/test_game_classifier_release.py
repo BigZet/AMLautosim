@@ -96,7 +96,7 @@ def test_published_examples_end_to_end(
             is None
         )
         request_api(
-            "POST", f"/admin/rounds/{round_id}/score", player["headers"], status=403
+            "POST", f"/admin/rounds/{round_id}/score?wait=true", player["headers"], status=403
         )
         players.append(player)
     scorer = get_game_classifier()
@@ -111,9 +111,9 @@ def test_published_examples_end_to_end(
         return original(*args, **kwargs)
 
     with patch.object(scorer, "score", side_effect=fail_second):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 0
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     saved_results = []
     for player, example in zip(players, EXAMPLES):
         result = request_api("GET", "/rounds/current/state", player["headers"])[
@@ -140,7 +140,7 @@ def test_published_examples_end_to_end(
     with patch.object(
         scorer, "score", side_effect=AssertionError("must not recalculate")
     ):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 25
     if os.environ.get("AML_PLAYTEST_RESULTS_OUTPUT"):
         Path(os.environ["AML_PLAYTEST_RESULTS_OUTPUT"]).write_text(
@@ -178,3 +178,7 @@ def test_fixed_context_limits_and_package_failure(
     )
     monkeypatch.setenv("AML_PROBABILITY_MODEL_PATH", str(tmp_path / "missing"))
     request_api("POST", f"/admin/rounds/{round_id}/start", admin, status=409)
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

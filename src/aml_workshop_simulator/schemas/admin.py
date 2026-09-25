@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
@@ -57,6 +58,7 @@ class RoundAdminOut(RoundContextOut):
     completed_at: datetime | None = None
     admission_counts: AdmissionCountsOut | None = None
     results_version: str | None = None
+    scoring_job_id: UUID | None = None
 
 
 class ScoringSummaryOut(BaseModel):
@@ -68,6 +70,18 @@ class ScoringSummaryOut(BaseModel):
     scoring_version: str
     leaderboard_version: str
     completed_at: datetime
+
+
+class ScoringJobOut(BaseModel):
+    job_id: UUID
+    round_id: int | None
+    original_round_id: int
+    state: Literal['queued', 'running', 'completed', 'failed', 'cancelled']
+    done: int
+    total: int
+    attempt: int
+    error: dict[str, JsonValue] | None = None
+    summary: ScoringSummaryOut | None = None
 
 
 class PlayerSummaryOut(BaseModel):

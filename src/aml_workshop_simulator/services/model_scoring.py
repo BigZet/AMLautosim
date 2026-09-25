@@ -115,9 +115,9 @@ class ModelScorer:
             feature_names=self.adapter.columns,
             cat_features=self.adapter.schema["categorical"],
         )
-        raw = float(self.adapter.model.predict(pool, thread_count=4)[0])
+        raw = float(self.adapter.model.predict(pool, thread_count=1)[0])
         shap = self.adapter.model.get_feature_importance(
-            pool, type="ShapValues", thread_count=4
+            pool, type="ShapValues", thread_count=1
         )[0]
         if (
             len(shap) != len(self.adapter.columns) + 1

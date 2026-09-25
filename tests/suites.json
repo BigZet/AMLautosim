@@ -1,6 +1,7 @@
 {
   "version": 1,
   "modules": {
+    "tests/api/test_scoring_jobs.py": "runtime",
     "tests/unit/test_russian_plural.py": "runtime",
     "tests/unit/test_password_migration.py": "runtime",
     "tests/api/test_password_migration.py": "runtime",

@@ -33,6 +33,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-240}
       EXPANDED_ROUNDS_ENABLED: ${EXPANDED_ROUNDS_ENABLED:-true}
+      API_WORKERS: ${API_WORKERS:-1}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      DB_POOL_OVERFLOW: ${DB_POOL_OVERFLOW:-10}
+      DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-5}
+      DB_POOL_RECYCLE: ${DB_POOL_RECYCLE:-1800}
+      PASSWORD_ARGON2_ENABLED: ${PASSWORD_ARGON2_ENABLED:-true}
       AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
       LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
@@ -47,6 +53,24 @@ services:
       timeout: 5s
       retries: 20
     image: ${AML_IMAGE:-aml-local:development}
+  scoring-worker:
+    image: ${AML_IMAGE:-aml-local:development}
+    restart: unless-stopped
+    depends_on:
+      release:
+        condition: service_completed_successfully
+    command: python -m scripts.ops.scoring_worker
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aml_simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-aml}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      DB_POOL_SIZE: 2
+      DB_POOL_OVERFLOW: 0
+      SCORING_THREADS: ${SCORING_THREADS:-2}
+      SCORING_LEASE_SECONDS: ${SCORING_LEASE_SECONDS:-30}
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
   ui:
     restart: unless-stopped
     depends_on:
@@ -85,6 +109,7 @@ services:
       LOGIN_MAX_FAILED_ATTEMPTS: ${LOGIN_MAX_FAILED_ATTEMPTS:-10}
       LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-5}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?set BOOTSTRAP_ADMIN_EMAIL in .env}
+      PASSWORD_ARGON2_ENABLED: ${PASSWORD_ARGON2_ENABLED:-true}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?set BOOTSTRAP_ADMIN_PASSWORD in .env, 10-128 characters}
     depends_on:
       db:

@@ -56,7 +56,7 @@ def test_incoming_profiles_complete_game(
     assert (
         request_api("POST", path + "/scenario/submit", headers, submission) == submitted
     )
-    summary = request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert summary["scored_count"] == 1
     result = request_api("GET", path + "/result", headers)
     assert result["rank"] == 1
@@ -69,3 +69,7 @@ def test_incoming_profiles_complete_game(
     assert state["round"]["status"] == "completed"
     assert state["result"] == result
     assert not state["can_edit"] and state["can_view_leaderboard"]
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

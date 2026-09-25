@@ -113,6 +113,29 @@ def request_api(api):
 
 
 @pytest.fixture
+def scoring_worker(api):
+    """Real queue consumer for explicit legacy wait-mode and UI regressions.
+
+    The default202 contract and crash tests deliberately do not use this fixture.
+    """
+    from src.aml_workshop_simulator.services.scoring_jobs import worker_loop
+
+    async def start():
+        stop = asyncio.Event()
+        task = asyncio.create_task(worker_loop(AsyncSessionLocal, stop, 0.1))
+        return stop, task
+
+    stop, task = api.portal.call(start)
+    yield
+
+    async def finish():
+        stop.set()
+        await asyncio.wait_for(task, 15)
+
+    api.portal.call(finish)
+
+
+@pytest.fixture
 def admin(request_api):
     session = request_api(
         "POST",

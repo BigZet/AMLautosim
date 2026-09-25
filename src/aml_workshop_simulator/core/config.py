@@ -58,6 +58,10 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE: int = Field(default=1800, ge=1, le=86400)
     API_WORKERS: int = Field(default=1, ge=1, le=4)
     PASSWORD_ARGON2_ENABLED: bool = True
+    SCORING_THREADS: int = Field(default=2, ge=1, le=4)
+    SCORING_LEASE_SECONDS: int = Field(default=30, ge=5, le=3600)
+    SCORING_MAX_SCENARIOS: int = Field(default=1000, ge=1, le=10000)
+    SCORING_MAX_SNAPSHOT_BYTES: int = Field(default=64 * 1024 * 1024, ge=1048576, le=536870912)
 
     BOOTSTRAP_ADMIN_EMAIL: str = "admin@example.com"
     BOOTSTRAP_ADMIN_PASSWORD: str = ""

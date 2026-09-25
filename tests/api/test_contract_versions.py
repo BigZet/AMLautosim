@@ -203,7 +203,7 @@ def test_no_evaluation_or_cutoff_for_injected_expanded_round(
         ("POST", path + "/preview", player["headers"], {"steps": steps}),
         ("PUT", path, player["headers"], command(steps, 1)),
         ("POST", path + "/submit", player["headers"], command(steps, 1)),
-        ("POST", f"/admin/rounds/{active_round}/score", admin, None),
+        ("POST", f"/admin/rounds/{active_round}/score?wait=true", admin, None),
     ]:
         error = request_api(method, url, headers, payload, 409)
         assert error["code"] == "round_contract_not_ready"
@@ -225,3 +225,7 @@ def test_legacy_golden_snapshot_cannot_start_online(
     assert error["code"] == "model_contract_mismatch"
     assert state(sql) == before
     # Historical numeric golden expectations are retained in the pure-engine unit tests.
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

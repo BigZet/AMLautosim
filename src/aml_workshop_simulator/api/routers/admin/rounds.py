@@ -1,6 +1,10 @@
 """HTTP commands for the current game."""
 
-from fastapi import APIRouter, Depends, Request, Query
+import asyncio
+import time
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Request, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.api.deps import CurrentPrincipal, get_current_admin
@@ -12,6 +16,7 @@ from src.aml_workshop_simulator.schemas.admin import (
     RoundUpdateIn,
     ScoringSummaryOut,
     AdmissionCountsOut,
+    ScoringJobOut,
 )
 from src.aml_workshop_simulator.schemas.editor_metadata import EditorMetadataOut
 from src.aml_workshop_simulator.schemas.game_version import GameVersion
@@ -26,7 +31,8 @@ from src.aml_workshop_simulator.domain.contract_versions import (
 )
 from src.aml_workshop_simulator.schemas.rounds import ActionCardOut
 from src.aml_workshop_simulator.services import admin_rounds as operations
-from src.aml_workshop_simulator.services import scoring_run
+from src.aml_workshop_simulator.services import scoring_jobs
+from src.aml_workshop_simulator.core.errors import ApplicationError, Conflict
 from src.aml_workshop_simulator.services.catalog import catalog_cards
 from src.aml_workshop_simulator.services.round_configuration import round_out
 
@@ -97,19 +103,54 @@ async def start_round(
     )
 
 
-@router.post("/rounds/{round_id}/score", response_model=ScoringSummaryOut)
+@router.post(
+    "/rounds/{round_id}/score",
+    response_model=ScoringJobOut | ScoringSummaryOut,
+    status_code=202,
+)
 async def score_round(
     round_id: int,
     request: Request,
+    response: Response,
+    wait: bool = False,
     principal: CurrentPrincipal = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    return await scoring_run.run(
+    job = await scoring_jobs.enqueue(
         db, round_id, principal.user_id, request.state.request_id
     )
+    if wait:
+        # Transitional long-poll only: calculation always belongs to the worker.
+        deadline = time.monotonic() + 30
+        while True:
+            if job.state == "completed" and job.summary is not None:
+                response.status_code = 200
+                return job.summary
+            if job.state == "failed":
+                error = job.error or {}
+                raise ApplicationError(
+                    error.get("message", "Ошибка расчёта."),
+                    code=error.get("code", "scoring_failed"),
+                    status_code=error.get("status_code", 500),
+                )
+            if job.state == "cancelled":
+                raise Conflict(
+                    "Расчёт отменён перезапуском игры.", code="scoring_cancelled"
+                )
+            if time.monotonic() >= deadline:
+                break
+            await db.rollback()  # never reserve a pool connection while waiting
+            await asyncio.sleep(0.1)
+            job = await scoring_jobs.read(db, job.job_id)
+    return job
 
 
-@router.get('/rounds/{round_id}/admission', response_model=AdmissionCountsOut)
+@router.get("/scoring-jobs/{job_id}", response_model=ScoringJobOut)
+async def scoring_job(job_id: UUID, db: AsyncSession = Depends(get_db)):
+    return await scoring_jobs.read(db, job_id)
+
+
+@router.get("/rounds/{round_id}/admission", response_model=AdmissionCountsOut)
 async def admission_counts(round_id: int, db: AsyncSession = Depends(get_db)):
     return await operations.admission_counts(db, round_id)
 

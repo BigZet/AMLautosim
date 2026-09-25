@@ -1,3 +1,5 @@
+
+import pytest
 from unittest.mock import patch
 from scripts.check_expanded_balance import demo_steps
 from src.aml_workshop_simulator.services.model_scoring import get_model_scorer
@@ -39,10 +41,10 @@ def test_model_round_atomic_retry_and_no_early_explanation(
         return original(*args, **kwargs)
 
     with patch.object(scorer, "score", side_effect=fail_second):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT * FROM scoring_results") == []
     assert sql("SELECT status FROM rounds")[0]["status"] == "closed"
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert len(sql("SELECT * FROM scoring_results")) == 2
     for player in players:
         state = request_api("GET", "/rounds/current/state", player["headers"])
@@ -60,7 +62,7 @@ def test_model_round_atomic_retry_and_no_early_explanation(
     with patch.object(
         scorer, "score", side_effect=AssertionError("must not recalculate")
     ):
-        request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+        request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert len(sql("SELECT * FROM scoring_results")) == 2
 
 
@@ -92,7 +94,7 @@ def test_100_scenarios_keep_state_requests_responsive(
     started = time.perf_counter()
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(
-            request_api, "POST", f"/admin/rounds/{round_id}/score", admin
+            request_api, "POST", f"/admin/rounds/{round_id}/score?wait=true", admin
         )
         while not future.done():
             before = time.perf_counter()
@@ -141,3 +143,7 @@ def test_readiness_exposes_loaded_model_identity(api):
     assert result.status_code == 200
     from src.aml_workshop_simulator.services.game_classifier import get_game_classifier
     assert result.json()["checks"]["model"] == get_game_classifier().identity
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

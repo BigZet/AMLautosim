@@ -5,6 +5,7 @@ from .base import Base
 from .rounds import Round
 from .scenarios import Scenario
 from .scoring_results import ScoringResult
+from .scoring_jobs import ScoringJob
 from .sessions import Session
 from .users import User
 
@@ -16,6 +17,7 @@ __all__ = [
     "Round",
     "Scenario",
     "ScoringResult",
+    "ScoringJob",
     "AuditEvent",
     "AuthRateLimit",
 ]

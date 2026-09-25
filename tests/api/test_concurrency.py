@@ -117,7 +117,7 @@ def test_submission_races_cutoff(
 
     def score():
         barrier.wait(timeout=10)
-        return api.post(f"/api/v1/admin/rounds/{active_round}/score", headers=admin)
+        return api.post(f"/api/v1/admin/rounds/{active_round}/score?wait=true", headers=admin)
 
     with ThreadPoolExecutor(2) as pool:
         submitted, scored = pool.submit(submit), pool.submit(score)
@@ -156,7 +156,7 @@ def test_state_is_one_nonblocking_snapshot_during_scoring(
 
     with ThreadPoolExecutor(2) as pool:
         score = pool.submit(
-            request_api, "POST", f"/admin/rounds/{active_round}/score", admin
+            request_api, "POST", f"/admin/rounds/{active_round}/score?wait=true", admin
         )
         try:
             assert started.wait(10)
@@ -219,7 +219,7 @@ def test_concurrent_scorers_publish_once(
 
     def score():
         barrier.wait(timeout=10)
-        return api.post(f"/api/v1/admin/rounds/{active_round}/score", headers=admin)
+        return api.post(f"/api/v1/admin/rounds/{active_round}/score?wait=true", headers=admin)
 
     with ThreadPoolExecutor(2) as pool:
         first, second = pool.submit(score), pool.submit(score)
@@ -227,3 +227,7 @@ def test_concurrent_scorers_publish_once(
     assert a.status_code == b.status_code == 200
     assert a.json() == b.json()
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 1
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

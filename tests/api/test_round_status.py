@@ -1,3 +1,5 @@
+
+import pytest
 import json
 
 
@@ -54,6 +56,7 @@ def test_other_account_access_invalidates_rating_version(api, request_api, admin
     assert api.get('/api/v1/rounds/current/status', headers=other['headers']).status_code == 401
 
 
+@pytest.mark.usefixtures("scoring_worker")
 def test_results_version_and_cutoff_counts(request_api, player, player_factory, admin, active_round, command, chain, sql):
     other = player_factory('Draft')
     path = f'/rounds/{active_round}/scenario'
@@ -62,7 +65,7 @@ def test_results_version_and_cutoff_counts(request_api, player, player_factory, 
     counts = request_api('GET', f'/admin/rounds/{active_round}/admission', admin)
     assert counts == {'registered_total': 2, 'editing': 1, 'submitted': 1, 'scored': 0}
     before = request_api('GET', '/rounds/current/status', player['headers'])
-    request_api('POST', f'/admin/rounds/{active_round}/score', admin)
+    request_api('POST', f'/admin/rounds/{active_round}/score?wait=true', admin)
     after = request_api('GET', '/rounds/current/status', player['headers'])
     assert after['status'] == 'completed'
     assert after['results_version'] != before['results_version']
@@ -78,9 +81,10 @@ def test_results_version_and_cutoff_counts(request_api, player, player_factory, 
     assert changed['results_version'] != after['results_version']
 
 
+@pytest.mark.usefixtures("scoring_worker")
 def test_own_row_outside_top_two_hundred(request_api, player, admin, active_round, command, chain, sql):
     request_api('POST', f'/rounds/{active_round}/scenario/submit', player['headers'], command(chain()))
-    request_api('POST', f'/admin/rounds/{active_round}/score', admin)
+    request_api('POST', f'/admin/rounds/{active_round}/score?wait=true', admin)
     sql('''WITH inserted AS (
         INSERT INTO users(email, display_name, hashed_password, role, is_blocked, access_revision, failed_login_count)
         SELECT 'rank-' || n || '@example.com', 'Rank ' || n, u.hashed_password, 'participant', false, 0, 0
@@ -102,3 +106,4 @@ def test_own_row_outside_top_two_hundred(request_api, player, admin, active_roun
     assert not {'email', 'participant_id', 'scenario_id', 'risk_score'} & board['current_user_row'].keys()
     result = request_api('GET', f'/rounds/{active_round}/result', player['headers'])
     assert result['rank'] == board['current_user_row']['rank']
+

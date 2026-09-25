@@ -59,7 +59,7 @@ def test_probability_atomic_retry_storage_and_completed_reads(
         return original(*args, **kwargs)
 
     monkeypatch.setattr(probability_scorer, "score", fail_second)
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=500)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=500)
     assert sql("SELECT * FROM scoring_results") == []
     assert [r["status"] for r in sql("SELECT status FROM scenarios")] == [
         "submitted",
@@ -68,7 +68,7 @@ def test_probability_atomic_retry_storage_and_completed_reads(
     # A process restart may leave scoring status persisted; the existing lock/retry protocol recovers it.
     sql("UPDATE rounds SET status='scoring'")
     monkeypatch.setattr(probability_scorer, "score", original)
-    summary = request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert summary["leaderboard_version"] == "leaderboard-aml-probability-v1"
     stored = sql("SELECT * FROM scoring_results ORDER BY id")
     assert len(stored) == 2
@@ -101,7 +101,7 @@ def test_probability_atomic_retry_storage_and_completed_reads(
     assert all(row["aml_probability"] == 0.09999 and row["category"] == "low"
                and row["leaderboard_version"] == "leaderboard-aml-probability-v1"
                for row in admin_board["rows"])
-    request_api("POST", f"/admin/rounds/{round_id}/score", admin)
+    request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin)
     assert len(sql("SELECT * FROM scoring_results")) == 2
 
 
@@ -117,6 +117,10 @@ def test_modified_pin_fails_atomically(
         "UPDATE rounds SET game_config=CAST(:config AS jsonb)",
         {"config": json.dumps(config)},
     )
-    error = request_api("POST", f"/admin/rounds/{round_id}/score", admin, status=409)
+    error = request_api("POST", f"/admin/rounds/{round_id}/score?wait=true", admin, status=409)
     assert error["code"] == "model_version_mismatch"
     assert sql("SELECT * FROM scoring_results") == []
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

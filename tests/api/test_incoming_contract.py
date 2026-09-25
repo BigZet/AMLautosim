@@ -1,5 +1,7 @@
 """New contract through the UI HTTP client, plus saved-round compatibility."""
 
+import pytest
+
 import asyncio
 from uuid import uuid4
 
@@ -76,7 +78,7 @@ def test_incoming_card_preview_save_submit_and_score(
             assert submitted["status"] == "submitted"
             await client.request(
                 "POST",
-                f"admin/rounds/{active_round}/score",
+                f"admin/rounds/{active_round}/score?wait=true",
                 session_id=admin["X-Session-ID"],
             )
             result = await client.request(
@@ -110,3 +112,7 @@ def test_explicit_seed_reset_replaces_game_but_keeps_accounts_and_sessions(
     assert sql("SELECT id, email FROM users ORDER BY id") == users
     assert sql("SELECT id FROM sessions ORDER BY id") == sessions
     request_api("GET", "/auth/session", player["headers"])
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

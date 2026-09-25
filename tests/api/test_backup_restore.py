@@ -25,7 +25,7 @@ def test_online_backup_and_restore(phase, request_api, admin, player, active_rou
     request_api('PUT' if phase == 'draft' else 'POST', path if phase == 'draft' else path + '/submit',
                 player['headers'], command(chain()))
     if phase == 'scored':
-        request_api('POST', f'/admin/rounds/{active_round}/score', admin)
+        request_api('POST', f'/admin/rounds/{active_round}/score?wait=true', admin)
     tables = ('users', 'rounds', 'scenarios', 'scoring_results', 'audit_events')
     before = {table: sql(f'SELECT count(*) AS n FROM {table}')[0]['n'] for table in tables}
     result = backup(tmp_path, image_reference='test-code', container=container)
@@ -45,3 +45,7 @@ def test_online_backup_and_restore(phase, request_api, admin, player, active_rou
         print(json.dumps(report))
     finally:
         subprocess.run(pg_command('dropdb', '--if-exists', target, container=container), check=True)
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

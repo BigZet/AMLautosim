@@ -34,6 +34,9 @@ async def score_round(
     round_obj: Round,
     actor_user_id: int,
     request_id: str | None = None,
+    *,
+    prepared: list[dict] | None = None,
+    duration_ms: int | None = None,
 ) -> dict:
     """Caller holds an exclusive round lock and commits the whole batch once.
 
@@ -68,11 +71,22 @@ async def score_round(
         if round_obj.game_config["schema_version"] == 10
         else LEADERBOARD_VERSION
     )
+    calculated = (
+        {item["id"]: item for item in prepared} if prepared is not None else None
+    )
+    if calculated is not None and set(calculated) != {s.id for s in scenarios}:
+        raise ValueError("prepared_scenarios_mismatch")
     for scenario in scenarios:
         # CPU work receives plain data; the database session stays on this loop.
-        snapshot, values = await asyncio.to_thread(
-            _evaluate, scenario.steps, specs, round_obj.game_config, policy, scorer
-        )
+        if calculated is None:
+            snapshot, values = await asyncio.to_thread(
+                _evaluate, scenario.steps, specs, round_obj.game_config, policy, scorer
+            )
+        else:
+            snapshot, values = (
+                calculated[scenario.id]["snapshot"],
+                calculated[scenario.id]["values"],
+            )
         db.add(
             ScoringResult(
                 scenario_id=scenario.id,
@@ -87,7 +101,9 @@ async def score_round(
     summary = dict(
         submitted_count=len(scenarios),
         scored_count=len(scenarios),
-        duration_ms=int((time.perf_counter() - started) * 1000),
+        duration_ms=duration_ms
+        if duration_ms is not None
+        else int((time.perf_counter() - started) * 1000),
         scoring_version=scoring_version,
         leaderboard_version=leaderboard_version,
     )

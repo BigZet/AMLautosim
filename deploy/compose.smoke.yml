@@ -37,6 +37,21 @@ services:
       interval: 2s
       timeout: 5s
       retries: 60
+  scoring-worker:
+    image: ${AML_CI_IMAGE:?}
+    depends_on:
+      release:
+        condition: service_completed_successfully
+    command: python -m scripts.ops.scoring_worker
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: aml_ci
+      POSTGRES_PASSWORD: ${AML_CI_DB_PASSWORD:?}
+      POSTGRES_DB: aml_ci
+      DB_POOL_SIZE: 2
+      DB_POOL_OVERFLOW: 0
+      AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
   ui:
     image: ${AML_CI_IMAGE:?}
     depends_on:

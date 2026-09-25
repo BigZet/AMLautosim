@@ -360,3 +360,7 @@ def test_state_load_failure_remains_visible_and_recovers(
             await front.api.close()
 
     asyncio.run(run())
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

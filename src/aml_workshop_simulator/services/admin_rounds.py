@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.aml_workshop_simulator.core.errors import Conflict
@@ -11,6 +11,7 @@ from src.aml_workshop_simulator.db.models.action_cards import ActionCard
 from src.aml_workshop_simulator.db.models.rounds import Round
 from src.aml_workshop_simulator.db.models.scenarios import Scenario
 from src.aml_workshop_simulator.db.models.scoring_results import ScoringResult
+from src.aml_workshop_simulator.db.models.scoring_jobs import ScoringJob
 from src.aml_workshop_simulator.db.models.users import User
 from src.aml_workshop_simulator.db.queries import get_round
 from src.aml_workshop_simulator.domain.contract_versions import (
@@ -67,6 +68,9 @@ async def current(db: AsyncSession) -> RoundAdminOut | None:
     if row is None:
         return None
     result = round_out(row)
+    result.scoring_job_id = (await db.execute(select(ScoringJob.id).where(
+        ScoringJob.round_id == row.id,
+    ).order_by(ScoringJob.created_at.desc()).limit(1))).scalar_one_or_none()
     result.admission_counts = await admission_counts(db, row.id)
     from src.aml_workshop_simulator.services.participant_state import results_version
     result.results_version = await results_version(db, row)
@@ -214,6 +218,12 @@ async def restart(
     )
     config = await prepare_config(db, selected)
     # Accounts and authentication sessions survive; all game data is discarded.
+    await db.execute(update(ScoringJob).where(
+        ScoringJob.round_id == round_id, ScoringJob.state.in_(['queued', 'running']),
+    ).values(state='cancelled', owner=None, lease_until=None, finished_at=func.now()))
+    # Jobs keep lifecycle metadata, never copies of deleted game scenarios.
+    await db.execute(update(ScoringJob).where(ScoringJob.round_id == round_id)
+                     .values(snapshot={}))
     scenario_ids = select(Scenario.id).where(Scenario.round_id == round_id)
     deleted_scenarios = await db.scalar(select(func.count()).select_from(Scenario).where(Scenario.round_id == round_id))
     deleted_results = await db.scalar(select(func.count()).select_from(ScoringResult).where(ScoringResult.scenario_id.in_(scenario_ids)))

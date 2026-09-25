@@ -1,3 +1,5 @@
+
+import pytest
 import json
 
 from tests.counterparty_support import step
@@ -33,7 +35,7 @@ def test_freeze_preview_save_submit_score_and_result(
         "POST", path + "/submit", player["headers"], command(values, 1)
     )
     assert submitted["resources"] == preview["resources"]
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     state = request_api("GET", "/rounds/current/state", player["headers"])
     assert state["result"]["resources"] == preview["resources"]
     assert (
@@ -89,3 +91,7 @@ def test_duplicate_purchase_configuration_is_rejected(request_api, admin, round_
     assert "purchase" in [
         c["code"] for c in request_api("GET", f"/rounds/{round_id}/cards", player["headers"])
     ]
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

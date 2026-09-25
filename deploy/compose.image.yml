@@ -4,3 +4,7 @@ services:
     image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}
   ui:
     image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}
+  release:
+    image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}
+  scoring-worker:
+    image: ${AML_RUNTIME_IMAGE:?set AML_RUNTIME_IMAGE to the verified release tag}

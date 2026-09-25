@@ -163,9 +163,10 @@ NiceGUI остаётся одним процессом. Миграции и seed
 параметры QueuePool не передаются в NullPool.
 
 До изменения числа процессов проверьте PostgreSQL `SHOW max_connections`.
-Бюджет: workers × (pool_size + overflow) + ops_connections + reserve должен
+Бюджет: workers × (pool_size + overflow) + scoring_worker_pool + ops_connections + reserve должен
 быть строго меньше max_connections. При 100 соединениях и резервах 10+10:
-один процесс использует бюджет 35, два — 50. Это бюджет соединений, а не
+с отдельным worker (пул 2, overflow 0) один API-процесс использует бюджет 37,
+два — 52. Это бюджет соединений, а не
 доказательство ёмкости: RAM модели умножается на workers. Базовая конфигурация
 остаётся 1×(5+10), пока измерения не обоснуют изменение.
 
@@ -217,3 +218,29 @@ Disposable тестовые стенды включают новый форма�
 назад. Старый verifier сохраняется до подтверждённой инвентаризации остатков
 и готового восстановления доступа; календарный срок не является основанием
 для его удаления. Production в ходе этой работы не переключался.
+
+### Durable scoring worker (T13)
+
+Release migrations once, then start API/UI and `scoring-worker` from the same
+immutable image. The worker owns calculation; API requests only close admission,
+freeze revisions/config/model pin and enqueue. POST score returns 202 and a job ID;
+GET `/api/v1/admin/scoring-jobs/{id}` returns bounded progress metadata. Transitional
+`?wait=true` waits up to 30 seconds for that same job, returning the old 200 summary
+when ready and 202 otherwise. It does not calculate in the API process.
+
+Worker defaults: two independent scorer threads, each CatBoost thread_count=1;
+one active job at a time; DB pool 2+0; 30-second renewable fenced lease. Snapshot
+limits are 1,000 scenarios and 64 MiB (`SCORING_MAX_SCENARIOS`,
+`SCORING_MAX_SNAPSHOT_BYTES`). CPU tasks receive plain data, never ORM sessions.
+After a hard stop, restart the same image: the expired lease is claimed with a new
+owner/attempt. Progress starts again at zero; results appear only with the final
+transaction. A stale owner cannot publish. Failed jobs expose a safe error and
+permit an explicit score retry. Restart cancels active jobs and erases their
+scenario snapshots while retaining lifecycle metadata. Do not remove the worker
+while keeping an API/UI release that queues jobs.
+
+Disposable verification: `python -m scripts.check_durable_scoring --directory
+.local-run/scoring-lab --output scoring-verification.json` (requires the lab helper's
+private state). It inserts calculation fixtures in the disposable DB, queues via
+HTTP, kills the real worker on the 300-scenario run and checks recovery and atomic
+publication. This fixture is not a registration/submit throughput measurement.

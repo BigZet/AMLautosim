@@ -118,6 +118,7 @@ def test_access_without_round_revokes_session(request_api, admin, player, sql):
     assert event["round_id"] is None and event["target_id"] == str(player["id"])
 
 
+@pytest.mark.usefixtures("scoring_worker")
 def test_domain_scoring_error_is_preserved(request_api, admin, player, active_round, chain, command, monkeypatch, sql):
     request_api("POST", f"/rounds/{active_round}/scenario/submit", player["headers"], command(chain()))
     original = scoring_run.score_round
@@ -127,7 +128,7 @@ def test_domain_scoring_error_is_preserved(request_api, admin, player, active_ro
         raise Conflict("Закреплённая модель недоступна.", code="model_unavailable")
 
     monkeypatch.setattr(scoring_run, "score_round", fail_after_writes)
-    error = request_api("POST", f"/admin/rounds/{active_round}/score", admin, status=409)
+    error = request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin, status=409)
     assert error["code"] == "model_unavailable"
     row = sql("SELECT status, scoring_error FROM rounds")[0]
     assert row["status"] == "closed"
@@ -148,11 +149,12 @@ def test_failed_restart_rolls_back_audit_references(request_api, admin, active_r
     assert {table: sql(f"SELECT * FROM {table} ORDER BY id") for table in before} == before
 
 
+@pytest.mark.usefixtures("scoring_worker")
 def test_cutoff_preserves_audit_of_discarded_draft(request_api, admin, player, active_round, chain, command, sql):
     scenario = request_api("PUT", f"/rounds/{active_round}/scenario", player["headers"], command(chain()))
     sql("INSERT INTO audit_events(actor_user_id, round_id, scenario_id, event_type, created_at) "
         "VALUES(1, :rid, :sid, 'draft_checked', now())", {"rid": active_round, "sid": scenario["id"]})
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     event = sql("SELECT * FROM audit_events WHERE event_type='draft_checked'")[0]
     assert event["scenario_id"] is None
     assert event["metadata"]["previous_scenario_id"] == scenario["id"]
@@ -172,3 +174,4 @@ def test_audit_migration_preserves_populated_old_schema(api, sql):
         assert sql("SELECT * FROM audit_events ORDER BY id") == before
     finally:
         command.upgrade(config, "head")
+

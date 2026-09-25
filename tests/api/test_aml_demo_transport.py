@@ -69,9 +69,9 @@ def test_frozen_demo_survives_real_creation_submit_storage_and_retry(
         )
         assert submitted["status"] == "submitted"
         players.append((row, player, submitted["id"], steps))
-    summary = request_api("POST", f"/admin/rounds/{rid}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{rid}/score?wait=true", admin)
     assert summary["submitted_count"] == summary["scored_count"] == 5
-    assert request_api("POST", f"/admin/rounds/{rid}/score", admin) == summary
+    assert request_api("POST", f"/admin/rounds/{rid}/score?wait=true", admin) == summary
     for row, player, scenario_id, steps in players:
         original = deepcopy(row["public_snapshot"])
         expected = probability_scorer.adapter.predict(**original)
@@ -110,3 +110,7 @@ def test_frozen_demo_survives_real_creation_submit_storage_and_retry(
                     )
         assert request_api("GET", f"/rounds/{rid}/result", player["headers"]) == result
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 5
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

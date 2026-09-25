@@ -189,6 +189,24 @@ class OrganizerScreen:
             await self.render()
             if (
                 current
+                and current["status"] == "scoring"
+                and current.get("scoring_job_id")
+            ):
+                _, still_current = self.begin_read("scoring_job")
+                job = await self.request(
+                    "GET", f"admin/scoring-jobs/{current['scoring_job_id']}"
+                )
+                if still_current():
+                    label = {
+                        "queued": "Ожидаем начала расчёта",
+                        "running": "Подсчитываем результаты",
+                        "completed": "Расчёт завершён",
+                        "cancelled": "Расчёт отменён",
+                        "failed": "Ошибка расчёта. Приём закрыт; расчёт можно повторить.",
+                    }[job["state"]]
+                    self.status.set_text(f"{label} · {job['done']} / {job['total']}")
+            if (
+                current
                 and current["status"] == "completed"
                 and self.tabs.value == "results"
                 and current.get("results_version") != self.results_version

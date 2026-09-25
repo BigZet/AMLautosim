@@ -1,3 +1,5 @@
+
+import pytest
 from copy import deepcopy
 
 from scripts.check_expanded_balance import demo_steps
@@ -65,7 +67,7 @@ def test_released_round_full_cycle_and_emergency_creation_switch(
             "POST", path + "/submit", player["headers"], command(values, 1)
         )
         assert submitted["resources"] == preview["resources"]
-    request_api("POST", f"/admin/rounds/{identity}/score", admin)
+    request_api("POST", f"/admin/rounds/{identity}/score?wait=true", admin)
     for player in players:
         result = request_api("GET", "/rounds/current/state", player["headers"])
         assert result["result"]["rank"] in (1, 2, 3)
@@ -124,3 +126,7 @@ def test_employer_incoming_is_rejected_by_api(
         {"steps": values},
     )
     assert preview["can_submit"]
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

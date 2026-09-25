@@ -54,7 +54,7 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         command(steps),
     )
     assert submitted["status"] == "submitted"
-    summary = request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert summary["scored_count"] == 1
     result = request_api("GET", f"/rounds/{active_round}/result", player["headers"])
     explanation = result["explanation"]
@@ -73,9 +73,13 @@ def test_native_probability_and_shap_survive_api_storage_and_retry(
         "get_round_scorer",
         lambda *args: pytest.fail("Completed result/retry attempted fresh inference"),
     )
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert (
         request_api("GET", f"/rounds/{active_round}/result", player["headers"])
         == result
     )
     assert sql("SELECT count(*) AS n FROM scoring_results")[0]["n"] == 1
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

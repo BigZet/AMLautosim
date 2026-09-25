@@ -35,7 +35,7 @@ def test_configuration_only_before_start(
         command(chain()),
         409,
     )
-    request_api("POST", path + "/score", admin, status=409)
+    request_api("POST", path + "/score?wait=true", admin, status=409)
     updated = request_api(
         "PUT", path, admin, {"expected_config_revision": 1, "title": "Изменено"}
     )
@@ -55,7 +55,7 @@ def test_restart_clears_game_preserves_accounts(
 ):
     h = player["headers"]
     request_api("POST", f"/rounds/{active_round}/scenario/submit", h, command(chain()))
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     fresh = request_api(
         "POST", f"/admin/rounds/{active_round}/restart", admin, status=201
     )
@@ -85,7 +85,7 @@ def test_unsent_chain_hidden_from_admin_and_deleted_at_cutoff(
         "GET", f"/admin/rounds/{active_round}/participants/{player['id']}", admin
     )
     assert detail["scenario"] is None
-    request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     state = request_api("GET", "/rounds/current/state", player["headers"])
     assert state["scenario"] is None and state["result"] is None
     assert (
@@ -112,3 +112,7 @@ def test_organizer_energy_change_is_saved_with_revision(request_api, admin, roun
         k: v for k, v in updated.items() if k not in live_fields
     }
     assert current["admission_counts"] is not None
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")

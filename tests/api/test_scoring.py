@@ -1,3 +1,5 @@
+
+import pytest
 from src.aml_workshop_simulator.services import scoring_run
 
 
@@ -15,9 +17,9 @@ def test_ranking_ties_access_and_shared_results(
         )
     board_path = f"/rounds/{active_round}/leaderboard"
     assert request_api("GET", board_path, players[0]["headers"])["rows"] == []
-    summary = request_api("POST", f"/admin/rounds/{active_round}/score", admin)
+    summary = request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)
     assert summary["scored_count"] == 2
-    assert request_api("POST", f"/admin/rounds/{active_round}/score", admin) == summary
+    assert request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin) == summary
     rows = request_api("GET", board_path, players[0]["headers"])["rows"]
     assert [r["rank"] for r in rows] == [1, 1]
     assert {r["display_name"] for r in rows} == {p["display_name"] for p in players}
@@ -92,7 +94,7 @@ def test_scoring_failure_rolls_back_scores_but_keeps_cutoff(
 
     monkeypatch.setattr(scoring_run, "score_round", fail_after_writes)
     error = request_api(
-        "POST", f"/admin/rounds/{active_round}/score", admin, status=500
+        "POST", f"/admin/rounds/{active_round}/score?wait=true", admin, status=500
     )
     assert error["code"] == "scoring_failed"
     state = request_api("GET", "/rounds/current/state", player["headers"])
@@ -109,8 +111,12 @@ def test_scoring_failure_rolls_back_scores_but_keeps_cutoff(
     )
     monkeypatch.setattr(scoring_run, "score_round", original)
     assert (
-        request_api("POST", f"/admin/rounds/{active_round}/score", admin)[
+        request_api("POST", f"/admin/rounds/{active_round}/score?wait=true", admin)[
             "scored_count"
         ]
         == 1
     )
+
+
+# Existing result assertions use the explicit transitional wait contract.
+pytestmark = pytest.mark.usefixtures("scoring_worker")
