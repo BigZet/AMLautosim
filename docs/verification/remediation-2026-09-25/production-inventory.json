@@ -1,0 +1,172 @@
+{
+  "containers": [
+    {
+      "name": "/amlplay-api-1",
+      "image_reference": "aml-runtime:20260920",
+      "image_id": "sha256:a9a792b0dc963a3b744e3edb8fb976030e476b2b862ad144a4f3807d05dc56b7",
+      "repo_digests": [
+        "aml-runtime@sha256:a9a792b0dc963a3b744e3edb8fb976030e476b2b862ad144a4f3807d05dc56b7"
+      ],
+      "revision": null,
+      "ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "18000"
+          }
+        ],
+        "8080/tcp": null
+      },
+      "runtime_paths": {
+        "AML_MODEL_PATH": null,
+        "AML_PROBABILITY_MODEL_PATH": "/app/resources/catboost_models/aml-game-organizer-settings-v1",
+        "NICEGUI_STORAGE_PATH": null
+      },
+      "mounts": [
+        {
+          "source": "/opt/amlplay/releases/20260920/config",
+          "destination": "/app/config",
+          "writable": false
+        }
+      ]
+    },
+    {
+      "name": "/amlplay-ui-1",
+      "image_reference": "aml-runtime:20260920-amount-format",
+      "image_id": "sha256:fa24a140d55d64f3beaf6e6f8fe1f771b45d467c4708bae5b7eb6eef95bb28a2",
+      "repo_digests": [
+        "aml-runtime@sha256:fa24a140d55d64f3beaf6e6f8fe1f771b45d467c4708bae5b7eb6eef95bb28a2"
+      ],
+      "revision": null,
+      "ports": {
+        "8000/tcp": null,
+        "8080/tcp": [
+          {
+            "HostIp": "0.0.0.0",
+            "HostPort": "8080"
+          },
+          {
+            "HostIp": "::",
+            "HostPort": "8080"
+          }
+        ]
+      },
+      "runtime_paths": {
+        "AML_MODEL_PATH": null,
+        "AML_PROBABILITY_MODEL_PATH": null,
+        "NICEGUI_STORAGE_PATH": "/home/app/nicegui"
+      },
+      "mounts": [
+        {
+          "source": "/var/lib/docker/volumes/amlplay_nicegui_data/_data",
+          "destination": "/home/app/nicegui",
+          "writable": true
+        }
+      ]
+    },
+    {
+      "name": "/amlplay-db-1",
+      "image_reference": "postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+      "image_id": "sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+      "repo_digests": [
+        "postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94"
+      ],
+      "revision": null,
+      "ports": {
+        "5432/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "55432"
+          }
+        ]
+      },
+      "runtime_paths": {
+        "AML_MODEL_PATH": null,
+        "AML_PROBABILITY_MODEL_PATH": null,
+        "NICEGUI_STORAGE_PATH": null
+      },
+      "mounts": [
+        {
+          "source": "/var/lib/docker/volumes/amlplay_postgres_data/_data",
+          "destination": "/var/lib/postgresql/data",
+          "writable": true
+        }
+      ]
+    }
+  ],
+  "compose": {
+    "api": {
+      "image": "aml-runtime:20260920",
+      "ports": [
+        {
+          "mode": "ingress",
+          "host_ip": "127.0.0.1",
+          "target": 8000,
+          "published": "18000",
+          "protocol": "tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/opt/amlplay/releases/20260920/config",
+          "target": "/app/config",
+          "read_only": true,
+          "bind": {
+            "create_host_path": true
+          }
+        }
+      ]
+    },
+    "db": {
+      "image": "postgres@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+      "ports": [
+        {
+          "mode": "ingress",
+          "host_ip": "127.0.0.1",
+          "target": 5432,
+          "published": "55432",
+          "protocol": "tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "type": "volume",
+          "source": "postgres_data",
+          "target": "/var/lib/postgresql/data",
+          "volume": {}
+        }
+      ]
+    },
+    "ui": {
+      "image": "aml-runtime:20260920-amount-format",
+      "ports": [
+        {
+          "mode": "ingress",
+          "target": 8080,
+          "published": "8080",
+          "protocol": "tcp"
+        }
+      ],
+      "volumes": [
+        {
+          "type": "volume",
+          "source": "nicegui_data",
+          "target": "/home/app/nicegui",
+          "volume": {}
+        }
+      ]
+    }
+  },
+  "default_model_identity": {
+    "package_sha256": "6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+    "model_sha256": "514b0b03e794bc54a6d74b1cfd7981dad4f415063fc3cd8e567b334084efcf35",
+    "context_sha256": "e70d9bd62bed8bb270d377de7bb54e314018a639808fa15da99791c88a139cef",
+    "feature_schema_sha256": "310527a4290410d039246db499aec17d592fa99238801f4f9e83d1c120ec5ae7",
+    "contract_version": 10,
+    "extractor_version": "aml-game-attributes-context-v1",
+    "score_kind": "educational_pattern_probability",
+    "model_version": "aml-game:sha256:6b9c93935933e806ca733d22f36bdb99ef9660a4f6946e4f7d27b2fb748c5fbe",
+    "explanation_version": 5
+  }
+}
