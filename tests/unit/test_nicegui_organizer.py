@@ -19,6 +19,9 @@ def test_delayed_panel_response_is_discarded(panel, change):
         screen.storage = {"auth_admin": {"session_id": screen.token}}
         screen.read_versions = {}
         screen.query = SimpleNamespace(value="first search")
+        screen.current_scenario = SimpleNamespace(value=False)
+        screen.access_filter = SimpleNamespace(value="all")
+        screen.scenario_filter = SimpleNamespace(value="all")
         screen.event_filter = SimpleNamespace(value="")
         entered, release = asyncio.Event(), asyncio.Event()
 
@@ -37,7 +40,7 @@ def test_delayed_panel_response_is_discarded(panel, change):
             else getattr(screen, f"load_{panel}")()
         )
         task = asyncio.create_task(call)
-        await entered.wait()
+        await asyncio.wait_for(entered.wait(), 2)
         if change == "restart":
             screen.round = {"id": 2}
         elif change == "new_request":

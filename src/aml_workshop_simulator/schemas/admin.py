@@ -85,6 +85,7 @@ class PlayerSummaryOut(BaseModel):
 
 class PlayerSummaryPageOut(BaseModel):
     rows: list[PlayerSummaryOut]
+    next_cursor: int | None = None
 
 
 class PlayerDetailUserOut(BaseModel):

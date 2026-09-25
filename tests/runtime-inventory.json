@@ -857,6 +857,12 @@
     "tests/api/test_scoring.py::test_scoring_failure_rolls_back_scores_but_keeps_cutoff",
     "tests/api/test_semantic_v9.py::test_v9_http_matrix_and_saved_observations",
     "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[8]",
-    "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[10]"
+    "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[10]",
+    "tests/api/test_participant_pagination.py::test_all_accounts_reachable_during_registration",
+    "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[%-expected0]",
+    "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[_-expected1]",
+    "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[\\\\-expected2]",
+    "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[\\u0451\\u043b\\u043a\\u0430-expected3]",
+    "tests/api/test_participant_pagination.py::test_current_round_scenario_filter_includes_draft_without_exposing_it"
   ]
 }

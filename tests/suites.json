@@ -1,6 +1,7 @@
 {
   "version": 1,
   "modules": {
+    "tests/api/test_participant_pagination.py": "runtime",
     "tests/unit/test_scenario_preparation.py": "runtime",
     "tests/api/test_round_status.py": "runtime",
     "tests/api/test_observability.py": "runtime",
