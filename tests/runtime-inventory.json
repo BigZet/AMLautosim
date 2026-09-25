@@ -640,7 +640,11 @@
     "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[DB_POOL_RECYCLE-86401]",
     "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[API_WORKERS-0]",
     "tests/unit/test_runtime_settings.py::test_database_concurrency_settings_are_bounded[API_WORKERS-5]",
-    "tests/unit/test_runtime_settings.py::test_pool_options_respect_nullpool"
+    "tests/unit/test_runtime_settings.py::test_pool_options_respect_nullpool",
+    "tests/unit/test_storage_retention.py::test_many_tabs_keep_dirty_pending_and_live_guards",
+    "tests/unit/test_storage_retention.py::test_ttl_and_reload_reconnect_preserve_active_tokens",
+    "tests/unit/test_storage_retention.py::test_limit_is_soft_for_unsaved_or_active_pages",
+    "tests/unit/test_storage_retention.py::test_clean_legacy_records_can_be_reloaded_from_server"
   ],
   "api": [
     "tests/api/test_all_operation_parameters.py::test_all_parameters_are_exposed_and_saved[salary]",
@@ -863,6 +867,7 @@
     "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[_-expected1]",
     "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[\\\\-expected2]",
     "tests/api/test_participant_pagination.py::test_search_treats_wildcards_literally[\\u0451\\u043b\\u043a\\u0430-expected3]",
-    "tests/api/test_participant_pagination.py::test_current_round_scenario_filter_includes_draft_without_exposing_it"
+    "tests/api/test_participant_pagination.py::test_current_round_scenario_filter_includes_draft_without_exposing_it",
+    "tests/api/test_session_retention.py::test_session_retention_is_dry_by_default_bounded_and_repeatable"
   ]
 }

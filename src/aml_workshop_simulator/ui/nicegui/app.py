@@ -82,6 +82,9 @@ def page_owner(storage, audience):
         pages = dict(storage.get("pages", {}))
         pages[client.tab_id] = client.id
         storage["pages"] = pages
+        from .storage_retention import retain_live_tabs
+
+        retain_live_tabs(storage, client.tab_id)
 
     client.on_connect(claim)
     return lambda: storage.get("pages", {}).get(client.tab_id) == client.id

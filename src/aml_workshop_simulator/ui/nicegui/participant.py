@@ -630,6 +630,9 @@ class ParticipantScreen:
             all_records = dict(self.storage.get("workspace_play", {}))
             all_records[tab_id] = deepcopy(record)
             self.storage["workspace_play"] = all_records
+            from .storage_retention import retain_live_tabs
+
+            retain_live_tabs(self.storage, tab_id)
 
         self.editor = GameEditor(self.api, self.token, record, persist)
         await self.poll()

@@ -1,6 +1,8 @@
 {
   "version": 1,
   "modules": {
+    "tests/unit/test_storage_retention.py": "runtime",
+    "tests/api/test_session_retention.py": "runtime",
     "tests/api/test_participant_pagination.py": "runtime",
     "tests/unit/test_scenario_preparation.py": "runtime",
     "tests/api/test_round_status.py": "runtime",
