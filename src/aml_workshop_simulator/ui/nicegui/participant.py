@@ -6,7 +6,7 @@ import time
 import json
 import re
 from copy import deepcopy
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from nicegui import ui
@@ -840,7 +840,14 @@ class ParticipantScreen:
                             ui.label(
                                 "Отправьте сценарий до закрытия игры: неотправленный черновик будет удалён."
                             ).classes("text-sm muted")
-                            self.save_status = ui.label().classes("save-indicator")
+                            self.save_status = (
+                                ui.label()
+                                .classes("save-indicator")
+                                .props("role=status aria-live=polite")
+                            )
+                            self.submit_reason = ui.label().classes(
+                                "submit-reason text-sm"
+                            )
                             self.retry_button = ui.button(
                                 "Повторить запрос", on_click=self.retry
                             ).props("outline no-caps")
@@ -1019,13 +1026,28 @@ class ParticipantScreen:
         editor = self.editor
         ready = editor.can_submit and not self.submitting
         self.submit_button.set_enabled(ready)
+        self.submit_button.set_visibility(bool(editor.steps))
         self.submit_button.props(
             "color=primary text-color=white"
             if ready
             else "color=grey-3 text-color=blue-grey-5"
         )
+        if getattr(self, "submit_reason", None) is not None:
+            self.submit_reason.set_text(
+                "Добавьте первую операцию"
+                if not editor.steps
+                else "Исправьте ошибку ниже"
+                if editor.error or not editor.transport_valid()
+                else "Дождитесь сохранения"
+                if editor.dirty or editor.lock.locked()
+                else "Проверьте условия отправки"
+                if not ready
+                else "Сценарий готов к отправке"
+            )
         self.save_status.set_text(
-            "Отправляем…"
+            "Не удалось сохранить"
+            if editor.error and (editor.error.status == 0 or editor.error.status >= 500)
+            else "Отправляем…"
             if self.submitting
             else "Сохраняем…"
             if editor.lock.locked()
@@ -1034,6 +1056,37 @@ class ParticipantScreen:
             else "Сохранено"
         )
         error = editor.error
+        violations = list((editor.preview or {}).get("blockers", []))
+        if error:
+            violations += (error.details or {}).get("violations", [])
+        step_errors = {
+            v["step_id"]: v.get("field") for v in violations if v.get("step_id")
+        }
+        for step in editor.steps:
+            try:
+                value = Decimal(str(step.get("amount", "")))
+                valid = (
+                    value.is_finite()
+                    and value > 0
+                    and value == value.quantize(Decimal(".01"))
+                )
+            except (InvalidOperation, ValueError):
+                valid = False
+            if not valid:
+                step_errors[step["step_id"]] = "amount"
+        for identity, card in getattr(self, "step_cards", {}).items():
+            if hasattr(card, "error_button") and not card.element.is_deleted:
+                card.error_field = step_errors.get(identity)
+                card.error_button.set_visibility(identity in step_errors)
+        if (
+            getattr(self, "submit_reason", None) is not None
+            and not ready
+            and editor.preview
+            and not error
+        ):
+            blockers = editor.preview.get("blockers", [])
+            if blockers and editor.preview_version == editor.version:
+                self.submit_reason.set_text(blockers[0]["message"])
         self.error_box.set_visibility(error is not None or not editor.transport_valid())
         if error:
             violations = (error.details or {}).get("violations", [])
@@ -1086,7 +1139,11 @@ class ParticipantScreen:
                         if not editor.error and editor.transport_valid()
                         else "Расчёт не обновлён"
                     ).classes("text-xs muted")
-                with ui.column().classes("w-full open-conditions"):
+                with ui.expansion(
+                    "Условия отправки",
+                    value=getattr(self, "conditions_open", False),
+                    on_value_change=lambda e: setattr(self, "conditions_open", e.value),
+                ).classes("w-full open-conditions"):
                     submission_conditions(
                         editor.preview,
                         current=editor.preview_version == editor.version,

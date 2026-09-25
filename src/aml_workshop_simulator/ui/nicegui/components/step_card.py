@@ -3,6 +3,7 @@
 from copy import deepcopy
 from uuid import uuid4
 from nicegui import ui
+from .money_input import MoneyInput
 from ..counterparties import (
     editable_params,
     expanded,
@@ -68,7 +69,10 @@ class StepCard:
 
         def remember(e, step_id=step["step_id"]):
             if e.value:
-                screen.open_steps.add(step_id)
+                screen.open_steps = {step_id}
+                for identity, component in getattr(screen, "step_cards", {}).items():
+                    if identity != step_id and not component.element.is_deleted:
+                        component.element.set_value(False)
             else:
                 screen.open_steps.discard(step_id)
 
@@ -89,13 +93,37 @@ class StepCard:
                     self.caption_label = caption_label = ui.label(caption).classes(
                         "operation-caption"
                     )
+                    self.error_field = None
+                    self.error_button = (
+                        ui.button(
+                            "Исправить ошибку",
+                            icon="error_outline",
+                            on_click=lambda: screen.focus_error_step(
+                                self.step_id, self.error_field
+                            ),
+                        )
+                        .props(
+                            'flat no-caps color=negative aria-label="Исправить ошибку в операции"'
+                        )
+                        .classes("step-error-button")
+                    )
+                    self.error_button.on("click.stop", lambda: None)
+                    self.error_button.set_visibility(False)
                 with (
                     ui.element("q-item-section")
                     .props("side")
                     .classes("operation-actions-slot")
                 ):
-                    actions = ui.row().classes("operation-actions")
-                    actions.on("click.stop", lambda: None)
+                    with ui.row().classes("operation-actions") as action_row:
+                        action_row.on("click.stop", lambda: None)
+                        with (
+                            ui.button("Действия", icon="more_horiz")
+                            .props("flat no-caps")
+                            .classes("operation-menu-button")
+                        ):
+                            actions = (
+                                ui.menu().props("auto-close").classes("operation-menu")
+                            )
             with actions:
 
                 def move(delta):
@@ -125,7 +153,11 @@ class StepCard:
 
                 # The newest step is displayed first: visually up means later.
                 self.up_button = (
-                    ui.button(icon="arrow_upward", on_click=lambda m=move: m(1))
+                    ui.button(
+                        "Выполнить позже",
+                        icon="arrow_upward",
+                        on_click=lambda m=move: m(1),
+                    )
                     .props(
                         'flat dense aria-label="Переместить вверх — выполнить позже"'
                     )
@@ -133,7 +165,11 @@ class StepCard:
                     .set_enabled(index < len(screen.editor.steps) - 1)
                 )
                 self.down_button = (
-                    ui.button(icon="arrow_downward", on_click=lambda m=move: m(-1))
+                    ui.button(
+                        "Выполнить раньше",
+                        icon="arrow_downward",
+                        on_click=lambda m=move: m(-1),
+                    )
                     .props(
                         'flat dense aria-label="Переместить вниз — выполнить раньше"'
                     )
@@ -170,10 +206,10 @@ class StepCard:
                     screen.changed()
                     screen.render_chain()
 
-                ui.button(icon="content_copy", on_click=duplicate).props(
+                ui.button("Копировать", icon="content_copy", on_click=duplicate).props(
                     'flat dense aria-label="Копировать операцию"'
                 ).tooltip("Копировать операцию")
-                ui.button(icon="delete_outline", on_click=remove).props(
+                ui.button("Удалить", icon="delete_outline", on_click=remove).props(
                     'flat dense aria-label="Удалить операцию"'
                 ).classes("operation-delete").tooltip("Удалить операцию")
             with ui.element("div").classes("operation-fields") as self.fields:
@@ -198,7 +234,7 @@ class StepCard:
 
                 minimum = float(card["min_amount"])
                 maximum = float(card["max_amount"])
-                ui.number(
+                MoneyInput(
                     "Сумма",
                     value=float(step["amount"]) if step["amount"] else None,
                     min=minimum,
