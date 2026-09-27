@@ -1,0 +1,25 @@
+{
+  "collected": [
+    "tests/api/test_nicegui_participant_editing.py::test_parameters_and_amount_remain_editable_after_autosave",
+    "tests/api/test_concurrency.py::test_pool_exhaustion_returns_retryable_503_without_losing_command[10]",
+    "tests/api/test_concurrency.py::test_submission_races_autosave[10]",
+    "tests/api/test_concurrency.py::test_submission_races_cutoff[10]",
+    "tests/api/test_concurrency.py::test_state_is_one_nonblocking_snapshot_during_scoring[10]",
+    "tests/api/test_concurrency.py::test_concurrent_submit_retries_record_once[10]",
+    "tests/api/test_concurrency.py::test_concurrent_scorers_publish_once[10]",
+    "tests/api/test_scenarios.py::test_direct_submission_and_retry",
+    "tests/api/test_scenarios.py::test_invalid_submit_preserves_attempt[False]",
+    "tests/api/test_scenarios.py::test_invalid_submit_preserves_attempt[True]",
+    "tests/api/test_scenarios.py::test_autosave_revision_and_uuid_conflicts",
+    "tests/api/test_scenarios.py::test_preview_and_page_reload",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[frequency-422]",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[negative_amount-422]",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[fraction-422]",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[duplicate_step-422]",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[unknown_card-422]",
+    "tests/api/test_scenarios.py::test_invalid_cards_and_chains[missing_goal-400]"
+  ],
+  "failures": {},
+  "skipped": [],
+  "exit_code": 0
+}

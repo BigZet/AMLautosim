@@ -1,0 +1,62 @@
+diff --git a/src/aml_workshop_simulator/ui/nicegui/participant.py b/src/aml_workshop_simulator/ui/nicegui/participant.py
+index 0c3c7ca..bc561dd 100644
+--- a/src/aml_workshop_simulator/ui/nicegui/participant.py
++++ b/src/aml_workshop_simulator/ui/nicegui/participant.py
+@@ -11,6 +11,8 @@ from uuid import uuid4
+ 
+ from nicegui import ui
+ 
++from src.aml_workshop_simulator.core.observability import metrics
++
+ from .profile_history import profile_history_panel
+ from .participant_limits import participant_limits_panel
+ from .game import GameEditor
+@@ -39,6 +41,8 @@ from .shap_result import aml_result_view_model, shap_result
+ from src.aml_workshop_simulator.domain.operation_purposes import default_purpose
+ from .counterparties import party_options
+ 
++AUTOSAVE_DELAY_SECONDS = 0.4
++
+ STATUS = {
+     "none": "Игра ещё не создана",
+     "draft": "Ожидаем начала игры",
+@@ -1136,20 +1140,35 @@ class ParticipantScreen:
+             editor = self.editor
+             age = time.monotonic() - self.last_change
+             if (
+-                age >= 0.4
++                age >= AUTOSAVE_DELAY_SECONDS
+                 and editor.editable
+                 and editor.preview_version != editor.version
+                 and not editor.error
+             ):
+-                await editor.evaluate()
++                started = time.monotonic()
++                metrics.observe("ui_autosave_debounce_seconds", age)
++                try:
++                    await editor.evaluate()
++                finally:
++                    metrics.observe("ui_preview_seconds", time.monotonic() - started)
++            # Preview can cross the deadline, or a new edit can arrive while it
++            # is in flight. Recheck both the debounce and the evaluated version.
+             if (
+-                age >= 1
++                time.monotonic() - self.last_change >= AUTOSAVE_DELAY_SECONDS
+                 and editor.dirty
+                 and editor.editable
++                and editor.preview_version == editor.version
+                 and not editor.error
+                 and not editor.conflict
+             ):
+-                await editor.write()
++                started = time.monotonic()
++                changed_at, version = self.last_change, editor.version
++                try:
++                    saved = await editor.write()
++                finally:
++                    metrics.observe("ui_autosave_seconds", time.monotonic() - started)
++                if saved and editor.version == version and not editor.dirty:
++                    metrics.observe("ui_edit_saved_seconds", time.monotonic() - changed_at)
+             self.update_status()
+ 
+         try:

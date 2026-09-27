@@ -2,6 +2,7 @@
 
 from nicegui import ui
 from datetime import datetime
+from .components.operation_select import OperationSelect
 
 
 def moment(value):
@@ -12,7 +13,7 @@ def timeline_control(timing, config, on_change):
     if timing["step_index"] == 1:
         return
     return (
-        ui.select(
+        OperationSelect(
             {1: "1 минута", 10: "10 минут", 60: "1 час", 1440: "1 сутки"},
             value=timing["interval_minutes"],
             label="Ожидание перед операцией",

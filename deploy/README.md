@@ -28,15 +28,22 @@ Production использует `compose.production.yml` и отдельный �
 на внешнем балансировщике; прямой доступ должен возвращать 403.
 До обновления сохранить предыдущий **registry digest** и совместимую резервную копию.
 На обследованном старом сервере registry digest не установлен: известны только
-локальные image IDs, см. production-inventory.json. Их нельзя выдавать за digest.
+локальные image IDs. Перед деплоем обновить инвентаризацию и сохранить сами образы
+через `docker image save`; локальные IDs нельзя выдавать за registry digest.
+
+Для перехода с текущего прода использовать [план запуска и отката](../docs/deploy-rollback.md):
+отдельный Compose project, БД, том NiceGUI, порт и подсеть. Следующие команды
+предназначены для нового окружения, не для обновления старой БД на месте.
+Во всех командах явно задан `--project-name` нового окружения; сначала убедиться,
+что это имя не занято существующим production-проектом.
 
 Порядок команд (из корня checkout, env-файл вне репозитория):
 
 ```sh
-docker compose --env-file /secure/aml.env -f deploy/compose.production.yml pull
-docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d db
-docker compose --env-file /secure/aml.env -f deploy/compose.production.yml run --rm release
-docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d --no-deps --wait api ui ingress
+docker compose --project-name aml-green-20260927 --env-file /secure/aml.env -f deploy/compose.production.yml pull
+docker compose --project-name aml-green-20260927 --env-file /secure/aml.env -f deploy/compose.production.yml up -d --wait db
+docker compose --project-name aml-green-20260927 --env-file /secure/aml.env -f deploy/compose.production.yml run --rm release
+docker compose --project-name aml-green-20260927 --env-file /secure/aml.env -f deploy/compose.production.yml up -d --no-deps --wait api ui scoring-worker ingress
 ```
 
 `release` — единственный одноразовый процесс миграции и seed, без демонстрационного
@@ -45,10 +52,10 @@ docker compose --env-file /secure/aml.env -f deploy/compose.production.yml up -d
 pg_dump/pg_restore в отдельную БД и повторную release-команду с сохранением аккаунтов.
 Это проверка disposable-стенда, не восстановление production backup.
 
-Откат: остановить новые API/UI, вернуть предыдущий проверенный `AML_IMAGE`, затем
-запустить API/UI без downgrade только если старая версия совместима с новой схемой.
-При несовместимой схеме восстановить backup в новую БД, проверить миграции/readiness
-и целостность игры, переключить подключение. Не выполнять слепой Alembic downgrade.
+Откат текущего перехода: закрыть запись, остановить новые API/UI/scoring-worker,
+сохранить новую БД и вернуть маршрут на сохранённое старое окружение с его БД.
+Не подключать старый образ к новой схеме и не выполнять слепой Alembic downgrade.
+Возврат образа на общей БД допустим только после отдельной проверки совместимости.
 
 ## Пути и настройки
 

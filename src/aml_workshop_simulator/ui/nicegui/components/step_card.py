@@ -1,9 +1,11 @@
 """A persistent operation card keyed by step identity; GameEditor owns all writes."""
 
 from copy import deepcopy
+from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 from nicegui import ui
 from .money_input import MoneyInput
+from .operation_select import OperationSelect
 from ..counterparties import (
     editable_params,
     expanded,
@@ -11,7 +13,8 @@ from ..counterparties import (
     party_name,
     party_options,
 )
-from ..aml_context import explanation_selector
+from ..aml_context import explanation_selector, purpose_options
+from src.aml_workshop_simulator.domain.operation_purposes import default_purpose
 from ..operation_timeline import timeline_control
 from .resource_summary import display_number, display_operation_amount, display_moment
 
@@ -20,7 +23,7 @@ class StepCard:
     def __init__(self, screen, step, *, index):
         self.screen = screen
         self.step_id = step["step_id"]
-        self.step = step
+        self.field_values = self._field_values(step)
         self.index = index
         self.updating = False
         self.timeline = None
@@ -31,6 +34,27 @@ class StepCard:
     @staticmethod
     def _shape(step):
         return (step["card"], step.get("action_details", {}).get("incoming_kind"))
+
+    @staticmethod
+    def _field_values(step):
+        values = deepcopy(step)
+        # Timing is updated in place below, including after reordering.
+        values.pop("interval_minutes", None)
+        try:
+            amount = Decimal(str(values["amount"]))
+            if amount.is_finite():
+                values["amount"] = amount
+        except (InvalidOperation, ValueError):
+            pass
+        return values
+
+    def _changed(self):
+        # The control already displays this edit. Keep a value snapshot, not a
+        # reference to a step that GameEditor.write replaces after saving.
+        self.field_values = self._field_values(
+            self.screen.current_step(self.step_id)
+        )
+        self.screen.changed()
 
     def _build(self, step, index):
         screen = self.screen
@@ -195,7 +219,7 @@ class StepCard:
                         expansion.set_text(
                             f"{self.index + 1}. {card['title']} · {formatted} ₽"
                         )
-                        screen.changed()
+                        self._changed()
 
                 minimum = float(card["min_amount"])
                 maximum = float(card["max_amount"])
@@ -269,7 +293,15 @@ class StepCard:
                                 )
                                 if current.get("sender_id") not in options:
                                     current["sender_id"] = next(iter(options), None)
-                            screen.changed()
+                                if config.get("schema_version") == 10:
+                                    purposes = purpose_options(config, current)
+                                    if current.get("purpose_code") not in purposes:
+                                        preferred = default_purpose(current)
+                                        current["purpose_code"] = (
+                                            preferred if preferred in purposes
+                                            else next(iter(purposes), None)
+                                        )
+                            self._changed()
                             if (
                                 config.get("schema_version") in (9, 10)
                                 and k == "incoming_kind"
@@ -287,12 +319,12 @@ class StepCard:
                         option = param["options"][0]
                         if target.get(param["key"]) != option["value"]:
                             target[param["key"]] = option["value"]
-                            screen.changed()
+                            self._changed()
                         ui.label(f"{param['label']}: {option['label']}").classes(
                             "text-sm muted"
                         )
                     else:
-                        ui.select(
+                        OperationSelect(
                             {o["value"]: o["label"] for o in param["options"]},
                             value=value,
                             label=param["label"],
@@ -324,7 +356,7 @@ class StepCard:
                                 heading.set_text(
                                     " · ".join(v for v in (selected, self.moment) if v)
                                 )
-                            screen.changed()
+                            self._changed()
 
                     party_selector(config, step, select_party)
                     explanation_selector(config, step, select_party)
@@ -336,7 +368,7 @@ class StepCard:
                             and screen.editor.editable
                         ):
                             screen.current_step(step_id)["interval_minutes"] = value
-                            screen.changed()
+                            self._changed()
                             screen.render_chain()
 
                     self.change_interval = change_interval
@@ -350,13 +382,16 @@ class StepCard:
         config = screen.editor.state["round"]["game_config"]
         timing = screen.step_timing
         self.moment = display_moment(timing[index]["occurred_at"]) if timing else ""
-        if self._shape(step) != self.shape or step != self.step:
+        if (
+            self._shape(step) != self.shape
+            or self._field_values(step) != self.field_values
+        ):
             self.shape = deepcopy(self._shape(step))
             old = self.element
             self.timeline = None
             self._build(step, index)
             old.delete()
-        self.step = step
+        self.field_values = self._field_values(step)
         if self.card is None:
             return
         amount = display_operation_amount(step["amount"]) if step["amount"] else "—"

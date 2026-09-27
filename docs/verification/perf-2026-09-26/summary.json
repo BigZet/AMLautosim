@@ -1,0 +1,1259 @@
+{
+  "pooled_edits": {
+    "45": {
+      "attempted": 3674,
+      "failed": 2,
+      "p95": 2.1353182999882847
+    },
+    "60": {
+      "attempted": 4776,
+      "failed": 2,
+      "p95": 2.3869434999651276
+    }
+  },
+  "commit": "b00a096a9ac54b764bc737aeb53df87e82e1b0e8",
+  "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+  "seconds_per_run": 120,
+  "api_workers": 1,
+  "pool_size": 5,
+  "pool_overflow": 10,
+  "pool_timeout_seconds": 5,
+  "docker_cpus": 12,
+  "docker_ram_bytes": 33590730752,
+  "runs": [
+    {
+      "name": "45-r1",
+      "users": 45,
+      "exit_code": 0,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 114,
+          "failed": 0,
+          "p50": 0.010172399983275682,
+          "p95": 0.2186570999911055,
+          "max": 0.5126564999809489
+        },
+        "edit": {
+          "count": 1243,
+          "failed": 0,
+          "p50": 1.3468630000133999,
+          "p95": 1.7963137000333518,
+          "max": 2.1843752000131644
+        },
+        "login": {
+          "count": 45,
+          "failed": 0,
+          "p50": 0.5342283000354655,
+          "p95": 0.7224554999847896,
+          "max": 0.801551099983044
+        },
+        "prepare": {
+          "count": 45,
+          "failed": 0,
+          "p50": 2.0902702000457793,
+          "p95": 2.28127229999518,
+          "max": 2.2862177999923006
+        }
+      },
+      "connected_peak": 45,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374071.685239,
+          "histograms": {
+            "pool_acquire_seconds": {
+              "count": 13958,
+              "sum": 132.63830903144844,
+              "window_count": 1024,
+              "max": 0.20259804699162487,
+              "p95": 0.06203240400645882
+            },
+            "sql_seconds": {
+              "count": 15614,
+              "sum": 139.78373535748688,
+              "window_count": 1024,
+              "max": 0.10432152799330652,
+              "p95": 0.04003293901041616
+            },
+            "http GET /health/ready 200": {
+              "count": 66,
+              "sum": 3.2170822539483197,
+              "window_count": 66,
+              "max": 0.22331655099696945,
+              "p95": 0.18850807400303893
+            },
+            "event_loop_lag_seconds": {
+              "count": 151,
+              "sum": 0.5761915559414774,
+              "window_count": 151,
+              "max": 0.079036230003112,
+              "p95": 0.023182869990705512
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 46,
+              "sum": 10.960534133992041,
+              "window_count": 46,
+              "max": 0.4947426419967087,
+              "p95": 0.3367131650011288
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.048591066006338224,
+              "window_count": 1,
+              "max": 0.048591066006338224,
+              "p95": 0.048591066006338224
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.02667003399983514,
+              "window_count": 1,
+              "max": 0.02667003399983514,
+              "p95": 0.02667003399983514
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 45,
+              "sum": 6.886090552958194,
+              "window_count": 45,
+              "max": 0.274820105987601,
+              "p95": 0.17009999700530898
+            },
+            "http GET /internal/metrics 200": {
+              "count": 63,
+              "sum": 0.4197807289165212,
+              "window_count": 63,
+              "max": 0.0900181809993228,
+              "p95": 0.0325051489926409
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 90,
+              "sum": 0.8315677539940225,
+              "window_count": 90,
+              "max": 0.052102367000770755,
+              "p95": 0.031896542001049966
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 1916,
+              "sum": 100.52181214462325,
+              "window_count": 1024,
+              "max": 0.44634910600143485,
+              "p95": 0.22620587699930184
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 45,
+              "sum": 0.9668479599640705,
+              "window_count": 45,
+              "max": 0.07205878899549134,
+              "p95": 0.05628135499136988
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 45,
+              "sum": 0.6594326070335228,
+              "window_count": 45,
+              "max": 0.06972564299940132,
+              "p95": 0.04145506200438831
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1333,
+              "sum": 106.92439634879702,
+              "window_count": 1024,
+              "max": 0.44252230701386,
+              "p95": 0.3007575280062156
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1288,
+              "sum": 151.58145230126684,
+              "window_count": 1024,
+              "max": 0.5247222079924541,
+              "p95": 0.34790580900153145
+            }
+          },
+          "gauges": {
+            "http_in_flight": 1,
+            "pool_checked_out": 0,
+            "pool_overflow": 0
+          },
+          "process": {
+            "rss_bytes": 207953920,
+            "cpu_seconds": 72.41000000000001
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374071.6939478,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 149,
+              "sum": 1.0500699350232026,
+              "window_count": 149,
+              "max": 0.2681909429957159,
+              "p95": 0.020688845004769973
+            },
+            "ui_api_seconds": {
+              "count": 4762,
+              "sum": 656.318490062622,
+              "window_count": 1024,
+              "max": 0.8684820710041095,
+              "p95": 0.3469009960099356
+            }
+          },
+          "gauges": {
+            "ui_clients": 45,
+            "ui_connected_clients": 45,
+            "ui_api_in_flight": 0
+          },
+          "process": {
+            "rss_bytes": 173314048,
+            "cpu_seconds": 60.98
+          }
+        }
+      },
+      "raw_sha256": "5ca1529269969239b579f39385719ab5b3558cfcc4462f19c2afa9de033a9016",
+      "raw_gzip": "45-r1.json.gz",
+      "failures": [],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 20.0,
+      "http_5xx_count": 0
+    },
+    {
+      "name": "60-r1",
+      "users": 60,
+      "exit_code": 0,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 108,
+          "failed": 0,
+          "p50": 0.029812099994160235,
+          "p95": 0.4121782999718562,
+          "max": 1.0688082000124268
+        },
+        "edit": {
+          "count": 1599,
+          "failed": 0,
+          "p50": 1.4638202000060119,
+          "p95": 2.2538631000206806,
+          "max": 3.4081366999889724
+        },
+        "login": {
+          "count": 60,
+          "failed": 0,
+          "p50": 0.6416874999995343,
+          "p95": 0.9164298999821767,
+          "max": 0.9902034000260755
+        },
+        "prepare": {
+          "count": 60,
+          "failed": 0,
+          "p50": 2.669796000001952,
+          "p95": 2.99690530000953,
+          "max": 3.05714839999564
+        }
+      },
+      "connected_peak": 60,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374247.779774,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 161,
+              "sum": 0.7493146199849434,
+              "window_count": 161,
+              "max": 0.0995067729963921,
+              "p95": 0.0221096960012801
+            },
+            "pool_acquire_seconds": {
+              "count": 18259,
+              "sum": 286.79568564373767,
+              "window_count": 1024,
+              "max": 0.28565839100338053,
+              "p95": 0.13872221698693465
+            },
+            "sql_seconds": {
+              "count": 20404,
+              "sum": 210.40917414758587,
+              "window_count": 1024,
+              "max": 0.16666127899952698,
+              "p95": 0.04529082399676554
+            },
+            "http GET /health/ready 200": {
+              "count": 68,
+              "sum": 5.211446878063725,
+              "window_count": 68,
+              "max": 0.3372511729976395,
+              "p95": 0.27787499500846025
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 61,
+              "sum": 16.426307062938577,
+              "window_count": 61,
+              "max": 0.5311321429908276,
+              "p95": 0.35719321899523493
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.04711511799541768,
+              "window_count": 1,
+              "max": 0.04711511799541768,
+              "p95": 0.04711511799541768
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.028342478995909914,
+              "window_count": 1,
+              "max": 0.028342478995909914,
+              "p95": 0.028342478995909914
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 60,
+              "sum": 9.565589058009209,
+              "window_count": 60,
+              "max": 0.20002936199307442,
+              "p95": 0.1851154470059555
+            },
+            "http GET /internal/metrics 200": {
+              "count": 63,
+              "sum": 0.33030259302177,
+              "window_count": 63,
+              "max": 0.051814129008562304,
+              "p95": 0.01879221500712447
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 120,
+              "sum": 1.9253287108585937,
+              "window_count": 120,
+              "max": 0.10269806100404821,
+              "p95": 0.06761086900951341
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 2613,
+              "sum": 236.8867279590777,
+              "window_count": 1024,
+              "max": 0.5613139319902984,
+              "p95": 0.30820371500158217
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 61,
+              "sum": 1.9389734139840584,
+              "window_count": 61,
+              "max": 0.18771070400543977,
+              "p95": 0.09271492499101441
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 60,
+              "sum": 1.2221562630293192,
+              "window_count": 60,
+              "max": 0.11201434099348262,
+              "p95": 0.0709493320027832
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1719,
+              "sum": 184.30600085601327,
+              "window_count": 1024,
+              "max": 0.6215653290128103,
+              "p95": 0.3810515239892993
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1659,
+              "sum": 211.10782717414259,
+              "window_count": 1024,
+              "max": 0.6298061380075524,
+              "p95": 0.3846300509903813
+            }
+          },
+          "gauges": {
+            "http_in_flight": 3,
+            "pool_checked_out": 5,
+            "pool_overflow": 2
+          },
+          "process": {
+            "rss_bytes": 209862656,
+            "cpu_seconds": 99.41
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374247.7871194,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 155,
+              "sum": 2.152797678965726,
+              "window_count": 155,
+              "max": 0.4347707150009228,
+              "p95": 0.050465792999602854
+            },
+            "ui_api_seconds": {
+              "count": 6292,
+              "sum": 1462.9241092532175,
+              "window_count": 1024,
+              "max": 1.145976548010367,
+              "p95": 0.5666036139882635
+            }
+          },
+          "gauges": {
+            "ui_clients": 60,
+            "ui_connected_clients": 60,
+            "ui_api_in_flight": 3
+          },
+          "process": {
+            "rss_bytes": 185987072,
+            "cpu_seconds": 87.60000000000001
+          }
+        }
+      },
+      "raw_sha256": "ded3704ff06021494074d04922d4f3525fe8b25414dd9ac8dae0b1442d9e0886",
+      "raw_gzip": "60-r1.json.gz",
+      "failures": [],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 17.7,
+      "http_5xx_count": 0
+    },
+    {
+      "name": "45-r2",
+      "users": 45,
+      "exit_code": 1,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 112,
+          "failed": 0,
+          "p50": 0.00867180002387613,
+          "p95": 0.3254917000303976,
+          "max": 0.7317720999708399
+        },
+        "edit": {
+          "count": 1222,
+          "failed": 2,
+          "p50": 1.4520469999988563,
+          "p95": 2.1380702999886125,
+          "max": 3.1357709000003524
+        },
+        "login": {
+          "count": 45,
+          "failed": 0,
+          "p50": 0.6502203000127338,
+          "p95": 0.8134626999963075,
+          "max": 0.8560458999709226
+        },
+        "prepare": {
+          "count": 45,
+          "failed": 0,
+          "p50": 2.5152979999547824,
+          "p95": 2.701775799971074,
+          "max": 2.7148395999684
+        }
+      },
+      "connected_peak": 45,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374417.5080316,
+          "histograms": {
+            "pool_acquire_seconds": {
+              "count": 13874,
+              "sum": 218.08181864499056,
+              "window_count": 1024,
+              "max": 0.33255324998754077,
+              "p95": 0.1092732389952289
+            },
+            "sql_seconds": {
+              "count": 15509,
+              "sum": 170.64117775818158,
+              "window_count": 1024,
+              "max": 0.26765624700055923,
+              "p95": 0.03185069099708926
+            },
+            "http GET /health/ready 200": {
+              "count": 67,
+              "sum": 3.475564260050305,
+              "window_count": 67,
+              "max": 0.3357166929927189,
+              "p95": 0.17476468899985775
+            },
+            "event_loop_lag_seconds": {
+              "count": 155,
+              "sum": 0.5892368610511767,
+              "window_count": 155,
+              "max": 0.07467725600872654,
+              "p95": 0.019966498992289416
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 46,
+              "sum": 13.275413540992304,
+              "window_count": 46,
+              "max": 0.49814201600383967,
+              "p95": 0.456215398007771
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.04583577500307001,
+              "window_count": 1,
+              "max": 0.04583577500307001,
+              "p95": 0.04583577500307001
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.026448407996213064,
+              "window_count": 1,
+              "max": 0.026448407996213064,
+              "p95": 0.026448407996213064
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 45,
+              "sum": 7.595256180007709,
+              "window_count": 45,
+              "max": 0.2119324489904102,
+              "p95": 0.19096285100386012
+            },
+            "http GET /internal/metrics 200": {
+              "count": 62,
+              "sum": 0.3262691600539256,
+              "window_count": 62,
+              "max": 0.044562647002749145,
+              "p95": 0.02535539299424272
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 90,
+              "sum": 1.2302616449451307,
+              "window_count": 90,
+              "max": 0.12549238099018112,
+              "p95": 0.06569553699227981
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 1946,
+              "sum": 173.05806690105237,
+              "window_count": 1024,
+              "max": 0.6130966930068098,
+              "p95": 0.3060490609932458
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 45,
+              "sum": 1.4743319100380177,
+              "window_count": 45,
+              "max": 0.11348487800569274,
+              "p95": 0.09969906699552666
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 45,
+              "sum": 0.9769612510426668,
+              "window_count": 45,
+              "max": 0.12579340899537783,
+              "p95": 0.05868548899888992
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1312,
+              "sum": 145.0483866938157,
+              "window_count": 1024,
+              "max": 0.6587379200063879,
+              "p95": 0.34860244300216436
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1267,
+              "sum": 178.14995025628014,
+              "window_count": 1024,
+              "max": 0.5801522340043448,
+              "p95": 0.4019926980108721
+            }
+          },
+          "gauges": {
+            "http_in_flight": 1,
+            "pool_checked_out": 0,
+            "pool_overflow": 0
+          },
+          "process": {
+            "rss_bytes": 208056320,
+            "cpu_seconds": 76.61
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374417.5157888,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 152,
+              "sum": 1.574117587035289,
+              "window_count": 152,
+              "max": 0.23996957100462168,
+              "p95": 0.04447957199590746
+            },
+            "ui_api_seconds": {
+              "count": 4752,
+              "sum": 1007.0353530092252,
+              "window_count": 1024,
+              "max": 1.3545525439985795,
+              "p95": 0.6505428999953438
+            }
+          },
+          "gauges": {
+            "ui_clients": 45,
+            "ui_connected_clients": 45,
+            "ui_api_in_flight": 0
+          },
+          "process": {
+            "rss_bytes": 173125632,
+            "cpu_seconds": 66.03
+          }
+        }
+      },
+      "raw_sha256": "0adb45a7a8298d9a17f59d644551e31a562ed6d939533fdda742cfc638fca9d6",
+      "raw_gzip": "45-r2.json.gz",
+      "failures": [
+        {
+          "kind": "edit",
+          "user": 15,
+          "at": 1790374314.1670027,
+          "seconds": 15.239787900005467,
+          "failure": "TimeoutError",
+          "ws_message_bytes": 14557
+        },
+        {
+          "kind": "edit",
+          "user": 19,
+          "at": 1790374314.2615478,
+          "seconds": 15.272159499989357,
+          "failure": "TimeoutError",
+          "ws_message_bytes": 14557
+        }
+      ],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 18.9,
+      "http_5xx_count": 0
+    },
+    {
+      "name": "60-r2",
+      "users": 60,
+      "exit_code": 1,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 109,
+          "failed": 0,
+          "p50": 0.03536629996960983,
+          "p95": 0.288784799980931,
+          "max": 0.9683600999996997
+        },
+        "edit": {
+          "count": 1612,
+          "failed": 2,
+          "p50": 1.4020891999825835,
+          "p95": 2.273053599987179,
+          "max": 3.238134399987757
+        },
+        "login": {
+          "count": 60,
+          "failed": 0,
+          "p50": 0.5984434999991208,
+          "p95": 0.8593104999745265,
+          "max": 1.0690223999554291
+        },
+        "prepare": {
+          "count": 60,
+          "failed": 0,
+          "p50": 2.680512399994768,
+          "p95": 3.007247599947732,
+          "max": 3.0541380000067875
+        }
+      },
+      "connected_peak": 60,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374593.373587,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 161,
+              "sum": 0.830467366045923,
+              "window_count": 161,
+              "max": 0.08583198999986053,
+              "p95": 0.022334565001074225
+            },
+            "pool_acquire_seconds": {
+              "count": 18346,
+              "sum": 366.04127774706285,
+              "window_count": 1024,
+              "max": 0.6309735840040958,
+              "p95": 0.20009768300224096
+            },
+            "sql_seconds": {
+              "count": 20506,
+              "sum": 203.7886237236089,
+              "window_count": 1024,
+              "max": 0.1758663609944051,
+              "p95": 0.03878006800368894
+            },
+            "http GET /health/ready 200": {
+              "count": 68,
+              "sum": 5.404925045993878,
+              "window_count": 68,
+              "max": 0.43199672500486486,
+              "p95": 0.32606570700590964
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 61,
+              "sum": 15.517413440000382,
+              "window_count": 61,
+              "max": 0.5542259820067557,
+              "p95": 0.34311174300091807
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.04969547499786131,
+              "window_count": 1,
+              "max": 0.04969547499786131,
+              "p95": 0.04969547499786131
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.026080575000378303,
+              "window_count": 1,
+              "max": 0.026080575000378303,
+              "p95": 0.026080575000378303
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 60,
+              "sum": 10.006237729015993,
+              "window_count": 60,
+              "max": 0.19682568800635636,
+              "p95": 0.18463195400545374
+            },
+            "http GET /internal/metrics 200": {
+              "count": 62,
+              "sum": 0.5348294410505332,
+              "window_count": 62,
+              "max": 0.08798845700221136,
+              "p95": 0.030003464009496383
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 120,
+              "sum": 1.5429142119246535,
+              "window_count": 120,
+              "max": 0.10348705400247127,
+              "p95": 0.04005815999698825
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 2613,
+              "sum": 323.5466185359837,
+              "window_count": 1024,
+              "max": 0.6875487369979965,
+              "p95": 0.35189415101194754
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 60,
+              "sum": 1.6188211599946953,
+              "window_count": 60,
+              "max": 0.13153740800044034,
+              "p95": 0.08707715499622282
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 60,
+              "sum": 1.3785773769777734,
+              "window_count": 60,
+              "max": 0.11148969999339897,
+              "p95": 0.08109987500938587
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1732,
+              "sum": 171.08345908284537,
+              "window_count": 1024,
+              "max": 0.6119744469906436,
+              "p95": 0.33939786700648256
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1672,
+              "sum": 210.73395507366513,
+              "window_count": 1024,
+              "max": 0.7349485279992223,
+              "p95": 0.3720384059997741
+            }
+          },
+          "gauges": {
+            "http_in_flight": 1,
+            "pool_checked_out": 0,
+            "pool_overflow": 0
+          },
+          "process": {
+            "rss_bytes": 209534976,
+            "cpu_seconds": 96.39
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374593.3806434,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 155,
+              "sum": 2.9043885070859687,
+              "window_count": 155,
+              "max": 0.5931438970001182,
+              "p95": 0.05931070900987834
+            },
+            "ui_api_seconds": {
+              "count": 6319,
+              "sum": 1543.2965144398186,
+              "window_count": 1024,
+              "max": 1.7234734189987648,
+              "p95": 0.8569093319965759
+            }
+          },
+          "gauges": {
+            "ui_clients": 60,
+            "ui_connected_clients": 60,
+            "ui_api_in_flight": 0
+          },
+          "process": {
+            "rss_bytes": 186822656,
+            "cpu_seconds": 88.07
+          }
+        }
+      },
+      "raw_sha256": "f11fb74f174a9f931ed1902658de489c65f765d3a0b92b3f73784088fbe245eb",
+      "raw_gzip": "60-r2.json.gz",
+      "failures": [
+        {
+          "kind": "edit",
+          "user": 50,
+          "at": 1790374515.9300284,
+          "seconds": 15.039883400022518,
+          "failure": "TimeoutError",
+          "ws_message_bytes": 14375
+        },
+        {
+          "kind": "edit",
+          "user": 10,
+          "at": 1790374515.9300523,
+          "seconds": 15.03999359998852,
+          "failure": "TimeoutError",
+          "ws_message_bytes": 14375
+        }
+      ],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 20.0,
+      "http_5xx_count": 0
+    },
+    {
+      "name": "45-r3",
+      "users": 45,
+      "exit_code": 0,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 111,
+          "failed": 0,
+          "p50": 0.010084400011692196,
+          "p95": 0.46597190003376454,
+          "max": 0.8544715999742039
+        },
+        "edit": {
+          "count": 1209,
+          "failed": 0,
+          "p50": 1.44288389995927,
+          "p95": 2.3254443000187166,
+          "max": 3.405607199994847
+        },
+        "login": {
+          "count": 45,
+          "failed": 0,
+          "p50": 0.6029987999936566,
+          "p95": 0.8472119999933057,
+          "max": 0.9324210000340827
+        },
+        "prepare": {
+          "count": 45,
+          "failed": 0,
+          "p50": 2.218922699976247,
+          "p95": 2.482809700013604,
+          "max": 2.50392180000199
+        }
+      },
+      "connected_peak": 45,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374761.4639926,
+          "histograms": {
+            "pool_acquire_seconds": {
+              "count": 13742,
+              "sum": 232.00515460896713,
+              "window_count": 1024,
+              "max": 0.4481434339977568,
+              "p95": 0.1808731799974339
+            },
+            "sql_seconds": {
+              "count": 15364,
+              "sum": 182.58907422618358,
+              "window_count": 1024,
+              "max": 0.16199816200241912,
+              "p95": 0.042468052997719496
+            },
+            "http GET /health/ready 200": {
+              "count": 66,
+              "sum": 4.301368030050071,
+              "window_count": 66,
+              "max": 0.3887661560002016,
+              "p95": 0.26732129001175053
+            },
+            "event_loop_lag_seconds": {
+              "count": 154,
+              "sum": 0.45613490998221096,
+              "window_count": 154,
+              "max": 0.03713987699302379,
+              "p95": 0.017956315001356415
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 46,
+              "sum": 11.982149879928329,
+              "window_count": 46,
+              "max": 0.5473087579885032,
+              "p95": 0.3298119660030352
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.047973367996746674,
+              "window_count": 1,
+              "max": 0.047973367996746674,
+              "p95": 0.047973367996746674
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.026378907001344487,
+              "window_count": 1,
+              "max": 0.026378907001344487,
+              "p95": 0.026378907001344487
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 45,
+              "sum": 7.543126401840709,
+              "window_count": 45,
+              "max": 0.23172563599655405,
+              "p95": 0.1787747339985799
+            },
+            "http GET /internal/metrics 200": {
+              "count": 62,
+              "sum": 0.5880054559966084,
+              "window_count": 62,
+              "max": 0.10048216499853879,
+              "p95": 0.04381936900608707
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 90,
+              "sum": 1.2699479820439592,
+              "window_count": 90,
+              "max": 0.1068679679883644,
+              "p95": 0.0694894199987175
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 1926,
+              "sum": 163.13718595184037,
+              "window_count": 1024,
+              "max": 0.48888638499192894,
+              "p95": 0.2842527580069145
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 46,
+              "sum": 1.185430139012169,
+              "window_count": 46,
+              "max": 0.11679651800659485,
+              "p95": 0.09902196499751881
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 45,
+              "sum": 0.8186344599671429,
+              "window_count": 45,
+              "max": 0.09919785099918954,
+              "p95": 0.08347694600524846
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1299,
+              "sum": 171.84406203620892,
+              "window_count": 1024,
+              "max": 0.6001184600027045,
+              "p95": 0.3410183810046874
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1254,
+              "sum": 197.7003101281589,
+              "window_count": 1024,
+              "max": 0.6570728779915953,
+              "p95": 0.4168551639886573
+            }
+          },
+          "gauges": {
+            "http_in_flight": 1,
+            "pool_checked_out": 0,
+            "pool_overflow": 0
+          },
+          "process": {
+            "rss_bytes": 207900672,
+            "cpu_seconds": 81.84
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374761.470782,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 149,
+              "sum": 2.969097806868376,
+              "window_count": 149,
+              "max": 0.4640911610040348,
+              "p95": 0.1652314969978761
+            },
+            "ui_api_seconds": {
+              "count": 4705,
+              "sum": 1012.6537436198705,
+              "window_count": 1024,
+              "max": 1.6209283089992823,
+              "p95": 0.6630088439997053
+            }
+          },
+          "gauges": {
+            "ui_clients": 45,
+            "ui_connected_clients": 45,
+            "ui_api_in_flight": 0
+          },
+          "process": {
+            "rss_bytes": 172265472,
+            "cpu_seconds": 68.64
+          }
+        }
+      },
+      "raw_sha256": "89fb85340488401eeb1a484721a2f611dc20b28c9e67cf9dafd6fa29f6524f6e",
+      "raw_gzip": "45-r3.json.gz",
+      "failures": [],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 17.8,
+      "http_5xx_count": 0
+    },
+    {
+      "name": "60-r3",
+      "users": 60,
+      "exit_code": 0,
+      "image_id": "sha256:bd03477ca0643709f964b136fb9ecf1165fc24364d861c721d0cb44320006025",
+      "settings": {
+        "workers": 1,
+        "pool_size": 5,
+        "overflow": 10
+      },
+      "actions": {
+        "canary": {
+          "count": 106,
+          "failed": 0,
+          "p50": 0.024164600006770343,
+          "p95": 0.5814599000150338,
+          "max": 1.4795225999550894
+        },
+        "edit": {
+          "count": 1565,
+          "failed": 0,
+          "p50": 1.569059900008142,
+          "p95": 2.6007457000087015,
+          "max": 3.865762600034941
+        },
+        "login": {
+          "count": 60,
+          "failed": 0,
+          "p50": 0.6197916999808513,
+          "p95": 0.9041590000269935,
+          "max": 0.9847904999624006
+        },
+        "prepare": {
+          "count": 60,
+          "failed": 0,
+          "p50": 2.9251365999807604,
+          "p95": 3.604002900014166,
+          "max": 3.6730128999915905
+        }
+      },
+      "connected_peak": 60,
+      "telemetry": {
+        "api": {
+          "pid": 1,
+          "timestamp": 1790374937.6190827,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 160,
+              "sum": 1.0922313050250523,
+              "window_count": 160,
+              "max": 0.1117820310028037,
+              "p95": 0.03384887501306366
+            },
+            "pool_acquire_seconds": {
+              "count": 18012,
+              "sum": 492.7477387581457,
+              "window_count": 1024,
+              "max": 0.37415035799494945,
+              "p95": 0.19676637901284266
+            },
+            "sql_seconds": {
+              "count": 20125,
+              "sum": 247.54894733586116,
+              "window_count": 1024,
+              "max": 0.15889940700435545,
+              "p95": 0.05218500299088191
+            },
+            "http GET /health/ready 200": {
+              "count": 67,
+              "sum": 7.021288273084792,
+              "window_count": 67,
+              "max": 0.8863058390124934,
+              "p95": 0.3346461699984502
+            },
+            "http POST /api/v1/auth/login 200": {
+              "count": 61,
+              "sum": 16.168604276012047,
+              "window_count": 61,
+              "max": 0.5257844409934478,
+              "p95": 0.3676074469985906
+            },
+            "http POST /api/v1/admin/rounds 201": {
+              "count": 1,
+              "sum": 0.04730106498755049,
+              "window_count": 1,
+              "max": 0.04730106498755049,
+              "p95": 0.04730106498755049
+            },
+            "http POST /api/v1/admin/rounds/{round_id}/start 200": {
+              "count": 1,
+              "sum": 0.02826552899205126,
+              "window_count": 1,
+              "max": 0.02826552899205126,
+              "p95": 0.02826552899205126
+            },
+            "http POST /api/v1/auth/register 201": {
+              "count": 60,
+              "sum": 10.26554489688715,
+              "window_count": 60,
+              "max": 0.21920772599696647,
+              "p95": 0.18885073700221255
+            },
+            "http GET /internal/metrics 200": {
+              "count": 62,
+              "sum": 0.4491572929546237,
+              "window_count": 62,
+              "max": 0.10332037899934221,
+              "p95": 0.027378964994568378
+            },
+            "http GET /api/v1/auth/session 200": {
+              "count": 120,
+              "sum": 1.6566734259977238,
+              "window_count": 120,
+              "max": 0.15128819399978966,
+              "p95": 0.056541410012869164
+            },
+            "http GET /api/v1/rounds/current/status 200": {
+              "count": 2611,
+              "sum": 415.24136697140057,
+              "window_count": 1024,
+              "max": 0.6426219599961769,
+              "p95": 0.3652953640121268
+            },
+            "http GET /api/v1/rounds/current/state 200": {
+              "count": 61,
+              "sum": 1.656084550995729,
+              "window_count": 61,
+              "max": 0.25910542499332223,
+              "p95": 0.06655405799392611
+            },
+            "http GET /api/v1/rounds/{round_id}/cards 200": {
+              "count": 60,
+              "sum": 1.089345942964428,
+              "window_count": 60,
+              "max": 0.10881792899454013,
+              "p95": 0.0720471370004816
+            },
+            "http POST /api/v1/rounds/{round_id}/scenario/preview 200": {
+              "count": 1685,
+              "sum": 232.39545858380734,
+              "window_count": 1024,
+              "max": 1.2242576260032365,
+              "p95": 0.44457787901046686
+            },
+            "http PUT /api/v1/rounds/{round_id}/scenario 200": {
+              "count": 1625,
+              "sum": 259.18777234011213,
+              "window_count": 1024,
+              "max": 0.8375412010063883,
+              "p95": 0.4297464240080444
+            }
+          },
+          "gauges": {
+            "http_in_flight": 1,
+            "pool_checked_out": 0,
+            "pool_overflow": 0
+          },
+          "process": {
+            "rss_bytes": 209350656,
+            "cpu_seconds": 99.33
+          }
+        },
+        "ui": {
+          "pid": 1,
+          "timestamp": 1790374937.6249518,
+          "histograms": {
+            "event_loop_lag_seconds": {
+              "count": 155,
+              "sum": 2.7214248420204967,
+              "window_count": 155,
+              "max": 0.6073315500107128,
+              "p95": 0.053602963002049364
+            },
+            "ui_api_seconds": {
+              "count": 6222,
+              "sum": 2052.362807910962,
+              "window_count": 1024,
+              "max": 1.4664324830082478,
+              "p95": 0.6024791090021608
+            }
+          },
+          "gauges": {
+            "ui_clients": 60,
+            "ui_connected_clients": 60,
+            "ui_api_in_flight": 0
+          },
+          "process": {
+            "rss_bytes": 185614336,
+            "cpu_seconds": 87.22999999999999
+          }
+        }
+      },
+      "raw_sha256": "717e2ef8afb3a0db26165be7d56bd2b2764d1bda171565809de7175ee69f1aff",
+      "raw_gzip": "60-r3.json.gz",
+      "failures": [],
+      "latency_gate_pass": false,
+      "metrics_failures": 0,
+      "generator_cpu_peak": 14.1,
+      "http_5xx_count": 0
+    }
+  ]
+}
