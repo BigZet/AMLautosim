@@ -50,3 +50,12 @@ it excludes WebSocket framing/compression and heartbeat packets. Concurrent
 application updates in the measurement interval are included. The exact driver
 hash is recorded. Legacy T07 reports counted only update-event payloads and
 must not be compared directly with this complete application-message counter.
+
+Autosave stage histograms on the UI process help explain edit latency:
+`ui_autosave_debounce_seconds` measures the age of the latest edit when its
+preview starts (including timer/queue delay); `ui_preview_seconds` and
+`ui_autosave_seconds` time the awaited preview and save calls, including failed
+attempts. `ui_edit_saved_seconds` measures from the latest server-side edit to
+a successful save of that same editor version. It excludes delivery of the
+updated status to the client; use the driver's `edit` actions for the full
+Socket.IO round trip. Stage percentiles must not be added together.

@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from nicegui import ui
+from .components.operation_select import OperationSelect
 from .counterparties import party_name
 from src.aml_workshop_simulator.domain.operation_purposes import (
     allowed_purposes,
@@ -197,7 +198,7 @@ def explanation_selector(config, step, on_change):
             if issue is not None:
                 issue.set_visibility(event.value not in purposes)
 
-        ui.select(
+        OperationSelect(
             purposes,
             value=step.get("purpose_code") if valid else None,
             label=purpose_field_label(step),
@@ -220,7 +221,7 @@ def explanation_selector(config, step, on_change):
             on_change("claim_id", event.value)
             details.set_text(claim_details(config, event.value))
 
-        ui.select(
+        OperationSelect(
             claims,
             value=step.get("claim_id"),
             label="Основание (необязательно)",

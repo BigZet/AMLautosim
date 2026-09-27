@@ -27,6 +27,12 @@ def test_release_is_reproducible_and_excludes_local_data(tmp_path):
     with tarfile.open(first) as archive:
         names = archive.getnames()
         assert ".env" not in names and "resources/aml_dataset/private.csv" not in names
+        assert {
+            "deploy/compose.production.yml",
+            "deploy/.env.production.example",
+            "deploy/nicegui.nginx.conf",
+            "docs/deploy-rollback.md",
+        }.issubset(names)
         assert (
             len(json.load(archive.extractfile("RELEASE-CHECKSUMS.json")))
             == len(names) - 1

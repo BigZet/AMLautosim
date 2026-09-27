@@ -46,8 +46,9 @@ def test_fixed_salary_and_no_empty_claim_selector(tmp_path, monkeypatch):
     asyncio.run(run())
 
 
+@pytest.mark.parametrize("extra_purpose", [False, True])
 def test_v10_editor_keeps_explicit_claim_through_type_change_and_submission(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, extra_purpose
 ):
     from nicegui import ui
     from nicegui.storage import Storage
@@ -57,6 +58,10 @@ def test_v10_editor_keeps_explicit_claim_through_type_change_and_submission(
 
     monkeypatch.setattr(Storage, "path", tmp_path / "nicegui")
     config, _ = context_fixture()
+    if extra_purpose:
+        config["behavior"]["aml_context"]["purpose_catalog"].append(
+            {"code": "asset_sale", "title": "Продажа имущества"}
+        )
     original_context = deepcopy(config["behavior"]["aml_context"])
     cards = [
         card_out(s, schema_version=10).model_dump(mode="json")
@@ -85,7 +90,13 @@ def test_v10_editor_keeps_explicit_claim_through_type_change_and_submission(
     screen.submitting = False
     screen.open_steps = set()
     screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
-    screen.changed = screen.editor.changed
+    def changed():
+        # Every refresh (including the sidebar) must see a valid purpose,
+        # before rendering the dependent controls.
+        canonical_steps(screen.editor.steps, config)
+        screen.editor.changed()
+
+    screen.changed = changed
 
     async def run():
         await screen.editor.poll()
@@ -124,11 +135,17 @@ def test_v10_editor_keeps_explicit_claim_through_type_change_and_submission(
             assert step["purpose_code"] == "unknown"
             assert step["action_details"] == {"incoming_kind": "exchange_withdrawal"}
             assert step["sender_id"] == "exchange"
-            # The fixture allows only one purpose for exchange withdrawals.
             canonical_steps([step], config)
-            assert not any(
+            assert any(
                 s.label == "Назначение операции" for s in user.find(ui.select).elements
-            )
+            ) == extra_purpose
+            await user.should_not_see("Прежнее назначение несовместимо с операцией")
+            if extra_purpose:
+                selected = next(
+                    s for s in user.find(ui.select).elements
+                    if s.label == "Назначение операции"
+                )
+                assert selected.value == "unknown"
             assert await screen.editor.write()
             screen.editor = GameEditor(Transport(), "test", {}, lambda: None)
             screen.changed = screen.editor.changed
@@ -136,9 +153,21 @@ def test_v10_editor_keeps_explicit_claim_through_type_change_and_submission(
             await user.open("/aml-editor")
             selectors = user.find(ui.select).elements
             assert screen.editor.steps[0]["purpose_code"] == "unknown"
-            # This fixture's catalogue contains only unknown for exchange withdrawals.
             assert not any("shared_expense" in s.options for s in selectors)
             assert next(s for s in selectors if "shared" in s.options).value == "shared"
+            if extra_purpose:
+                with user:
+                    next(
+                        s for s in user.find(ui.select).elements
+                        if s.label == "Назначение операции"
+                    ).set_value("asset_sale")
+                    for kind in ("bank_transfer", "crypto_p2p", "exchange_withdrawal"):
+                        next(
+                            s for s in user.find(ui.select).elements
+                            if "bank_transfer" in s.options
+                        ).set_value(kind)
+                        assert screen.editor.steps[0]["purpose_code"] == "asset_sale"
+                        canonical_steps(screen.editor.steps, config)
             assert await screen.editor.write(submit=True)
             assert state["scenario"]["steps"][0]["claim_id"] == "shared"
             assert config["behavior"]["aml_context"] == original_context

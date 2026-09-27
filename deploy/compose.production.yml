@@ -17,7 +17,7 @@ services:
       retries: 20
     networks:
       default:
-        ipv4_address: 172.30.23.5
+        ipv4_address: ${AML_NETWORK_PREFIX:-172.30.23}.5
   api:
     restart: unless-stopped
     depends_on:
@@ -45,7 +45,7 @@ services:
       AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
       AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
       AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
-      AUTH_TRUSTED_UI_CIDRS: '["172.30.23.4/32"]'
+      AUTH_TRUSTED_UI_CIDRS: '["${AML_NETWORK_PREFIX:-172.30.23}.4/32"]'
     healthcheck:
       test:
       - CMD-SHELL
@@ -57,7 +57,7 @@ services:
     image: ${AML_IMAGE:?set an immutable registry image digest}
     networks:
       default:
-        ipv4_address: 172.30.23.3
+        ipv4_address: ${AML_NETWORK_PREFIX:-172.30.23}.3
   scoring-worker:
     image: ${AML_IMAGE:?set an immutable registry image digest}
     restart: unless-stopped
@@ -79,7 +79,7 @@ services:
       AML_PROBABILITY_MODEL_PATH: /app/resources/catboost_models/aml-game-organizer-settings-v1
     networks:
       default:
-        ipv4_address: 172.30.23.6
+        ipv4_address: ${AML_NETWORK_PREFIX:-172.30.23}.6
   ui:
     restart: unless-stopped
     depends_on:
@@ -97,7 +97,7 @@ services:
       AUTH_PAIR_PER_MINUTE: ${AUTH_PAIR_PER_MINUTE:-10}
       AUTH_IP_PER_MINUTE: ${AUTH_IP_PER_MINUTE:-300}
       AUTH_IP_BURST: ${AUTH_IP_BURST:-120}
-      TRUSTED_PROXY_CIDRS: '["172.30.23.2/32"]'
+      TRUSTED_PROXY_CIDRS: '["${AML_NETWORK_PREFIX:-172.30.23}.2/32"]'
     volumes:
     - nicegui_data:/home/app/nicegui
     command: python -m src.aml_workshop_simulator.ui.nicegui.app
@@ -111,7 +111,7 @@ services:
     image: ${AML_IMAGE:?set an immutable registry image digest}
     networks:
       default:
-        ipv4_address: 172.30.23.4
+        ipv4_address: ${AML_NETWORK_PREFIX:-172.30.23}.4
   release:
     environment:
       POSTGRES_HOST: db
@@ -152,7 +152,7 @@ services:
       retries: 10
     networks:
       default:
-        ipv4_address: 172.30.23.2
+        ipv4_address: ${AML_NETWORK_PREFIX:-172.30.23}.2
 volumes:
   postgres_data: null
   nicegui_data: null
@@ -160,4 +160,4 @@ networks:
   default:
     ipam:
       config:
-      - subnet: 172.30.23.0/24
+      - subnet: ${AML_NETWORK_PREFIX:-172.30.23}.0/24

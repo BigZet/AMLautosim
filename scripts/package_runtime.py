@@ -16,12 +16,17 @@ FILES = (
     ".env.example",
     "docker-compose.yml",
     "deploy/compose.image.yml",
+    "deploy/compose.production.yml",
+    "deploy/.env.production.example",
+    "deploy/nicegui.nginx.conf",
+    "deploy/README.md",
     "requirements.txt",
     "requirements.in",
     "alembic.ini",
     "deploy/Dockerfile",
     "docs/deployment.md",
     "docs/operations.md",
+    "docs/deploy-rollback.md",
     "resources/catboost_models/registry.json",
 )
 DIRECTORIES = (

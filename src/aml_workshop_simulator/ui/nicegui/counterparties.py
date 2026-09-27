@@ -1,6 +1,7 @@
 """V8 party selectors and read-only details using the public snapshot."""
 
 from nicegui import ui
+from .components.operation_select import OperationSelect
 
 from src.aml_workshop_simulator.domain.counterparty_roles import (
     PARTY_ROLES,
@@ -131,7 +132,7 @@ def party_selector(config, step, on_change):
             on_change(role, identity)
         ui.input(label, value=options[identity]).props("outlined dense readonly hide-bottom-space").classes("operation-parameter operation-fixed")
         return
-    ui.select(
+    OperationSelect(
         options, value=step.get(role), label=label,
         on_change=lambda event: on_change(role, event.value),
     ).props("outlined dense options-dense hide-bottom-space").classes("operation-parameter")

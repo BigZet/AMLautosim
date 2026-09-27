@@ -1,0 +1,20 @@
+{
+  "collected": [
+    "tests/unit/test_autosave_timing.py::test_burst_is_coalesced_and_saved_before_one_second",
+    "tests/unit/test_autosave_timing.py::test_slow_preview_saves_in_same_tick",
+    "tests/unit/test_autosave_timing.py::test_edit_during_preview_waits_for_new_preview_and_debounce",
+    "tests/unit/test_autosave_timing.py::test_edit_during_save_is_retained_for_next_serialized_save",
+    "tests/unit/test_autosave_timing.py::test_autosave_does_not_write_when_blocked[submitting]",
+    "tests/unit/test_autosave_timing.py::test_autosave_does_not_write_when_blocked[conflict]",
+    "tests/unit/test_autosave_timing.py::test_autosave_does_not_write_when_blocked[closed]",
+    "tests/unit/test_game_poll_races.py::test_unchanged_poll_uses_only_light_status",
+    "tests/unit/test_game_poll_races.py::test_older_cards_response_cannot_replace_newer_round",
+    "tests/unit/test_game_poll_races.py::test_cards_response_cannot_roll_back_completed_save",
+    "tests/unit/test_game_poll_races.py::test_failed_round_cards_fetch_keeps_previous_snapshot_and_draft",
+    "tests/unit/test_game_poll_races.py::test_round_transition_is_not_visible_while_cards_are_loading",
+    "tests/unit/test_game_poll_races.py::test_edit_during_cards_fetch_is_preserved_with_revision_conflict"
+  ],
+  "failures": {},
+  "skipped": [],
+  "exit_code": 0
+}
